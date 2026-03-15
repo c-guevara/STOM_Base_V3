@@ -21,6 +21,9 @@ https://www.youtube.com/@stomlive
 
 ## STOM 주요 기능 및 화면 구성
 
+### 홈 화면
+![홈화면](./utility/imagefiles/00_홈화면.png)
+
 ### 기본 화면
 ![기본창](./utility/imagefiles/01_기본창.png)
 
