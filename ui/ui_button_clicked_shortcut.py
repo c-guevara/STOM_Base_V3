@@ -56,7 +56,7 @@ def mnbutton_c_clicked_01(ui, index):
     QTimer.singleShot(400, lambda: ui.image_label1.setVisible(True if ui.svc_labellllll_05.isVisible() or ui.cvc_labellllll_05.isVisible() else False))
     ui.animation = QPropertyAnimation(ui.main_box_list[ui.main_btn], b'size')
     ui.animation.setEasingCurve(QEasingCurve.InOutCirc)
-    ui.animation.setDuration(500)
+    ui.animation.setDuration(300)
     ui.animation.setStartValue(QSize(0, 757))
     ui.animation.setEndValue(QSize(1353, 757))
     ui.animation.start()
