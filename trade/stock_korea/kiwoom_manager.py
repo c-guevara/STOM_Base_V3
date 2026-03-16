@@ -364,7 +364,7 @@ class KiwoomManager:
 
     def StockAgentProcessKill(self):
         if self.StockAgentProcessAlive():
-            self.proc_trader.kill()
+            self.proc_agent.kill()
 
     def ManagerProcessKill(self):
         if self.zmqrecv.isRunning(): self.zmqrecv.stop()
