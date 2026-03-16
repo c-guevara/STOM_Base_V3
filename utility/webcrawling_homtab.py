@@ -84,7 +84,7 @@ class WebCrawingHomTab:
             resp = self.session.get(url, headers=self.headers)
             soup = BeautifulSoup(resp.text, 'html.parser')
 
-            page_times  = [t.get_text(strip=True) for t in soup.select('td.date')]
+            page_times = [t.get_text(strip=True) for t in soup.select('td.date')]
             if last_times != page_times:
                 last_times = page_times
             else:
@@ -92,8 +92,19 @@ class WebCrawingHomTab:
 
             page_prices = [p.get_text(strip=True) for p in soup.select('td.number_1')[::4]]
             page_gaps   = [p.get_text(strip=True) for p in soup.select('span.tah')]
-            page_buhos  = [t['alt'] for t in soup.select('td > img') if t['alt'] != '']
+            page_buhos  = [t['alt'] for t in soup.select('td > img')]
             page_buhos  = [-1 if b == '하락' else 1 for b in page_buhos]
+
+            if '0' in page_gaps:
+                k = 0
+                new_buhos = []
+                for g in page_gaps:
+                    if g != '0':
+                        new_buhos.append(page_buhos[k])
+                        k += 1
+                    else:
+                        new_buhos.append(1)
+                page_buhos = new_buhos
 
             page_times  = [dt_ymdhms_ios(f"{search_today} {t}:00").timestamp() for t in page_times if t != '']
             page_prices = [float(p.replace(',', '')) for p in page_prices if p != '']
