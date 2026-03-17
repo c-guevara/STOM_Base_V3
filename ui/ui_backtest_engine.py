@@ -21,6 +21,7 @@ from backtest.backengine_binance_tick2 import BackEngineBinanceTick2
 from backtest.backengine_binance_min import BackEngineBinanceMin
 from backtest.backengine_binance_min2 import BackEngineBinanceMin2
 from ui.set_style import style_bc_dk
+from ui.ui_dialog_animation import DialogAnimator
 from utility.lazy_imports import get_np, get_pd
 from utility.static import thread_decorator, qtest_qwait, str_hms, dt_hms, timedelta_sec, error_decorator
 from utility.setting_base import DB_STOCK_BACK_TICK, DB_COIN_BACK_TICK, ui_num, DB_STOCK_BACK_MIN, DB_COIN_BACK_MIN, \
@@ -69,6 +70,7 @@ def backengine_show(ui, gubun):
     ui.be_lineEdittttt_02.setText(endtime)
     if not ui.backengin_window_open:
         ui.be_comboBoxxxxx_01.setCurrentText(ui.dict_set['백테엔진분류방법'])
+    DialogAnimator.setup_dialog_animation(ui.dialog_backengine, duration=300)
     ui.dialog_backengine.show()
     ui.backengin_window_open = True
 
