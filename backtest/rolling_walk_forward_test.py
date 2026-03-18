@@ -265,8 +265,8 @@ class Total:
             bootstrap_min  = round(get_np().percentile(bootstrap_dist, 2.5), 2)
             bootstrap_max  = round(get_np().percentile(bootstrap_dist, 97.5), 2)
             bootstrap_pv   = round(get_np().mean(bootstrap_dist > 0) * 100, 2)
-            bootstrap_text = f"\n부트스트랩 평균수익률: {bootstrap_avg}%, 예상 최소 평균수익률: {bootstrap_min}%, 예상 최대 평균수익률: {bootstrap_max}%, 전략유의확률(pv): {bootstrap_pv}%"
-            bootstrap_cmt  = f"\n이 전략은 95%의 확률로 [{bootstrap_min}~{bootstrap_max}%]의 평균수익률이 예상되며, 수익일 확률은 [{bootstrap_pv}%]입니다."
+            bootstrap_text = f"\n부트스트랩 평균수익률: {bootstrap_avg}%, 예상최소수익률: {bootstrap_min}%, 예상최대수익률: {bootstrap_max}%, 전략유의확률(pv): {bootstrap_pv}%"
+            bootstrap_cmt  = f"\n이 전략은 95%의 확률로 [{bootstrap_min}~{bootstrap_max}%]의 수익률이 예상되며, 수익일 확률은 [{bootstrap_pv}%]입니다."
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '부트스트랩 결과' + bootstrap_text + bootstrap_cmt))
 
             startday, endday = str(self.startday_), str(self.endday_)
