@@ -10,8 +10,7 @@ from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellCond
 from utility.setting_base import DB_STOCK_BACK_TICK, BACK_TEMP, ui_num, DB_STOCK_BACK_MIN, indicator, \
     DB_FUTURE_BACK_TICK, DB_FUTURE_BACK_MIN, DB_COIN_BACK_TICK, DB_COIN_BACK_MIN, list_stock_tick, \
     list_stock_min, list_coin_tick, list_coin_min
-# noinspection PyUnresolvedReferences
-from utility.static import timedelta_sec, pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
+from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
     add_rolling_data, error_decorator, set_builtin_print
 
 
