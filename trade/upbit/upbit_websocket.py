@@ -4,8 +4,8 @@ import uuid
 import asyncio
 import websockets
 from traceback import format_exc
-from PyQt5.QtCore import QThread, pyqtSignal
 from utility.setting_base import ui_num
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 class WebSocketReceiver(QThread):

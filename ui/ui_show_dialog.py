@@ -9,8 +9,8 @@ from ui.ui_dialog_animation import DialogAnimator
 from utility.lazy_imports import get_pd
 from utility.kimp_upbit_binance import Kimp
 from utility.static import qtest_qwait, str_hms, dt_hms, error_decorator
-from utility.setting_base import columns_hc, DB_COIN_BACK_TICK, DB_STOCK_BACK_TICK, DB_PATH, DB_COIN_BACK_MIN, \
-    DB_STOCK_BACK_MIN, DB_FUTURE_BACK_MIN, DB_FUTURE_BACK_TICK
+from utility.setting_base import columns_hc, DB_COIN_TICK_BACK, DB_STOCK_TICK_BACK, DB_PATH, DB_COIN_MIN_BACK, \
+    DB_STOCK_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 from ui.set_style import style_bc_bt, style_bc_bb
 
 
@@ -445,7 +445,7 @@ def chart_moneytop_list(ui):
     is_min = False
     if coin:
         db_name1 = f'{DB_PATH}/coin_tick_{searchdate}.db' if ui.dict_set['코인타임프레임'] else f'{DB_PATH}/coin_min_{searchdate}.db'
-        db_name2 = DB_COIN_BACK_TICK if ui.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+        db_name2 = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
         if ui.dict_set['코인타임프레임']:
             query = f"SELECT * FROM moneytop WHERE " \
                     f"`index` >= {int(searchdate) * 1000000 + int(starttime)} and " \
@@ -458,10 +458,10 @@ def chart_moneytop_list(ui):
     else:
         if '키움증권' in ui.dict_set['증권사']:
             db_name1 = f'{DB_PATH}/stock_tick_{searchdate}.db' if ui.dict_set['주식타임프레임'] else f'{DB_PATH}/stock_min_{searchdate}.db'
-            db_name2 = DB_STOCK_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+            db_name2 = DB_STOCK_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
         else:
             db_name1 = f'{DB_PATH}/future_tick_{searchdate}.db' if ui.dict_set['주식타임프레임'] else f'{DB_PATH}/future_min_{searchdate}.db'
-            db_name2 = DB_FUTURE_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+            db_name2 = DB_FUTURE_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
 
         if ui.dict_set['주식타임프레임']:
             query = f"SELECT * FROM moneytop WHERE " \

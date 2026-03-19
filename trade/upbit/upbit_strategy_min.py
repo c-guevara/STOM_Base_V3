@@ -1,8 +1,8 @@
 
 from traceback import format_exc
-from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
 from utility.setting_base import ui_num
 from utility.lazy_imports import get_np
+from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
 from utility.static import now, now_utc, GetUpbitHogaunit, GetUpbitPgSgSp, dt_ymdhms, GetIndicator
 
 

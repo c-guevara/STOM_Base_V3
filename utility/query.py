@@ -4,9 +4,9 @@ import shutil
 import sqlite3
 from utility.lazy_imports import get_pd
 from utility.static import error_decorator, set_builtin_print
-from utility.setting_base import ui_num, DB_TRADELIST, DB_SETTING, DB_STRATEGY, DB_COIN_TICK, DB_PATH, DB_STOCK_BACK_TICK, \
-    DB_COIN_BACK_TICK, DB_STOCK_TICK, DB_BACKTEST, DB_STOCK_BACK_MIN, DB_COIN_BACK_MIN, DB_STOCK_MIN, \
-    DB_COIN_MIN, DB_FUTURE_BACK_MIN, DB_FUTURE_MIN, DB_CODE_INFO, DB_FUTURE_BACK_TICK, DB_FUTURE_TICK
+from utility.setting_base import ui_num, DB_TRADELIST, DB_SETTING, DB_STRATEGY, DB_COIN_TICK, DB_PATH, DB_STOCK_TICK_BACK, \
+    DB_COIN_TICK_BACK, DB_STOCK_TICK, DB_BACKTEST, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_STOCK_MIN, \
+    DB_COIN_MIN, DB_FUTURE_MIN_BACK, DB_FUTURE_MIN, DB_CODE_INFO, DB_FUTURE_TICK_BACK, DB_FUTURE_TICK
 
 
 class Query:
@@ -93,11 +93,11 @@ class Query:
             elif '백테DB지정일자삭제' in data[0]:
                 if '주식' in data[0]:
                     if '키움증권' in self.dict_set['증권사']:
-                        BACK_FILE = DB_STOCK_BACK_TICK if self.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+                        BACK_FILE = DB_STOCK_TICK_BACK if self.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
                     else:
-                        BACK_FILE = DB_FUTURE_BACK_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+                        BACK_FILE = DB_FUTURE_TICK_BACK if self.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
                 else:
-                    BACK_FILE = DB_COIN_BACK_TICK if self.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+                    BACK_FILE = DB_COIN_TICK_BACK if self.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
                 con = sqlite3.connect(BACK_FILE)
                 cur = con.cursor()
                 df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
@@ -240,13 +240,13 @@ class Query:
                 file_list = os.listdir(DB_PATH)
                 if '주식' in data[0]:
                     if '키움증권' in self.dict_set['증권사']:
-                        BACK_FILE = DB_STOCK_BACK_TICK if self.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+                        BACK_FILE = DB_STOCK_TICK_BACK if self.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
                         firstname = 'stock_tick_' if self.dict_set['주식타임프레임'] else 'stock_min_'
                     else:
-                        BACK_FILE = DB_FUTURE_BACK_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+                        BACK_FILE = DB_FUTURE_TICK_BACK if self.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
                         firstname = 'future_tick_' if self.dict_set['주식타임프레임'] else 'future_min_'
                 else:
-                    BACK_FILE = DB_COIN_BACK_TICK if self.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+                    BACK_FILE = DB_COIN_TICK_BACK if self.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
                     firstname = 'coin_tick_' if self.dict_set['코인타임프레임'] else 'coin_min_'
                 file_list = [x for x in file_list if firstname in x and '.db' in x and 'back' not in x]
                 if len(file_list) == 0:
@@ -283,13 +283,13 @@ class Query:
                 file_list = os.listdir(DB_PATH)
                 if '주식' in data[0]:
                     if '키움증권' in self.dict_set['증권사']:
-                        BACK_FILE = DB_STOCK_BACK_TICK if self.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+                        BACK_FILE = DB_STOCK_TICK_BACK if self.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
                         firstname = 'stock_tick_' if self.dict_set['주식타임프레임'] else 'stock_min_'
                     else:
-                        BACK_FILE = DB_FUTURE_BACK_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+                        BACK_FILE = DB_FUTURE_TICK_BACK if self.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
                         firstname = 'future_tick_' if self.dict_set['주식타임프레임'] else 'future_min_'
                 else:
-                    BACK_FILE = DB_COIN_BACK_TICK if self.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+                    BACK_FILE = DB_COIN_TICK_BACK if self.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
                     firstname = 'coin_tick_' if self.dict_set['코인타임프레임'] else 'coin_min_'
                 file_list = [x for x in file_list if firstname in x and '.db' in x and 'back' not in x]
                 if len(file_list) == 0:
@@ -334,15 +334,15 @@ class Query:
                     if '주식' in data[0]:
                         if '키움증권' in self.dict_set['증권사']:
                             gubun     = '주식'
-                            BACK_FILE = DB_STOCK_BACK_TICK if self.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+                            BACK_FILE = DB_STOCK_TICK_BACK if self.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
                             firstname = 'stock_tick_' if self.dict_set['주식타임프레임'] else 'stock_min_'
                         else:
                             gubun     = '해선'
-                            BACK_FILE = DB_FUTURE_BACK_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+                            BACK_FILE = DB_FUTURE_TICK_BACK if self.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
                             firstname = 'future_tick_' if self.dict_set['주식타임프레임'] else 'future_min_'
                     else:
                         gubun     = '코인'
-                        BACK_FILE = DB_COIN_BACK_TICK if self.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+                        BACK_FILE = DB_COIN_TICK_BACK if self.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
                         firstname = 'coin_tick_' if self.dict_set['코인타임프레임'] else 'coin_min_'
                     con2 = sqlite3.connect(BACK_FILE)
                     df['일자'] = df['index'].apply(lambda x: str(x)[:8])

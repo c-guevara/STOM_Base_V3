@@ -24,8 +24,8 @@ from ui.set_style import style_bc_dk
 from ui.ui_dialog_animation import DialogAnimator
 from utility.lazy_imports import get_np, get_pd
 from utility.static import thread_decorator, qtest_qwait, str_hms, dt_hms, timedelta_sec, error_decorator
-from utility.setting_base import DB_STOCK_BACK_TICK, DB_COIN_BACK_TICK, ui_num, DB_STOCK_BACK_MIN, DB_COIN_BACK_MIN, \
-    DB_FUTURE_BACK_MIN, DB_FUTURE_BACK_TICK, DB_STRATEGY
+from utility.setting_base import DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, ui_num, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, \
+    DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK, DB_STRATEGY
 
 
 @error_decorator
@@ -33,11 +33,11 @@ def backengine_show(ui, gubun):
     table_list = []
     if gubun == '주식':
         if '키움증권' in ui.dict_set['증권사']:
-            db = DB_STOCK_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+            db = DB_STOCK_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
         else:
-            db = DB_FUTURE_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+            db = DB_FUTURE_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
     else:
-        db = DB_COIN_BACK_TICK if ui.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+        db = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
     con = sqlite3.connect(db)
     try:
         df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
@@ -144,13 +144,13 @@ def backengine_start(ui, gubun):
     dict_info = None
     try:
         if gubun == '주식':
-            db = DB_STOCK_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_STOCK_BACK_MIN
+            db = DB_STOCK_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
             is_tick = ui.dict_set['주식타임프레임']
         elif gubun == '해선':
-            db = DB_FUTURE_BACK_TICK if ui.dict_set['주식타임프레임'] else DB_FUTURE_BACK_MIN
+            db = DB_FUTURE_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_FUTURE_MIN_BACK
             is_tick = ui.dict_set['주식타임프레임']
         else:
-            db = DB_COIN_BACK_TICK if ui.dict_set['코인타임프레임'] else DB_COIN_BACK_MIN
+            db = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
             is_tick = ui.dict_set['코인타임프레임']
 
         con = sqlite3.connect(db)

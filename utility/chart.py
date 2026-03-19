@@ -7,8 +7,8 @@ from utility.lazy_imports import get_np, get_pd, get_talib
 from trade.formula_manager import FormulaManager, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, error_decorator, \
     set_builtin_print
-from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_BACK_TICK, DB_COIN_BACK_TICK, \
-    DB_BACKTEST, DB_COIN_BACK_MIN, DB_STOCK_BACK_MIN, DB_CODE_INFO, DB_FUTURE_BACK_MIN, DB_FUTURE_BACK_TICK, \
+from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
+    DB_BACKTEST, DB_COIN_MIN_BACK, DB_STOCK_MIN_BACK, DB_CODE_INFO, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK, \
     list_stock_min, list_coin_min
 
 
@@ -136,13 +136,13 @@ class Chart:
             if self.dict_set['코인타임프레임']:
                 is_tick  = True
                 db_name1 = f'{DB_PATH}/coin_tick_{searchdate}.db'
-                db_name2 = DB_COIN_BACK_TICK
+                db_name2 = DB_COIN_TICK_BACK
                 query1   = f"SELECT * FROM '{code}' WHERE " \
                            f"`index` >= {int(searchdate) * 1000000 + int(starttime)} and " \
                            f"`index` <= {int(searchdate) * 1000000 + int(endtime)}"
             else:
                 db_name1 = f'{DB_PATH}/coin_min_{searchdate}.db'
-                db_name2 = DB_COIN_BACK_MIN
+                db_name2 = DB_COIN_MIN_BACK
                 query1   = f"SELECT * FROM '{code}' WHERE " \
                            f"`index` >= {int(searchdate) * 10000 + int(int(starttime) / 100)} and " \
                            f"`index` <= {int(searchdate) * 10000 + int(int(endtime) / 100)}"
@@ -154,22 +154,22 @@ class Chart:
                     is_tick  = True
                     if starttime == '': starttime, endtime = '090000', '093000'
                     db_name1 = f'{DB_PATH}/stock_tick_{searchdate}.db'
-                    db_name2 = DB_STOCK_BACK_TICK
+                    db_name2 = DB_STOCK_TICK_BACK
                 else:
                     if starttime == '': starttime, endtime = '090000', '152000'
                     db_name1 = f'{DB_PATH}/stock_min_{searchdate}.db'
-                    db_name2 = DB_STOCK_BACK_MIN
+                    db_name2 = DB_STOCK_MIN_BACK
             else:
                 market = 2
                 if self.dict_set['주식타임프레임']:
                     is_tick  = True
                     if starttime == '': starttime, endtime = '093000', '103000'
                     db_name1 = f'{DB_PATH}/future_tick_{searchdate}.db'
-                    db_name2 = DB_FUTURE_BACK_TICK
+                    db_name2 = DB_FUTURE_TICK_BACK
                 else:
                     if starttime == '': starttime, endtime = '090000', '160000'
                     db_name1 = f'{DB_PATH}/future_min_{searchdate}.db'
-                    db_name2 = DB_FUTURE_BACK_MIN
+                    db_name2 = DB_FUTURE_MIN_BACK
 
             if is_tick:
                 query1 = f"SELECT * FROM '{code}' WHERE " \
