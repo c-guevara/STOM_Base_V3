@@ -75,9 +75,8 @@ class BinanceReceiverTick:
         self.dict_bool = {
             '프로세스종료': False
         }
-        curr_time = now()
-        self.mtop_time = curr_time
-        self.lvhp_time = curr_time
+
+        self.lvhp_time = now()
 
         self.GetTickers()
 
@@ -347,17 +346,15 @@ class BinanceReceiverTick:
             self.hogaQ.put([code] + hoga_tamount + hoga_seprice[-5:] + hoga_buprice[:5] + hoga_samount[-5:] + hoga_bamount[:5])
 
     def Scheduler(self):
-        curr_time = now()
-        inthmsutc = int(str_hms(now_utc()))
-        if curr_time > self.mtop_time:
-            self.MoneyTopSearch()
-            self.mtop_time = timedelta_sec(10)
+        self.MoneyTopSearch()
 
+        curr_time = now()
         if not self.dict_set['바이낸스선물고정레버리지'] and curr_time > self.lvhp_time:
             if self.dict_dlhp:
                 self.ctraderQ.put(('저가대비고가등락율', self.dict_dlhp))
             self.lvhp_time = timedelta_sec(300)
 
+        inthmsutc = int(str_hms(now_utc()))
         if not self.dict_bool['프로세스종료'] and \
                 ((self.dict_set['코인전략종료시간'] < inthmsutc < self.dict_set['코인전략종료시간'] + 10 and self.dict_set['코인프로세스종료']) or 235000 < inthmsutc < 235010):
             self.ReceiverProcKill()
