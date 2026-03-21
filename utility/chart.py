@@ -5,8 +5,7 @@ from copy import deepcopy
 from traceback import format_exc
 from utility.lazy_imports import get_np, get_pd, get_talib
 from trade.formula_manager import FormulaManager, get_formula_data
-from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, error_decorator, \
-    set_builtin_print
+from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_BACKTEST, DB_COIN_MIN_BACK, DB_STOCK_MIN_BACK, DB_CODE_INFO, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK, \
     list_stock_min, list_coin_min
@@ -46,21 +45,22 @@ class Chart:
             '그외거래대금': list_coin_min.index('분당거래대금')
         }
 
-        set_builtin_print(True, self.windowQ)
         self.MainLoop()
 
-    @error_decorator
     def MainLoop(self):
         while True:
             data = self.chartQ.get()
-            if data[0] == '설정변경':
-                self.dict_set = data[1]
-            if data[0] == '그래프비교':
-                self.GraphComparison(data[1])
-            elif len(data) == 3:
-                self.UpdateRealJisu(data)
-            elif len(data) >= 7:
-                self.UpdateChart(data)
+            try:
+                if data[0] == '설정변경':
+                    self.dict_set = data[1]
+                if data[0] == '그래프비교':
+                    self.GraphComparison(data[1])
+                elif len(data) == 3:
+                    self.UpdateRealJisu(data)
+                elif len(data) >= 7:
+                    self.UpdateChart(data)
+            except:
+                self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
     @staticmethod
     def GraphComparison(backdetail_list):
