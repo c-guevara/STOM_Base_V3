@@ -224,7 +224,7 @@ class Chart:
                     return cgtime_
 
                 for index in df.index:
-                    cgtime = float(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
+                    cgtime = int(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
                     cgtime = get_cgtime(cgtime)
                     if market in (1, 3):
                         if df['주문구분'][index] == '매수':
