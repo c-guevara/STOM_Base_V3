@@ -429,25 +429,25 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     windows = [20, 60, 120, 240, 480]
     for window in windows:
         df_tsg[f'수익금합계{window:03d}'] = profit_series.rolling(window=window).mean()
-    profit_array = df_tsg['수익금'].values
-    df_tsg['이익금액'] = get_np().where(profit_array >= 0, profit_array, 0)
-    df_tsg['손실금액'] = get_np().where(profit_array < 0, profit_array, 0)
 
     sig_array = df_tsg['수익금'].values
+    df_tsg['이익금액'] = get_np().where(sig_array >= 0, sig_array, 0)
+    df_tsg['손실금액'] = get_np().where(sig_array < 0, sig_array, 0)
+
     mdd_list = []
-    random_data = get_np().random.permutation(sig_array)
-    for i in range(30):
-        if i > 0:
-            random_data = get_np().random.permutation(sig_array)
-        random_cumsum = get_np().cumsum(random_data)
-        df_tsg[f'수익금합계{i}'] = random_cumsum
+    random_cumsums = []
+    for i in range(100):
+        random_sig_array = get_np().random.permutation(sig_array)
+        cumsum_sig_array = get_np().cumsum(random_sig_array)
+        random_cumsums.append(cumsum_sig_array)
         try:
-            lower = get_np().argmax(get_np().maximum.accumulate(random_cumsum) - random_cumsum)
-            upper = get_np().argmax(random_cumsum[:lower])
-            mdd_ = round(abs(random_cumsum[upper] - random_cumsum[lower]) / (random_cumsum[upper] + seed) * 100, 2)
+            lower = get_np().argmax(get_np().maximum.accumulate(cumsum_sig_array) - cumsum_sig_array)
+            upper = get_np().argmax(cumsum_sig_array[:lower])
+            mdd_ = round(abs(cumsum_sig_array[upper] - cumsum_sig_array[lower]) / (cumsum_sig_array[upper] + seed) * 100, 2)
         except:
             mdd_ = 0.
         mdd_list.append(mdd_)
+    random_cumsums = get_np().array(random_cumsums)
 
     df_ts = df_tsg[['수익금']].copy()
     df_ts.index = df_ts.index.map(lambda x: dt_ymd(x))
@@ -512,8 +512,7 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     ax3 = fig1.add_subplot(gs[1, 0])
     ax4 = fig1.add_subplot(gs[1, 1])
 
-    for i in range(30):
-        ax1.plot(df_tsg.index, df_tsg[f'수익금합계{i}'], linewidth=0.5, label=f'MDD {mdd_list[i]}%', alpha=0.7)
+    ax1.plot(df_tsg.index, random_cumsums.T, linewidth=0.5, alpha=0.7)
     ax1.plot(df_tsg.index, df_tsg['수익금합계'], linewidth=2, label=f'MDD {mdd}%', color='orange')
     max_mdd = max(mdd_list)
     min_mdd = min(mdd_list)
