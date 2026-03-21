@@ -13,10 +13,11 @@ def database_check():
         os.makedirs('./backtest/temp', exist_ok=True)
         os.makedirs('./backtest/graph', exist_ok=True)
 
-        DB_SETTING    = './_database/setting.db'
-        DB_TRADELIST  = './_database/tradelist.db'
-        DB_STRATEGY   = './_database/strategy.db'
-        DB_CODE_INFO  = './_database/code_info.db'
+        DB_PATH       = './_database'
+        DB_SETTING    = f'{DB_PATH}/setting.db'
+        DB_TRADELIST  = f'{DB_PATH}/tradelist.db'
+        DB_STRATEGY   = f'{DB_PATH}/strategy.db'
+        DB_CODE_INFO  = f'{DB_PATH}/code_info.db'
 
         try:
             read_key()
@@ -467,6 +468,38 @@ def database_check():
 
         con.commit()
         con.close()
+
+        file_list  = os.listdir(DB_PATH)
+        file_names = ['stock_tick_', 'future_tick_', 'coin_tick_']
+        for file_name in file_names:
+            file_list_ = [x for x in file_list if file_name in x and '.db' in x and 'back' not in x]
+            if file_list_:
+                con = sqlite3.connect(f'{DB_PATH}/{file_list_[0]}')
+                df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
+                table_list = df['name'].to_list()
+                if 'moneytop' in table_list: table_list.remove('moneytop')
+                if table_list:
+                    df = get_pd().read_sql(f'SELECT * FROM "{table_list[0]}"', con)
+                    if '당일매수금액' not in df.columns:
+                        con.close()
+                        return False, '일자DB의 칼럼이 일치하지 않습니다.\nupdate_db_20260211.bat 파일을 실행하여 데이터베이스를 업데이트하십시오.'
+                con.close()
+
+            file_list_ = [x for x in file_list if file_name in x and '.db' in x and 'back' in x]
+            if file_list_:
+                con = sqlite3.connect(f'{DB_PATH}/{file_list_[0]}')
+                df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
+                table_list = df['name'].to_list()
+                if 'moneytop' in table_list: table_list.remove('moneytop')
+                if 'stockinfo' in table_list: table_list.remove('stockinfo')
+                if 'futureinfo' in table_list: table_list.remove('futureinfo')
+                if table_list:
+                    df = get_pd().read_sql(f'SELECT * FROM "{table_list[0]}"', con)
+                    if '당일매수금액' not in df.columns:
+                        con.close()
+                        return False, f'백테DB의 칼럼이 일치하지 않습니다.\n업데이트 된 일자DB로 백테DB를 새로 생성하십시오.'
+                con.close()
+
         return True, None
 
     except:

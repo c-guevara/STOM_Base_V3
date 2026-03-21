@@ -198,14 +198,6 @@ class Chart:
             self.windowQ.put((ui_num['차트'], '차트오류', '', '', '', ''))
             return
 
-        if '당일매수금액' not in df.columns:
-            self.windowQ.put((
-                ui_num['시스템로그'],
-                '오류 알림 - 데이터베이스의 칼럼이 일치하지 않습니다.\n'
-                '프로그램을 종료하고 update_db_20260211.bat 파일을 실행하여 데이터베이스를 업데이트하십시오.'
-            ))
-            return
-
         if cf1 is None:
             arry = add_rolling_data(df, market, is_tick, [w_unit])
         else:

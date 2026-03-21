@@ -195,6 +195,7 @@ class Query:
                     df.drop(columns=['시간'], inplace=True)
                     df.to_sql('moneytop', con, index=False, if_exists='replace', chunksize=1000)
                     mtlist = list(set(';'.join(df['거래대금순위'].to_list()[29:]).split(';')))
+
                     df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                     table_list = df['name'].to_list()
                     if table_list:
@@ -382,6 +383,7 @@ class Query:
                         elif 'future' in firstname:
                             df = get_pd().read_sql('SELECT * FROM futureinfo', self.con4)
                             df.to_sql('futureinfo', con2, index=False, if_exists='replace', chunksize=1000)
+
                         df = get_pd().read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                         table_list = df['name'].to_list()
                         last = len(table_list)
