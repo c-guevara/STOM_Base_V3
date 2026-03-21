@@ -4,7 +4,7 @@ import time
 import sqlite3
 from multiprocessing import Process
 from utility.lazy_imports import get_pd
-from utility.static import now, str_ymdhms, error_decorator
+from utility.static import now, str_ymdhms, error_decorator, set_builtin_print
 from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num
 
 
@@ -98,6 +98,7 @@ class BackFinder:
         else:
             self.gubun = 'coin'
 
+        set_builtin_print(True, self.wq)
         self.Start()
 
     @error_decorator

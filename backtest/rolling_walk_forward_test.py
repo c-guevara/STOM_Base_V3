@@ -10,7 +10,7 @@ from multiprocessing import Process, Queue
 from utility.lazy_imports import get_np, get_pd
 from backtest.back_static_numba import GetResult, bootstrap_test
 from backtest.back_static import SendResult, GetMoneytopQuery, PlotShow, GetResultDataframe, AddMdd
-from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd, error_decorator
+from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd, error_decorator, set_builtin_print
 from utility.setting_base import ui_num, DB_STRATEGY, DB_BACKTEST, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_OPTUNA, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 
@@ -72,6 +72,7 @@ class Total:
         self.hstd         = -float('inf')
         self.sub_total    = 0
 
+        set_builtin_print(True, self.wq)
         self.MainLoop()
 
     def MainLoop(self):
@@ -338,6 +339,7 @@ class RollingWalkForwardTest:
         self.study      = None
         self.dict_simple_vars = {}
 
+        set_builtin_print(True, self.wq)
         self.Start()
 
     @error_decorator

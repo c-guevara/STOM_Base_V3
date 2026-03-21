@@ -7,8 +7,8 @@ from traceback import format_exc
 from fake_useragent import UserAgent
 from utility.lazy_imports import get_pd
 from utility.setting_base import ui_num
-from utility.static import str_ymdhm, set_builtin_print, str_ymd_ios, dt_ymdhms_ios, timedelta_day, dt_ymd, str_hms, \
-    now, str_ymd, thread_decorator
+from utility.static import str_ymdhm, str_ymd_ios, dt_ymdhms_ios, timedelta_day, dt_ymd, str_hms, now, str_ymd, \
+    thread_decorator
 
 
 class WebCrawingHomTab:
@@ -24,7 +24,6 @@ class WebCrawingHomTab:
         self.thread_lock = Lock()
         self.complted_thread = 0
 
-        set_builtin_print(True, self.windowQ)
         self.MainLoop()
 
     def MainLoop(self):

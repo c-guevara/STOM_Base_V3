@@ -11,7 +11,7 @@ from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK
     DB_FUTURE_TICK_BACK, DB_FUTURE_MIN_BACK, DB_COIN_TICK_BACK, DB_COIN_MIN_BACK, list_stock_tick, \
     list_stock_min, list_coin_tick, list_coin_min
 from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
-    add_rolling_data
+    add_rolling_data, set_builtin_print
 
 
 class BackEngineBase(StrategyBase):
@@ -92,6 +92,7 @@ class BackEngineBase(StrategyBase):
         self.opti_kind       = 0
         self.sell_count      = 0
 
+        set_builtin_print(True, self.wq)
         self.UpdateMarketGubun()
         self.MainLoop()
 
