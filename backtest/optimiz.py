@@ -472,7 +472,6 @@ class Optimize:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 검증 기간 {vsday} ~ {veday}'))
         if 'T' in self.backname:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 확인 기간 {test_days[0]} ~ {test_days[1]}'))
-
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 기간 추출 완료'))
 
         arry_bct = get_np().zeros((len(df_mt), 3), dtype='float64')
@@ -523,12 +522,9 @@ class Optimize:
 
         if 'B' in self.backname:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'<font color=#54d2f9>OPTUNA Sampler : {optuna_sampler}</font>'))
-        if only_buy:
-            add_text = ', 매수전략의 변수만 최적화합니다.'
-        elif only_sell:
-            add_text = ', 매도전략의 변수만 최적화합니다.'
-        else:
-            add_text = ''
+        if only_buy:    add_text = ', 매수전략의 변수만 최적화합니다.'
+        elif only_sell: add_text = ', 매도전략의 변수만 최적화합니다.'
+        else:           add_text = ''
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} START {add_text}'))
 
         if 'B' not in self.backname:
@@ -547,23 +543,22 @@ class Optimize:
         self.BackStart(('변수정보', self.vars_, 2))
 
         data = mq.get()
-        if data == '백테스트 완료':
-            self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))
+        if data != '백테스트 완료': self.SysExit(True)
+        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))
 
-            self.SaveOptiVars(text_vars, optivars_name, only_buy, only_sell, buy_first, sell_num)
-            if self.dict_set['스톰라이브']:
-                self.lq.put(self.backname.replace('O', '').replace('B', ''))
+        self.SaveOptiVars(text_vars, optivars_name, only_buy, only_sell, buy_first, sell_num)
+        if self.dict_set['스톰라이브']:
+            self.lq.put(self.backname.replace('O', '').replace('B', ''))
 
-            gubun_text = f'{self.gubun}_future' if self.ui_gubun == 'CF' else self.gubun
-            back_name  = f'{gubun_text}_{self.backname.replace("최적화", "").lower()}'
-            ymdhms     = str_ymdhms()
-            file_name  = f'{back_name}_{buystg_name}_{optistandard}_{ymdhms}'
-            self.visual3D.plot_3d_visualization(schedul, file_name)
+        gubun_text = f'{self.gubun}_future' if self.ui_gubun == 'CF' else self.gubun
+        back_name  = f'{gubun_text}_{self.backname.replace("최적화", "").lower()}'
+        ymdhms     = str_ymdhms()
+        file_name  = f'{back_name}_{buystg_name}_{optistandard}_{ymdhms}'
+        self.visual3D.plot_3d_visualization(schedul, file_name)
 
-            _ = mq.get()
-            self.SysExit(False)
-        else:
-            self.SysExit(True)
+        data = mq.get()
+        if data != '백테스트 완료': self.SysExit(True)
+        self.SysExit(False)
 
     def GetListDays(self, startday, endday, dt_endday, day_list, weeks_train, weeks_valid, weeks_test):
         train_days_ = [startday, int(str_ymd(timedelta_day(-weeks_test * 7, dt_endday)))]

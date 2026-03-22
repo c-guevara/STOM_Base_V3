@@ -403,7 +403,6 @@ class OptimizeGeneticAlgorithm:
         con.commit()
         con.close()
 
-        mq.close()
         if self.dict_set['스톰라이브']: self.lq.put(f'{self.backname}')
         self.sq.put('지에이 최적화가 완료되었습니다.')
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))

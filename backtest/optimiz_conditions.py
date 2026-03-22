@@ -368,7 +368,6 @@ class OptimizeConditions:
         else:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 기준값 0을 초과하는 조합이 없습니다.'))
 
-        mq.close()
         if self.dict_set['스톰라이브']: self.lq.put(self.backname)
         self.sq.put('조건 최적화가 완료되었습니다.')
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))

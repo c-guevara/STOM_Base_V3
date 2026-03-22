@@ -393,6 +393,7 @@ class RollingWalkForwardTest:
 
         plus_day = 3 if 'S' in self.ui_gubun else 1
         int_day  = int(str_ymd(timedelta_day(-(weeks_train + weeks_test * 2) * 7 + plus_day, dt_ymd(str(endday)))))
+
         if int(backengin_sday) > int_day:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '백테엔진에 로딩된 데이터가 부족합니다. 최소 (학습기간 + 확인기간 * 2)주 만큼의 데이터가 필요합니다'))
             self.SysExit(True)
@@ -442,6 +443,7 @@ class RollingWalkForwardTest:
         day_list.sort()
 
         if 'V' not in self.backname: weeks_valid = 0
+
         list_days = self.GetListDays(startday, endday, weeks_train, weeks_valid, weeks_test, day_list)
         for i, days in enumerate(list_days):
             train_days, valid_days, test_days = days
@@ -526,14 +528,17 @@ class RollingWalkForwardTest:
             startday, endday = days[2]
             self.tq.put(('경우의수', back_count, startday, endday, out_count))
             self.BackStart(('변수정보', hvar_list[i], 2, startday, endday, i))
-            _ = mq.get()
+            data = mq.get()
+            if data != '아웃샘플 백테스트 완료': self.SysExit(True)
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 아웃샘플 백테스트 완료'))
 
-        _ = mq.get()
+        data = mq.get()
+        if data != '백테스트 완료': self.SysExit(True)
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))
         if self.dict_set['스톰라이브']: self.lq.put(self.backname.replace('O', '').replace('B', ''))
-        _ = mq.get()
-        mq.close()
+
+        data = mq.get()
+        if data != '백테스트 완료': self.SysExit(True)
         self.SysExit(False)
 
     def GetListDays(self, startday, endday, weeks_train, weeks_valid, weeks_test, day_list):

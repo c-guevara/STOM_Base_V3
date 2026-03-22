@@ -360,13 +360,12 @@ class BackTest:
             q.put(data)
 
         data = mq.get()
-        if data == f'{self.backname} 완료':
-            self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 소요시간 {now() - start_time}'))
-            if self.dict_set['스톰라이브']: self.lq.put(self.backname)
-            _ = mq.get()
-            self.SysExit(False)
-        else:
-            self.SysExit(True)
+        if data != f'{self.backname} 완료': self.SysExit(True)
+        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 소요시간 {now() - start_time}'))
+        if self.dict_set['스톰라이브']: self.lq.put(self.backname)
+        data = mq.get()
+        if data != f'{self.backname} 완료': self.SysExit(True)
+        self.SysExit(False)
 
     def SysExit(self, cancel):
         if cancel:

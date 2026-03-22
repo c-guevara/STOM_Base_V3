@@ -140,9 +140,10 @@ class BackFinder:
             q.put(data)
 
         data = self.bq.get()
+        if data != '백파인더 완료': self.SysExit(True)
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'백파인더 소요시간 {now() - start_time}'))
         if self.dict_set['스톰라이브']: self.lq.put('백파인더')
-        self.SysExit(False) if data == '백파인더 완료' else self.SysExit(True)
+        self.SysExit(False)
 
     def SysExit(self, cancel):
         if cancel:
