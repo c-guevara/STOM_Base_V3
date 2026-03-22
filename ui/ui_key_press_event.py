@@ -100,6 +100,12 @@ def key_press_event(ui, event):
                 code       = ui.dict_code[name] if name in ui.dict_code else name
                 starttime  = ui.ct_lineEdittttt_01.text()
                 endtime    = ui.ct_lineEdittttt_02.text()
+                if len(str(buytime)) > 12 and (coin and not ui.dict_set['코인타임프레임'] or not coin and not ui.dict_set['주식타임프레임']):
+                    QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트를 표시할 수 없습니다.\n')
+                    return
+                if len(str(buytime)) < 14 and (coin and ui.dict_set['코인타임프레임'] or not coin and ui.dict_set['주식타임프레임']):
+                    QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트를 표시할 수 없습니다.\n')
+                    return
                 if len(starttime) < 6 or len(endtime) < 6:
                     QMessageBox.critical(ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
                     return
