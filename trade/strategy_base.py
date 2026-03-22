@@ -52,6 +52,17 @@ class StrategyBase:
         self.avg_list         = []
         self.sma_list         = []
 
+    def _calc_fill_amount(self, 주문수량, 호가배열, 잔량배열):
+        np = get_np()
+        누적잔량 = np.cumsum(잔량배열)
+        fill_idx = np.searchsorted(누적잔량, 주문수량, side='left')
+        if fill_idx >= len(호가배열):
+            return 0, False
+        이전누적 = 누적잔량[fill_idx - 1] if fill_idx > 0 else 0
+        남은수량 = 주문수량 - 이전누적
+        거래금액 = np.sum(호가배열[:fill_idx] * 잔량배열[:fill_idx]) + 호가배열[fill_idx] * 남은수량
+        return 거래금액, True
+
     def _now(self):
         return dt_ymdhms(str(self.index)) if self.is_tick else dt_ymdhm(str(self.index))
 
