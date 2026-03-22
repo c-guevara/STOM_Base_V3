@@ -206,11 +206,18 @@ class Chart:
         if market in (2, 4):
             arry = np.column_stack((arry, np.zeros((arry.shape[0], 2))))
 
+        indices = arry[:, 0]
+
         def get_cgidx_and_cgtime(cgtime_):
-            indices = arry[:, 0]
             while cgtime_ not in indices:
-                onesecago = timedelta_sec(-1, dt_ymdhms(str(cgtime_)) if is_tick else dt_ymdhm(str(cgtime_)))
-                cgtime_ = int(str_ymdhms(onesecago)) if is_tick else int(str_ymdhm(onesecago))
+                if is_tick:
+                    dt_cgtime = dt_ymdhms(str(cgtime_))
+                    onesecago = timedelta_sec(-1, dt_cgtime)
+                    cgtime_   = int(str_ymdhms(onesecago))
+                else:
+                    dt_cgtime = dt_ymdhm(str(cgtime_))
+                    onesecago = timedelta_sec(-1, dt_cgtime)
+                    cgtime_   = int(str_ymdhm(onesecago))
             cgidx_ = np.where(indices == cgtime_)[0][0]
             return cgidx_, cgtime_
 
