@@ -1,6 +1,7 @@
 
+import numpy as np
+import pandas as pd
 from traceback import format_exc
-from utility.lazy_imports import get_np
 from utility.setting_base import ui_num
 from utility.static import thread_decorator
 
@@ -284,8 +285,8 @@ def SendResult(result, dict_train, dict_valid=None, exponential=False):
             valid_stds.append(std)
 
         from backtest.back_static_numba import GetOptiValidStd
-        train_stds = get_np().array(train_stds, dtype=get_np().float64)
-        valid_stds = get_np().array(valid_stds, dtype=get_np().float64)
+        train_stds = np.array(train_stds, dtype=np.float64)
+        valid_stds = np.array(valid_stds, dtype=np.float64)
         std = GetOptiValidStd(train_stds, valid_stds, exponential)
         text2, hstd, sendtext = GetText2(std, pre_hstd)
 
@@ -435,23 +436,23 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
         df_tsg[f'수익금합계{window:03d}'] = profit_series.rolling(window=window).mean()
 
     sig_array = df_tsg['수익금'].values
-    df_tsg['이익금액'] = get_np().where(sig_array >= 0, sig_array, 0)
-    df_tsg['손실금액'] = get_np().where(sig_array < 0, sig_array, 0)
+    df_tsg['이익금액'] = np.where(sig_array >= 0, sig_array, 0)
+    df_tsg['손실금액'] = np.where(sig_array < 0, sig_array, 0)
 
     mdd_list = []
     random_cumsums = []
     for i in range(100):
-        random_sig_array = get_np().random.permutation(sig_array)
-        cumsum_sig_array = get_np().cumsum(random_sig_array)
+        random_sig_array = np.random.permutation(sig_array)
+        cumsum_sig_array = np.cumsum(random_sig_array)
         random_cumsums.append(cumsum_sig_array)
         try:
-            lower = get_np().argmax(get_np().maximum.accumulate(cumsum_sig_array) - cumsum_sig_array)
-            upper = get_np().argmax(cumsum_sig_array[:lower])
+            lower = np.argmax(np.maximum.accumulate(cumsum_sig_array) - cumsum_sig_array)
+            upper = np.argmax(cumsum_sig_array[:lower])
             mdd_ = round(abs(cumsum_sig_array[upper] - cumsum_sig_array[lower]) / (cumsum_sig_array[upper] + seed) * 100, 2)
         except:
             mdd_ = 0.
         mdd_list.append(mdd_)
-    random_cumsums = get_np().array(random_cumsums)
+    random_cumsums = np.array(random_cumsums)
 
     df_ts = df_tsg[['수익금']].copy()
     df_ts.index = df_ts.index.map(lambda x: dt_ymd(x))
@@ -467,8 +468,8 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     interval = get_interval(total_sec)
     df_st = df_st.resample(interval).sum()
     profit_array_st = df_st['수익금'].values
-    df_st['이익금액'] = get_np().where(profit_array_st >= 0, profit_array_st, 0)
-    df_st['손실금액'] = get_np().where(profit_array_st < 0, profit_array_st, 0)
+    df_st['이익금액'] = np.where(profit_array_st >= 0, profit_array_st, 0)
+    df_st['손실금액'] = np.where(profit_array_st < 0, profit_array_st, 0)
     df_st.index = df_st.index.map(lambda x: str_ymdhms_ios(x))
 
     df_wt = df_tsg[['수익금']].copy()
@@ -479,9 +480,9 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     if dict_cn is None:
         wt_index += ['토', '일']
         wt_data += [weekday_sums.get(5, 0), weekday_sums.get(6, 0)]
-    wt_data_array = get_np().array(wt_data)
-    wt_datap = get_np().where(wt_data_array >= 0, wt_data_array, 0)
-    wt_datam = get_np().where(wt_data_array < 0, wt_data_array, 0)
+    wt_data_array = np.array(wt_data)
+    wt_datap = np.where(wt_data_array >= 0, wt_data_array, 0)
+    wt_datam = np.where(wt_data_array < 0, wt_data_array, 0)
 
     if is_tick:
         df_tsg.index = df_tsg.index.map(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
@@ -616,7 +617,6 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
 
 
 def GetResultDataframe(ui_gubun, list_tsg, arry_bct):
-    from utility.lazy_imports import get_pd
     columns1 = [
         'index', '종목명', '포지션' if ui_gubun in ('SF', 'CF') else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '매도조건', '추가매수시간'
@@ -625,13 +625,13 @@ def GetResultDataframe(ui_gubun, list_tsg, arry_bct):
         '종목명', '포지션' if ui_gubun in ('SF', 'CF') else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '수익금합계', '매도조건', '추가매수시간'
     ]
-    df_tsg = get_pd().DataFrame(list_tsg, columns=columns1)
+    df_tsg = pd.DataFrame(list_tsg, columns=columns1)
     df_tsg.set_index('index', inplace=True)
     df_tsg.sort_index(inplace=True)
     df_tsg['수익금합계'] = df_tsg['수익금'].cumsum()
     df_tsg = df_tsg[columns2]
     arry_bct = arry_bct[arry_bct[:, 1] > 0]
-    df_bct = get_pd().DataFrame(arry_bct[:, 1:], columns=['보유종목수', '보유금액'], index=arry_bct[:, 0])
+    df_bct = pd.DataFrame(arry_bct[:, 1:], columns=['보유종목수', '보유금액'], index=arry_bct[:, 0])
     df_bct.index = df_bct.index.astype(str)
     return df_tsg, df_bct
 
@@ -644,8 +644,8 @@ def AddMdd(arry_tsg, result):
     """
     try:
         array = arry_tsg[:, 4]
-        lower = get_np().argmax(get_np().maximum.accumulate(array) - array)
-        upper = get_np().argmax(array[:lower])
+        lower = np.argmax(np.maximum.accumulate(array) - array)
+        upper = np.argmax(array[:lower])
         mdd   = round(abs(array[upper] - array[lower]) / (array[upper] + result[10]) * 100, 2)
         mdd_  = int(abs(array[upper] - array[lower]))
     except:

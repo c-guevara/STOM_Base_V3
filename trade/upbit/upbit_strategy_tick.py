@@ -1,9 +1,10 @@
 
 import time
 import sqlite3
+import numpy as np
+import pandas as pd
 from copy import deepcopy
 from trade.strategy_base import StrategyBase
-from utility.lazy_imports import get_np, get_pd
 from trade.formula_manager import get_formula_data
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_COIN_TICK, DB_COIN_MIN, indicator, \
     list_coin_tick, list_coin_min
@@ -95,7 +96,6 @@ class UpbitStrategyTick(StrategyBase):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
     def UpdateStringategy(self):
-        pd   = get_pd()
         con  = sqlite3.connect(DB_STRATEGY)
         dfb  = pd.read_sql('SELECT * FROM coinbuy', con).set_index('index')
         dfs  = pd.read_sql('SELECT * FROM coinsell', con).set_index('index')
@@ -216,7 +216,6 @@ class UpbitStrategyTick(StrategyBase):
         순매수금액 = 초당매수금액 - 초당매도금액
         self.hoga_unit = 호가단위 = GetUpbitHogaunit(현재가)
 
-        np = get_np()
         self.shogainfo = np.array([매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5])
         self.shreminfo = np.array([매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5])
         self.bhogainfo = np.array([매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5])
@@ -529,7 +528,7 @@ class UpbitStrategyTick(StrategyBase):
     def PutGsjmAndDeleteHilo(self):
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
-            df_gj = get_pd().DataFrame.from_dict(self.dict_gj, orient='index')
+            df_gj = pd.DataFrame.from_dict(self.dict_gj, orient='index')
             self.windowQ.put((ui_num['C관심종목'], df_gj))
         if self.dict_profit:
             self.dict_profit = {k: v for k, v in self.dict_profit.items() if k in self.dict_jg}
@@ -546,7 +545,7 @@ class UpbitStrategyTick(StrategyBase):
             start = now()
             cllen = len(columns_)
             for i, code in enumerate(self.dict_data):
-                df = get_pd().DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
+                df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
                 df['index'] = df['index'].astype('int64')
                 df.to_sql(code, con, index=False, if_exists='append', chunksize=1000)
                 self.windowQ.put((ui_num['기본로그'], f'시스템 명령 실행 알림 - 전략연산 프로세스 데이터 저장 중 ... {i + 1}/{last}'))

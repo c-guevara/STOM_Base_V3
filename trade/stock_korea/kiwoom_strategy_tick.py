@@ -3,12 +3,13 @@ import os
 import sys
 import time
 import sqlite3
+import numpy as np
+import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
 from trade.formula_manager import get_formula_data
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from trade.strategy_base import StrategyBase
-from utility.lazy_imports import get_np, get_pd
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_STOCK_TICK, DB_STOCK_MIN, indicator, \
     list_stock_tick, list_stock_min
 # noinspection PyUnresolvedReferences
@@ -103,7 +104,6 @@ class KiwoomStrategyTick(StrategyBase):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
     def UpdateStringategy(self):
-        pd   = get_pd()
         con  = sqlite3.connect(DB_STRATEGY)
         dfb  = pd.read_sql('SELECT * FROM stockbuy', con).set_index('index')
         dfs  = pd.read_sql('SELECT * FROM stocksell', con).set_index('index')
@@ -236,7 +236,6 @@ class KiwoomStrategyTick(StrategyBase):
         순매수금액 = 초당매수금액 - 초당매도금액
         self.hoga_unit = 호가단위 = GetHogaunit(종목코드 in self.tuple_kosd, 현재가, 체결시간)
 
-        np = get_np()
         self.shogainfo = np.array([매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5])
         self.shreminfo = np.array([매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5])
         self.bhogainfo = np.array([매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5])
@@ -551,7 +550,7 @@ class KiwoomStrategyTick(StrategyBase):
     def PutGsjmAndDeleteHilo(self):
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
-            df_gj = get_pd().DataFrame.from_dict(self.dict_gj, orient='index')
+            df_gj = pd.DataFrame.from_dict(self.dict_gj, orient='index')
             self.mgzservQ.put(('window', (ui_num['S관심종목'], self.gubun, df_gj)))
         if self.dict_profit:
             self.dict_profit = {k: v for k, v in self.dict_profit.items() if k in self.dict_jg}
@@ -568,7 +567,7 @@ class KiwoomStrategyTick(StrategyBase):
             start = now()
             cllen = len(columns_)
             for i, code in enumerate(self.dict_data):
-                df = get_pd().DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
+                df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
                 df['index'] = df['index'].astype('int64')
                 df.to_sql(code, con, index=False, if_exists='append', chunksize=1000)
                 self.mgzservQ.put(('window', (ui_num['기본로그'], f'시스템 명령 실행 알림 - 전략연산 프로세스 데이터 저장 중 ... [{self.gubun + 1}]{i + 1}/{last}')))

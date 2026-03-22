@@ -1,7 +1,7 @@
 
+import numpy as np
 from traceback import format_exc
 from utility.setting_base import ui_num
-from utility.lazy_imports import get_np
 from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
 from utility.static import now, now_utc, GetUpbitHogaunit, GetUpbitPgSgSp, dt_ymdhms, GetIndicator
 
@@ -24,7 +24,6 @@ class UpbitStrategyMin(UpbitStrategyTick):
         순매수금액 = 분당매수금액 - 분당매도금액
         self.hoga_unit = 호가단위 = GetUpbitHogaunit(현재가)
 
-        np = get_np()
         self.shogainfo = np.array([매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5])
         self.shreminfo = np.array([매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5])
         self.bhogainfo = np.array([매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5])

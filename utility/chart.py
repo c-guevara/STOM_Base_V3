@@ -1,9 +1,11 @@
 
 import os
+import talib
 import sqlite3
+import numpy as np
+import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from utility.lazy_imports import get_np, get_pd, get_talib
 from trade.formula_manager import FormulaManager, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
@@ -26,9 +28,9 @@ class Chart:
         self.arry_kosd   = None
 
         con = sqlite3.connect(DB_CODE_INFO)
-        df = get_pd().read_sql('SELECT * FROM stockinfo', con).set_index('index')
+        df = pd.read_sql('SELECT * FROM stockinfo', con).set_index('index')
         self.dict_name.update(df['종목명'].to_dict())
-        df = get_pd().read_sql('SELECT * FROM futureinfo', con).set_index('index')
+        df = pd.read_sql('SELECT * FROM futureinfo', con).set_index('index')
         self.dict_name.update(df['종목명'].to_dict())
         con.close()
 
@@ -76,7 +78,7 @@ class Chart:
         plt.figure('그래프 비교', figsize=(12, 10))
         con = sqlite3.connect(DB_BACKTEST)
         for table in backdetail_list:
-            df = get_pd().read_sql(f'SELECT `index`, `수익금` FROM {table}', con)
+            df = pd.read_sql(f'SELECT `index`, `수익금` FROM {table}', con)
             df['index'] = df['index'].apply(lambda x: dt_ymdhms(x))
             df.set_index('index', inplace=True)
             df = df.resample('D').sum()
@@ -93,16 +95,16 @@ class Chart:
         jisu_data = data[1:]
         if gubun == '코스피':
             if self.arry_kosp is None:
-                self.arry_kosp = get_np().array([jisu_data])
+                self.arry_kosp = np.array([jisu_data])
             else:
-                self.arry_kosp = get_np().r_[self.arry_kosp, get_np().array([jisu_data])]
+                self.arry_kosp = np.r_[self.arry_kosp, np.array([jisu_data])]
             xticks = [dt_ymdhms(str(int(x))).timestamp() for x in self.arry_kosp[:, 0]]
             self.windowQ.put((ui_num['코스피'], xticks, self.arry_kosp[:, 1]))
         elif gubun == '코스닥':
             if self.arry_kosd is None:
-                self.arry_kosd = get_np().array([jisu_data])
+                self.arry_kosd = np.array([jisu_data])
             else:
-                self.arry_kosd = get_np().r_[self.arry_kosd, get_np().array([jisu_data])]
+                self.arry_kosd = np.r_[self.arry_kosd, np.array([jisu_data])]
             xticks = [dt_ymdhms(str(int(x))).timestamp() for x in self.arry_kosd[:, 0]]
             self.windowQ.put((ui_num['코스닥'], xticks, self.arry_kosd[:, 1]))
 
@@ -179,11 +181,11 @@ class Chart:
         try:
             if os.path.isfile(db_name1):
                 con = sqlite3.connect(db_name1)
-                df = get_pd().read_sql(query1 if starttime and endtime else query2, con)
+                df = pd.read_sql(query1 if starttime and endtime else query2, con)
                 con.close()
             elif os.path.isfile(db_name2):
                 con = sqlite3.connect(db_name2)
-                df = get_pd().read_sql(query1 if starttime and endtime else query2, con)
+                df = pd.read_sql(query1 if starttime and endtime else query2, con)
                 con.close()
         except:
             pass
@@ -200,28 +202,28 @@ class Chart:
         buy_index  = []
         sell_index = []
 
-        arry = get_np().column_stack((arry, get_np().zeros((arry.shape[0], 2))))
+        arry = np.column_stack((arry, np.zeros((arry.shape[0], 2))))
         if market in (2, 4):
-            arry = get_np().column_stack((arry, get_np().zeros((arry.shape[0], 2))))
+            arry = np.column_stack((arry, np.zeros((arry.shape[0], 2))))
 
         def get_cgidx_and_cgtime(cgtime_):
             indices = arry[:, 0]
             while cgtime_ not in indices:
                 onesecago = timedelta_sec(-1, dt_ymdhms(str(cgtime_)) if is_tick else dt_ymdhm(str(cgtime_)))
                 cgtime_ = int(str_ymdhms(onesecago)) if is_tick else int(str_ymdhm(onesecago))
-            cgidx_ = get_np().where(indices == cgtime_)[0][0]
+            cgidx_ = np.where(indices == cgtime_)[0][0]
             return cgidx_, cgtime_
 
         if detail is None:
             con = sqlite3.connect(DB_TRADELIST)
             if market in (3, 4):
-                df = get_pd().read_sql(f"SELECT * FROM c_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{code}'", con).set_index('index')
+                df = pd.read_sql(f"SELECT * FROM c_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{code}'", con).set_index('index')
             else:
                 name = self.dict_name[code] if code in self.dict_name else code
                 if market == 1:
-                    df = get_pd().read_sql(f"SELECT * FROM s_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{name}'", con).set_index('index')
+                    df = pd.read_sql(f"SELECT * FROM s_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{name}'", con).set_index('index')
                 else:
-                    df = get_pd().read_sql(f"SELECT * FROM f_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{name}'", con).set_index('index')
+                    df = pd.read_sql(f"SELECT * FROM f_chegeollist WHERE 체결시간 LIKE '{searchdate}%' and 종목명 = '{name}'", con).set_index('index')
             con.close()
 
             if len(df) > 0:
@@ -267,81 +269,81 @@ class Chart:
                     arry[buy_cgidx, -2] = 추가매수가
 
         if not is_tick:
-            arry = get_np().column_stack((arry, get_np().zeros((arry.shape[0], 28))))
+            arry = np.column_stack((arry, np.zeros((arry.shape[0], 28))))
             try:
                 mc = arry[:, 1]
                 mh = arry[:, self.factor_index['주식분봉고가' if market == 1 else '그외분봉고가']]
                 ml = arry[:, self.factor_index['주식분봉저가' if market == 1 else '그외분봉저가']]
                 mv = arry[:, self.factor_index['주식거래대금' if market == 1 else '그외거래대금']]
 
-                AD = get_talib().AD(mh, ml, mc, mv)
+                AD = talib.AD(mh, ml, mc, mv)
                 arry[:, -28] = AD
                 if k[0] != 0:
-                    ADOSC = get_talib().ADOSC(mh, ml, mc, mv, fastperiod=k[0], slowperiod=k[1])
+                    ADOSC = talib.ADOSC(mh, ml, mc, mv, fastperiod=k[0], slowperiod=k[1])
                     arry[:, -27] = ADOSC
                 if k[2] != 0:
-                    ADXR = get_talib().ADXR(mh, ml, mc, timeperiod=k[2])
+                    ADXR = talib.ADXR(mh, ml, mc, timeperiod=k[2])
                     arry[:, -26] = ADXR
                 if k[3] != 0:
-                    APO = get_talib().APO(mc, fastperiod=k[3], slowperiod=k[4], matype=k[5])
+                    APO = talib.APO(mc, fastperiod=k[3], slowperiod=k[4], matype=k[5])
                     arry[:, -25] = APO
                 if k[6] != 0:
-                    AROOND, AROONU = get_talib().AROON(mh, ml, timeperiod=k[6])
+                    AROOND, AROONU = talib.AROON(mh, ml, timeperiod=k[6])
                     arry[:, -24] = AROOND
                     arry[:, -23] = AROONU
                 if k[7] != 0:
-                    ATR = get_talib().ATR(mh, ml, mc, timeperiod=k[7])
+                    ATR = talib.ATR(mh, ml, mc, timeperiod=k[7])
                     arry[:, -22] = ATR
                 if k[8] != 0:
-                    BBU, BBM, BBL = get_talib().BBANDS(mc, timeperiod=k[8], nbdevup=k[9], nbdevdn=k[10], matype=k[11])
+                    BBU, BBM, BBL = talib.BBANDS(mc, timeperiod=k[8], nbdevup=k[9], nbdevdn=k[10], matype=k[11])
                     arry[:, -21] = BBU
                     arry[:, -20] = BBM
                     arry[:, -19] = BBL
                 if k[12] != 0:
-                    CCI = get_talib().CCI(mh, ml, mc, timeperiod=k[12])
+                    CCI = talib.CCI(mh, ml, mc, timeperiod=k[12])
                     arry[:, -18] = CCI
                 if k[13] != 0:
-                    DIM = get_talib().MINUS_DI(mh, ml, mc, timeperiod=k[13])
-                    DIP = get_talib().PLUS_DI(mh, ml, mc, timeperiod=k[13])
+                    DIM = talib.MINUS_DI(mh, ml, mc, timeperiod=k[13])
+                    DIP = talib.PLUS_DI(mh, ml, mc, timeperiod=k[13])
                     arry[:, -17] = DIM
                     arry[:, -16] = DIP
                 if k[14] != 0:
-                    MACD, MACDS, MACDH = get_talib().MACD(mc, fastperiod=k[14], slowperiod=k[15], signalperiod=k[16])
+                    MACD, MACDS, MACDH = talib.MACD(mc, fastperiod=k[14], slowperiod=k[15], signalperiod=k[16])
                     arry[:, -15] = MACD
                     arry[:, -14] = MACDS
                     arry[:, -13] = MACDH
                 if k[17] != 0:
-                    MFI = get_talib().MFI(mh, ml, mc, mv, timeperiod=k[17])
+                    MFI = talib.MFI(mh, ml, mc, mv, timeperiod=k[17])
                     arry[:, -12] = MFI
                 if k[18] != 0:
-                    MOM = get_talib().MOM(mc, timeperiod=k[18])
+                    MOM = talib.MOM(mc, timeperiod=k[18])
                     arry[:, -11] = MOM
-                OBV = get_talib().OBV(mc, mv)
+                OBV = talib.OBV(mc, mv)
                 arry[:, -10] = OBV
                 if k[19] != 0:
-                    PPO = get_talib().PPO(mc, fastperiod=k[19], slowperiod=k[20], matype=k[21])
+                    PPO = talib.PPO(mc, fastperiod=k[19], slowperiod=k[20], matype=k[21])
                     arry[:,  -9] = PPO
                 if k[22] != 0:
-                    ROC = get_talib().ROC(mc, timeperiod=k[22])
+                    ROC = talib.ROC(mc, timeperiod=k[22])
                     arry[:,  -8] = ROC
                 if k[23] != 0:
-                    RSI = get_talib().RSI(mc, timeperiod=k[23])
+                    RSI = talib.RSI(mc, timeperiod=k[23])
                     arry[:,  -7] = RSI
                 if k[24] != 0:
-                    SAR = get_talib().SAR(mh, ml, acceleration=k[24], maximum=k[25])
+                    SAR = talib.SAR(mh, ml, acceleration=k[24], maximum=k[25])
                     arry[:,  -6] = SAR
                 if k[26] != 0:
-                    STOCHSK, STOCHSD = get_talib().STOCH(mh, ml, mc, fastk_period=k[26], slowk_period=k[27], slowk_matype=k[28], slowd_period=k[29], slowd_matype=k[30])
+                    STOCHSK, STOCHSD = talib.STOCH(mh, ml, mc, fastk_period=k[26], slowk_period=k[27], slowk_matype=k[28], slowd_period=k[29], slowd_matype=k[30])
                     arry[:,  -5] = STOCHSK
                     arry[:,  -4] = STOCHSD
                 if k[31] != 0:
-                    STOCHFK, STOCHFD = get_talib().STOCHF(mh, ml, mc, fastk_period=k[31], fastd_period=k[32], fastd_matype=k[33])
+                    STOCHFK, STOCHFD = talib.STOCHF(mh, ml, mc, fastk_period=k[31], fastd_period=k[32], fastd_matype=k[33])
                     arry[:,  -3] = STOCHFK
                     arry[:,  -2] = STOCHFD
                 if k[34] != 0:
-                    WILLR = get_talib().WILLR(mh, ml, mc, timeperiod=k[34])
+                    WILLR = talib.WILLR(mh, ml, mc, timeperiod=k[34])
                     arry[:,  -1] = WILLR
-                arry = get_np().nan_to_num(arry)
+                arry = np.nan_to_num(arry)
             except:
                 arry = None
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 보조지표의 설정값이 잘못되었습니다.'))
@@ -349,7 +351,7 @@ class Chart:
         if arry is not None:
             fm_list, dict_fm, fm_tcnt = get_formula_data(True, arry.shape[1])
             if fm_tcnt > 0:
-                arry = get_np().column_stack((arry, get_np().zeros((arry.shape[0], fm_tcnt))))
+                arry = np.column_stack((arry, np.zeros((arry.shape[0], fm_tcnt))))
                 fm = FormulaManager(deepcopy(fm_list))
                 fm.update_all_data(code, arry, market, is_tick, w_unit)
 

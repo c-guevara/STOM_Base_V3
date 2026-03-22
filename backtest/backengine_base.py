@@ -1,9 +1,10 @@
 
 import sqlite3
+import numpy as np
+import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.strategy_base import StrategyBase
-from utility.lazy_imports import get_np, get_pd
 from trade.formula_manager import get_formula_data
 from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
     get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
@@ -320,8 +321,6 @@ class BackEngineBase(StrategyBase):
                     self.wq.put((ui_num['시스템로그'], format_exc()))
 
     def DataLoad(self, data):
-        pd = get_pd()
-
         def data_load(days):
             try:
                 df = pd.read_sql(GetBackloadCodeQuery(self.is_tick, code, days, starttime, endtime), con)
@@ -373,7 +372,6 @@ class BackEngineBase(StrategyBase):
 
             shared_info = []
             offset = 0
-            np = get_np()
             for item in all_data:
                 shared_array = np.ndarray(
                     item['shape'],
@@ -474,7 +472,6 @@ class BackEngineBase(StrategyBase):
         if shared_info is None:
             return None
 
-        np = get_np()
         code = shared_info['code']
         if self.dict_set['백테일괄로딩']:
             shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
@@ -554,7 +551,6 @@ class BackEngineBase(StrategyBase):
 
             last = len(self.arry_code) - 1
             if last > 0:
-                np = get_np()
                 indexs = self.arry_code[:, 0].astype(np.int64)
                 day_vals = indexs // 1000000
                 day_last_indexs = np.where(day_vals[:-1] != day_vals[1:])[0]
