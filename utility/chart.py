@@ -236,6 +236,9 @@ class Chart:
             if len(df) > 0:
                 for index in df.index:
                     cgtime = int(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
+                    if cgtime < indices[0] or indices[-1] < cgtime:
+                        continue
+
                     cgidx, cgtime = get_cgidx_and_cgtime(cgtime)
                     if market in (1, 3):
                         if df['주문구분'][index] == '매수':
