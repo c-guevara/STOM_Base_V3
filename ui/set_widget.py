@@ -191,7 +191,6 @@ class AnimatedPushButton(QPushButton):
         self.hover_animation = QPropertyAnimation(self, b"geometry")
         self.hover_animation.setDuration(150)
         self.hover_animation.setEasingCurve(QEasingCurve.OutCubic)
-
         self.animation_timer = QTimer()
         self.animation_timer.setSingleShot(True)
         self.animation_timer.timeout.connect(self._delayed_leave)
@@ -199,26 +198,21 @@ class AnimatedPushButton(QPushButton):
     def enterEvent(self, event):
         if self.original_geometry is None:
             self.original_geometry = self.geometry()
-
         self.is_hovering = True
         self.animation_timer.stop()
-
         expanded_rect = QRect(
             self.original_geometry.x() - 2,
             self.original_geometry.y() - 2,
             self.original_geometry.width() + 4,
             self.original_geometry.height() + 4
         )
-
         self.hover_animation.setStartValue(self.geometry())
         self.hover_animation.setEndValue(expanded_rect)
         self.hover_animation.start()
-
         super().enterEvent(event)
 
     def leaveEvent(self, event):
         self.is_hovering = False
-        # 약간의 딜레이 후 애니메이션 실행 (빠른 이동 시 깜빡임 방지)
         self.animation_timer.start(50)
         super().leaveEvent(event)
 
@@ -229,6 +223,40 @@ class AnimatedPushButton(QPushButton):
             self.hover_animation.start()
 
 
+class BounceButton(QPushButton):
+    """클릭 시 버튼이 커졌다가 원래대로 돌아가는 바운스 애니메이션 버튼"""
+    def __init__(self, text, parent=None, scale=1.20, duration=300):
+        super().__init__(text, parent)
+        self.scale_factor = scale
+        self.anim_duration = duration
+        self.original_geometry = None
+        self.click_animation = None
+
+    def mousePressEvent(self, event):
+        """클릭 시 바운스 애니메이션 실행"""
+        if event.button() == Qt.LeftButton:
+            self._play_bounce_animation()
+        super().mousePressEvent(event)
+
+    def _play_bounce_animation(self):
+        """버튼 커졌다가 원래대로 돌아가는 애니메이션"""
+        self.original_geometry = self.geometry()
+        center_x = self.original_geometry.x() + self.original_geometry.width() / 2
+        center_y = self.original_geometry.y() + self.original_geometry.height() / 2
+        new_width = int(self.original_geometry.width() * self.scale_factor)
+        new_height = int(self.original_geometry.height() * self.scale_factor)
+        new_x = int(center_x - new_width / 2)
+        new_y = int(center_y - new_height / 2)
+        expanded_rect = QRect(new_x, new_y, new_width, new_height)
+        self.click_animation = QPropertyAnimation(self, b"geometry")
+        self.click_animation.setDuration(self.anim_duration)
+        self.click_animation.setEasingCurve(QEasingCurve.OutBack)
+        self.click_animation.setKeyValueAt(0.0, self.original_geometry)
+        self.click_animation.setKeyValueAt(0.4, expanded_rect)
+        self.click_animation.setKeyValueAt(1.0, self.original_geometry)
+        self.click_animation.start()
+
+
 class WidgetCreater:
     def __init__(self, ui_class):
         self.ui = ui_class
@@ -237,12 +265,18 @@ class WidgetCreater:
         groupbox = QGroupBox(gname, tab)
         return groupbox
 
-    def setPushbutton(self, pname, color=0, box=None, cmd=None, icon=None, tip=None, shortcut=None, visible=True, click=None, animated=False):
+    def setPushbutton(self, pname, color=0, box=None, cmd=None, icon=None, tip=None, shortcut=None, visible=True,
+                      click=None, animated=False, bounced=False):
         if animated:
             if box is not None:
                 pushbutton = AnimatedPushButton(pname, box)
             else:
                 pushbutton = AnimatedPushButton(pname, self.ui)
+        elif bounced:
+            if box is not None:
+                pushbutton = BounceButton(pname, box)
+            else:
+                pushbutton = BounceButton(pname, self.ui)
         else:
             if box is not None:
                 pushbutton = QPushButton(pname, box)
