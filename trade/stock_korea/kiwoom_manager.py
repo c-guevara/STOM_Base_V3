@@ -92,22 +92,18 @@ class ZmqSendToUI(QThread):
         self.is_running = True
 
     def run(self):
-        inthms = int(str_hms())
         while self.is_running:
             try:
-                msg, data = self.mgzservQ.get(timeout=5)
                 try:
+                    msg, data = self.mgzservQ.get(timeout=1)
                     self.sock.send_string(msg, zmq.SNDMORE)
                     self.sock.send_pyobj(data)
                 except:
                     pass
-
-                if int(str_hms()) > inthms:
-                    inthms = int(str_hms())
-                    sstgQs_size = sum([q.qsize() for q in self.sstgQs])
-                    qsize_data  = ('qsize', (self.sagentQ.qsize(), self.straderQ.qsize(), sstgQs_size))
-                    self.sock.send_string('qsize', zmq.SNDMORE)
-                    self.sock.send_pyobj(qsize_data)
+                sstgQs_size = sum([q.qsize() for q in self.sstgQs])
+                qsize_data = ('qsize', (self.sagentQ.qsize(), self.straderQ.qsize(), sstgQs_size))
+                self.sock.send_string('qsize', zmq.SNDMORE)
+                self.sock.send_pyobj(qsize_data)
             except:
                 pass
 

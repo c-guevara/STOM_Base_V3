@@ -16,7 +16,7 @@ from login_future.manuallogin import find_window, manual_login, leftClick, doubl
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utility.setting_user import load_settings
 from utility.setting_base import ui_num, FUTURE_LOGIN_PATH
-from utility.static import now, timedelta_sec, qtest_qwait, opstarter_kill, str_hms
+from utility.static import now, timedelta_sec, qtest_qwait, opstarter_kill
 
 
 class ZmqRecvFromUI(QThread):
@@ -91,21 +91,17 @@ class ZmqSendToUI(QThread):
         self.is_running = True
 
     def run(self):
-        inthms = int(str_hms())
         while self.is_running:
             try:
-                msg, data = self.mgzservQ.get(timeout=5)
                 try:
+                    msg, data = self.mgzservQ.get(timeout=1)
                     self.sock.send_string(msg, zmq.SNDMORE)
                     self.sock.send_pyobj(data)
                 except:
                     pass
-
-                if int(str_hms()) > inthms:
-                    inthms = int(str_hms())
-                    qsize_data  = ('qsize', (self.sagentQ.qsize(), self.straderQ.qsize(), self.sstgQ.qsize()))
-                    self.sock.send_string('qsize', zmq.SNDMORE)
-                    self.sock.send_pyobj(qsize_data)
+                qsize_data  = ('qsize', (self.sagentQ.qsize(), self.straderQ.qsize(), self.sstgQ.qsize()))
+                self.sock.send_string('qsize', zmq.SNDMORE)
+                self.sock.send_pyobj(qsize_data)
             except:
                 pass
 
