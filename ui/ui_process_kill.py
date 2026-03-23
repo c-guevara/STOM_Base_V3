@@ -1,6 +1,7 @@
 
 import sys
 from utility.setting_base import ui_num
+from PyQt5.QtWidgets import QApplication
 from utility.static import qtest_qwait, opstarter_kill, error_decorator
 
 
@@ -9,7 +10,6 @@ def process_kill(ui):
     if ui.proc_manager is not None and ui.proc_manager.poll() is None:
         ui.wdzservQ.put(('manager', '프로세스종료'))
         ui.windowQ.put((ui_num['시스템로그'], 'Manager process terminate completed'))
-        qtest_qwait(1)
 
     if ui.dict_set['에이전트프로파일링']:
         ui.wdzservQ.put(('agent', '프로파일링결과'))
@@ -117,4 +117,6 @@ def process_kill(ui):
 
     opstarter_kill()
     qtest_qwait(1)
+
+    QApplication.instance().quit()
     sys.exit()
