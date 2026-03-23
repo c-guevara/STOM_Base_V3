@@ -2,7 +2,7 @@
 import sys
 import pyqtgraph as pg
 from traceback import format_exc
-from PyQt5.QtCore import Qt, QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer
+from PyQt5.QtCore import Qt, QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEvent
 from PyQt5.QtWidgets import QPushButton, QFrame, QTextEdit, QComboBox, QCheckBox, QLineEdit, QDateEdit, QProgressBar, \
     QDialog, QTableWidget, QAbstractItemView, QGroupBox, QMessageBox
 from utility import syntax
@@ -257,6 +257,56 @@ class BounceButton(QPushButton):
         self.click_animation.start()
 
 
+class HoverComboBox(QComboBox):
+    """마우스 오버 시 드롭다운을 자동으로 열고 닫는 콤보박스"""
+    def __init__(self, parent=None, delay_ms=100):
+        super().__init__(parent)
+        self._is_open = False
+        self._is_mouse_over = False
+        self._delay_ms = delay_ms
+        self._close_timer = QTimer(self)
+        self._close_timer.setSingleShot(True)
+        self._close_timer.timeout.connect(self._try_close)
+        self.view().viewport().installEventFilter(self)
+
+    def enterEvent(self, event):
+        """마우스가 콤보박스 위로 들어오면 드롭다운 열기"""
+        self._is_mouse_over = True
+        self._close_timer.stop()
+        if not self._is_open:
+            self.showPopup()
+            self._is_open = True
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        """마우스가 콤보박스 영역을 벗어나면 닫기 타이머 시작"""
+        self._is_mouse_over = False
+        self._close_timer.start(self._delay_ms)
+        super().leaveEvent(event)
+
+    def eventFilter(self, obj, event):
+        """드롭다운 리스트의 마우스 이벤트 감지"""
+        if obj == self.view().viewport():
+            if event.type() == QEvent.Enter:
+                self._is_mouse_over = True
+                self._close_timer.stop()
+            elif event.type() == QEvent.Leave:
+                self._is_mouse_over = False
+                self._close_timer.start(self._delay_ms)
+        return super().eventFilter(obj, event)
+
+    def _try_close(self):
+        """마우스가 영역 밖에 있으면 드롭다운 닫기"""
+        if not self._is_mouse_over:
+            self.hidePopup()
+            self._is_open = False
+
+    def hidePopup(self):
+        """드롭다운이 닫히면 상태 초기화"""
+        super().hidePopup()
+        self._is_open = False
+
+
 class PlainTextEdit(QTextEdit):
     def insertFromMimeData(self, source):
         self.insertPlainText(source.text())
@@ -363,7 +413,7 @@ class WidgetCreater:
 
     @staticmethod
     def setCombobox(tab, font=None, items=None, tip=None, visible=True, activated=None):
-        combobox = QComboBox(tab)
+        combobox = HoverComboBox(tab)
         combobox.setStyleSheet(style_fc_dk)
         if font is not None:
             combobox.setFont(font)

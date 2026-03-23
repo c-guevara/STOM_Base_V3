@@ -66,10 +66,12 @@ class SetOrderTap:
         self.ui.sodb_checkbox_list2 = [self.ui.ss_buyy_checkBox_11, self.ui.ss_buyy_checkBox_12, self.ui.ss_buyy_checkBox_13]
 
         self.ui.ss_buyy_labellll_04 = QLabel('▣ 지정가유형 주문가격 기준가', self.ui.ss_od_groupBoxxx_05)
-        self.ui.ss_buyy_comboBox_01 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['현재가', '매도1호가', '매수1호가'], tip='지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.')
-        self.ui.ss_buyy_comboBox_02 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'], tip='0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.ss_buyy_labellll_04.setToolTip('지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.\n0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.ss_buyy_comboBox_01 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['현재가', '매도1호가', '매수1호가'])
+        self.ui.ss_buyy_comboBox_02 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'])
         self.ui.ss_buyy_labellll_05 = QLabel('▣ 시장가 유형 주문 시 호가범위 선택    매도                   호가', self.ui.ss_od_groupBoxxx_05)
-        self.ui.ss_buyy_comboBox_03 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['1', '2', '3', '4', '5'], tip='지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.ss_buyy_labellll_05.setToolTip('지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.ss_buyy_comboBox_03 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_05, items=['1', '2', '3', '4', '5'])
 
         self.ui.ss_buyy_checkBox_18 = self.wc.setCheckBox('관심이탈', self.ui.ss_od_groupBoxxx_06)
         self.ui.ss_buyy_checkBox_19 = self.wc.setCheckBox('매도시그널', self.ui.ss_od_groupBoxxx_06)
@@ -161,10 +163,12 @@ class SetOrderTap:
         self.ui.sods_checkbox_list2 = [self.ui.ss_sell_checkBox_11, self.ui.ss_sell_checkBox_12, self.ui.ss_sell_checkBox_13]
 
         self.ui.ss_sell_labellll_04 = QLabel('▣ 지정가유형 주문가격 기준가', self.ui.ss_od_groupBoxxx_12)
-        self.ui.ss_sell_comboBox_01 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['현재가', '매도1호가', '매수1호가'], tip='지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.')
-        self.ui.ss_sell_comboBox_02 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'], tip='0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.ss_sell_labellll_04.setToolTip('지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.\n0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.ss_sell_comboBox_01 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['현재가', '매도1호가', '매수1호가'])
+        self.ui.ss_sell_comboBox_02 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'])
         self.ui.ss_sell_labellll_05 = QLabel('▣ 시장가 유형 주문 시 호가범위 선택    매수                   호가', self.ui.ss_od_groupBoxxx_12)
-        self.ui.ss_sell_comboBox_03 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['1', '2', '3', '4', '5'], tip='지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.ss_sell_labellll_05.setToolTip('지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.ss_sell_comboBox_03 = self.wc.setCombobox(self.ui.ss_od_groupBoxxx_12, items=['1', '2', '3', '4', '5'])
 
         self.ui.ss_sell_checkBox_17 = self.wc.setCheckBox('관심진입', self.ui.ss_od_groupBoxxx_13)
         self.ui.ss_sell_checkBox_18 = self.wc.setCheckBox('매수시그널', self.ui.ss_od_groupBoxxx_13)
@@ -246,10 +250,12 @@ class SetOrderTap:
         self.ui.codb_checkbox_list2 = [self.ui.sc_buyy_checkBox_05, self.ui.sc_buyy_checkBox_06, self.ui.sc_buyy_checkBox_07]
 
         self.ui.sc_buyy_labellll_04 = QLabel('▣ 지정가유형 주문가격 기준가', self.ui.sc_od_groupBoxxx_05)
-        self.ui.sc_buyy_comboBox_01 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['현재가', '매도1호가', '매수1호가'], tip='지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.')
-        self.ui.sc_buyy_comboBox_02 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'], tip='0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.sc_buyy_labellll_04.setToolTip('지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.\n0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.sc_buyy_comboBox_01 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['현재가', '매도1호가', '매수1호가'])
+        self.ui.sc_buyy_comboBox_02 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'])
         self.ui.sc_buyy_labellll_05 = QLabel('▣ 시장가 유형 주문 시 호가범위 선택    매도                   호가', self.ui.sc_od_groupBoxxx_05)
-        self.ui.sc_buyy_comboBox_03 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['1', '2', '3', '4', '5'], tip='지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.sc_buyy_labellll_05.setToolTip('지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.sc_buyy_comboBox_03 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_05, items=['1', '2', '3', '4', '5'])
 
         self.ui.sc_buyy_checkBox_12 = self.wc.setCheckBox('관심이탈', self.ui.sc_od_groupBoxxx_06)
         self.ui.sc_buyy_checkBox_13 = self.wc.setCheckBox('매도시그널', self.ui.sc_od_groupBoxxx_06)
@@ -329,10 +335,12 @@ class SetOrderTap:
         self.ui.cods_checkbox_list2 = [self.ui.sc_sell_checkBox_05, self.ui.sc_sell_checkBox_06, self.ui.sc_sell_checkBox_07]
 
         self.ui.sc_sell_labellll_04 = QLabel('▣ 지정가유형 주문가격 기준가', self.ui.sc_od_groupBoxxx_12)
-        self.ui.sc_sell_comboBox_01 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['현재가', '매도1호가', '매수1호가'], tip='지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.')
-        self.ui.sc_sell_comboBox_02 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'], tip='0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.sc_sell_labellll_04.setToolTip('지정가 주문시 주문가격을 정하기 위한 기준가을 선택하십시오.\n0은 기준가격이며 ± 호가단위를 선택하십시오.\n선택한 기준가격에서 ± 호가단위 만큼의 가격이 주문가격이 됨')
+        self.ui.sc_sell_comboBox_01 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['현재가', '매도1호가', '매수1호가'])
+        self.ui.sc_sell_comboBox_02 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['5', '4', '3', '2', '1', '0', '-1', '-2', '-3', '-4', '-5'])
         self.ui.sc_sell_labellll_05 = QLabel('▣ 시장가 유형 주문 시 호가범위 선택    매수                   호가', self.ui.sc_od_groupBoxxx_12)
-        self.ui.sc_sell_comboBox_03 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['1', '2', '3', '4', '5'], tip='지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.sc_sell_labellll_05.setToolTip('지정한 호가범위 내의 잔량이 주문수량을 만족할 경우 주문이 전송됨')
+        self.ui.sc_sell_comboBox_03 = self.wc.setCombobox(self.ui.sc_od_groupBoxxx_12, items=['1', '2', '3', '4', '5'])
 
         self.ui.sc_sell_checkBox_11 = self.wc.setCheckBox('관심진입', self.ui.sc_od_groupBoxxx_13)
         self.ui.sc_sell_checkBox_12 = self.wc.setCheckBox('매수시그널', self.ui.sc_od_groupBoxxx_13)
