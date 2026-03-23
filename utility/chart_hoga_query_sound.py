@@ -10,7 +10,7 @@ import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
 from trade.formula_manager import FormulaManager, get_formula_data
-from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm
+from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm, thread_decorator
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_BACKTEST, DB_COIN_MIN_BACK, DB_STOCK_MIN_BACK, DB_CODE_INFO, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK, \
     list_stock_min, list_coin_min, DB_SETTING, DB_STRATEGY, DB_STOCK_TICK, DB_STOCK_MIN, DB_FUTURE_TICK, DB_FUTURE_MIN, \
@@ -190,9 +190,8 @@ class ChartHogaQuerySound:
                         self.UpdateChart(data)
 
                 if not self.soundQ.empty():
-                    text = self.soundQ.get()
-                    self.text2speak.say(text)
-                    self.text2speak.runAndWait()
+                    data = self.soundQ.get()
+                    self.TextToSpeak(data)
 
                 time.sleep(0.01)
             except:
@@ -1026,3 +1025,8 @@ class ChartHogaQuerySound:
             else:       xticks = [dt_ymdhms(f'{int(x)}00').timestamp() for x in arry[:, 0]]
             gubun = 'C' if coin else 'S' if '키움증권' in self.dict_set['증권사'] else 'F'
             self.windowQ.put((ui_num['차트'], gubun, xticks, arry, buy_index, sell_index, fm_list, dict_fm, fm_tcnt))
+
+    @thread_decorator
+    def TextToSpeak(self, data):
+        self.text2speak.say(data)
+        self.text2speak.runAndWait()
