@@ -8,7 +8,7 @@ class ImportProgressHook:
         self.progress        = 5
         self.original_import = None
         self.modules = [
-            'ui.ui_mainwindow', 'ui.set_style', 'utility.hoga', 'utility.chartquerysound', 'utility.timesync',
+            'ui.ui_mainwindow', 'ui.set_style', 'utility.chartquerysound', 'utility.timesync',
             'utility.setting_base', 'utility.webcrawling', 'utility.static', 'utility.telegram_bot',
             'utility.setting_user', 'utility.database_read_only', 'ui.set_icon',
             'ui.set_table', 'ui.set_log_tap', 'ui.set_home_tap', 'ui.set_widget', 'ui.set_setup_tap', 'ui.set_order_tap',
@@ -38,7 +38,7 @@ class ImportProgressHook:
     def custom_import(self, name, *args, **kwargs):
         if name in self.modules:
             self.current_index += 1
-            progress = self.progress + (self.current_index / self.total_modules) * 76
+            progress = self.progress + (self.current_index / self.total_modules) * 75
             self.splash.show_progress(f"{name}...", int(progress))
         return self.original_import(name, *args, **kwargs)
 
