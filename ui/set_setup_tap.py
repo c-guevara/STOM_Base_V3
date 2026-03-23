@@ -157,7 +157,7 @@ class SetSetupTap:
         ]
 
         self.ui.sj_etc_labelll_01 = QLabel('▣  UI 테마 선택                                (재구동 후 적용)', self.ui.sj_bs_groupBox_08)
-        self.ui.sj_etc_comBoxx_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_08, items=['다크블루', '다크브라운', '다크그린', '다크옐로', '다크라임', '다크퍼플'])
+        self.ui.sj_etc_comBoxx_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_08, items=['다크블루', '다크브라운', '다크그린', '다크옐로', '다크라임', '다크퍼플', '다크레드', '다크오렌지', '다크핑크', '다크그레이', '다크네이비'])
         self.ui.sj_etc_checBox_02 = self.wc.setCheckBox('저해상도 설정 (해상도 1920 x 1080일 경우, 재구동 후 적용)', self.ui.sj_bs_groupBox_08)
         self.ui.sj_etc_checBox_03 = self.wc.setCheckBox('프로그램 종료 시 창위치 기억하기 (재구동 후 적용)', self.ui.sj_bs_groupBox_08)
         self.ui.sj_etc_checBox_04 = self.wc.setCheckBox('국내주식 실행 후 9시1분까지 장운영알림을 받지 못할 경우 프로세스 종료하기', self.ui.sj_bs_groupBox_08)
