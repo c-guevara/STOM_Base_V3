@@ -13,7 +13,7 @@ from traceback import format_exc
 from fake_useragent import UserAgent
 from utility.setting_base import ui_num
 from utility.static import str_ymdhm, str_ymd_ios, dt_ymdhms_ios, timedelta_day, dt_ymd, str_hms, now, str_ymd, \
-    thread_decorator
+    thread_decorator, timedelta_sec
 
 
 class WebCrawling:
@@ -55,7 +55,7 @@ class WebCrawling:
                 if now() > hometap_crawling_time:
                     self.get_all_data()
                     self.windowQ.put((ui_num['홈차트'], self.dict_data))
-                    hometap_crawling_time = now()
+                    hometap_crawling_time = timedelta_sec(30)
             except:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
