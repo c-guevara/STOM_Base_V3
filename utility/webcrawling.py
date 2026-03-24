@@ -274,7 +274,8 @@ class WebCrawling:
 
         if self.dt_today != search_today:
             for name in ('코스피', '코스닥', '코스피100', '코스피200', '코스피200선물'):
-                del self.dict_data[name]
+                if name in self.dict_data:
+                    del self.dict_data[name]
             self.dt_today = search_today
 
         self.thread_join = 0
