@@ -107,7 +107,7 @@ class CandlestickItem(pg.GraphicsObject):
 class VolumeBarItem(pg.GraphicsObject):
     def __init__(self, ar, idxs, xticks, gubun=0):
         pg.GraphicsObject.__init__(self)
-        self.setZValue(0)
+        self.setZValue(20)
         self.picture = QPicture()
         self.draw(ar, idxs, xticks, gubun)
 
