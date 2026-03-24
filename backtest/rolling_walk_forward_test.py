@@ -803,7 +803,7 @@ class RollingWalkForwardTest:
                 else:
                     trial_ = suggest_func(trial_name, var_[1], var_[1])
 
-                if '.' in str(trial_): trial_ = round(trial_, 3)
+                if '.' in str(trial_): trial_ = round(trial_, 2)
 
                 optuna_vars.append(trial_)
                 backte_vars.append([[], trial_])

@@ -874,7 +874,7 @@ class Optimize:
                 else:
                     trial_ = suggest_func(trial_name, var[1], var[1])
 
-                if '.' in str(trial_): trial_ = round(trial_, 3)
+                if '.' in str(trial_): trial_ = round(trial_, 2)
 
                 optuna_vars.append(trial_)
                 backte_vars.append([[], trial_])
@@ -922,10 +922,10 @@ class Optimize:
                     if pre_hvar != cur_hvar:
                         change += 1
                         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 결과 self.vars[{i}]의 최적값 변경 [{pre_hvar} -> {cur_hvar}]'))
-                    first     = self.vars_[i][0][0]
-                    last      = self.vars_[i][0][-1]
-                    pre_gap   = self.vars[i][0][2]
-                    gap       = pre_gap if first != last else 0
+                    first      = self.vars_[i][0][0]
+                    last       = self.vars_[i][0][-1]
+                    pre_gap    = self.vars[i][0][2]
+                    gap        = pre_gap if first != last else 0
                     text_vars += f'self.vars[{i}] = [[{first}, {last}, {gap}], {cur_hvar}]\n'
                 else:
                     text_vars += f'self.vars[{i}] = {self.vars[i]}\n'
