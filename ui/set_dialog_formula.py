@@ -28,7 +28,7 @@ class SetDialogFormula:
         self.ui.fm_labellllllll_01 = QLabel(text, self.ui.fm_groupBoxxxxx_01)
 
         self.ui.fm_lineEdittttt_01 = self.wc.setLineedit(self.ui.fm_groupBoxxxxx_02, aleft=True, style=style_bc_dk)
-        self.ui.fm_comboBoxxxxx_00 = self.wc.setCombobox(self.ui.fm_groupBoxxxxx_02, activated=self.ui.fmActivated_01)
+        self.ui.fm_comboBoxxxxx_00 = self.wc.setCombobox(self.ui.fm_groupBoxxxxx_02, hover=False, activated=self.ui.fmActivated_01)
         self.ui.fm_pushButtonnn_01 = self.wc.setPushbutton('불러오기', parent=self.ui.fm_groupBoxxxxx_02, color=4, click=self.ui.fmButtonClicked_01)
         self.ui.fm_pushButtonnn_02 = self.wc.setPushbutton('저장하기', parent=self.ui.fm_groupBoxxxxx_02, color=4, click=self.ui.fmButtonClicked_01)
 
