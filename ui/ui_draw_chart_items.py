@@ -8,6 +8,7 @@ from ui.set_style import color_bg_ct, color_pluss, color_minus
 class AreaItem(pg.GraphicsObject):
     def __init__(self, ar, ymin, ymax, xticks, gubun=0):
         pg.GraphicsObject.__init__(self)
+        self.setZValue(0)
         self.picture = QPicture()
         self.draw(ar, ymin, ymax, xticks, gubun)
 
@@ -60,6 +61,7 @@ class AreaItem(pg.GraphicsObject):
 class CandlestickItem(pg.GraphicsObject):
     def __init__(self, ar, idxs, xticks, gubun=0):
         pg.GraphicsObject.__init__(self)
+        self.setZValue(20)
         self.picture = QPicture()
         self.draw(ar, idxs, xticks, gubun)
 
@@ -87,11 +89,11 @@ class CandlestickItem(pg.GraphicsObject):
             for i in range(count):
                 draw_candle(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]], ar[i, idxs[3]])
         elif gubun == 1:
-            for i in range(count-2):
+            for i in range(count-1):
                 draw_candle(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]], ar[i, idxs[3]])
         else:
-            for i in (-2, -1):
-                draw_candle(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]], ar[i, idxs[3]])
+            i = count-1
+            draw_candle(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]], ar[i, idxs[3]])
         p.end()
 
     def paint(self, p, *args):
@@ -105,6 +107,7 @@ class CandlestickItem(pg.GraphicsObject):
 class VolumeBarItem(pg.GraphicsObject):
     def __init__(self, ar, idxs, xticks, gubun=0):
         pg.GraphicsObject.__init__(self)
+        self.setZValue(0)
         self.picture = QPicture()
         self.draw(ar, idxs, xticks, gubun)
 
@@ -132,7 +135,7 @@ class VolumeBarItem(pg.GraphicsObject):
                 draw_bar(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]])
         else:
             i = count-1
-            draw_bar(xticks[-1], ar[-1, idxs[0]], ar[-1, idxs[1]], ar[-1, idxs[2]])
+            draw_bar(xticks[i], ar[i, idxs[0]], ar[i, idxs[1]], ar[i, idxs[2]])
         p.end()
 
     def paint(self, p, *args):
