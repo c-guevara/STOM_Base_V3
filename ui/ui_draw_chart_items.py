@@ -39,13 +39,13 @@ class AreaItem(pg.GraphicsObject):
         if gubun == 0:
             draw_area()
         elif gubun == 1:
-            ar = ar[:-2]
+            ar = ar[:-1]
             draw_area()
         else:
             if ar[-1] == 1:
-                p.drawRect(QRectF(xticks[-2], ymin, xticks[-2] - xticks[-1], ymax - ymin))
+                p.drawRect(QRectF(xticks[-2], ymin, xticks[-1] - xticks[-2], ymax - ymin))
             else:
-                p.drawRect(QRectF(xticks[-2], ymin, xticks[-2] - xticks[-1], 0))
+                p.drawRect(QRectF(xticks[-2], ymin, xticks[-1] - xticks[-2], 0))
 
         p.end()
 
