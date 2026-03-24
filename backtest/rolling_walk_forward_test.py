@@ -680,14 +680,16 @@ class RollingWalkForwardTest:
                     self.SysExit(True)
                 else:
                     vturn, vkey, std = data
-                    cur_turn_type = vars_type[vturn]
-                    cur_turn_var  = self.vars_[vturn][0][vkey]
-                    pre_turn_hvar, pre_turn_hstd = dict_turn_hvar_hstd[vturn]
-                    same_update1 = std == pre_turn_hstd and cur_turn_type and cur_turn_var > pre_turn_hvar
-                    same_update2 = std == pre_turn_hstd and not cur_turn_type and cur_turn_var < pre_turn_hvar
-                    if std > pre_turn_hstd or same_update1 or same_update2:
-                        dict_turn_hvar_hstd[vturn][0] = cur_turn_var
-                        dict_turn_hvar_hstd[vturn][1] = std
+                    cur_turn_type  = vars_type[vturn]
+                    cur_turn_var   = self.vars_[vturn][0][vkey]
+                    duct_turn_list = dict_turn_hvar_hstd[vturn]
+                    pre_turn_hvar, pre_turn_hstd = duct_turn_list
+                    A = std > pre_turn_hstd
+                    B = std == pre_turn_hstd and cur_turn_var > pre_turn_hvar and cur_turn_type
+                    C = std == pre_turn_hstd and cur_turn_var < pre_turn_hvar and not cur_turn_type
+                    if A or B or C:
+                        duct_turn_list[0] = cur_turn_var
+                        duct_turn_list[1] = std
                         if std > hstd:
                             hstd = std
                             if not bool_changed_hstd:
