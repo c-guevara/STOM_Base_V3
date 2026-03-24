@@ -7,6 +7,7 @@ import sqlite3
 import pyttsx3
 import numpy as np
 import pandas as pd
+from threading import Lock
 from copy import deepcopy
 from traceback import format_exc
 from trade.formula_manager import FormulaManager, get_formula_data
@@ -57,6 +58,7 @@ class ChartHogaQuerySound:
         self.text2speak = pyttsx3.init()
         self.text2speak.setProperty('rate', 170)
         self.text2speak.setProperty('volume', 1.0)
+        self.tts_lock = Lock()
 
         self.con1 = sqlite3.connect(DB_SETTING)
         self.cur1 = self.con1.cursor()
@@ -1028,5 +1030,6 @@ class ChartHogaQuerySound:
 
     @thread_decorator
     def TextToSpeak(self, data):
-        self.text2speak.say(data)
-        self.text2speak.runAndWait()
+        with self.tts_lock:
+            self.text2speak.say(data)
+            self.text2speak.runAndWait()
