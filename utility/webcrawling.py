@@ -48,18 +48,20 @@ class WebCrawling:
         hometap_crawling_time = timedelta_sec(30)
         while True:
             try:
-                try:
-                    data = self.webcQ.get(timeout=1)
+                if not self.webcQ.empty():
+                    data = self.webcQ.get()
                     self.Crawling(data)
-                except queue.Empty:
-                    pass
+
                 if now() > hometap_crawling_time:
                     self.thread_join = 0
                     self.CrawlingAllData()
                     hometap_crawling_time = timedelta_sec(30)
+
                 if self.thread_join == 16:
                     self.thread_join = 0
                     self.windowQ.put((ui_num['홈차트'], self.dict_data))
+
+                time.sleep(0.01)
             except:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
