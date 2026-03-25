@@ -43,7 +43,6 @@ class WebCrawling:
         self.MainLoop()
 
     def MainLoop(self):
-        self.thread_join = 0
         self.CrawlingAllData()
         hometap_crawling_time = timedelta_sec(30)
         while True:
@@ -53,7 +52,6 @@ class WebCrawling:
                     self.Crawling(data)
 
                 if now() > hometap_crawling_time:
-                    self.thread_join = 0
                     self.CrawlingAllData()
                     hometap_crawling_time = timedelta_sec(30)
 
