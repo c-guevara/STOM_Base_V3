@@ -658,7 +658,7 @@ def GetKiwoomPgSgSp(bg, cg):
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
     pg = int(cg - texs - bfee - sfee)
-    sg = int(round(pg - bg))
+    sg = int(pg - bg + 0.5)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
@@ -666,8 +666,8 @@ def GetKiwoomPgSgSp(bg, cg):
 def GetUpbitPgSgSp(bg, cg):
     bfee = bg * 0.0005
     sfee = cg * 0.0005
-    pg = int(round(cg - bfee - sfee))
-    sg = int(round(pg - bg))
+    pg = int(cg - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
