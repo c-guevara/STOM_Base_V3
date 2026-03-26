@@ -7,7 +7,6 @@ from copy import deepcopy
 from traceback import format_exc
 from trade.strategy_base import StrategyBase
 from trade.formula_manager import get_formula_data
-from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_COIN_TICK, DB_COIN_MIN, indicator, \
     list_coin_tick, list_coin_min
 from utility.static import now, now_utc, GetBinanceShortPgSgSp, dt_ymdhms, get_buy_indi_stg, GetBinanceLongPgSgSp, \
@@ -87,13 +86,14 @@ class BinanceStrategyTick(StrategyBase):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = MicrostructureAnalyzer('coin')
-
         # microstructure_analyzer numba 함수 워밍업
         from trade.microstructure_analyzer import nb_calculate_returns, nb_calculate_sharpe_ratio, nb_calculate_max_drawdown
         _ = nb_calculate_returns(np.array([100., 101., 102.]))
         _ = nb_calculate_sharpe_ratio(np.array([0.01, -0.005, 0.02]), True)
         _ = nb_calculate_max_drawdown(np.array([100., 110., 105., 95., 100.]))
+
+        from trade.microstructure_analyzer import MicrostructureAnalyzer
+        self.ms_analyzer = MicrostructureAnalyzer('coin')
 
         set_builtin_print(True, self.windowQ)
         self.SetFormulaData()
