@@ -13,7 +13,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utility.setting_base import OPENAPI_PATH, ui_num, DB_STOCK_TICK, DB_STOCK_MIN
 from utility.static import now, qtest_qwait, str_ymd, str_hms, timedelta_sec, str_ymdhms, roundfigure_upper5, \
-    GetSangHahanga, GetVIPrice
+    GetSangHahanga, GetVIPrice, get_profile_text
 
 sn_brrq = 1000
 sn_brrd = 1001
@@ -988,9 +988,7 @@ class KiwoomAgentTick:
         elif gubun == '수동데이터저장':
             self.ProcessKill()
         elif gubun == '프로파일링결과':
-            from utility.profile_utils import extract_profile_text
-            profile_text = extract_profile_text(self.pr, limit=50)
-            self.mgzservQ.put(('window', (ui_num['시스템로그'], profile_text)))
+            self.mgzservQ.put(('window', (ui_num['시스템로그'], get_profile_text(self.pr))))
 
     def Block_Request(self, *args, **kwargs):
         trcode = args[0].lower()
