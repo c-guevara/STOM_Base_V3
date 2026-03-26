@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from trade.formula_manager import get_formula_data
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from trade.strategy_base import StrategyBase
+from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_STOCK_TICK, DB_STOCK_MIN, indicator, \
     list_stock_tick, list_stock_min

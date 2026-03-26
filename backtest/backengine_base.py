@@ -6,6 +6,7 @@ from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.strategy_base import StrategyBase
 from trade.formula_manager import get_formula_data
+from trade.microstructure_analyzer import MicrostructureAnalyzer
 from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
     get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
 from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK_MIN_BACK, indicator, \
@@ -97,11 +98,6 @@ class BackEngineBase(StrategyBase):
         self.opti_kind       = 0
         self.sell_count      = 0
 
-        from trade.microstructure_analyzer import nb_calculate_returns, nb_calculate_sharpe_ratio, nb_calculate_max_drawdown
-        _ = nb_calculate_returns(np.array([100., 101., 102.]))
-        _ = nb_calculate_sharpe_ratio(np.array([0.01, -0.005, 0.02]), True)
-        _ = nb_calculate_max_drawdown(np.array([100., 110., 105., 95., 100.]))
-
         set_builtin_print(True, self.wq)
         self.UpdateMarketGubun()
         self.MainLoop()
@@ -116,11 +112,10 @@ class BackEngineBase(StrategyBase):
         self.set_dict_cond = self.dict_set[f'{self.market_text}경과틱수설정']
         self.set_weight    = self.dict_set[f'{self.market_text}비중조절']
         self.sma_list      = get_ema_list(self.is_tick)
+
         if self.market_gubun == 1:   gubun = 'stock'
         elif self.market_gubun == 2: gubun = 'future'
         else:                        gubun = 'coin'
-
-        from trade.microstructure_analyzer import MicrostructureAnalyzer
         self.ms_analyzer = MicrostructureAnalyzer(gubun)
 
         if self.market_gubun == 1:

@@ -12,13 +12,17 @@ def set_builtin_print(bit64, q):
             processed_args = []
             for arg in args:
                 if callable(arg):
-                    result = arg()
-                    processed_args.append(str(result))
+                    processed_args.append(str(arg()))
                 else:
                     processed_args.append(str(arg))
             message = sep.join(processed_args)
             message = message.lstrip()
             message = message.rstrip()
+
+            # numba 컴파일 로그 필터링
+            if 'microstructure_analyzer.py' in message:
+                return
+
             if bit64:
                 q.put((ui_num['시스템로그'], message))
             else:
