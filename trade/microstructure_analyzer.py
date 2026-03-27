@@ -73,8 +73,6 @@ try:
             return np.empty((0, 6), dtype=np.float64)
 
         prev_n = n_rows - 1
-
-        # 변경 감지 카운트 먼저
         change_count = 0
         max_change_ratio = 0.0
 
@@ -106,8 +104,8 @@ try:
             return np.empty((0, 6), dtype=np.float64)
 
         # 결과 배열 생성
-        result = np.empty((change_count, 6), dtype=np.float64)
         idx = 0
+        result = np.empty((change_count, 6), dtype=np.float64)
 
         for row in range(prev_n):
             for col in range(n_cols):
@@ -192,9 +190,9 @@ try:
             return np.empty((0, 6), dtype=np.float64)
 
         # 최대 20개 결과 저장 가능
+        result_count = 0
         max_results = 20
         results = np.empty((max_results, 6), dtype=np.float64)
-        result_count = 0
 
         for level in range(n_cols):
             # 소진 패턴 탐지
@@ -277,9 +275,9 @@ try:
         avg_volume = avg_volume / (n - 1) + 1e-8
 
         # 최대 50개 결과 저장
+        result_count = 0
         max_results = 50
         results = np.empty((max_results, 6), dtype=np.float64)
-        result_count = 0
 
         for i in range(3, n - 4):
             # 가격 변화율
@@ -341,9 +339,9 @@ try:
         avg_volume = avg_volume / (n - 1) + 1e-8
 
         # 최대 30개 결과 저장
+        result_count = 0
         max_results = 30
         results = np.empty((max_results, 3), dtype=np.float64)
-        result_count = 0
 
         for i in range(len(ma_prices) - 1):
             price_change = (ma_prices[i + 1] - ma_prices[i]) / (ma_prices[i] + 1e-10) * 100.0
@@ -870,7 +868,6 @@ class MicrostructureAnalyzer:
         # 상수 캐싱 (반복 생성 회피)
         self._depth_weights = np.array([0.35, 0.25, 0.20, 0.12, 0.08])  # 1~5단계 가중치
         self._log_depth_ratio_threshold = np.log(self.params['depth_ratio_threshold'])
-        self._depth_weights_reshaped = self._depth_weights.reshape(1, 5)  # 브로드캐스팅용
 
     def _setup_parameters(self):
         """
@@ -1037,6 +1034,7 @@ class MicrostructureAnalyzer:
 
         # HistoryBuffer에서 imbalance 배열 직접 가져와 트렌드 계산
         imbalances = hist_buffer.get_imbalance_array()[-self.history_cnt:]
+
         # 단순 선형 추정: (후반부 평균 - 전반부 평균) / (구간 길이 / 2)
         half = self.history_cnt // 2
         first_half_avg  = np.mean(imbalances[:half])
@@ -1117,7 +1115,6 @@ class MicrostructureAnalyzer:
             if qtys.shape[0] < 3:
                 continue
 
-            # Numba JIT 함수 호출 (C급 성능)
             suspicious_levels_arr = _calc_analyze_price_levels(qtys, multiplier, min_occurrences)
             large_order_changes_arr = _calc_detect_large_order_changes(qtys, prices, threshold)
 
@@ -1128,7 +1125,7 @@ class MicrostructureAnalyzer:
             if not has_suspicious and not has_changes:
                 continue
 
-            # confidence 계산 (Numba JIT)
+            # confidence 계산
             if has_suspicious and has_changes:
                 layering_conf = _calc_layering_confidence(suspicious_levels_arr)
                 spoofing_conf = _calc_spoofing_confidence(large_order_changes_arr)
@@ -1164,7 +1161,6 @@ class MicrostructureAnalyzer:
         vol_threshold = self.params['volume_spike_threshold']
         window = 5
 
-        # Numba JIT 함수 호출
         results = _calc_detect_pump_dump(prices, volumes, price_threshold, vol_threshold, window)
 
         # 결과 변환
@@ -1200,21 +1196,13 @@ class MicrostructureAnalyzer:
             return []
 
         iceberg_signals = []
-
-        # Numba 함수용 파라미터
-        depletion_threshold = 0.3
-        price_stable_threshold = 0.01
-        min_pattern_count = 3
-
         # 매도/매수 각각 Numba 함수 호출
         for side_idx, (qtys, prices) in enumerate([(ask_qtys, ask_prices), (bid_qtys, bid_prices)]):
             if qtys.shape[0] < 5:
                 continue
 
             side = 'ask' if side_idx == 0 else 'bid'
-
-            # Numba JIT 함수 호출
-            results = _calc_detect_iceberg(qtys, prices, depletion_threshold, price_stable_threshold, min_pattern_count)
+            results = _calc_detect_iceberg(qtys, prices, 0.3, 0.01, 3)
 
             # 결과 변환 (side 정보 추가)
             for i in range(results.shape[0]):
@@ -1240,10 +1228,7 @@ class MicrostructureAnalyzer:
         if n < 20:
             return []
 
-        # Numba JIT 함수 호출
-        price_threshold = 0.5
-        vol_threshold = 2.5
-        results = _calc_detect_stop_hunt(prices, volumes, price_threshold, vol_threshold)
+        results = _calc_detect_stop_hunt(prices, volumes, 0.5, 2.5)
 
         # 결과 변환
         stop_hunt_signals = []
@@ -1304,7 +1289,6 @@ class MicrostructureAnalyzer:
         if n < 10:
             return {'pattern': 'insufficient_data', 'volatility': 0, 'trend': 0}
 
-        # Numba JIT 함수 호출
         results = _calc_analyze_volume_pattern(volumes)
 
         mean_vol = float(results[0])
