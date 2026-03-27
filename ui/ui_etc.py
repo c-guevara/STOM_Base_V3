@@ -65,6 +65,7 @@ def auto_back_schedule(ui, gubun):
 
 @error_decorator
 def update_dictset(ui):
+    ui.teleQ.put(('설정변경', ui.dict_set))
     ui.wdzservQ.put(('manager', ('설정변경', ui.dict_set)))
     if ui.CoinReceiverProcessAlive(): ui.creceivQ.put(('설정변경', ui.dict_set))
     if ui.CoinTraderProcessAlive():   ui.ctraderQ.put(('설정변경', ui.dict_set))
