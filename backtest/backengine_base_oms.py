@@ -129,8 +129,10 @@ class BackEngineBaseOms(BackEngineBase):
                 비중조절기준 = self._거래대금평균대비비율(30)
             elif self.set_weight[0] == 3:
                 비중조절기준 = self._등락율각도(30)
-            else:
+            elif self.set_weight[0] == 4:
                 비중조절기준 = self._당일거래대금각도(30)
+            else:
+                비중조절기준 = self.비중조절기준
 
             if 비중조절기준 < self.set_weight[1]:
                 betting = self.betting * self.set_weight[5]

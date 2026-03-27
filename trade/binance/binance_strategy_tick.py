@@ -59,6 +59,7 @@ class BinanceStrategyTick(StrategyBase):
 
         self.jgrv_count       = 0
         self.int_tujagm       = 0
+        self.비중조절기준        = 0
 
         self.market_gubun     = 4
         self.ma_round_unit    = 8
@@ -503,8 +504,10 @@ class BinanceStrategyTick(StrategyBase):
                 비중조절기준 = self._거래대금평균대비비율(30)
             elif self.dict_set['코인비중조절'][0] == 3:
                 비중조절기준 = self._등락율각도(30)
-            else:
+            elif self.dict_set['코인비중조절'][0] == 4:
                 비중조절기준 = self._당일거래대금각도(30)
+            else:
+                비중조절기준 = self.비중조절기준
 
             if 비중조절기준 < self.dict_set['코인비중조절'][1]:
                 betting = self.int_tujagm * self.dict_set['코인비중조절'][5]
