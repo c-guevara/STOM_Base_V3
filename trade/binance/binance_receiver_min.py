@@ -124,7 +124,7 @@ class BinanceReceiverMin(BinanceReceiverTick):
                 self.dict_dtdm[code] = [dt_min, 0]
                 code_dtdm = self.dict_dtdm[code]
 
-            if send or code == self.chart_code:
+            if send or (code in self.dict_data and (code == self.chart_code or code in self.list_gsjm)):
                 c, _, h, low, _, dm, _, bids, asks = code_data[:9]
                 csp = cbp = c
 

@@ -77,7 +77,7 @@ class FutureAgentMin(FutureAgentTick):
                 self.dict_dtdm[code] = [dt_min, 0]
                 code_dtdm = self.dict_dtdm[code]
 
-            if send or code == self.chart_code:
+            if send or (code in self.dict_data and (code == self.chart_code or code in self.list_gsjm)):
                 csp, cbp = self.dict_hgbs[code]
 
                 if hoga_seprice[-1] < csp:
