@@ -312,8 +312,8 @@ class BackTest:
                 is_tick = False
 
         con   = sqlite3.connect(db)
-        query, params = GetMoneytopQuery(is_tick, self.ui_gubun, startday, endday, starttime, endtime)
-        df_mt = pd.read_sql(query, con, params=params)
+        query = GetMoneytopQuery(is_tick, self.ui_gubun, startday, endday, starttime, endtime)
+        df_mt = pd.read_sql(query, con)
         con.close()
 
         if len(df_mt) == 0 or back_count == 0:

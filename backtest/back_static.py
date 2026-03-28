@@ -69,12 +69,7 @@ def get_trade_info(gubun):
 
 
 def GetBackloadCodeQuery(is_tick, code, days, starttime, endtime):
-    # 파라미터화된 쿼리로 개선
-    if not days:
-        return f"SELECT * FROM '{code}' WHERE 1=0"
-
-    # 각 일자에 대한 시작/종료 인덱스 계산
-    index_ranges = []
+    conditions = []
     for day in days:
         if is_tick:
             sindex = day * 1000000 + starttime
@@ -82,17 +77,13 @@ def GetBackloadCodeQuery(is_tick, code, days, starttime, endtime):
         else:
             sindex = day * 10000 + int(starttime / 100)
             eindex = day * 10000 + int(endtime / 100)
-        index_ranges.extend([sindex, eindex])
-
-    # WHERE IN 절을 사용한 파라미터화된 쿼리 생성
-    placeholders = ','.join(['(? AND ?)'] * len(days))
-    query = f"SELECT * FROM '{code}' WHERE {placeholders}"
-
-    return query, tuple(index_ranges)
+        conditions.append(f"(`index` >= {sindex} AND `index` <= {eindex})")
+    where_clause = " OR ".join(conditions)
+    query = f"SELECT * FROM '{code}' WHERE {where_clause}"
+    return query
 
 
 def GetMoneytopQuery(is_tick, gubun, startday, endday, starttime, endtime):
-    # 파라미터화된 쿼리로 개선
     if is_tick:
         if gubun == 'S' and starttime < 90030:
             sindex = startday * 1000000 + 90030
@@ -103,9 +94,8 @@ def GetMoneytopQuery(is_tick, gubun, startday, endday, starttime, endtime):
     else:
         sindex = startday * 10000 + int(starttime / 100)
         eindex = endday * 10000 + int(endtime / 100)
-    
-    query = "SELECT * FROM moneytop WHERE `index` >= ? AND `index` <= ?"
-    return query, (sindex, eindex)
+    query = f"SELECT * FROM moneytop WHERE `index` >= {sindex} AND `index` <= {eindex}"
+    return query
 
 
 def GetBuyStg(buytxt, gubun, wq):
