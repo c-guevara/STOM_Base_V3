@@ -179,8 +179,8 @@ def backengine_start(ui, gubun):
             ui.dict_cn = df_info['종목명'].to_dict()
 
         gubun_ = 'S' if gubun == '주식' else 'X'
-        query = GetMoneytopQuery(is_tick, gubun_, ui.startday, ui.endday, ui.starttime, ui.endtime)
-        df_mt = pd.read_sql(query, con)
+        query, params = GetMoneytopQuery(is_tick, gubun_, ui.startday, ui.endday, ui.starttime, ui.endtime)
+        df_mt = pd.read_sql(query, con, params=params)
         if is_tick:
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
