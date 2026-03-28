@@ -44,9 +44,6 @@ class DrawDBChart(DrawChartBase):
         self.hms = from_timestamp(self.xmax).strftime('%H:%M' if self.is_min else '%H:%M:%S')
         self.same_time = False
 
-        self.update_factor_list()
-        self.update_dict_idxs()
-        self.update_ctpg_date()
         self.draw_all_chart()
 
         if self.gubun == 'S':

@@ -2,6 +2,7 @@
 import sys
 import pyqtgraph as pg
 from traceback import format_exc
+from PyQt5.QtGui import QPen
 from PyQt5.QtCore import Qt, QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEvent
 from PyQt5.QtWidgets import QPushButton, QFrame, QTextEdit, QComboBox, QCheckBox, QLineEdit, QDateEdit, QProgressBar, \
     QDialog, QTableWidget, QAbstractItemView, QGroupBox, QMessageBox, QTableWidgetItem
@@ -11,7 +12,7 @@ from utility.setting_base import columns_nt, columns_td, columns_jg, columns_cj,
     columns_kp, columns_sd, columns_hc2, columns_bt
 from ui.set_style import qfont12, style_bc_bt, style_bc_st, style_bc_sl, style_bc_bs, style_bc_by, style_fc_dk, \
     style_bc_bb, style_bc_dk, style_st_cf, style_st_sf, style_st_mf, style_st_sp, style_st_ct, style_st_ks, style_st_ss, \
-    style_st_su, color_gb_nm, color_gb_hv
+    style_st_su, color_gb_nm, color_gb_hv, color_bf_dk
 
 
 def error_decorator(func):
@@ -730,6 +731,9 @@ class WidgetCreater:
         subplot.showAxis('left', False)
         subplot.showAxis('right', True)
         subplot.getAxis('right').setStyle(tickTextWidth=45, autoExpandTextSpace=False)
+        transparent_pen = QPen(color_bf_dk)
+        subplot.getAxis('right').setPen(transparent_pen)
+        subplot.getAxis('bottom').setPen(transparent_pen)
         subplot.getAxis('right').setTickFont(qfont12)
         subplot.getAxis('bottom').setTickFont(qfont12)
         subplot.enableAutoRange(False, False)

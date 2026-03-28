@@ -190,7 +190,7 @@ def checkbox_changed_17(ui, state):
 # noinspection PyUnusedLocal
 @error_decorator
 def checkbox_changed_18(ui, state):
-    ui.ctpg_name = None
+    ui.ctpg_code = None
 
 
 @error_decorator

@@ -78,17 +78,16 @@ def update_dictset(ui):
 
 @error_decorator
 def chart_clear(ui):
-    ui.ctpg_name             = None
-    ui.ctpg_cline            = None
-    ui.ctpg_hline            = None
-    ui.ctpg_xticks           = None
-    ui.ctpg_arry             = None
-    ui.ctpg_last_xtick       = None
-    ui.ctpg_legend           = {}
-    ui.ctpg_item             = {}
-    ui.ctpg_data             = {}
-    ui.ctpg_factors          = []
-    ui.ctpg_labels           = []
+    ui.ctpg_code    = None
+    ui.ctpg_cline   = None
+    ui.ctpg_hline   = None
+    ui.ctpg_xticks  = None
+    ui.ctpg_arry    = None
+    ui.ctpg_legend  = {}
+    ui.ctpg_item    = {}
+    ui.ctpg_data    = {}
+    ui.ctpg_factors = []
+    ui.ctpg_labels  = []
 
 
 @error_decorator

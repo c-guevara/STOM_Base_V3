@@ -413,14 +413,14 @@ class UpdateTablewidget:
             if is_min:
                 if gubun == ui_num['S호가종목'] and '키움증권' in self.ui.dict_set['증권사']:
                     return self.ui.dict_findex_stock_min2[fname]
-                elif 'KRW' in self.ui.ctpg_name:
+                elif 'KRW' in self.ui.ctpg_code:
                     return self.ui.dict_findex_coin_min2[fname]
                 else:
                     return self.ui.dict_findex_future_min2[fname]
             else:
                 if gubun == ui_num['S호가종목'] and '키움증권' in self.ui.dict_set['증권사']:
                     return self.ui.dict_findex_stock_tick2[fname]
-                elif 'KRW' in self.ui.ctpg_name:
+                elif 'KRW' in self.ui.ctpg_code:
                     return self.ui.dict_findex_coin_tick2[fname]
                 else:
                     return self.ui.dict_findex_future_tick2[fname]
@@ -525,5 +525,5 @@ class UpdateTablewidget:
         self.ui.windowQ.put((ui_num[f'{gubun_}호가체결2'], df2))
 
         for i in range(len(self.ui.ctpg_legend)):
-            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, False, gubun_, self.ui.ctpg_name, is_min, xpoint, self.ui.ctpg_factors[i], hms_text))
+            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, False, gubun_, self.ui.ctpg_code, is_min, xpoint, self.ui.ctpg_factors[i], hms_text))
             self.ui.ctpg_labels[i].setText('')
