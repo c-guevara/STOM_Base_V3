@@ -487,32 +487,36 @@ class BackEngineBase(StrategyBase):
         code = shared_info['code']
         if self.dict_set['백테일괄로딩']:
             shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
-            self.arry_code = np.ndarray(
+            arry_code = np.ndarray(
                 shared_info['shape'],
                 dtype=shared_info['dtype'],
                 buffer=shm.buf[shared_info['offset']:shared_info['offset'] + shared_info['size']]
             ).copy()
             shm.close()
         else:
-            self.arry_code = pickle_read(shared_info['file_name'])
+            arry_code = pickle_read(shared_info['file_name'])
 
         if self.same_days and self.same_time:
             pass
         elif self.same_time:
-            self.arry_code = self.arry_code[(self.arry_code[:, 0] >= self.startday * self.unit) &
-                                            (self.arry_code[:, 0] <= self.endday * self.unit + self.hour)]
+            indices = arry_code[:, 0]
+            arry_code = arry_code[(indices >= self.startday * self.unit) &
+                                  (indices <= self.endday * self.unit + self.hour)]
         elif self.same_days:
-            self.arry_code = self.arry_code[(self.arry_code[:, 0] % self.unit >= self.starttime) &
-                                            (self.arry_code[:, 0] % self.unit <= self.endtime)]
+            indices = arry_code[:, 0]
+            arry_code = arry_code[(indices % self.unit >= self.starttime) &
+                                  (indices % self.unit <= self.endtime)]
         else:
-            self.arry_code = self.arry_code[(self.arry_code[:, 0] >= self.startday * self.unit) &
-                                            (self.arry_code[:, 0] <= self.endday * self.unit + self.hour) &
-                                            (self.arry_code[:, 0] % self.unit >= self.starttime) &
-                                            (self.arry_code[:, 0] % self.unit <= self.endtime)]
+            indices = arry_code[:, 0]
+            arry_code = arry_code[(indices >= self.startday * self.unit) &
+                                  (indices <= self.endday * self.unit + self.hour) &
+                                  (indices % self.unit >= self.starttime) &
+                                  (indices % self.unit <= self.endtime)]
 
         if self.fm_tcnt > 0:
-            self.arry_code = np.column_stack((self.arry_code, np.zeros((self.arry_code.shape[0], self.fm_tcnt))))
+            arry_code = np.column_stack((arry_code, np.zeros((self.arry_code.shape[0], self.fm_tcnt))))
 
+        self.arry_code = arry_code
         return code
 
     def UpdateFormulaData(self):
