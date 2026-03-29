@@ -717,48 +717,6 @@ class HistoryBuffer:
         return self.count
 
 
-class DataBuffer:
-    """numpy 기반 고정 크기 링 버퍼"""
-
-    __slots__ = ['data', 'ptr', 'count', 'maxlen', 'n_cols']
-
-    def __init__(self, maxlen: int, n_cols: int):
-        self.maxlen = maxlen
-        self.n_cols = n_cols
-        self.data = np.zeros((maxlen, n_cols), dtype=np.float64)
-        self.ptr = 0    # 다음 쓰기 위치
-        self.count = 0  # 실제 데이터 개수
-
-    def append(self, value: np.ndarray):
-        """데이터 추가 (링 버퍼)"""
-        self.data[self.ptr] = value
-        self.ptr = (self.ptr + 1) % self.maxlen
-        if self.count < self.maxlen:
-            self.count += 1
-
-    def get_recent(self, n: int) -> np.ndarray:
-        """최근 n개 데이터 뷰 반환 (복사 없음)"""
-        if n > self.count:
-            n = self.count
-
-        # 순환 래핑 고려하여 최근 데이터 위치 계산
-        start = (self.ptr - n) % self.maxlen
-        end = (self.ptr - 1) % self.maxlen
-
-        if start <= end:
-            return self.data[start:end+1]
-        else:
-            # 순환 래핑 경우: 두 구간 합침
-            return np.concatenate([self.data[start:], self.data[:end+1]], axis=0)
-
-    def get_all(self) -> np.ndarray:
-        """모든 데이터 반환 (최신순)"""
-        return self.get_recent(self.count)
-
-    def __len__(self) -> int:
-        return self.count
-
-
 class MicrostructureAnalyzer:
     def __init__(self, market_type: str, data_cnt: int = 1800, history_cnt: int = 30):
         """
@@ -783,8 +741,7 @@ class MicrostructureAnalyzer:
         # 칼럼 설정
         self._setup_columns()
 
-        # 종목코드별 데이터 저장소 (Ring Buffer로 변경)
-        self.data_buffers: Dict[str, DataBuffer] = {}
+        # 분석 히스토리 버퍼
         self.data_history: Dict[str, HistoryBuffer] = {}
 
         # 상수 캐싱 (반복 생성 회피)
@@ -858,65 +815,49 @@ class MicrostructureAnalyzer:
 
     def update_data(self, code: str, tick_data: np.ndarray):
         """
-        데이터 전처리, 시장구조분석
+        데이터 전처리 및 시장구조분석
 
         Args:
             code: 종목코드
-            tick_data: 1차원 numpy 배열 (실시간 데이터)
+            tick_data: 2차원 numpy 배열 (shape: [n_ticks, n_features])
         """
-        # 종목코드별 Ring Buffer 생성 (최초 접근 시)
-        if code not in self.data_buffers:
-            self.data_buffers[code] = DataBuffer(self.data_cnt, len(tick_data))
-        
-        # Ring Buffer에 실시간 데이터 추가
-        self.data_buffers[code].append(tick_data)
+        self._calculate_processed_data(code, tick_data)
 
-        # 데이터 전처리, 시장구조분석
-        self._calculate_processed_data(code)
-
-    def get_signal(self, code: str, buy_cf: float, sell_cf: float) -> Tuple[str, float, float]:
+    def get_signal(self, buy_cf: float, sell_cf: float) -> Tuple[str, float, float]:
         """
         리스크분석, 신호 생성
 
         Args:
-            code: 종목코드
             buy_cf: 매수 신호 생성용 계수
             sell_cf: 매도 신호 생성용 계수
 
         Returns:
             Tuple[str, float, float]: (신호타입, 신뢰도, 리스크)
         """
-        # 리스크분석
-        total_risk = self._analyze_risk(code)
-        # 시그널 및 신뢰도 계산
+        total_risk = self._analyze_risk()
         signal, confidence = self._analyze_signal(buy_cf, sell_cf)
         return signal, confidence, total_risk
 
-    def _calculate_processed_data(self, code: str):
+    def _calculate_processed_data(self, code: str, tick_data: np.ndarray):
         """
-        데이터 전처리, 시장구조분석 (Ring Buffer 최적화 버전)
+        데이터 전처리, 시장구조분석 (2차원 배열 바로 처리 버전)
 
         Args:
             code: 종목코드
+            tick_data: 2차원 numpy 배열 (shape: [n_ticks, n_features])
         """
-        ring_buffer = self.data_buffers[code]
-        if len(ring_buffer) < self.history_cnt:
+        if len(tick_data) < self.history_cnt:
             return
 
-        # Ring Buffer에서 최근 데이터 뷰 가져오기 (복사 없음)
-        recent_data = ring_buffer.get_recent(self.history_cnt)
-        curr_price  = recent_data[-1, self.idx_curr_price]
-
-        # 거래량 관련 계산 (캐싱된 인덱스 사용)
+        recent_data  = tick_data[-self.history_cnt:]
+        curr_price   = recent_data[-1, self.idx_curr_price]
         buy_volume   = recent_data[-1, self.idx_buy_vol]
         sell_volume  = recent_data[-1, self.idx_sell_vol]
         total_volume = buy_volume + sell_volume
-
-        # 마지막 호가 데이터 추출 (5단계 호가) - 캐싱된 인덱스 사용
-        ask_prices = [recent_data[-1, idx] for idx in self.idx_ask_price]
-        ask_qtys   = [recent_data[-1, idx] for idx in self.idx_ask_qty]
-        bid_prices = [recent_data[-1, idx] for idx in self.idx_bid_price]
-        bid_qtys   = [recent_data[-1, idx] for idx in self.idx_bid_qty]
+        ask_prices   = [recent_data[-1, idx] for idx in self.idx_ask_price]
+        ask_qtys     = [recent_data[-1, idx] for idx in self.idx_ask_qty]
+        bid_prices   = [recent_data[-1, idx] for idx in self.idx_bid_price]
+        bid_qtys     = [recent_data[-1, idx] for idx in self.idx_bid_qty]
 
         # 깊이 비율, 불균형, VWAP 계산
         total_ask_qty = sum(ask_qtys)
@@ -926,13 +867,13 @@ class MicrostructureAnalyzer:
         imbalance     = (total_bid_qty - total_ask_qty) / total_qty if total_qty > 0 else 0.0
 
         # 깊이별 가중치 계산 (벡터화 연산)
-        ask_qtys_array = np.array(ask_qtys)
-        bid_qtys_array = np.array(bid_qtys)
+        ask_qtys_array   = np.array(ask_qtys)
+        bid_qtys_array   = np.array(bid_qtys)
         weighted_ask_qty = np.dot(ask_qtys_array, self._depth_weights)
         weighted_bid_qty = np.dot(bid_qtys_array, self._depth_weights)
         weighted_depth_ratio = weighted_bid_qty / weighted_ask_qty if weighted_ask_qty > 0 else 1
 
-        # 히스토리 데이터 저장 (DataHistoryBuffer 사용)
+        # 히스토리 데이터 저장
         if code not in self.data_history:
             self.data_history[code] = HistoryBuffer(self.history_cnt)
         
@@ -971,11 +912,11 @@ class MicrostructureAnalyzer:
         pressure_level      = (imbalance + concentration_score) / 2
 
         # 각종 조작 패턴 감지 (HistoryBuffer 직접 사용)
-        layering     = self._detect_layering(hist_buffer)                      # 레이어링 감지
-        pump_dump    = self._detect_pump_dump(hist_buffer)                      # 펌프앤덤프 감지
-        iceberg      = self._detect_iceberg(hist_buffer)                        # 아이스버그 감지
-        stop_hunt    = self._detect_stop_hunt(hist_buffer)                      # 스탑헌트 감지
-        overall_risk = self._calculate_overall_risk(layering, pump_dump, iceberg, stop_hunt)  # 리스크 평가
+        layering     = self._detect_layering(hist_buffer)                                       # 레이어링 감지
+        pump_dump    = self._detect_pump_dump(hist_buffer)                                      # 펌프앤덤프 감지
+        iceberg      = self._detect_iceberg(hist_buffer)                                        # 아이스버그 감지
+        stop_hunt    = self._detect_stop_hunt(hist_buffer)                                      # 스탑헌트 감지
+        overall_risk = self._calculate_overall_risk(layering, pump_dump, iceberg, stop_hunt)    # 리스크 평가
 
         # 최신 데이터 저장 (전략 클래스들에서 참조)
         self.curr_data = {
@@ -1195,7 +1136,7 @@ class MicrostructureAnalyzer:
             'stop_hunt_count': len(stop_hunt_signals)
         }
 
-    def _analyze_risk(self, code: str):
+    def _analyze_risk(self):
         """리스크 분석"""
         if self.curr_data is None:
             return 1.0
@@ -1207,8 +1148,7 @@ class MicrostructureAnalyzer:
         market_risk = self._calculate_market_risk()                     # 시장 리스크
         manipulation_risk = self._calculate_manipulation_risk()         # 조작 리스크
         liquidity_risk = self._calculate_liquidity_risk()               # 유동성 리스크
-        price_risk = self._calculate_price_risk(code)                   # 가격 기반 리스크 (VaR 등)
-        total_risk = round((market_risk + manipulation_risk + liquidity_risk + price_risk) / 4, 2)
+        total_risk = round((market_risk + manipulation_risk + liquidity_risk) / 3, 2)
 
         self.curr_data['total_risk'] = total_risk
 
@@ -1281,102 +1221,6 @@ class MicrostructureAnalyzer:
         concentration_risk = min(avg_concentration / self.params['concentration_threshold'], 1.0)
 
         return (depth_risk + concentration_risk) / 2
-
-    def _calculate_price_risk(self, code: str) -> float:
-        """
-        가격 기반 리스크 계산 (VaR, Sharpe Ratio, Max Drawdown) - 캐싱 적용
-        """
-        # Ring Buffer에서 모든 데이터 가져오기
-        ring_buffer = self.data_buffers.get(code)
-        if ring_buffer is None or len(ring_buffer) < 2:
-            return 0.3
-        
-        n = len(ring_buffer)
-        
-        # 캐시 키: 버퍼 길이 (데이터가 추가되었을 때만 재계산)
-        cache_key = f"price_risk_{code}_{n}"
-        if cache_key in self._price_risk_cache:
-            return self._price_risk_cache[cache_key]
-
-        prices = ring_buffer.get_all()[:, self.idx_curr_price]
-
-        # 수익률 계산
-        returns = self._calculate_returns(prices)
-        if len(returns) == 0:
-            return 0.3
-
-        # VaR 계산 (95% 신뢰수준)
-        var_95 = self._calculate_var_historical(returns, 0.95)
-        # Sharpe Ratio 계산
-        sharpe_ratio = self._calculate_sharpe_ratio(returns)
-        # Max Drawdown 계산
-        max_dd, _, _ = self._calculate_max_drawdown(prices)
-        # 각 지표를 0-1 스케일로 정규화하여 리스크 점수 계산
-        # noinspection PyTypeChecker
-        var_risk = min(var_95 / 0.05, 1.0)
-        sharpe_risk = max(0, min(1, (2 - sharpe_ratio) / 4))
-        # noinspection PyTypeChecker
-        dd_risk = min(max_dd / 0.2, 1.0)
-        # 세 가지 리스크 지표의 평균
-        price_risk = (var_risk + sharpe_risk + dd_risk) / 3
-        
-        # 캐싱
-        self._price_risk_cache[cache_key] = price_risk
-
-        return price_risk
-
-    def _calculate_returns(self, prices: np.ndarray) -> np.ndarray:
-        """가격 데이터로부터 수익률 계산 (numpy 기반)"""
-        if len(prices) < 2:
-            return np.array([])
-        return np.diff(prices) / prices[:-1]
-
-    def _calculate_var_historical(self, returns: np.ndarray, confidence: float = 0.95):
-        """
-        VaR 계산 (최적화 버전)
-        np.percentile 대신 np.partition 사용하여 정렬 오버헤드 감소
-        """
-        if len(returns) == 0:
-            return 0.0
-        
-        # percentile 대신 partition 사용 (부분 정렬로 더 빠름)
-        k = int((1 - confidence) * len(returns))
-        if k == 0:
-            k = 1
-        
-        # k-1번째 작은 값을 찾음 (partition은 k번째가 아닌 k-1 인덱스)
-        partitioned = np.partition(returns, k - 1)
-        var_value = partitioned[k - 1]
-        return -var_value
-
-    def _calculate_sharpe_ratio(self, returns: np.ndarray, annualize: bool = True):
-        """Sharpe Ratio 계산"""
-        if len(returns) == 0:
-            return 0.0
-        mean_return = np.mean(returns)
-        std_return = np.std(returns, ddof=1) if len(returns) > 1 else 0.0
-        if std_return == 0:
-            return 0.0
-        # noinspection PyTypeChecker
-        sharpe = (mean_return - 0.02 / 250) / std_return
-        if annualize:
-            sharpe *= np.sqrt(250)
-        return sharpe
-
-    def _calculate_max_drawdown(self, prices: np.ndarray):
-        """최대낙폭 계산"""
-        if len(prices) == 0:
-            return 0.0, 0, 0
-        # 누적 최대값 계산 (벡터화)
-        cummax = np.maximum.accumulate(prices)
-        drawdown = (cummax - prices) / cummax
-        max_dd = np.max(drawdown)
-        # 최대 낙폭 끝점 찾기
-        end_idx = np.argmax(drawdown)
-        # 시작점 찾기 (벡터화)
-        # noinspection PyTypeChecker
-        start_idx = np.argmax(prices[:end_idx + 1]) if end_idx >= 0 else 0
-        return max_dd, start_idx, end_idx
 
     def _analyze_order_flow(self, buy_cf, sell_cf) -> str:
         """주문 흐름 분석
@@ -1476,13 +1320,10 @@ class MicrostructureAnalyzer:
     def clear_code_data(self, code):
         """종목 데이터 초기화"""
         self.curr_data = None
-        if code in self.data_buffers:
-            del self.data_buffers[code]
         if code in self.data_history:
             del self.data_history[code]
 
     def clear_data(self):
         """전체 데이터 초기화"""
         self.curr_data = None
-        self.data_buffers = {}
         self.data_history = {}

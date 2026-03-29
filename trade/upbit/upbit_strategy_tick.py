@@ -244,11 +244,10 @@ class UpbitStrategyTick(StrategyBase):
         if 데이터길이 >= 평균값계산틱수:
             self.arry_code[-1, self.base_cnt:self.data_cnt] = self.GetParameterArea(rw)
 
+            if self.dict_set['시장미시구조분석']:
+                self.ms_analyzer.update_data(self.code, self.arry_code)
             if self.dict_set['시장리스크분석']:
                 리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
-
-        if self.dict_set['시장미시구조분석']:
-            self.ms_analyzer.update_data(self.code, self.arry_code[-1, :])
 
         high_low = self.high_low.get(종목코드)
         if high_low:
