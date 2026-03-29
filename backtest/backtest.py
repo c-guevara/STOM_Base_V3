@@ -100,6 +100,16 @@ class BackTest:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '날짜 지정이 잘못되었거나 데이터가 존재하지 않습니다.'))
             self.SysExit(True)
 
+        con = sqlite3.connect(DB_STRATEGY)
+        dfb = pd.read_sql(f'SELECT * FROM {self.gubun}buy', con).set_index('index')
+        dfs = pd.read_sql(f'SELECT * FROM {self.gubun}sell', con).set_index('index')
+        con.close()
+
+        buystg = dfb['전략코드'][self.buystg_name]
+        if 'self.ms_analyzer' in buystg and not self.dict_set['시장미시구조분석']:
+            self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '시장미시구조분석 미적용 상태입니다. 설정을 변경하십시오.'))
+            self.SysExit(True)
+
         if self.is_tick:
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
@@ -107,20 +117,15 @@ class BackTest:
         self.day_count = len(df_mt['일자'].unique())
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 기간 추출 완료'))
 
+        self.buystg  = buystg
+        self.sellstg = dfs['전략코드'][self.sellstg_name]
+        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 매도수전략 설정 완료'))
+
         arry_bct = np.zeros((len(df_mt), 3), dtype='float64')
         arry_bct[:, 0] = df_mt['index'].values
         data = ('백테정보', self.ui_gubun, None, None, arry_bct, self.betting, self.day_count)
         for q in self.bstq_list:
             q.put(data)
-
-        con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.gubun}buy', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.gubun}sell', con).set_index('index')
-        con.close()
-
-        self.buystg  = dfb['전략코드'][self.buystg_name]
-        self.sellstg = dfs['전략코드'][self.sellstg_name]
-        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 매도수전략 설정 완료'))
 
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} START'))
         self.shared_cnt.value = 0

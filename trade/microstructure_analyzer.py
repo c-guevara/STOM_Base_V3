@@ -652,34 +652,36 @@ class HistoryBuffer:
         self.ask_qtys = np.zeros((maxlen, 5), dtype=np.float64)
         self.bid_qtys = np.zeros((maxlen, 5), dtype=np.float64)
 
-    def append(self, data: dict):
-        """데이터 추가"""
+    def append(self, curr_price: float, imbalance: float, buy_volume: float, sell_volume: float,
+               total_volume: float, weighted_depth_ratio: float, ask_prices: np.ndarray, bid_prices: np.ndarray,
+               ask_qtys: np.ndarray, bid_qtys: np.ndarray):
+        """데이터 추가 (딕셔너리 오버헤드 제거)"""
         idx = self.ptr
 
-        self.curr_price[idx] = data['curr_price']
-        self.imbalance[idx] = data['imbalance']
-        self.buy_volume[idx] = data['buy_volume']
-        self.sell_volume[idx] = data['sell_volume']
-        self.total_volume[idx] = data['total_volume']
-        self.weighted_depth_ratio[idx] = data['weighted_depth_ratio']
+        self.curr_price[idx] = curr_price
+        self.imbalance[idx] = imbalance
+        self.buy_volume[idx] = buy_volume
+        self.sell_volume[idx] = sell_volume
+        self.total_volume[idx] = total_volume
+        self.weighted_depth_ratio[idx] = weighted_depth_ratio
 
-        self.ask_prices[idx] = data['ask_prices']
-        self.bid_prices[idx] = data['bid_prices']
-        self.ask_qtys[idx] = data['ask_qtys']
-        self.bid_qtys[idx] = data['bid_qtys']
+        self.ask_prices[idx] = ask_prices
+        self.bid_prices[idx] = bid_prices
+        self.ask_qtys[idx] = ask_qtys
+        self.bid_qtys[idx] = bid_qtys
 
         self.ptr = (self.ptr + 1) % self.maxlen
         if self.count < self.maxlen:
             self.count += 1
 
     def get_prices_array(self) -> np.ndarray:
-        """가격 배열 직접 반환"""
+        """가격 배열 직접 반환 (뷰 기반 최적화)"""
         if self.count < self.maxlen:
             return self.curr_price[:self.count]
         return np.concatenate([self.curr_price[self.ptr:], self.curr_price[:self.ptr]])
 
     def get_volumes_array(self) -> np.ndarray:
-        """거래량 배열 직접 반환"""
+        """거래량 배열 직접 반환 (뷰 기반 최적화)"""
         if self.count < self.maxlen:
             return self.total_volume[:self.count]
         return np.concatenate([self.total_volume[self.ptr:], self.total_volume[:self.ptr]])
@@ -688,10 +690,10 @@ class HistoryBuffer:
         """
         ask/bid 잔량 배열 직접 반환 (iceberg detection용)
         Returns: (ask_qtys, bid_qtys) 각각 (n, 5) shape
+        뷰 기반 최적화로 메모리 복사 최소화
         """
         if self.count < self.maxlen:
             return self.ask_qtys[:self.count], self.bid_qtys[:self.count]
-        # 순환 래핑된 경우
         ask = np.concatenate([self.ask_qtys[self.ptr:], self.ask_qtys[:self.ptr]], axis=0)
         bid = np.concatenate([self.bid_qtys[self.ptr:], self.bid_qtys[:self.ptr]], axis=0)
         return ask, bid
@@ -854,41 +856,33 @@ class MicrostructureAnalyzer:
         buy_volume   = recent_data[-1, self.idx_buy_vol]
         sell_volume  = recent_data[-1, self.idx_sell_vol]
         total_volume = buy_volume + sell_volume
-        ask_prices   = [recent_data[-1, idx] for idx in self.idx_ask_price]
-        ask_qtys     = [recent_data[-1, idx] for idx in self.idx_ask_qty]
-        bid_prices   = [recent_data[-1, idx] for idx in self.idx_bid_price]
-        bid_qtys     = [recent_data[-1, idx] for idx in self.idx_bid_qty]
 
-        # 깊이 비율, 불균형, VWAP 계산
-        total_ask_qty = sum(ask_qtys)
-        total_bid_qty = sum(bid_qtys)
+        # 벡터화된 호가 데이터 추출 (리스트-배열 변환 제거)
+        ask_prices   = recent_data[-1, self.idx_ask_price]
+        ask_qtys     = recent_data[-1, self.idx_ask_qty]
+        bid_prices   = recent_data[-1, self.idx_bid_price]
+        bid_qtys     = recent_data[-1, self.idx_bid_qty]
+
+        # 깊이 비율, 불균형, VWAP 계산 (벡터화 연산)
+        total_ask_qty = np.sum(ask_qtys)
+        total_bid_qty = np.sum(bid_qtys)
         depth_ratio   = total_bid_qty / total_ask_qty if total_ask_qty > 0 else 1
         total_qty     = total_bid_qty + total_ask_qty
         imbalance     = (total_bid_qty - total_ask_qty) / total_qty if total_qty > 0 else 0.0
 
         # 깊이별 가중치 계산 (벡터화 연산)
-        ask_qtys_array   = np.array(ask_qtys)
-        bid_qtys_array   = np.array(bid_qtys)
-        weighted_ask_qty = np.dot(ask_qtys_array, self._depth_weights)
-        weighted_bid_qty = np.dot(bid_qtys_array, self._depth_weights)
+        weighted_ask_qty = np.dot(ask_qtys, self._depth_weights)
+        weighted_bid_qty = np.dot(bid_qtys, self._depth_weights)
         weighted_depth_ratio = weighted_bid_qty / weighted_ask_qty if weighted_ask_qty > 0 else 1
 
-        # 히스토리 데이터 저장
+        # 히스토리 데이터 저장 (최적화된 append 호출)
         if code not in self.data_history:
             self.data_history[code] = HistoryBuffer(self.history_cnt)
 
-        self.data_history[code].append({
-            'curr_price': curr_price,
-            'buy_volume': buy_volume,
-            'sell_volume': sell_volume,
-            'total_volume': total_volume,
-            'ask_prices': ask_prices,
-            'bid_prices': bid_prices,
-            'ask_qtys': ask_qtys,
-            'bid_qtys': bid_qtys,
-            'imbalance': imbalance,
-            'weighted_depth_ratio': weighted_depth_ratio
-        })
+        self.data_history[code].append(
+            curr_price, imbalance, buy_volume, sell_volume, total_volume,
+            weighted_depth_ratio, ask_prices, bid_prices, ask_qtys, bid_qtys
+        )
 
         # 스프레드 트렌드 및 불균형 트렌드 계산 (HistoryBuffer 직접 사용)
         hist_buffer = self.data_history[code]
@@ -905,9 +899,17 @@ class MicrostructureAnalyzer:
         # noinspection PyTypeChecker
         imbalance_trend = (second_half_avg - first_half_avg) / half
 
-        # 집중도 점수, 압력 레벨 계산
-        ask_concentration   = sum((aq / total_ask_qty) ** 2 if total_ask_qty > 0 else 0 for aq in ask_qtys)
-        bid_concentration   = sum((bq / total_bid_qty) ** 2 if total_bid_qty > 0 else 0 for bq in bid_qtys)
+        # 집중도 점수, 압력 레벨 계산 (벡터화 연산)
+        if total_ask_qty > 0:
+            ask_concentration = np.sum((ask_qtys / total_ask_qty) ** 2)
+        else:
+            ask_concentration = 0.0
+
+        if total_bid_qty > 0:
+            bid_concentration = np.sum((bid_qtys / total_bid_qty) ** 2)
+        else:
+            bid_concentration = 0.0
+
         concentration_score = (bid_concentration + ask_concentration) / 2
         pressure_level      = (imbalance + concentration_score) / 2
 
