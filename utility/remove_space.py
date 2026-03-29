@@ -17,12 +17,14 @@ def fix_indentation_in_file(filepath):
         lines = content.split('\n')
         fixed_lines = []
         changes_made = False
+        issue_count = 0
 
         for line in lines:
             if line.strip() == '' and line != '':
                 # 들여쓰기된 빈 줄 발견
                 fixed_lines.append('')
                 changes_made = True
+                issue_count += 1
             else:
                 fixed_lines.append(line)
 
@@ -32,13 +34,13 @@ def fix_indentation_in_file(filepath):
         if changes_made:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(fixed_content)
-            return True
+            return True, issue_count
         else:
-            return False
+            return False, 0
 
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
-        return False
+        return False, 0
 
 
 def find_python_files(root_dir):
@@ -75,14 +77,21 @@ def fix_all_python_files():
     # 파일 수정
     fixed_count = 0
     error_count = 0
+    total_issues = 0
 
-    for filepath in python_files:
+    for i, filepath in enumerate(python_files, 1):
         try:
-            if fix_indentation_in_file(filepath):
+            fixed, issue_count = fix_indentation_in_file(filepath)
+            if fixed:
                 # 상대 경로로 표시
                 rel_path = os.path.relpath(filepath, project_root)
-                print(f"[수정 완료] {rel_path}")
+                print(f"[수정 완료] {rel_path} ({issue_count}개 수정)")
                 fixed_count += 1
+                total_issues += issue_count
+            else:
+                # 진행 상황 표시
+                if i % 10 == 0 or i == len(python_files):
+                    print(f"진행률: {i}/{len(python_files)}")
         except Exception as e:
             rel_path = os.path.relpath(filepath, project_root)
             print(f"[오류 발생] {rel_path} - {e}")
@@ -94,12 +103,13 @@ def fix_all_python_files():
     print("=" * 60)
     print(f"총 파일 수: {len(python_files)}")
     print(f"수정된 파일: {fixed_count}")
+    print(f"총 수정된 빈 줄: {total_issues}")
     print(f"오류 발생: {error_count}")
     print(f"이미 정상된 파일: {len(python_files) - fixed_count - error_count}")
     print()
 
     if fixed_count > 0:
-        print("[완료] 5번 규칙 수정 완료!")
+        print(f"[완료] 5번 규칙 수정 완료! 총 {total_issues}개의 빈 줄을 수정했습니다.")
     else:
         print("[정보] 모든 파일이 이미 5번 규칙을 준수하고 있습니다.")
 
