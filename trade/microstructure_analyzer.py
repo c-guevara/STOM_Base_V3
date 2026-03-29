@@ -876,7 +876,7 @@ class MicrostructureAnalyzer:
         # 히스토리 데이터 저장
         if code not in self.data_history:
             self.data_history[code] = HistoryBuffer(self.history_cnt)
-        
+
         self.data_history[code].append({
             'curr_price': curr_price,
             'buy_volume': buy_volume,
@@ -1009,7 +1009,7 @@ class MicrostructureAnalyzer:
         prices = hist_buffer.get_prices_array()
         volumes = hist_buffer.get_volumes_array()
         n = len(prices)
-        
+
         if n < 20:
             return []
 
@@ -1106,7 +1106,7 @@ class MicrostructureAnalyzer:
         종합 리스크 평가 (for문 최적화 버전)
         """
         total_signals = len(layering_signals) + len(pump_dump_signals) + len(iceberg_signals) + len(stop_hunt_signals)
-        
+
         # 모든 신호의 confidence 추출 (모두 튜플 형식)
         all_confidences = (
             [s[3] for s in layering_signals] +      # 튜플: (side, levels_count, changes_count, confidence)
@@ -1114,7 +1114,7 @@ class MicrostructureAnalyzer:
             [s[5] for s in iceberg_signals] +       # 튜플: (side, level, price, count, volume, confidence)
             [s[4] for s in stop_hunt_signals]       # 튜플: (direction, price, change, vol, confidence, idx)
         )
-        
+
         # 빈 리스트 처리
         max_confidence = max(all_confidences) if all_confidences else 0.0
 

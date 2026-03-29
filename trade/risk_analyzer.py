@@ -318,7 +318,7 @@ class RiskAnalyzer:
         short_period = self.params['trend_short_period']
         medium_period = self.params['trend_medium_period']
         long_period = self.params['trend_long_period']
-        
+
         short_ma = np.mean(prices[-short_period:]) if len(prices) >= short_period else prices[-1]
         medium_ma = np.mean(prices[-medium_period:]) if len(prices) >= medium_period else prices[-1]
         long_ma = np.mean(prices[-long_period:]) if len(prices) >= long_period else prices[-1]
@@ -355,7 +355,7 @@ class RiskAnalyzer:
         strong_bullish_medium = self.params['momentum_strong_bullish_medium']
         strong_bearish_short = self.params['momentum_strong_bearish_short']
         strong_bearish_medium = self.params['momentum_strong_bearish_medium']
-        
+
         short_momentum = (prices[-1] - prices[-5]) / prices[-5] * 100 if len(prices) >= 5 else 0
         medium_momentum = (prices[-1] - prices[-10]) / prices[-10] * 100 if len(prices) >= 10 else 0
 
@@ -381,7 +381,7 @@ class RiskAnalyzer:
 
         current_strength = chegyeol_strength[-1]
         avg_strength = chegyeol_avg[-1]
-        
+
         spike_multiplier = self.params['strength_spike_multiplier']
         weak_multiplier = self.params['strength_weak_multiplier']
 
@@ -391,7 +391,7 @@ class RiskAnalyzer:
             trend = 'weak'
         else:
             trend = 'normal'
-        
+
         return {
             'current_strength': current_strength,
             'avg_strength': avg_strength,
@@ -400,7 +400,7 @@ class RiskAnalyzer:
             'trend': trend,
             'deviation': abs(current_strength - avg_strength) / avg_strength if avg_strength > 0 else 0
         }
-    
+
     def _analyze_suyang_imbalance(self, arry_code: np.ndarray) -> dict:
         """수량 불균형 분석"""
         buy_suyang = arry_code[:, self.idx_buy_vol]   # 초당매수수량
@@ -408,7 +408,7 @@ class RiskAnalyzer:
 
         current_buy = buy_suyang[-1]
         current_sell = sell_suyang[-1]
-        
+
         dominant_ratio = self.params['imbalance_dominant_ratio']
 
         total = current_buy + current_sell
@@ -426,7 +426,7 @@ class RiskAnalyzer:
             direction = 'sell_dominant'
         else:
             direction = 'balanced'
-        
+
         return {
             'buy_ratio': buy_ratio,
             'sell_ratio': sell_ratio,
@@ -435,7 +435,7 @@ class RiskAnalyzer:
             'current_buy': current_buy,
             'current_sell': current_sell
         }
-    
+
     def _analyze_price_position(self, arry_code: np.ndarray) -> dict:
         """가격 위치 분석"""
         current_price = arry_code[-1, self.idx_curr_price]
@@ -513,7 +513,7 @@ class RiskAnalyzer:
         previous_avg = np.mean(volumes[-10:-5]) if len(volumes) >= 10 else recent_avg
         # noinspection PyTypeChecker
         volume_change = (recent_avg - previous_avg) / previous_avg * 100 if previous_avg > 0 else 0
-        
+
         spike_multiplier = self.params['volume_spike_multiplier']
         # noinspection PyTypeChecker
         spike = recent_avg > previous_avg * spike_multiplier
@@ -658,5 +658,5 @@ class RiskAnalyzer:
         # 총 리스크 점수 계산 (0-100점)
         total_risk = (rsi_risk + volatility_risk + trend_risk + momentum_risk + 
                       volume_risk + chegyeol_risk + suyang_risk + price_risk + angle_risk)
-        
+
         return round(min(total_risk, 100.0), 2)

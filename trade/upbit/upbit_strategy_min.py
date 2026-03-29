@@ -135,18 +135,18 @@ class UpbitStrategyMin(UpbitStrategyTick):
                     매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_utc(), 0, 0, 0
 
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
-    
+
                 BBT = not self.dict_set['코인매수금지시간'] or not (self.dict_set['코인매수금지시작시간'] < 시분초 < self.dict_set['코인매수금지종료시간'])
                 BLK = not self.dict_set['코인매수금지블랙리스트'] or 종목코드 not in self.dict_set['코인블랙리스트']
                 C20 = not self.dict_set['코인매수금지200원이하'] or 현재가 > 200
                 NIB = 종목코드 not in self.dict_signal['매수']
                 NIS = 종목코드 not in self.dict_signal['매도']
-    
+
                 A = 관심종목 and NIB and 매수가 == 0
                 B = self.dict_set['코인매수분할시그널']
                 C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['코인매수분할횟수']
                 D = NIB and self.dict_set['코인매도취소매수시그널'] and not NIS
-    
+
                 if BBT and BLK and C20 and (A or (B and C) or C or D):
                     self.info_for_signal = D, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
@@ -165,15 +165,15 @@ class UpbitStrategyMin(UpbitStrategyTick):
                             매수 = True
                         elif self.dict_set['코인매수분할상방'] and 분할매수기준수익률 > self.dict_set['코인매수분할상방수익률']:
                             매수 = True
-    
+
                         if 매수:
                             self.Buy()
-    
+
                 SBT = not self.dict_set['코인매도금지시간'] or not (self.dict_set['코인매도금지시작시간'] < 시분초 < self.dict_set['코인매도금지종료시간'])
                 SCC = self.dict_set['코인매수분할횟수'] == 1 or not self.dict_set['코인매도금지매수횟수'] or 분할매수횟수 > self.dict_set[
                     '코인매도금지매수횟수값']
                 NIB = 종목코드 not in self.dict_signal['매수']
-    
+
                 A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['코인매도분할횟수'] == 1
                 B = self.dict_set['코인매도분할시그널']
                 C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['코인매도분할횟수']
@@ -204,7 +204,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
                                 매도 = True
                         elif 강제청산:
                             매도 = True
-    
+
                         if 매도:
                             self.Sell()
 
