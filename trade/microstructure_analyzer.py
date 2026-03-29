@@ -2,6 +2,7 @@
 import os
 import sys
 import numpy as np
+from collections import defaultdict
 from typing import Dict, List, Tuple
 try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -744,7 +745,7 @@ class MicrostructureAnalyzer:
         self._setup_columns()
 
         # 분석 히스토리 버퍼
-        self.data_history: Dict[str, HistoryBuffer] = {}
+        self.data_history = defaultdict(lambda: HistoryBuffer(self.history_cnt))
 
         # 상수 캐싱 (반복 생성 회피)
         self._depth_weights = np.array([0.35, 0.25, 0.20, 0.12, 0.08])  # 1~5단계 가중치
@@ -874,10 +875,6 @@ class MicrostructureAnalyzer:
         weighted_ask_qty = np.dot(ask_qtys, self._depth_weights)
         weighted_bid_qty = np.dot(bid_qtys, self._depth_weights)
         weighted_depth_ratio = weighted_bid_qty / weighted_ask_qty if weighted_ask_qty > 0 else 1
-
-        # 히스토리 데이터 저장 (최적화된 append 호출)
-        if code not in self.data_history:
-            self.data_history[code] = HistoryBuffer(self.history_cnt)
 
         self.data_history[code].append(
             curr_price, imbalance, buy_volume, sell_volume, total_volume,
