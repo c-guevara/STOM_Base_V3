@@ -176,59 +176,13 @@ class UpdateTablewidget:
 
     @error_decorator
     def update_tablewidget(self, data):
-        def tablewidget_change():
-            if tableWidget.columnCount() != columns_cnt:
-                tableWidget.setColumnCount(columns_cnt)
-                tableWidget.setHorizontalHeaderLabels(columns_list)
-                if gubun in self.uinums_detail2:
-                    if columns_cnt == 7:
-                        tableWidget.setColumnWidth(0, 90)
-                        tableWidget.setColumnWidth(1, 101)
-                        tableWidget.setColumnWidth(2, 95)
-                        tableWidget.setColumnWidth(3, 95)
-                        tableWidget.setColumnWidth(4, 95)
-                        tableWidget.setColumnWidth(5, 95)
-                        tableWidget.setColumnWidth(6, 95)
-                    elif columns_cnt == 8:
-                        tableWidget.setColumnWidth(0, 90)
-                        tableWidget.setColumnWidth(1, 96)
-                        tableWidget.setColumnWidth(2, 80)
-                        tableWidget.setColumnWidth(3, 80)
-                        tableWidget.setColumnWidth(4, 80)
-                        tableWidget.setColumnWidth(5, 80)
-                        tableWidget.setColumnWidth(6, 80)
-                        tableWidget.setColumnWidth(7, 80)
-                else:
-                    if columns_cnt == 8:
-                        tableWidget.setColumnWidth(0, 96)
-                        tableWidget.setColumnWidth(1, 90)
-                        tableWidget.setColumnWidth(2, 90)
-                        tableWidget.setColumnWidth(3, 90)
-                        tableWidget.setColumnWidth(4, 140)
-                        tableWidget.setColumnWidth(5, 70)
-                        tableWidget.setColumnWidth(6, 90)
-                        tableWidget.setColumnWidth(7, 90)
-                    elif columns_cnt == 12:
-                        tableWidget.setColumnWidth(0, 96)
-                        tableWidget.setColumnWidth(1, 70)
-                        tableWidget.setColumnWidth(2, 115)
-                        tableWidget.setColumnWidth(3, 115)
-                        tableWidget.setColumnWidth(4, 90)
-                        tableWidget.setColumnWidth(5, 90)
-                        tableWidget.setColumnWidth(6, 90)
-                        tableWidget.setColumnWidth(7, 90)
-                        tableWidget.setColumnWidth(8, 90)
-                        tableWidget.setColumnWidth(9, 90)
-                        tableWidget.setColumnWidth(10, 90)
-                        tableWidget.setColumnWidth(11, 90)
-
         if len(data) == 2:
             gubun, df = data
         else:
             if data[2].__class__ == str:
                 gubun, df, ymshms = data
                 if self.ui.ctpg_xticks is not None:
-                    self.UpdateHogainfoForChart(gubun, ymshms)
+                    self.update_hogainfo_for_chart(gubun, ymshms)
             else:
                 gubun, df, usdtokrw = data
                 self.ui.dialog_kimp.setWindowTitle(f'STOM KIMP - 환율 {usdtokrw:,}원/달러')
@@ -237,32 +191,36 @@ class UpdateTablewidget:
         if tableWidget is None:
             return
 
-        columns_list = list(df.columns)
-        columns_cnt  = len(columns_list)
-
-        if gubun in self.table_change_uinums:
-            tablewidget_change()
-        elif gubun in self.header_change_uinums:
-            tableWidget.setHorizontalHeaderLabels(columns_list)
-        elif gubun in self.uinums_hogatick:
-            if not self.ui.dialog_hoga.isVisible():
-                self.ui.wdzservQ.put(('agent', ('호가종목코드', '000000')))
-                if self.ui.CoinReceiverProcessAlive():  self.ui.creceivQ.put(('호가종목코드', '000000'))
-                return
-        elif gubun == ui_num['김프']:
-            if not self.ui.dialog_kimp.isVisible():
-                return
-
         len_df = len(df)
         if len_df == 0:
             tableWidget.clearContents()
             return
 
+        if gubun in self.uinums_hogatick:
+            if not self.ui.dialog_hoga.isVisible():
+                self.ui.wdzservQ.put(('agent', ('호가종목코드', '000000')))
+                if self.ui.CoinReceiverProcessAlive():  self.ui.creceivQ.put(('호가종목코드', '000000'))
+                return
+
+        elif gubun == ui_num['김프']:
+            if not self.ui.dialog_kimp.isVisible():
+                return
+
+        columns_list = list(df.columns)
+        columns_cnt  = len(columns_list)
+
+        if gubun in self.table_change_uinums:
+            self.tablewidget_change(gubun, tableWidget, columns_cnt, columns_list)
+
+        elif gubun in self.header_change_uinums:
+            tableWidget.setHorizontalHeaderLabels(columns_list)
+
+        arry = df.values
+
+        tableWidget.setRowCount(len_df)
         if gubun in self.sorted_uinums:
             tableWidget.setSortingEnabled(False)
 
-        tableWidget.setRowCount(len_df)
-        arry = df.values
         for i in range(len_df):
             for j, column in enumerate(columns_list):
                 value = arry[i, j]
@@ -425,15 +383,8 @@ class UpdateTablewidget:
 
                 elif gubun in self.uinums_giup:
                     text = arry[i, 2]
-                    warning = False
-                    for warn in self.warning_text:
-                        if warn in text:
-                            warning = True
-                            break
-                    if warning:
-                        item.setForeground(color_fg_bt)
-                    else:
-                        item.setForeground(color_fg_dk)
+                    warning = any(warn in text for warn in self.warning_text)
+                    item.setForeground(color_fg_bt if warning else color_fg_dk)
 
                 elif gubun in self.uinums_jemu:
                     color = color_fg_bt if '-' not in value else color_fg_dk
@@ -441,12 +392,12 @@ class UpdateTablewidget:
 
                 tableWidget.setItem(i, j, item)
 
+        if gubun in self.sorted_uinums:
+            tableWidget.setSortingEnabled(True)
+
         row_min_cnt = self.dict_minrowcnt.get(gubun)
         if row_min_cnt and len_df < row_min_cnt:
             tableWidget.setRowCount(row_min_cnt)
-
-        if gubun in self.sorted_uinums:
-            tableWidget.setSortingEnabled(True)
 
         if gubun in self.col_auto_resize_uinums:
             header = tableWidget.horizontalHeader()
@@ -457,14 +408,11 @@ class UpdateTablewidget:
                 header_count = 7
             else:
                 header_count = 8
-
             width = []
             for i in range(header_count):
                 header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
                 width.append(header.sectionSize(i))
-
             wfactor = hwidth / sum(width)
-
             cumsum_width = 0
             last = header_count - 1
             for i in range(header_count):
@@ -481,14 +429,11 @@ class UpdateTablewidget:
             header = tableWidget.horizontalHeader()
             hwidth = header.width()
             header_count = header.count()
-
             width = []
             for i in range(header_count):
                 header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
                 width.append(header.sectionSize(i))
-
             wfactor = hwidth / sum(width)
-
             cumsum_width = 0
             last = header_count - 1
             for i in range(header_count):
@@ -501,7 +446,53 @@ class UpdateTablewidget:
                     column_width = hwidth - cumsum_width
                     header.resizeSection(i, column_width)
 
-    def UpdateHogainfoForChart(self, gubun, ymdhms):
+    def tablewidget_change(self, gubun, tableWidget, columns_cnt, columns_list):
+        if tableWidget.columnCount() != columns_cnt:
+            tableWidget.setColumnCount(columns_cnt)
+            tableWidget.setHorizontalHeaderLabels(columns_list)
+            if gubun in self.uinums_detail2:
+                if columns_cnt == 7:
+                    tableWidget.setColumnWidth(0, 90)
+                    tableWidget.setColumnWidth(1, 101)
+                    tableWidget.setColumnWidth(2, 95)
+                    tableWidget.setColumnWidth(3, 95)
+                    tableWidget.setColumnWidth(4, 95)
+                    tableWidget.setColumnWidth(5, 95)
+                    tableWidget.setColumnWidth(6, 95)
+                elif columns_cnt == 8:
+                    tableWidget.setColumnWidth(0, 90)
+                    tableWidget.setColumnWidth(1, 96)
+                    tableWidget.setColumnWidth(2, 80)
+                    tableWidget.setColumnWidth(3, 80)
+                    tableWidget.setColumnWidth(4, 80)
+                    tableWidget.setColumnWidth(5, 80)
+                    tableWidget.setColumnWidth(6, 80)
+                    tableWidget.setColumnWidth(7, 80)
+            else:
+                if columns_cnt == 8:
+                    tableWidget.setColumnWidth(0, 96)
+                    tableWidget.setColumnWidth(1, 90)
+                    tableWidget.setColumnWidth(2, 90)
+                    tableWidget.setColumnWidth(3, 90)
+                    tableWidget.setColumnWidth(4, 140)
+                    tableWidget.setColumnWidth(5, 70)
+                    tableWidget.setColumnWidth(6, 90)
+                    tableWidget.setColumnWidth(7, 90)
+                elif columns_cnt == 12:
+                    tableWidget.setColumnWidth(0, 96)
+                    tableWidget.setColumnWidth(1, 70)
+                    tableWidget.setColumnWidth(2, 115)
+                    tableWidget.setColumnWidth(3, 115)
+                    tableWidget.setColumnWidth(4, 90)
+                    tableWidget.setColumnWidth(5, 90)
+                    tableWidget.setColumnWidth(6, 90)
+                    tableWidget.setColumnWidth(7, 90)
+                    tableWidget.setColumnWidth(8, 90)
+                    tableWidget.setColumnWidth(9, 90)
+                    tableWidget.setColumnWidth(10, 90)
+                    tableWidget.setColumnWidth(11, 90)
+
+    def update_hogainfo_for_chart(self, gubun, ymdhms):
         def fi(fname):
             if is_min:
                 if gubun == ui_num['S호가종목'] and '키움증권' in self.ui.dict_set['증권사']:
