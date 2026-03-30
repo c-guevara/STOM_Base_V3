@@ -25,6 +25,63 @@
 - **유료버전**: 사용자 편의에 맞게 소스코드를 자유롭게 수정하여 사용할 수 있습니다.
 - **구독문의**: https://cafe.naver.com/stom
 
+## 프로젝트 구조
+
+```
+STOM/
+├── stom.py                             # 메인 실행 파일
+├── stom_stock.bat                      # 국내주식 모드 실행
+├── stom_coin.bat                       # 코인 모드 실행
+├── stom_future.bat                     # 해외선물 모드 실행
+├── pip_install_32.bat                  # 32비트 라이브러리 설치
+├── pip_install_64.bat                  # 64비트 라이브러리 설치
+│
+├── backtest/                           # 백테스트 및 최적화 엔진
+│   ├── backengine_*.py                 # 백테스트 엔진
+│   ├── backfinder.py                   # 백파인더
+│   ├── backtest.py                     # 백테스트
+│   ├── optimiz*.py                     # 최적화, 교차검증, GA, OPTUNA, 
+│   ├── rolling_walk_forward_test.py    # 전진분석
+│   └── graph/                          # 백테스트 결과 그래프 저장
+│
+├── trade/                              # 실시간 트레이딩 모듈
+│   ├── strategy_base.py                # 전략 기반 클래스 (230개+ 템플릿)
+│   ├── formula_manager.py              # 사용자 팩터, 수식관리자
+│   ├── risk_analyzer.py                # 리스크 분석
+│   ├── microstructure_analyzer.py      # 시장미시구조 분석
+│   ├── stock_korea/                    # 국내주식 API 연동
+│   ├── future_oversea/                 # 해외선물 API 연동
+│   ├── upbit/                          # 업비트 API 연동
+│   └── binance/                        # 바이낸스 API 연동
+│
+├── ui/                                 # PyQt5 기반 GUI
+│   ├── set_*.py                        # UI 설정 및 레이아웃
+│   ├── ui_*.py                         # UI 이벤트 및 동작 처리
+│   └── icon/                           # 아이콘 리소스
+│
+├── utility/                            # 공통 유틸리티
+│   ├── chart_hoga_query_sound.py       # 차트, 호가, 쿼리, 사운드
+│   ├── telegram_bot.py                 # 텔레그램봇
+│   ├── webcrawling.py                  # 웹크롤링
+│   └── ai_agent/                       # AI 에이전트용 전략 설명
+│   └── imagefiles/                     # 주요 화면 스크린샷
+│   └── pycharm/                        # 파이참 규칙 및 테마
+│
+├── _database/                          # 데이터베이스
+└── _log/                               # 로그
+```
+
+## 기술 스택
+
+| 분야 | 라이브러리 |
+|------|-----------|
+| **데이터 처리** | numpy, pandas, numba |
+| **UI/시각화** | PyQt5, pyqtgraph, matplotlib, squarify |
+| **거래소 연동** | python-binance, pyupbit |
+| **최적화** | optuna, cmaes |
+| **통신/알림** | websockets, requests, python-telegram-bot |
+| **기타** | cryptography, pillow |
+
 ## STOM 주요 화면 및 기능 설명
 
 ### 홈 화면: 주요 지수 및 시장 지표
