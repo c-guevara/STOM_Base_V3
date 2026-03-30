@@ -36,7 +36,7 @@ STOM/
 ├── pip_install_32.bat                  # 32비트 라이브러리 설치
 ├── pip_install_64.bat                  # 64비트 라이브러리 설치
 │
-├── backtest/                           # 백테스트 및 최적화 엔진
+├── backtest/                           # 백테스트 및 최적화
 │   ├── backengine_*.py                 # 백테스트 엔진
 │   ├── backfinder.py                   # 백파인더
 │   ├── backtest.py                     # 백테스트
@@ -81,6 +81,22 @@ STOM/
 | **최적화** | optuna, cmaes |
 | **통신/알림** | websockets, requests, python-telegram-bot |
 | **기타** | cryptography, pillow |
+
+## 시스템 요구사항
+
+### 트레이딩 용도
+| 항목 | 최소 사양              | 권장 사양                 |
+|------|--------------------|-----------------------|
+| **CPU** | Intel i5 / Ryzen 5 | Intel i7 / Ryzen 7 이상 |
+| **RAM** | 8GB                | 16GB 이상               |
+| **인터넷** | 10Mbps             | 50Mbps 이상             |
+
+### 백테스트 용도
+| 항목 | 최소 사양                    | 권장 사양                         |
+|------|--------------------------|-------------------------------|
+| **CPU** | Intel i7 / Ryzen 7 (8코어) | Intel i9 / Ryzen 9 이상 (16코어+) |
+| **RAM** | 32GB                     | 64GB                          |
+| **저장공간** | NVMe 500GB               | NVMe 1TB 이상                   |
 
 ## STOM 주요 화면 및 기능 설명
 
