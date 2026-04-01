@@ -5,6 +5,7 @@ from ui.set_style import color_bf_dk
 from ui.set_text import famous_saying
 from utility.static import qtest_qwait
 from PyQt5.QtWidgets import QMessageBox
+from utility.static import error_decorator
 from utility.strategy_version_manager import StrategyVersionManager
 
 
@@ -74,6 +75,7 @@ def get_widget(ui, sorc, gubun1, gubun2):
     return textEdit1, textEdit2, comboBox1, comboBox2
 
 
+@error_decorator
 def strategy_version(ui, market, gubun1, gubun2, strategy_name):
     if market in ('stock', 'future'):
         not_visible_widjet1 = getattr(ui, 'svc_pushButton_21')
@@ -138,6 +140,7 @@ def sync_scroll(target_edit, value):
     target_edit.verticalScrollBar().setValue(value)
 
 
+@error_decorator
 def ssbutton_clicked_07(ui):
     """버전 삭제 버튼 호출"""
     global SVM
@@ -151,6 +154,7 @@ def ssbutton_clicked_07(ui):
         QMessageBox.information(ui, '삭제 완료', random.choice(famous_saying))
 
 
+@error_decorator
 def dactivated_04(ui):
     """버전 콤보박스 변경 시 호출 diff 표시"""
     global SVM
