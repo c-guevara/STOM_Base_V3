@@ -9,7 +9,7 @@ class Visualization3D:
         self.top_3_params = None
         self.optimization_3d_history = []
 
-    def update_3d_visualization(self, dict_turn_hvar_hstd, k):
+    def update_3d_visualization(self, k, dict_turn_hvar_hstd):
         """
         dict_turn_hvar_hstd 데이터를 활용한 3D 최적화 진화 시각화
 
