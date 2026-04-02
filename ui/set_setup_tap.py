@@ -1,7 +1,9 @@
 
 from ui.set_style import style_bc_dk
-from ui.set_widget import error_decorator
+from ui.ui_button_clicked_settings import *
+from ui import ui_activated_stg, ui_activated_etc
 from PyQt5.QtWidgets import QLabel, QTabWidget, QWidget
+from ui.ui_button_clicked_etc import lvbutton_clicked_01
 
 
 class SetSetupTap:
@@ -19,12 +21,12 @@ class SetSetupTap:
         self.ui.cod_tab = QWidget()
 
         self.ui.sj_set_labelll_01 = QLabel('설정 관리', self.ui.sj_tab)
-        self.ui.sj_set_comBoxx_01 = self.wc.setCombobox(self.ui.sj_tab, activated=self.ui.dActivated_02)
-        self.ui.sj_set_pButton_01 = self.wc.setPushbutton('로딩', parent=self.ui.sj_tab, click=self.ui.SettingAllLoad)
-        self.ui.sj_set_pButton_02 = self.wc.setPushbutton('설정', parent=self.ui.sj_tab, click=self.ui.SettingAllApp)
-        self.ui.sj_set_pButton_03 = self.wc.setPushbutton('삭제', parent=self.ui.sj_tab, click=self.ui.SettingAllDel)
+        self.ui.sj_set_comBoxx_01 = self.wc.setCombobox(self.ui.sj_tab, activated=lambda: ui_activated_etc.dactivated_02(self.ui))
+        self.ui.sj_set_pButton_01 = self.wc.setPushbutton('로딩', parent=self.ui.sj_tab, click=lambda: setting_all_load(self.ui))
+        self.ui.sj_set_pButton_02 = self.wc.setPushbutton('설정', parent=self.ui.sj_tab, click=lambda: setting_all_app(self.ui))
+        self.ui.sj_set_pButton_03 = self.wc.setPushbutton('삭제', parent=self.ui.sj_tab, click=lambda: setting_all_del(self.ui))
         self.ui.sj_set_liEditt_01 = self.wc.setLineedit(self.ui.sj_tab, style=style_bc_dk)
-        self.ui.sj_set_pButton_04 = self.wc.setPushbutton('저장', parent=self.ui.sj_tab, click=self.ui.SettingAllSave)
+        self.ui.sj_set_pButton_04 = self.wc.setPushbutton('저장', parent=self.ui.sj_tab, click=lambda: setting_all_save(self.ui))
 
         self.ui.set_tapWidgett_01.addTab(self.ui.ssd_tab, '일반설정')
         self.ui.set_tapWidgett_01.addTab(self.ui.sod_tab, '주식해선주문설정')
@@ -50,9 +52,9 @@ class SetSetupTap:
         self.ui.sj_main_cheBox_06 = self.wc.setCheckBox('데이터 저장', self.ui.sj_bs_groupBox_01, changed=self.ui.CheckboxChanged_06, tip='전략연산 프로세스가 모아둔 데이터를 데이터베이스에 저장한다.')
 
         self.ui.sj_main_labell_01 = QLabel('바이낸스 선물   |                                                         마진타입                     포지션', self.ui.sj_bs_groupBox_01)
-        self.ui.sj_lvrg_Button_01 = self.wc.setPushbutton('레버리지 유형 및 수치 설정', parent=self.ui.sj_bs_groupBox_01, click=self.ui.lvButtonClicked_01, tip='바이낸스 선물 레버리지를 고정, 변동 형태 중 선택하여 설정한다.')
-        self.ui.sj_main_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['격리', '교차'], activated=self.ui.cActivated_10)
-        self.ui.sj_main_comBox_04 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['단방향', '양방향'], activated=self.ui.cActivated_11)
+        self.ui.sj_lvrg_Button_01 = self.wc.setPushbutton('레버리지 유형 및 수치 설정', parent=self.ui.sj_bs_groupBox_01, click=lambda: lvbutton_clicked_01(self.ui), tip='바이낸스 선물 레버리지를 고정, 변동 형태 중 선택하여 설정한다.')
+        self.ui.sj_main_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['격리', '교차'], activated=ui_activated_stg.activated_10)
+        self.ui.sj_main_comBox_04 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['단방향', '양방향'], activated=ui_activated_stg.activated_11)
 
         text = '키움증권  아이디                                                             ' \
                '비밀번호                                                           ' \
@@ -82,7 +84,7 @@ class SetSetupTap:
                '매도                                       ' \
                '데이터                              평균값계산틱수                       최대종목수                       종료시간'
         self.ui.sj_stock_label_01 = QLabel(text, self.ui.sj_bs_groupBox_05)
-        self.ui.sj_stock_cbBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05, activated=self.ui.sActivated_09)
+        self.ui.sj_stock_cbBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05, activated=lambda: ui_activated_stg.activated_09(self.ui, 'stock'))
         self.ui.sj_stock_cbBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05)
         self.ui.sj_stock_cbBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05, items=['1초스냅샷', '1분봉'])
         self.ui.sj_stock_lEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_05)
@@ -104,7 +106,7 @@ class SetSetupTap:
         self.ui.sj_coin_cheBox_01 = self.wc.setCheckBox('모의투자    |', self.ui.sj_bs_groupBox_06, changed=self.ui.CheckboxChanged_08, tip='모의투자 체크 시 주문이 전송되지 않고\n매수, 매도를 기록한다. 체크 해제 시 실제 주문이 전송된다.')
         self.ui.sj_coin_cheBox_02 = self.wc.setCheckBox('알림소리    |', self.ui.sj_bs_groupBox_06, tip='각종 알림소리를 끄고 켠다.')
         self.ui.sj_coin_labell_01 = QLabel(text, self.ui.sj_bs_groupBox_06)
-        self.ui.sj_coin_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_06, activated=self.ui.cActivated_09)
+        self.ui.sj_coin_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_06, activated=lambda: ui_activated_stg.activated_09(self.ui, 'coin'))
         self.ui.sj_coin_comBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_06)
         self.ui.sj_coin_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_06, items=['1초스냅샷', '1분봉'])
         self.ui.sj_coin_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_06)
@@ -178,27 +180,27 @@ class SetSetupTap:
         self.ui.sj_etc_liEditt_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_08, passhide=True)
         self.ui.sj_etc_daEditt_01 = self.wc.setDateEdit(self.ui.sj_bs_groupBox_08, popup=False)
 
-        self.ui.sj_load_Button_01 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_01, click=self.ui.SettingLoad_01)
-        self.ui.sj_load_Button_02 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_02, click=self.ui.SettingLoad_02)
-        self.ui.sj_load_Button_03 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_03, click=self.ui.SettingLoad_03)
-        self.ui.sj_load_Button_04 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_04, click=self.ui.SettingLoad_04)
-        self.ui.sj_load_Button_05 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_05, click=self.ui.SettingLoad_05)
-        self.ui.sj_load_Button_06 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_06, click=self.ui.SettingLoad_06)
-        self.ui.sj_load_Button_07 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_07, click=self.ui.SettingLoad_07)
-        self.ui.sj_load_Button_08 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_08, click=self.ui.SettingLoad_08)
+        self.ui.sj_load_Button_01 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_01, click=lambda: setting_load_01(self.ui))
+        self.ui.sj_load_Button_02 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_02, click=lambda: setting_load_02(self.ui))
+        self.ui.sj_load_Button_03 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_03, click=lambda: setting_load_03(self.ui))
+        self.ui.sj_load_Button_04 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_load_04(self.ui))
+        self.ui.sj_load_Button_05 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_05, click=lambda: setting_load_05(self.ui))
+        self.ui.sj_load_Button_06 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_06, click=lambda: setting_load_06(self.ui))
+        self.ui.sj_load_Button_07 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_07, click=lambda: setting_load_07(self.ui))
+        self.ui.sj_load_Button_08 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_08, click=lambda: setting_load_08(self.ui))
 
-        self.ui.sj_save_Button_01 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_01, click=self.ui.SettingSave_01)
-        self.ui.sj_save_Button_02 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_02, click=self.ui.SettingSave_02)
-        self.ui.sj_save_Button_03 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_03, click=self.ui.SettingSave_03)
-        self.ui.sj_save_Button_04 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_04, click=self.ui.SettingSave_04)
-        self.ui.sj_save_Button_05 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_05, click=self.ui.SettingSave_05)
-        self.ui.sj_save_Button_06 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_06, click=self.ui.SettingSave_06)
-        self.ui.sj_save_Button_07 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_07, click=self.ui.SettingSave_07)
-        self.ui.sj_save_Button_08 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_08, click=self.ui.SettingSave_08)
+        self.ui.sj_save_Button_01 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_01, click=lambda: setting_save_01(self.ui))
+        self.ui.sj_save_Button_02 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_02, click=lambda: setting_save_02(self.ui))
+        self.ui.sj_save_Button_03 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_03, click=lambda: setting_save_03(self.ui))
+        self.ui.sj_save_Button_04 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_save_04(self.ui))
+        self.ui.sj_save_Button_05 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_05, click=lambda: setting_save_05(self.ui))
+        self.ui.sj_save_Button_06 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_06, click=lambda: setting_save_06(self.ui))
+        self.ui.sj_save_Button_07 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_07, click=lambda: setting_save_07(self.ui))
+        self.ui.sj_save_Button_08 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_08, click=lambda: setting_save_08(self.ui))
 
-        self.ui.sj_etc_pButton_01 = self.wc.setPushbutton('계정 텍스트 보기', parent=self.ui.ssd_tab, click=self.ui.SettingAccView)
-        self.ui.sj_etc_pButton_02 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_05, click=self.ui.SettingStockElapsedTickNumber)
-        self.ui.sj_etc_pButton_03 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_06, click=self.ui.SettingCoinElapsedTickNumber)
+        self.ui.sj_etc_pButton_01 = self.wc.setPushbutton('계정 텍스트 보기', parent=self.ui.ssd_tab, click=lambda: setting_acc_view(self.ui))
+        self.ui.sj_etc_pButton_02 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_05, click=lambda: setting_stock_elapsed_tick_number(self.ui))
+        self.ui.sj_etc_pButton_03 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_06, click=lambda: setting_coin_elapsed_tick_number(self.ui))
 
         self.ui.set_tapWidgett_01.setGeometry(7, 10, 1341, 742)
         self.ui.sj_set_labelll_01.setGeometry(847, 10, 50, 20)

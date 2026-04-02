@@ -1,7 +1,11 @@
 
 from PyQt5.QtCore import QDate, QUrl
 from PyQt5.QtWidgets import QMessageBox
+from ui.ui_text_changed import text_changed_05
+from ui.ui_process_alive import coin_trader_process_alive
+from ui.ui_button_clicked_chart import get_indicator_detail
 from utility.setting_base import columns_jg, columns_jgf, columns_jgcf, ui_num
+from ui.ui_show_dialog import show_db, show_dialog_graph, show_dialog, show_dialog_web, show_dialog_chart
 from utility.static import comma2int, comma2float, now, str_ymd, now_utc, now_cme, qtest_qwait, error_decorator
 
 
@@ -22,7 +26,7 @@ def cell_clicked_01(ui, row, col):
     code       = ui.dict_code[name] if name in ui.dict_code else name
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
-    ui.ShowDialog(name, tickcount, searchdate, col)
+    show_dialog(ui, name, tickcount, searchdate, col)
 
 
 @error_decorator
@@ -63,7 +67,7 @@ def cell_clicked_03(ui, row, col):
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        if ui.CoinTraderProcessAlive():
+        if coin_trader_process_alive(ui):
             if 'KRW' in code:
                 ui.ctraderQ.put(('매도', code, c, oc, now(), True))
             else:
@@ -89,7 +93,7 @@ def cell_clicked_04(ui, row):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-    ui.ShowDialog(name, tickcount, searchdate, 4)
+    show_dialog(ui, name, tickcount, searchdate, 4)
 
 
 @error_decorator
@@ -118,7 +122,7 @@ def cell_clicked_05(ui, row):
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
     df.set_index('index', inplace=True)
 
-    ui.ShowDialogGraph(df)
+    show_dialog_graph(ui, df)
 
 
 @error_decorator
@@ -163,7 +167,7 @@ def cell_clicked_06(ui, row):
         QMessageBox.critical(ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
         return
 
-    ui.ShowDialogChart(False, coin, code, tickcount, searchdate, starttime, endtime, detail, buytimes)
+    show_dialog_chart(ui, False, coin, code, tickcount, searchdate, starttime, endtime, detail, buytimes)
 
 
 @error_decorator
@@ -185,11 +189,11 @@ def cell_clicked_07(ui, row):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-    data = (coin, code, tickcount, searchdate, starttime, endtime, ui.GetIndicatorDetail(code))
+    data = (coin, code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
     cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
     if cf1 and cf2: data += (float(cf1), float(cf2))
     ui.chartQ.put(data)
-    if ui.dialog_web.isVisible(): ui.ShowDialogWeb(False, code)
+    if ui.dialog_web.isVisible(): show_dialog_web(ui, False, code)
 
 
 @error_decorator
@@ -302,7 +306,7 @@ def cell_clicked_09(ui, row, col):
             ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 스케쥴 "{stg_name}" 삭제 완료'))
 
     qtest_qwait(0.5)
-    ui.ShowDB()
+    show_db(ui)
 
 
 @error_decorator
@@ -315,7 +319,7 @@ def cell_clicked_10(ui, row, col):
         else:
             order_price = comma2int(text)
         ui.od_lineEdittttt_01.setText(str(order_price))
-        ui.TextChanged_05()
+        text_changed_05(ui)
 
 
 @error_decorator
@@ -327,4 +331,4 @@ def cell_clicked_11(ui):
     df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name}")
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
     df.set_index('index', inplace=True)
-    ui.ShowDialogGraph(df)
+    show_dialog_graph(ui, df)

@@ -1,9 +1,9 @@
 
 import random
-from PyQt5.QtWidgets import QMessageBox
 from ui.set_text import famous_saying
-from utility.setting_base import indi_base, indicator
+from PyQt5.QtWidgets import QMessageBox
 from utility.static import error_decorator
+from utility.setting_base import indi_base, indicator
 
 
 @error_decorator

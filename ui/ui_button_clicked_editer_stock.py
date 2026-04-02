@@ -1,16 +1,18 @@
 
+from ui.ui_vars_change import *
 from multiprocessing import Process
 from backtest.optimiz import Optimize
 from backtest.backtest import BackTest
 from backtest.backfinder import BackFinder
+from utility.static import error_decorator
 from PyQt5.QtWidgets import QMessageBox, QApplication
+from ui.ui_process_alive import backtest_process_alive
 from backtest.optimiz_conditions import OptimizeConditions
 from backtest.rolling_walk_forward_test import RollingWalkForwardTest
 from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
 from ui.set_style import style_bc_by, style_bc_dk, style_bc_bs, style_bc_bd, style_bc_st
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QParallelAnimationGroup, QRect
 from ui.set_text import testtext, rwfttext, gaoptext, vedittxt, optitext, condtext, cedittxt, example_finder
-from utility.static import error_decorator
 
 
 def group_animation_01(ui):
@@ -1264,7 +1266,8 @@ def stock_cond_editer(ui):
 
 @error_decorator
 def stock_backtest_start(ui):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1279,7 +1282,7 @@ def stock_backtest_start(ui):
             QMessageBox.critical(ui, '오류 알림', '백테엔진을 먼저 구동하십시오.\n')
             return
         if not back_club and (not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier)):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1305,7 +1308,7 @@ def stock_backtest_start(ui):
             QMessageBox.critical(ui, '오류 알림', '전략을 저장하고 콤보박스에서 선택하십시오.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', '백테스트'))
 
@@ -1317,14 +1320,15 @@ def stock_backtest_start(ui):
                   endtime, buystg, sellstg, ui.dict_cn, ui.back_count, bl, False, back_club)
         )
         ui.proc_backtester_bs.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
 
 @error_decorator
 def stock_backfinder_start(ui):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1334,7 +1338,7 @@ def stock_backfinder_start(ui):
             QMessageBox.critical(ui, '오류 알림', '백테엔진이 구동되지 않았습니다.\n')
             return
         if not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1360,7 +1364,7 @@ def stock_backfinder_start(ui):
             QMessageBox.critical(ui, '오류 알림', '현재 매수전략이 백파인더용이 아닙니다.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', '백파인더'))
 
@@ -1371,7 +1375,7 @@ def stock_backfinder_start(ui):
                   ui.dict_set, avgtime, startday, endday, starttime, endtime, buystg, ui.back_count)
         )
         ui.proc_backtester_bf.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
@@ -1386,7 +1390,8 @@ def stock_backfinder_sample(ui):
 
 @error_decorator
 def stock_opti_start(ui, back_name):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1398,7 +1403,7 @@ def stock_opti_start(ui, back_name):
         if not ui.backtest_engine or (not (QApplication.keyboardModifiers() & Qt.ShiftModifier) and
                                       not (QApplication.keyboardModifiers() & Qt.AltModifier) and
                                       (QApplication.keyboardModifiers() & Qt.ControlModifier)):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1441,7 +1446,7 @@ def stock_opti_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '변수를 설장하고 콤보박스에서 선택하십시오.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', '최적화'))
 
@@ -1536,14 +1541,15 @@ def stock_opti_start(ui, back_name):
                       ui.back_sques, ui.multi, back_name, gubun, ui.dict_set)
             )
             ui.proc_backtester_bvct.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
 
 @error_decorator
 def stock_opti_rwft_start(ui, back_name):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1553,7 +1559,7 @@ def stock_opti_rwft_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '백테엔진이 구동되지 않았습니다.\n')
             return
         if not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1596,7 +1602,7 @@ def stock_opti_rwft_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '변수를 설장하고 콤보박스에서 선택하십시오.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', '전진분석'))
 
@@ -1649,14 +1655,15 @@ def stock_opti_rwft_start(ui, back_name):
                       ui.back_sques, ui.multi, back_name, gubun, ui.dict_set)
             )
             ui.proc_backtester_brvc.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
 
 @error_decorator
 def stock_opti_ga_start(ui, back_name):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1666,7 +1673,7 @@ def stock_opti_ga_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '백테엔진이 구동되지 않았습니다.\n')
             return
         if not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1698,7 +1705,7 @@ def stock_opti_ga_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '변수를 설장하고 콤보박스에서 선택하십시오.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', 'GA최적화'))
 
@@ -1729,14 +1736,15 @@ def stock_opti_ga_start(ui, back_name):
                       ui.multi, back_name, gubun, ui.dict_set)
             )
             ui.proc_backtester_ogvc.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
 
 @error_decorator
 def stock_opti_cond_start(ui, back_name):
-    if ui.BacktestProcessAlive():
+    from ui.ui_backtest_engine import clear_backtestQ, backengine_show
+    if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
         if ui.back_engining:
@@ -1746,7 +1754,7 @@ def stock_opti_cond_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '백테엔진이 구동되지 않았습니다.\n')
             return
         if not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier):
-            ui.BackTestengineShow('주식')
+            backengine_show(ui, '주식')
             return
         if ui.back_cancelling:
             QMessageBox.critical(ui, '오류 알림', '이전 백테스트를 중지하고 있습니다.\n잠시 후 다시 시도하십시오.\n')
@@ -1781,7 +1789,7 @@ def stock_opti_cond_start(ui, back_name):
             QMessageBox.critical(ui, '오류 알림', '조건을 저장하고 콤보박스에서 선택하십시오.\n')
             return
 
-        ui.ClearBacktestQ()
+        clear_backtestQ(ui)
         for q in ui.back_eques:
             q.put(('백테유형', '조건최적화'))
 
@@ -1812,7 +1820,7 @@ def stock_opti_cond_start(ui, back_name):
                       ui.multi, back_name, gubun, ui.dict_set)
             )
             ui.proc_backtester_ocvc.start()
-        ui.StockBacktestLog()
+        stock_backtest_log(ui)
         ui.ss_progressBar_01.setValue(0)
         ui.ssicon_alert = True
 
@@ -1821,7 +1829,7 @@ def stock_opti_cond_start(ui, back_name):
 def stock_optivars_to_gavars(ui):
     opti_vars_text = ui.ss_textEditttt_05.toPlainText()
     if opti_vars_text:
-        ga_vars_text = ui.GetOptivarsToGavars(opti_vars_text)
+        ga_vars_text = get_optivars_to_gavars(ui, opti_vars_text)
         ui.ss_textEditttt_06.clear()
         ui.ss_textEditttt_06.append(ga_vars_text)
     else:
@@ -1832,7 +1840,7 @@ def stock_optivars_to_gavars(ui):
 def stock_gavars_to_optivars(ui):
     ga_vars_text = ui.ss_textEditttt_06.toPlainText()
     if ga_vars_text:
-        opti_vars_text = ui.GetGavarsToOptivars(ga_vars_text)
+        opti_vars_text = get_gavars_to_optivars(ui, ga_vars_text)
         ui.ss_textEditttt_05.clear()
         ui.ss_textEditttt_05.append(opti_vars_text)
     else:
@@ -1843,7 +1851,7 @@ def stock_gavars_to_optivars(ui):
 def stock_stg_vars_change(ui):
     buystg = ui.ss_textEditttt_01.toPlainText()
     sellstg = ui.ss_textEditttt_02.toPlainText()
-    buystg_str, sellstg_str = ui.GetStgtxtToVarstxt(buystg, sellstg)
+    buystg_str, sellstg_str = get_stgtxt_to_varstxt(ui, buystg, sellstg)
     ui.ss_textEditttt_03.clear()
     ui.ss_textEditttt_04.clear()
     ui.ss_textEditttt_03.append(buystg_str)
@@ -1854,7 +1862,7 @@ def stock_stg_vars_change(ui):
 def stock_stgvars_key_sort(ui):
     optivars = ui.ss_textEditttt_05.toPlainText()
     gavars = ui.ss_textEditttt_06.toPlainText()
-    optivars_str, gavars_str = ui.GetStgtxtSort2(optivars, gavars)
+    optivars_str, gavars_str = get_stgtxt_sort2(ui, optivars, gavars)
     ui.ss_textEditttt_05.clear()
     ui.ss_textEditttt_06.clear()
     ui.ss_textEditttt_05.append(optivars_str)
@@ -1865,7 +1873,7 @@ def stock_stgvars_key_sort(ui):
 def stock_optivars_key_sort(ui):
     buystg = ui.ss_textEditttt_03.toPlainText()
     sellstg = ui.ss_textEditttt_04.toPlainText()
-    buystg_str, sellstg_str = ui.GetStgtxtSort(buystg, sellstg)
+    buystg_str, sellstg_str = get_stgtxt_sort(ui, buystg, sellstg)
     ui.ss_textEditttt_03.clear()
     ui.ss_textEditttt_04.clear()
     ui.ss_textEditttt_03.append(buystg_str)

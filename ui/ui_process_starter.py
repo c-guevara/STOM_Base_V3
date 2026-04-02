@@ -1,4 +1,6 @@
 
+from ui.ui_etc import auto_back_schedule
+from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_03
 from utility.static import now, summer_time, now_utc, now_cme, str_ymdhms_ios, str_hms, error_decorator
 
 
@@ -18,12 +20,12 @@ def process_starter(ui):
 
     if ui.dict_set['백테스케쥴실행'] and not ui.backtest_engine and now().weekday() == ui.dict_set['백테스케쥴요일']:
         if ui.int_time < ui.dict_set['백테스케쥴시간'] <= inthms:
-            ui.AutoBackSchedule(1)
+            auto_back_schedule(ui, 1)
 
     if ui.auto_run > 0:
         login_num = ui.auto_run
         ui.auto_run = 0
-        ui.mnButtonClicked_03(login=login_num)
+        mnbutton_c_clicked_03(ui, login_num)
 
     UpdateWindowTitle(ui)
     ui.int_time = inthms
