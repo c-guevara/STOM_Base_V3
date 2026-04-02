@@ -118,9 +118,12 @@ class BackTest:
             self.SysExit(True)
 
         if self.is_tick:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
+        # noinspection PyUnresolvedReferences
         self.day_count = len(df_mt['일자'].unique())
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 기간 추출 완료'))
 
@@ -129,6 +132,7 @@ class BackTest:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 매도수전략 설정 완료'))
 
         arry_bct = np.zeros((len(df_mt), 3), dtype='float64')
+        # noinspection PyUnresolvedReferences
         arry_bct[:, 0] = df_mt['index'].values
         data = ('백테정보', self.ui_gubun, None, None, arry_bct, self.betting, self.day_count)
         for q in self.bstq_list:

@@ -35,16 +35,13 @@ class BinanceStrategyTick(StrategyBase):
         self.arry_code        = None
         self.info_for_signal  = None
 
-        self.dict_data        = {}
-        self.dict_signal_num  = {}
-        self.dict_buy_num     = {}
-        self.dict_condition   = {}
-        self.dict_cond_indexn = {}
-        self.dict_profit      = {}
-        self.high_low         = {} 
-        self.dict_gj          = {}
-        self.dict_jg          = {}
-        self.dict_info        = {}
+        self.dict_data        = {str: []}
+        self.dict_signal_num  = {str: int}
+        self.dict_buy_num     = {str: int}
+        self.dict_profit      = {str: []}
+        self.dict_gj          = {str: {}}
+        self.dict_jg          = {str: {}}
+        self.dict_info        = {str: {}}
         self.indi_settings    = []
         self.dict_signal      = {
             'BUY_LONG': [],

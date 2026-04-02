@@ -261,6 +261,8 @@ class BounceButton(QPushButton):
 
 class HoverComboBox(QComboBox):
     """마우스 오버 시 드롭다운을 자동으로 열고 닫는 콤보박스"""
+
+    # noinspection PyUnresolvedReferences
     def __init__(self, parent=None, delay_ms=100):
         super().__init__(parent)
         self._is_open = False
@@ -288,6 +290,7 @@ class HoverComboBox(QComboBox):
 
     def eventFilter(self, obj, event):
         """드롭다운 리스트의 마우스 이벤트 감지"""
+        # noinspection PyUnresolvedReferences
         if obj == self.view().viewport():
             if event.type() == QEvent.Enter:
                 self._is_mouse_over = True
@@ -347,6 +350,7 @@ class HoverGroupBox(QGroupBox):
 
 class PlainTextEdit(QTextEdit):
     def insertFromMimeData(self, source):
+        # noinspection PyUnresolvedReferences
         self.insertPlainText(source.text())
 
 
@@ -360,6 +364,7 @@ class FixedColumnTableWidget(QTableWidget):
         self._clicked = clicked
         self._setup_fixed_column()
 
+    # noinspection PyUnresolvedReferences
     def _setup_fixed_column(self):
         self._first_column_table = QTableWidget(self)
         self._first_column_table.verticalHeader().setDefaultSectionSize(23)
@@ -384,6 +389,7 @@ class FixedColumnTableWidget(QTableWidget):
 
     def _sync_child_to_parent_scroll(self, value):
         if self._is_fixed:
+            # noinspection PyUnresolvedReferences
             self.verticalScrollBar().setValue(value)
 
     def _sync_parent_to_child_scroll(self, value):
@@ -432,6 +438,7 @@ class FixedColumnTableWidget(QTableWidget):
             self._first_column_table.setColumnCount(1)
             self._first_column_table.setRowCount(self.rowCount())
             self._first_column_table.setColumnWidth(0, self._first_column_width)
+            # noinspection PyUnresolvedReferences
             self._first_column_table.setHorizontalHeaderLabels([self.horizontalHeaderItem(0).text() if self.horizontalHeaderItem(0) else ''])
 
             for row in range(self.rowCount()):
@@ -449,6 +456,7 @@ class FixedColumnTableWidget(QTableWidget):
         else:
             self._first_column_table.hide()
 
+    # noinspection PyUnresolvedReferences
     def _update_fixed_column_position(self):
         if not self._is_fixed or not self._first_column_table:
             return
@@ -488,6 +496,7 @@ class FixedColumnTableWidget(QTableWidget):
     def setHorizontalHeaderLabels(self, labels):
         super().setHorizontalHeaderLabels(labels)
         if self._is_fixed and len(labels) > 0:
+            # noinspection PyUnresolvedReferences
             self._first_column_table.setHorizontalHeaderLabels([labels[0]])
 
     def setColumnWidth(self, column, width):
@@ -756,6 +765,7 @@ class WidgetCreater:
         dialog.setFont(qfont12)
         return dialog
 
+    # noinspection PyUnresolvedReferences
     def setTablewidget(self, parent, columns, rowcount, vscroll=False, visible=True, clicked=None, valuechanged=None,
                        sortchanged=None, fixed=False):
         if fixed:

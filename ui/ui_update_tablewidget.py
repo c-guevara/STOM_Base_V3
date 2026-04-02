@@ -175,6 +175,7 @@ class UpdateTablewidget:
             '최고매도금액', '최고매수가격', '최고매도가격', '누적초당매수수량', '누적초당매도수량', '매도수5호가잔량합'
         ]
 
+    # noinspection PyUnresolvedReferences
     @error_decorator
     def update_tablewidget(self, data):
         if len(data) == 2:

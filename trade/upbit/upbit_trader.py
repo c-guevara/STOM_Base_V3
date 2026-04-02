@@ -297,7 +297,9 @@ class UpbitTrader:
                     if self.CheckError(ret):
                         dt = self.GetIndex()
                         self.dict_intg['추정예수금'] -= 주문수량 * 주문가격
+                        # noinspection PyUnresolvedReferences
                         self.dict_order[주문구분][종목코드] = [ret['uuid'], timedelta_sec(self.dict_set['코인매수취소시간초']), 정정횟수, 주문가격, GetUpbitHogaunit(주문가격)]
+                        # noinspection PyUnresolvedReferences
                         self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, ret['uuid'])
                         self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
                 else:
@@ -314,7 +316,9 @@ class UpbitTrader:
                 if ret is not None:
                     if self.CheckError(ret):
                         dt = self.GetIndex()
+                        # noinspection PyUnresolvedReferences
                         self.dict_order[주문구분][종목코드] = [ret['uuid'], timedelta_sec(self.dict_set['코인매도취소시간초']), 정정횟수, 주문가격, GetUpbitHogaunit(주문가격)]
+                        # noinspection PyUnresolvedReferences
                         self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, ret['uuid'])
                         self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
                 else:

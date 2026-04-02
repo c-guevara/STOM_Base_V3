@@ -107,6 +107,7 @@ def show_dialog_web(ui, _show, code):
         DialogAnimator.setup_dialog_animation(ui.dialog_info, duration=250)
         ui.dialog_info.show()
     if ui.dialog_web.isVisible() and ui.dialog_info.isVisible():
+        # noinspection PyUnresolvedReferences
         ui.webEngineView.load(QUrl(f'https://finance.naver.com/item/main.naver?code={code}'))
         ui.webcQ.put(('기업정보', code))
 
@@ -257,6 +258,7 @@ def show_giup(ui):
     if not ui.dialog_web.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_web, duration=250)
         ui.dialog_web.show()
+        # noinspection PyUnresolvedReferences
         ui.webEngineView.load(QUrl('https://finance.naver.com/sise/'))
     else:
         ui.dialog_web.close()
@@ -406,6 +408,7 @@ def show_order(ui):
         if tableWidget is not None:
             ui.od_comboBoxxxxx_01.clear()
             for row in range(100):
+                # noinspection PyUnresolvedReferences
                 item = tableWidget.item(row, 0)
                 if item is not None:
                     name = item.text()

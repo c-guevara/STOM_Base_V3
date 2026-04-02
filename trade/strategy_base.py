@@ -65,6 +65,7 @@ class StrategyBase:
             return 0, False
         이전누적 = 누적잔량[fill_idx - 1] if fill_idx > 0 else 0
         남은수량 = 주문수량 - 이전누적
+        # noinspection PyUnresolvedReferences
         거래금액 = np.sum(호가배열[:fill_idx] * 잔량배열[:fill_idx]) + 호가배열[fill_idx] * 남은수량
         return 거래금액, True
 
@@ -396,10 +397,12 @@ class StrategyBase:
             sidx, eidx = self._get_double_pre_index(tick, pre)
             if self.is_tick:
                 arry_close = self.arry_code[sidx:eidx, self.dict_findex['현재가']]
+                # noinspection PyUnresolvedReferences
                 volatility = np.std(arry_close) / np.mean(arry_close) * 100
             else:
                 arry_high  = self.arry_code[sidx:eidx, self.dict_findex['분봉고가']]
                 arry_low   = self.arry_code[sidx:eidx, self.dict_findex['분봉저가']]
+                # noinspection PyUnresolvedReferences
                 volatility = np.std(arry_high - arry_low) / np.mean(arry_high - arry_low) * 100
             return volatility
         return 0

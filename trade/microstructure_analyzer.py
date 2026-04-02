@@ -83,6 +83,7 @@ try:
                 curr_qty = quantities[row + 1, col]
                 max_qty = max(prev_qty, curr_qty)
 
+                # noinspection PyUnresolvedReferences
                 if max_qty > 0:
                     change_ratio = abs(curr_qty - prev_qty) / max_qty
                     if change_ratio > max_change_ratio:
@@ -114,6 +115,7 @@ try:
                 curr_qty = quantities[row + 1, col]
                 max_qty = max(prev_qty, curr_qty)
 
+                # noinspection PyUnresolvedReferences
                 if max_qty > 0:
                     change_ratio = abs(curr_qty - prev_qty) / max_qty
                     if change_ratio > threshold:
@@ -534,7 +536,7 @@ except:
 
         return np.array(results, dtype=np.float64) if results else np.empty((0, 6), dtype=np.float64)
 
-
+    # noinspection PyUnresolvedReferences
     def _calc_detect_stop_hunt(prices: np.ndarray, volumes: np.ndarray, price_threshold: float, vol_threshold: float):
         """스탑로스 털기 패턴 감지 (벡터 연산 버전 - 32비트 fallback)"""
         prices = np.asarray(prices, dtype=np.float64)
@@ -906,6 +908,7 @@ class MicrostructureAnalyzer:
         else:
             bid_concentration = 0.0
 
+        # noinspection PyUnresolvedReferences
         concentration_score = (bid_concentration + ask_concentration) / 2
         pressure_level      = (imbalance + concentration_score) / 2
 

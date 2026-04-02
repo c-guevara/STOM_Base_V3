@@ -102,19 +102,20 @@ class KiwoomAgentTick:
         self.tr_df       = None
 
         self.dict_name   = {}
-        self.dict_dtdm   = {}
         self.dict_hgbs   = {}
-        self.dict_data   = {}
-        self.dict_vipr   = {}
         self.dict_sghg   = {}
-        self.dict_mtop   = {}
         self.dict_sgbn   = {}
         self.dict_sncd   = {}
-        self.dict_jgdt   = {}
-        self.dict_money  = {}
+        self.dict_vipr   = {str: []}
+
+        self.dict_dtdm   = {str: []}
+        self.dict_data   = {str: []}
+        self.dict_money  = {str: []}
         self.dict_bmbyp  = {}
         self.dict_smbyp  = {}
         self.dict_index  = {}
+        self.dict_mtop   = {}
+        self.dict_jgdt   = {}
 
         self.list_hgdt   = [0, 0, 0, 0]
         self.list_code   = []
@@ -883,6 +884,7 @@ class KiwoomAgentTick:
         for i in range(0, len(self.list_code), 100):
             rreg = [sn_gsjm + k, ';'.join(self.list_code[i:i + 100]), '10;12;14;30;228;41;61;71;81', 1]
             self.SetRealReg(rreg)
+            # noinspection PyUnresolvedReferences
             text = f"실시간 알림 등록 완료 - [{sn_gsjm + k}] 종목갯수 {len(rreg[1].split(';'))}"
             self.mgzservQ.put(('window', (ui_num['기본로그'], text)))
             k += 1

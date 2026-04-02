@@ -48,15 +48,16 @@ class UpbitReceiverTick:
         self.cstgQ       = qlist[10]
         self.dict_set    = dict_set
 
-        self.dict_dtdm   = {}
-        self.dict_jgdt   = {}
-        self.dict_data   = {}
         self.dict_daym   = {}
-        self.dict_mtop   = {}
-        self.dict_money  = {}
+
+        self.dict_dtdm   = {str: []}
+        self.dict_data   = {str: []}
+        self.dict_money  = {str: []}
         self.dict_bmbyp  = {}
         self.dict_smbyp  = {}
         self.dict_index  = {}
+        self.dict_mtop   = {}
+        self.dict_jgdt   = {}
 
         self.list_hgdt   = [0, 0, 0, 0]
         self.list_gsjm   = []

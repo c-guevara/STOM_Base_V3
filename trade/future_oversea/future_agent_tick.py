@@ -73,17 +73,19 @@ class FutureAgentTick:
         self.tr_next     = None
         self.tr_df       = None
 
-        self.dict_dtdm   = {}
         self.dict_hgbs   = {}
-        self.dict_data   = {}
-        self.dict_info   = {}
-        self.dict_mtop   = {}
-        self.dict_jgdt   = {}
         self.dict_sncd   = {}
-        self.dict_money  = {}
+        self.dict_info   = {str: {}}
+
+        self.dict_dtdm   = {str: []}
+        self.dict_data   = {str: []}
+        self.dict_money  = {str: []}
+        self.dict_money  = {str: []}
         self.dict_bmbyp  = {}
         self.dict_smbyp  = {}
         self.dict_index  = {}
+        self.dict_mtop   = {}
+        self.dict_jgdt   = {}
 
         self.list_hgdt   = [0, 0, 0, 0]
         self.real_codes  = []

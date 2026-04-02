@@ -79,6 +79,7 @@ UI_CONFIG = {
 }
 
 
+# noinspection PyUnresolvedReferences
 def _activated_common(ui, ui_type, idx):
     """공통 activated 로직"""
     config = UI_CONFIG[ui_type]
@@ -161,12 +162,14 @@ def activated_09(ui, ui_type):
     """최적화용 전략 선택시 경고 메시지 (09번 공통)"""
     config = UI_CONFIG[ui_type]
     widgets = config['widgets']
-    
+
+    # noinspection PyUnresolvedReferences
     strategy_name = getattr(ui, widgets['combo_09']).currentText()
     if not strategy_name:
         return
     
     gubun = config['gubun_fn'](ui)
+    # noinspection PyUnresolvedReferences
     table = config['tables'][2].format(gubun=gubun) if ui_type == 'stock' else config['tables'][2]
     
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')

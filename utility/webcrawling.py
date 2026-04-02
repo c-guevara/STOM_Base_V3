@@ -140,6 +140,7 @@ class WebCrawling(QThread):
         df = pd.DataFrame({'일자': date_list, '정보제공': jbjg_list, '공시': gygs_list, '링크': link_list})
         self.signal.emit((ui_num['기업공시'], df))
 
+    # noinspection PyUnresolvedReferences
     @thread_decorator
     def JmnsCrawling(self, code):
         data_list = []
@@ -297,6 +298,7 @@ class WebCrawling(QThread):
         """한국주식 데이터 수집 (네이버)"""
         existing_data = self.dict_data.get(name)
         if existing_data is not None:
+            # noinspection PyUnresolvedReferences
             last_time = existing_data['time'].iloc[-1]
         else:
             last_time = None
@@ -388,6 +390,7 @@ class WebCrawling(QThread):
         for name, url_base in symbols.items():
             existing_data = self.dict_data.get(name)
             if existing_data is not None:
+                # noinspection PyUnresolvedReferences
                 last_time = existing_data['time'].iloc[-1]
             else:
                 last_time = None

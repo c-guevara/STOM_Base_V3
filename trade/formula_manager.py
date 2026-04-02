@@ -83,7 +83,7 @@ class FormulaManager(StrategyBase):
         self.arry_code   = arry
         self.is_tick     = is_tick
         self.avg_list    = [w_unit]
-        self.high_low    = {}
+        self.high_low    = {str: []}
         self.tick_count  = 0
 
         if market == 1:

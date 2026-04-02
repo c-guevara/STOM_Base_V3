@@ -63,6 +63,7 @@ def get_indicator_detail(ui, code):
             else:
                 indistg = ''
                 if buystg is not None:
+                    # noinspection PyUnresolvedReferences
                     for line in buystg.split('\n'):
                         if 'self.indicator' in line:
                             indistg += f"{line.replace('self.indicator', 'indicator_')}\n"

@@ -13,6 +13,7 @@ def set_builtin_print(bit64, q):
         try:
             is_direct_print = False
             frame = inspect.currentframe()
+            # noinspection PyUnresolvedReferences
             caller_frame = frame.f_back.f_back
             if caller_frame:
                 caller_filename = caller_frame.f_code.co_filename
@@ -162,6 +163,7 @@ def summer_time():
     import pytz
     now_utc_ = datetime.datetime.now(pytz.utc)
     now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
+    # noinspection PyUnresolvedReferences
     summer_t = int(now_cme_.dst().total_seconds())
     return summer_t
 

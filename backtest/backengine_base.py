@@ -328,6 +328,7 @@ class BackEngineBase(StrategyBase):
                 if self.gubun == 0:
                     self.wq.put((ui_num['시스템로그'], format_exc()))
 
+    # noinspection PyUnresolvedReferences
     def DataLoad(self, data):
         def data_load(days):
             try:
@@ -482,9 +483,12 @@ class BackEngineBase(StrategyBase):
         if shared_info is None:
             return None
 
+        # noinspection PyUnresolvedReferences
         code = shared_info['code']
         if self.dict_set['백테일괄로딩']:
+            # noinspection PyUnresolvedReferences
             shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
+            # noinspection PyUnresolvedReferences
             arry_code = np.ndarray(
                 shared_info['shape'],
                 dtype=shared_info['dtype'],
@@ -492,6 +496,7 @@ class BackEngineBase(StrategyBase):
             ).copy()
             shm.close()
         else:
+            # noinspection PyUnresolvedReferences
             arry_code = pickle_read(shared_info['file_name'])
 
         if self.same_days and self.same_time:
@@ -567,6 +572,7 @@ class BackEngineBase(StrategyBase):
             if last > 0:
                 indexs = self.arry_code[:, 0].astype(np.int64)
                 day_vals = indexs // 1_000_000 if self.is_tick else indexs // 10_000
+                # noinspection PyUnresolvedReferences
                 day_last_indexs = np.where(day_vals[:-1] != day_vals[1:])[0]
                 day_last_indexs = np.concatenate([day_last_indexs, [last]])
 

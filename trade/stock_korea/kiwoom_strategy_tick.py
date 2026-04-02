@@ -39,12 +39,12 @@ class KiwoomStrategyTick(StrategyBase):
         self.chart_code       = None
         self.info_for_signal  = None
 
-        self.dict_data        = {}
-        self.dict_signal_num  = {}
-        self.dict_buy_num     = {}
-        self.dict_profit      = {}
-        self.dict_gj          = {}
-        self.dict_jg          = {}
+        self.dict_data        = {str: []}
+        self.dict_signal_num  = {str: int}
+        self.dict_buy_num     = {str: int}
+        self.dict_profit      = {str: []}
+        self.dict_gj          = {str: {}}
+        self.dict_jg          = {str: {}}
         self.indi_settings    = []
         self.tuple_kosd       = ()
         self.dict_signal      = {
