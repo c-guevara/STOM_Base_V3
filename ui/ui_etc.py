@@ -142,6 +142,7 @@ def stom_live_screenshot(ui, cmd):
     qtest_qwait(1)
     file_name = f'./_log/StomLive_{mid}_{str_ymdhms()}.png'
     screen = QApplication.primaryScreen()
+    # noinspection PyUnresolvedReferences
     screenshot = screen.grabWindow(ui.winId())
     screenshot.save(file_name, 'png')
     ui.teleQ.put(file_name)
@@ -153,6 +154,7 @@ def chart_screenshot(ui):
     if ui.dialog_chart.isVisible():
         file_name = f'./_log/chart_{str_ymdhmsf()}.png'
         screen = QApplication.primaryScreen()
+        # noinspection PyUnresolvedReferences
         screenshot = screen.grabWindow(ui.dialog_chart.winId())
         screenshot.save(file_name, 'png')
         ui.teleQ.put(file_name)
@@ -164,6 +166,7 @@ def chart_screenshot2(ui):
     if ui.dialog_chart.isVisible():
         file_name = f'./_log/chart_{str_ymdhmsf()}.png'
         screen = QApplication.primaryScreen()
+        # noinspection PyUnresolvedReferences
         screenshot = screen.grabWindow(ui.dialog_chart.winId())
         screenshot.save(file_name, 'png')
         ui.teleQ.put(file_name)

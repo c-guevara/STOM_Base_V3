@@ -128,7 +128,7 @@ def cell_clicked_05(ui, row, col):
     show_dialog_graph(ui, df)
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyUnresolvedReferences
 @error_decorator
 def cell_clicked_06(ui, row, col):
     tableWidget = None

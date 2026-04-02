@@ -77,6 +77,7 @@ def backengine_show(ui, gubun):
     ui.backengin_window_open = True
 
 
+# noinspection PyUnresolvedReferences
 @thread_decorator
 def backengine_start(ui, gubun):
     from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill

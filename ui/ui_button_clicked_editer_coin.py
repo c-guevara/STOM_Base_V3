@@ -564,6 +564,7 @@ def group_animation_05(ui):
     ui.animation_group.start()
 
 
+# noinspection PyUnboundLocalVariable
 def group_animation_06(ui, pushButton1, pushButton2, pushButton3, pushButton4=None):
     # 위젯들의 좌측 상단으로 지오메트리 저장
     current_geo_btn01 = QRect(1350, 0, 0, 0)
@@ -607,9 +608,7 @@ def group_animation_06(ui, pushButton1, pushButton2, pushButton3, pushButton4=No
         anim_btn04 = QPropertyAnimation(pushButton4, b'geometry')
         anim_btn04.setDuration(300)
         anim_btn04.setEasingCurve(QEasingCurve.InOutCirc)
-        # noinspection PyUnboundLocalVariable
         anim_btn04.setStartValue(current_geo_btn04)
-        # noinspection PyUnboundLocalVariable
         anim_btn04.setEndValue(target_geo_btn04)
 
     # 그룹에 모든 애니메이션 추가
@@ -617,7 +616,6 @@ def group_animation_06(ui, pushButton1, pushButton2, pushButton3, pushButton4=No
     ui.animation_group2.addAnimation(anim_btn02)
     ui.animation_group2.addAnimation(anim_btn03)
     if pushButton4 is not None:
-        # noinspection PyUnboundLocalVariable
         ui.animation_group2.addAnimation(anim_btn04)
 
     # 애니메이션 시작

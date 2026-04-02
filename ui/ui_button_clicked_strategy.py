@@ -83,6 +83,7 @@ def button_clicked_strategy(ui, cmd):
 
     stg_text = ui.dict_stg_btn[cmd]
     if stg_text[-1] != '\n': stg_text = f'{stg_text}\n'
+    # noinspection PyUnresolvedReferences
     textEdit.insertPlainText(stg_text)
 
 

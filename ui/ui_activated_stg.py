@@ -79,6 +79,7 @@ UI_CONFIG = {
 }
 
 
+# noinspection PyUnresolvedReferences
 def _activated_common(ui, ui_type, idx):
     """공통 activated 로직"""
     config = UI_CONFIG[ui_type]
@@ -156,12 +157,13 @@ def activated_08(ui, ui_type):
     _activated_common(ui, ui_type, 8)
 
 
+# noinspection PyUnresolvedReferences
 @error_decorator
 def activated_09(ui, ui_type):
     """최적화용 전략 선택시 경고 메시지 (09번 공통)"""
     config = UI_CONFIG[ui_type]
     widgets = config['widgets']
-    
+
     strategy_name = getattr(ui, widgets['combo_09']).currentText()
     if not strategy_name:
         return

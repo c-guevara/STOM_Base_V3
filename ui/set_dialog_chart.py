@@ -299,6 +299,7 @@ class SetDialogChart:
             self.ui.dialog_chart.setFixedSize(1403, 1370)
 
         self.ui.ct_groupBoxxxxx_01.setGeometry(5, -10, 1393, 62)
+        # noinspection PyUnresolvedReferences
         self.ui.ct_groupBoxxxxx_02.setGeometry(5, 40, 1393, 1325 if not self.ui.dict_set['저해상도'] else 965)
 
         self.ui.ct_dateEdittttt_01.setGeometry(10, 25, 100, 30)

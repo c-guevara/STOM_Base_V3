@@ -67,6 +67,7 @@ def ssbutton_clicked_04(ui):
     if comboBox is None:
         return
 
+    # noinspection PyUnresolvedReferences
     file_name = comboBox.currentText()
 
     try:
@@ -170,6 +171,7 @@ def csbutton_clicked_04(ui):
     if comboBox is None:
         return
 
+    # noinspection PyUnresolvedReferences
     file_name = comboBox.currentText()
 
     try:
