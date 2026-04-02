@@ -696,7 +696,7 @@ elif not (현재가대비고가등락율 < 탐색등락율):
 elif not (초당거래대금 > 초당거래대금N(1)):
     SELL_SHORT = False
 
-# 이하는 수정하면 안됩니다.(SHORT 포지션 탐색일 경우만 BUY_LONG -> SELL_SHORT으로 변경하십시오.)
+# 이하는 수정하면 안됩니다. (SHORT 포지션 탐색일 경우만 BUY_LONG -> SELL_SHORT으로 변경하십시오.)
 현재날짜 = str(self.index)[:8]
 try:
     마지막날짜 = str(self.arry_code[self.indexn + 탐색틱수, 0])[:8]
