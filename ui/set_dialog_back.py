@@ -3,6 +3,7 @@ import psutil
 from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import QGroupBox, QLabel
 from ui.ui_button_clicked_dialog_backengine import *
+from ui.ui_checkbox_changed import checkbox_changed_15
 from ui.set_style import style_ck_bx, style_pgbar, style_bc_dk
 from ui.ui_button_clicked_etc import change_back_sdate, change_back_edate
 from ui.ui_activated_back import bactivated_01, bactivated_02, bactivated_03
@@ -72,22 +73,22 @@ class SetDialogBack:
                '학습         검증         확인          횟수      최적화기준                  매수                                 ' \
                '매도                                   범위                                         상태'
         self.ui.sd_labellllllll_01 = QLabel(text, self.ui.sd_groupBoxxxxx_02)
-        self.ui.sd_checkBoxxxxx_01 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_02 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_03 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_04 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_05 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_06 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_07 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_08 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_09 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_10 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_11 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_12 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_13 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_14 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_15 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_16 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=self.ui.CheckboxChanged_15, style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_01 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_02 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_03 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_04 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_05 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_06 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_07 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_08 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_09 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_10 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_11 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_12 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_13 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_14 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_15 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
+        self.ui.sd_checkBoxxxxx_16 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
 
         self.ui.list_checkBoxxxxxx = [
             self.ui.sd_checkBoxxxxx_01, self.ui.sd_checkBoxxxxx_02, self.ui.sd_checkBoxxxxx_03, self.ui.sd_checkBoxxxxx_04,

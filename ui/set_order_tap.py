@@ -1,6 +1,6 @@
 
 from PyQt5.QtWidgets import QLabel
-from ui.set_widget import error_decorator
+from ui.ui_checkbox_changed import *
 from ui.ui_button_clicked_settings import *
 
 
@@ -32,16 +32,16 @@ class SetOrderTap:
         self.ui.ss_od_groupBoxxx_16 = self.wc.setQGroupBox('익절청산', self.ui.ss_od_groupBoxxx_02, hover=True)
         self.ui.ss_od_groupBoxxx_17 = self.wc.setQGroupBox('손절청산', self.ui.ss_od_groupBoxxx_02, hover=True)
 
-        self.ui.ss_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_03,      changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_buyy_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_03,      changed=self.ui.sbCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_buyy_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_03, changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
-        self.ui.ss_buyy_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_03, changed=self.ui.sbCheckboxChanged_01, tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
-        self.ui.ss_buyy_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_buyy_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_buyy_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_03,   changed=self.ui.sbCheckboxChanged_01, tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_03,      changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_buyy_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_03,      changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_buyy_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_03, changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
+        self.ui.ss_buyy_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_03, changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
+        self.ui.ss_buyy_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_buyy_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_buyy_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_buyy_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_buyy_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_buyy_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.sodb_checkbox_list1 = [
             self.ui.ss_buyy_checkBox_01, self.ui.ss_buyy_checkBox_02, self.ui.ss_buyy_checkBox_03,
@@ -53,9 +53,9 @@ class SetOrderTap:
         self.ui.ss_buyy_labellll_01 = QLabel('▣ 분할매수횟수 (1:분할매수X)', self.ui.ss_od_groupBoxxx_04)
         self.ui.ss_buyy_lineEdit_01 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_04)
         self.ui.ss_buyy_labellll_02 = QLabel('▣ 분할매수방법 : 복수선택 불가능', self.ui.ss_od_groupBoxxx_04)
-        self.ui.ss_buyy_checkBox_11 = self.wc.setCheckBox('균등분할', self.ui.ss_od_groupBoxxx_04, changed=self.ui.sbCheckboxChanged_02, tip='종목당배팅금액을 분할횟수로 균등분할매수\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
-        self.ui.ss_buyy_checkBox_12 = self.wc.setCheckBox('비율감소', self.ui.ss_od_groupBoxxx_04, changed=self.ui.sbCheckboxChanged_02, tip='다음 추가매수 시 이전 매수비율의 절반으로 매수\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
-        self.ui.ss_buyy_checkBox_13 = self.wc.setCheckBox('비율증가', self.ui.ss_od_groupBoxxx_04, changed=self.ui.sbCheckboxChanged_02, tip='다음 추가매수 시 이전 매수비율의 두배로 매수\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
+        self.ui.ss_buyy_checkBox_11 = self.wc.setCheckBox('균등분할', self.ui.ss_od_groupBoxxx_04, changed=lambda state: sbcheckbox_changed_02(self.ui, state), tip='종목당배팅금액을 분할횟수로 균등분할매수\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
+        self.ui.ss_buyy_checkBox_12 = self.wc.setCheckBox('비율감소', self.ui.ss_od_groupBoxxx_04, changed=lambda state: sbcheckbox_changed_02(self.ui, state), tip='다음 추가매수 시 이전 매수비율의 절반으로 매수\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
+        self.ui.ss_buyy_checkBox_13 = self.wc.setCheckBox('비율증가', self.ui.ss_od_groupBoxxx_04, changed=lambda state: sbcheckbox_changed_02(self.ui, state), tip='다음 추가매수 시 이전 매수비율의 두배로 매수\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
         self.ui.ss_buyy_labellll_03 = QLabel('▣ 추가매수방법 : 복수선택 가능', self.ui.ss_od_groupBoxxx_04)
         self.ui.ss_buyy_checkBox_14 = self.wc.setCheckBox('매수시그널', self.ui.ss_od_groupBoxxx_04, tip='매수시그널을 통해서 추가매수')
         self.ui.ss_buyy_checkBox_15 = self.wc.setCheckBox('수익률(-)', self.ui.ss_od_groupBoxxx_04, tip='잔고의 - 수익률를 기준으로 추가매수')
@@ -113,12 +113,12 @@ class SetOrderTap:
                     "예제6: self.비중조절기준 = 리스크 <- 시장미시구조분석 전용\n"\
                     "예제7: self.비중조절기준 = 리스크점수 <- 시장리스크분석 전용"
 
-        self.ui.ss_bj_checkBoxxx_01 = self.wc.setCheckBox('비중조절사용안함', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged)
-        self.ui.ss_bj_checkBoxxx_02 = self.wc.setCheckBox('저가대비고가등락율', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged)
-        self.ui.ss_bj_checkBoxxx_03 = self.wc.setCheckBox('거래대금평균대비비율', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged)
-        self.ui.ss_bj_checkBoxxx_04 = self.wc.setCheckBox('등락율각도', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged)
-        self.ui.ss_bj_checkBoxxx_05 = self.wc.setCheckBox('당일거래대금각도', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged)
-        self.ui.ss_bj_checkBoxxx_06 = self.wc.setCheckBox('사용자비중조절기준', self.ui.ss_od_groupBoxxx_09, changed=self.ui.SettingStockWeightCotrolChanged, tip=bjjj_text)
+        self.ui.ss_bj_checkBoxxx_01 = self.wc.setCheckBox('비중조절사용안함', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state))
+        self.ui.ss_bj_checkBoxxx_02 = self.wc.setCheckBox('저가대비고가등락율', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state))
+        self.ui.ss_bj_checkBoxxx_03 = self.wc.setCheckBox('거래대금평균대비비율', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state))
+        self.ui.ss_bj_checkBoxxx_04 = self.wc.setCheckBox('등락율각도', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state))
+        self.ui.ss_bj_checkBoxxx_05 = self.wc.setCheckBox('당일거래대금각도', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state))
+        self.ui.ss_bj_checkBoxxx_06 = self.wc.setCheckBox('사용자비중조절기준', self.ui.ss_od_groupBoxxx_09, changed=lambda state: setting_stock_weight_cotrol_changed(self.ui, state), tip=bjjj_text)
         self.ui.ss_bj_labellllll_01 = QLabel('if    비중조절기준값 <                         :   배팅금액 * ', self.ui.ss_od_groupBoxxx_09)
         self.ui.ss_bj_labellllll_02 = QLabel('elif 비중조절기준값 <                         :   배팅금액 * ', self.ui.ss_od_groupBoxxx_09)
         self.ui.ss_bj_labellllll_03 = QLabel('elif 비중조절기준값 <                         :   배팅금액 * ', self.ui.ss_od_groupBoxxx_09)
@@ -141,16 +141,16 @@ class SetOrderTap:
 
         # =============================================================================================================
 
-        self.ui.ss_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_10,      changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_sell_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_10,      changed=self.ui.ssCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_sell_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_10, changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
-        self.ui.ss_sell_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_10, changed=self.ui.ssCheckboxChanged_01, tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
-        self.ui.ss_sell_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_sell_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_sell_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_10,   changed=self.ui.ssCheckboxChanged_01, tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_10,      changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_sell_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_10,      changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_sell_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_10, changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
+        self.ui.ss_sell_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_10, changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
+        self.ui.ss_sell_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_sell_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_sell_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_sell_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_sell_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_sell_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.sods_checkbox_list1 = [
             self.ui.ss_sell_checkBox_01, self.ui.ss_sell_checkBox_02, self.ui.ss_sell_checkBox_03,
@@ -162,9 +162,9 @@ class SetOrderTap:
         self.ui.ss_sell_labellll_01 = QLabel('▣ 분할매도횟수 (1:분할매도X)', self.ui.ss_od_groupBoxxx_11)
         self.ui.ss_sell_lineEdit_01 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_11)
         self.ui.ss_sell_labellll_02 = QLabel('▣ 분할매도방법 : 복수선택 불가능', self.ui.ss_od_groupBoxxx_11)
-        self.ui.ss_sell_checkBox_11 = self.wc.setCheckBox('균등분할', self.ui.ss_od_groupBoxxx_11, changed=self.ui.ssCheckboxChanged_02, tip='종목당배팅금액을 분할횟수로 균등분할매도\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
-        self.ui.ss_sell_checkBox_12 = self.wc.setCheckBox('비율감소', self.ui.ss_od_groupBoxxx_11, changed=self.ui.ssCheckboxChanged_02, tip='다음 추가매도 시 이전 매도비율의 절반으로 매도\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
-        self.ui.ss_sell_checkBox_13 = self.wc.setCheckBox('비율증가', self.ui.ss_od_groupBoxxx_11, changed=self.ui.ssCheckboxChanged_02, tip='다음 추가매도 시 이전 매도비율의 두배로 매도\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
+        self.ui.ss_sell_checkBox_11 = self.wc.setCheckBox('균등분할', self.ui.ss_od_groupBoxxx_11, changed=lambda state: sscheckbox_changed_02(self.ui, state), tip='종목당배팅금액을 분할횟수로 균등분할매도\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
+        self.ui.ss_sell_checkBox_12 = self.wc.setCheckBox('비율감소', self.ui.ss_od_groupBoxxx_11, changed=lambda state: sscheckbox_changed_02(self.ui, state), tip='다음 추가매도 시 이전 매도비율의 절반으로 매도\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
+        self.ui.ss_sell_checkBox_13 = self.wc.setCheckBox('비율증가', self.ui.ss_od_groupBoxxx_11, changed=lambda state: sscheckbox_changed_02(self.ui, state), tip='다음 추가매도 시 이전 매도비율의 두배로 매도\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
         self.ui.ss_sell_labellll_03 = QLabel('▣ 추가매도방법 : 복수선택 가능', self.ui.ss_od_groupBoxxx_11)
         self.ui.ss_sell_checkBox_14 = self.wc.setCheckBox('매도시그널', self.ui.ss_od_groupBoxxx_11, tip='매도시그널을 통해서 추가매도')
         self.ui.ss_sell_checkBox_15 = self.wc.setCheckBox('수익률(-)', self.ui.ss_od_groupBoxxx_11, tip='잔고의 - 수익률를 기준으로 추가매도(0.5설정 시 예: -0.5, -1.0, -1.5, -2.0, -2.5)')
@@ -238,19 +238,19 @@ class SetOrderTap:
         self.ui.cs_od_groupBoxxx_16 = self.wc.setQGroupBox('익절청산', self.ui.cs_od_groupBoxxx_02, hover=True)
         self.ui.cs_od_groupBoxxx_17 = self.wc.setQGroupBox('손절청산', self.ui.cs_od_groupBoxxx_02, hover=True)
 
-        self.ui.cs_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.cs_od_groupBoxxx_03,    changed=self.ui.cbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
-        self.ui.cs_buyy_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.cs_od_groupBoxxx_03,    changed=self.ui.cbCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.cs_buyy_checkBox_03 = self.wc.setCheckBox('지정가IOC', self.ui.cs_od_groupBoxxx_03, changed=self.ui.cbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.cs_buyy_checkBox_04 = self.wc.setCheckBox('지정가FOK', self.ui.cs_od_groupBoxxx_03, changed=self.ui.cbCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.cs_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.cs_od_groupBoxxx_03,    changed=lambda state: cbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.cs_buyy_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.cs_od_groupBoxxx_03,    changed=lambda state: cbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
+        self.ui.cs_buyy_checkBox_03 = self.wc.setCheckBox('지정가IOC', self.ui.cs_od_groupBoxxx_03, changed=lambda state: cbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.cs_buyy_checkBox_04 = self.wc.setCheckBox('지정가FOK', self.ui.cs_od_groupBoxxx_03, changed=lambda state: cbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.codb_checkbox_list1 = [self.ui.cs_buyy_checkBox_01, self.ui.cs_buyy_checkBox_02, self.ui.cs_buyy_checkBox_03, self.ui.cs_buyy_checkBox_04]
 
         self.ui.cs_buyy_labellll_01 = QLabel('▣ 분할매수횟수 (1:분할매수X)', self.ui.cs_od_groupBoxxx_04)
         self.ui.cs_buyy_lineEdit_01 = self.wc.setLineedit(self.ui.cs_od_groupBoxxx_04)
         self.ui.cs_buyy_labellll_02 = QLabel('▣ 분할매수방법 : 복수선택 불가능', self.ui.cs_od_groupBoxxx_04)
-        self.ui.cs_buyy_checkBox_05 = self.wc.setCheckBox('균등분할', self.ui.cs_od_groupBoxxx_04, changed=self.ui.cbCheckboxChanged_02, tip='종목당배팅금액을 분할횟수로 균등분할매수\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
-        self.ui.cs_buyy_checkBox_06 = self.wc.setCheckBox('비율감소', self.ui.cs_od_groupBoxxx_04, changed=self.ui.cbCheckboxChanged_02, tip='다음 추가매수 시 이전 매수비율의 절반으로 매수\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
-        self.ui.cs_buyy_checkBox_07 = self.wc.setCheckBox('비율증가', self.ui.cs_od_groupBoxxx_04, changed=self.ui.cbCheckboxChanged_02, tip='다음 추가매수 시 이전 매수비율의 두배로 매수\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
+        self.ui.cs_buyy_checkBox_05 = self.wc.setCheckBox('균등분할', self.ui.cs_od_groupBoxxx_04, changed=lambda state: cbcheckbox_changed_02(self.ui, state), tip='종목당배팅금액을 분할횟수로 균등분할매수\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
+        self.ui.cs_buyy_checkBox_06 = self.wc.setCheckBox('비율감소', self.ui.cs_od_groupBoxxx_04, changed=lambda state: cbcheckbox_changed_02(self.ui, state), tip='다음 추가매수 시 이전 매수비율의 절반으로 매수\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
+        self.ui.cs_buyy_checkBox_07 = self.wc.setCheckBox('비율증가', self.ui.cs_od_groupBoxxx_04, changed=lambda state: cbcheckbox_changed_02(self.ui, state), tip='다음 추가매수 시 이전 매수비율의 두배로 매수\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
         self.ui.cs_buyy_labellll_03 = QLabel('▣ 추가매수방법 : 복수선택 가능', self.ui.cs_od_groupBoxxx_04)
         self.ui.cs_buyy_checkBox_08 = self.wc.setCheckBox('매수시그널', self.ui.cs_od_groupBoxxx_04, tip='매수시그널을 통해서 추가매수')
         self.ui.cs_buyy_checkBox_09 = self.wc.setCheckBox('수익률(-)', self.ui.cs_od_groupBoxxx_04, tip='잔고의 - 수익률를 기준으로 추가매수')
@@ -297,12 +297,12 @@ class SetOrderTap:
         self.ui.cs_load_Button_01 = self.wc.setPushbutton('불러오기', parent=self.ui.cs_od_groupBoxxx_08, click=lambda: setting_order_load_03(self.ui))
         self.ui.cs_save_Button_01 = self.wc.setPushbutton('저장하기', parent=self.ui.cs_od_groupBoxxx_08, click=lambda: setting_order_save_03(self.ui))
 
-        self.ui.cs_bj_checkBoxxx_01 = self.wc.setCheckBox('비중조절사용안함', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged)
-        self.ui.cs_bj_checkBoxxx_02 = self.wc.setCheckBox('저가대비고가등락율', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged)
-        self.ui.cs_bj_checkBoxxx_03 = self.wc.setCheckBox('거래대금평균대비비율', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged)
-        self.ui.cs_bj_checkBoxxx_04 = self.wc.setCheckBox('등락율각도', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged)
-        self.ui.cs_bj_checkBoxxx_05 = self.wc.setCheckBox('당일거래대금각도', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged)
-        self.ui.cs_bj_checkBoxxx_06 = self.wc.setCheckBox('사용자비중조절기준', self.ui.cs_od_groupBoxxx_09, changed=self.ui.SettingCoinWeightCotrolChanged, tip=bjjj_text)
+        self.ui.cs_bj_checkBoxxx_01 = self.wc.setCheckBox('비중조절사용안함', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state))
+        self.ui.cs_bj_checkBoxxx_02 = self.wc.setCheckBox('저가대비고가등락율', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state))
+        self.ui.cs_bj_checkBoxxx_03 = self.wc.setCheckBox('거래대금평균대비비율', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state))
+        self.ui.cs_bj_checkBoxxx_04 = self.wc.setCheckBox('등락율각도', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state))
+        self.ui.cs_bj_checkBoxxx_05 = self.wc.setCheckBox('당일거래대금각도', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state))
+        self.ui.cs_bj_checkBoxxx_06 = self.wc.setCheckBox('사용자비중조절기준', self.ui.cs_od_groupBoxxx_09, changed=lambda state: setting_coin_weight_cotrol_changed(self.ui, state), tip=bjjj_text)
         self.ui.cs_bj_labellllll_01 = QLabel('if    비중조절기준값 <                         :   배팅금액 * ', self.ui.cs_od_groupBoxxx_09)
         self.ui.cs_bj_labellllll_02 = QLabel('elif 비중조절기준값 <                         :   배팅금액 * ', self.ui.cs_od_groupBoxxx_09)
         self.ui.cs_bj_labellllll_03 = QLabel('elif 비중조절기준값 <                         :   배팅금액 * ', self.ui.cs_od_groupBoxxx_09)
@@ -325,19 +325,19 @@ class SetOrderTap:
 
         # =============================================================================================================
 
-        self.ui.cs_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.cs_od_groupBoxxx_10,    changed=self.ui.csCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
-        self.ui.cs_sell_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.cs_od_groupBoxxx_10,    changed=self.ui.csCheckboxChanged_01, tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.cs_sell_checkBox_03 = self.wc.setCheckBox('지정가IOC', self.ui.cs_od_groupBoxxx_10, changed=self.ui.csCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.cs_sell_checkBox_04 = self.wc.setCheckBox('지정가FOK', self.ui.cs_od_groupBoxxx_10, changed=self.ui.csCheckboxChanged_01, tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.cs_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.cs_od_groupBoxxx_10,    changed=lambda state: cscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.cs_sell_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.cs_od_groupBoxxx_10,    changed=lambda state: cscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
+        self.ui.cs_sell_checkBox_03 = self.wc.setCheckBox('지정가IOC', self.ui.cs_od_groupBoxxx_10, changed=lambda state: cscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.cs_sell_checkBox_04 = self.wc.setCheckBox('지정가FOK', self.ui.cs_od_groupBoxxx_10, changed=lambda state: cscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.cods_checkbox_list1 = [self.ui.cs_sell_checkBox_01, self.ui.cs_sell_checkBox_02, self.ui.cs_sell_checkBox_03, self.ui.cs_sell_checkBox_04]
 
         self.ui.cs_sell_labellll_01 = QLabel('▣ 분할매도횟수 (1:분할매도X)', self.ui.cs_od_groupBoxxx_11)
         self.ui.cs_sell_lineEdit_01 = self.wc.setLineedit(self.ui.cs_od_groupBoxxx_11)
         self.ui.cs_sell_labellll_02 = QLabel('▣ 분할매도방법 : 복수선택 불가능', self.ui.cs_od_groupBoxxx_11)
-        self.ui.cs_sell_checkBox_05 = self.wc.setCheckBox('균등분할', self.ui.cs_od_groupBoxxx_11, changed=self.ui.csCheckboxChanged_02, tip='종목당배팅금액을 분할횟수로 균등분할매도\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
-        self.ui.cs_sell_checkBox_06 = self.wc.setCheckBox('비율감소', self.ui.cs_od_groupBoxxx_11, changed=self.ui.csCheckboxChanged_02, tip='다음 추가매도 시 이전 매도비율의 절반으로 매도\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
-        self.ui.cs_sell_checkBox_07 = self.wc.setCheckBox('비율증가', self.ui.cs_od_groupBoxxx_11, changed=self.ui.csCheckboxChanged_02, tip='다음 추가매도 시 이전 매도비율의 두배로 매도\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
+        self.ui.cs_sell_checkBox_05 = self.wc.setCheckBox('균등분할', self.ui.cs_od_groupBoxxx_11, changed=lambda state: cscheckbox_changed_02(self.ui, state), tip='종목당배팅금액을 분할횟수로 균등분할매도\n(예 0: 20., 1: 20., 2: 20., 3: 20., 4: 20.)')
+        self.ui.cs_sell_checkBox_06 = self.wc.setCheckBox('비율감소', self.ui.cs_od_groupBoxxx_11, changed=lambda state: cscheckbox_changed_02(self.ui, state), tip='다음 추가매도 시 이전 매도비율의 절반으로 매도\n(예 0: 51.61, 1: 25.81, 2: 12.90, 3: 6.45, 4: 3.23)')
+        self.ui.cs_sell_checkBox_07 = self.wc.setCheckBox('비율증가', self.ui.cs_od_groupBoxxx_11, changed=lambda state: cscheckbox_changed_02(self.ui, state), tip='다음 추가매도 시 이전 매도비율의 두배로 매도\n(예 0: 3.23, 1: 6.45, 2: 12.90, 3: 25.81, 4: 51.61)')
         self.ui.cs_sell_labellll_03 = QLabel('▣ 추가매도방법 : 복수선택 가능', self.ui.cs_od_groupBoxxx_11)
         self.ui.cs_sell_checkBox_08 = self.wc.setCheckBox('매도시그널', self.ui.cs_od_groupBoxxx_11, tip='매도시그널을 통해서 추가매도')
         self.ui.cs_sell_checkBox_09 = self.wc.setCheckBox('수익률(-)', self.ui.cs_od_groupBoxxx_11, tip='잔고의 - 수익률를 기준으로 추가매도(0.5설정 시 예: -0.5, -1.0, -1.5, -2.0, -2.5)')
