@@ -492,9 +492,12 @@ class Optimize:
             self.SysExit(True)
 
         if is_tick:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
+        # noinspection PyUnresolvedReferences
         day_list = df_mt['일자'].unique()
         day_list.sort()
 
@@ -504,11 +507,13 @@ class Optimize:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '텍스트에디터 클리어'))
 
         train_days, valid_days, test_days = list_days
+        # noinspection PyUnresolvedReferences
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 학습 기간 {train_days[0]} ~ {train_days[1]}'))
         if 'V' in self.backname:
             for vsday, veday, _ in valid_days:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 검증 기간 {vsday} ~ {veday}'))
         if 'T' in self.backname:
+            # noinspection PyUnresolvedReferences
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 확인 기간 {test_days[0]} ~ {test_days[1]}'))
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 기간 추출 완료'))
 
@@ -519,6 +524,7 @@ class Optimize:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], text))
 
         arry_bct = np.zeros((len(df_mt), 3), dtype='float64')
+        # noinspection PyUnresolvedReferences
         arry_bct[:, 0] = df_mt['index'].values
         data = ('백테정보', self.ui_gubun, list_days, None, arry_bct, betting, len(day_list))
         for q in self.bstq_list:

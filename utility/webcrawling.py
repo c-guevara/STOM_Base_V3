@@ -299,6 +299,7 @@ class WebCrawling(QThread):
         """한국주식 데이터 수집 (네이버)"""
         existing_data = self.dict_data.get(name)
         if existing_data is not None:
+            # noinspection PyUnresolvedReferences
             last_time = existing_data['time'].iloc[-1]
         else:
             last_time = None

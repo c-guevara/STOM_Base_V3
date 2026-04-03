@@ -304,9 +304,12 @@ class OptimizeGeneticAlgorithm:
             self.SysExit(True)
 
         if is_tick:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
+        # noinspection PyUnresolvedReferences
         day_list = df_mt['일자'].unique()
         day_list.sort()
 
@@ -345,6 +348,7 @@ class OptimizeGeneticAlgorithm:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 매도수전략 설정 완료'))
 
         arry_bct = np.zeros((len(df_mt), 3), dtype='float64')
+        # noinspection PyUnresolvedReferences
         arry_bct[:, 0] = df_mt['index'].values
         data = ('백테정보', self.ui_gubun, None, valid_days, arry_bct, betting, len(day_list))
         for q in self.bstq_list:

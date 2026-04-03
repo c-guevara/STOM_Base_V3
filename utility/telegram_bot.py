@@ -100,7 +100,9 @@ class TelegramBot(QThread):
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        # noinspection PyUnresolvedReferences
         cmd = update.message.text
+        # noinspection PyUnresolvedReferences
         cmd = cmd.replace('\n', '')
         if cmd in ('주식전략중지', '해선전략중지'):
             self.wdzservQ.put(('strategy', '매수전략중지'))

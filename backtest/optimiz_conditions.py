@@ -289,9 +289,12 @@ class OptimizeConditions:
                 self.SysExit(True)
 
         if is_tick:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
+            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
+        # noinspection PyUnresolvedReferences
         day_list = df_mt['일자'].unique()
         day_list.sort()
 

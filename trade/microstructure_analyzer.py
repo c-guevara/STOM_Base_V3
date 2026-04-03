@@ -83,6 +83,7 @@ try:
                 curr_qty = quantities[row + 1, col]
                 max_qty = max(prev_qty, curr_qty)
 
+                # noinspection PyUnresolvedReferences
                 if max_qty > 0:
                     change_ratio = abs(curr_qty - prev_qty) / max_qty
                     if change_ratio > max_change_ratio:
@@ -114,6 +115,7 @@ try:
                 curr_qty = quantities[row + 1, col]
                 max_qty = max(prev_qty, curr_qty)
 
+                # noinspection PyUnresolvedReferences
                 if max_qty > 0:
                     change_ratio = abs(curr_qty - prev_qty) / max_qty
                     if change_ratio > threshold:
