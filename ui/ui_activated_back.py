@@ -114,14 +114,11 @@ def bactivated_02(ui):
             list_comboBox = ui.list_vcomboBoxxxxx
 
         if list_comboBox is not None:
-            # noinspection PyUnresolvedReferences
             index = list_comboBox.index(ui.dialog_scheduler.focusWidget())
-            # noinspection PyUnresolvedReferences
             text = list_comboBox[index].currentText()
             back_type = ui.list_gcomboBoxxxxx[index].currentText()
             for i, combobox in enumerate(ui.list_gcomboBoxxxxx):
                 if i != index and combobox.currentText() == back_type:
-                    # noinspection PyUnresolvedReferences
                     list_comboBox[i].setCurrentText(text)
 
     if ui.dialog_scheduler.focusWidget() in ui.list_p1comboBoxxxx:

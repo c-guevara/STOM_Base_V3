@@ -291,7 +291,6 @@ class HoverComboBox(QComboBox):
     # noinspection PyUnresolvedReferences
     def eventFilter(self, obj, event):
         """드롭다운 리스트의 마우스 이벤트 감지"""
-        # noinspection PyUnresolvedReferences
         if obj == self.view().viewport():
             if event.type() == QEvent.Enter:
                 self._is_mouse_over = True
@@ -352,7 +351,6 @@ class HoverGroupBox(QGroupBox):
 class PlainTextEdit(QTextEdit):
     # noinspection PyUnresolvedReferences
     def insertFromMimeData(self, source):
-        # noinspection PyUnresolvedReferences
         self.insertPlainText(source.text())
 
 
@@ -392,7 +390,6 @@ class FixedColumnTableWidget(QTableWidget):
     # noinspection PyUnresolvedReferences
     def _sync_child_to_parent_scroll(self, value):
         if self._is_fixed:
-            # noinspection PyUnresolvedReferences
             self.verticalScrollBar().setValue(value)
 
     def _sync_parent_to_child_scroll(self, value):
@@ -442,7 +439,6 @@ class FixedColumnTableWidget(QTableWidget):
             self._first_column_table.setColumnCount(1)
             self._first_column_table.setRowCount(self.rowCount())
             self._first_column_table.setColumnWidth(0, self._first_column_width)
-            # noinspection PyUnresolvedReferences
             self._first_column_table.setHorizontalHeaderLabels([self.horizontalHeaderItem(0).text() if self.horizontalHeaderItem(0) else ''])
 
             for row in range(self.rowCount()):
@@ -501,7 +497,6 @@ class FixedColumnTableWidget(QTableWidget):
     def setHorizontalHeaderLabels(self, labels):
         super().setHorizontalHeaderLabels(labels)
         if self._is_fixed and len(labels) > 0:
-            # noinspection PyUnresolvedReferences
             self._first_column_table.setHorizontalHeaderLabels([labels[0]])
 
     def setColumnWidth(self, column, width):

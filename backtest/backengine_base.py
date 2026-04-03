@@ -484,12 +484,9 @@ class BackEngineBase(StrategyBase):
         if shared_info is None:
             return None
 
-        # noinspection PyUnresolvedReferences
         code = shared_info['code']
         if self.dict_set['백테일괄로딩']:
-            # noinspection PyUnresolvedReferences
             shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
-            # noinspection PyUnresolvedReferences
             arry_code = np.ndarray(
                 shared_info['shape'],
                 dtype=shared_info['dtype'],
@@ -497,7 +494,6 @@ class BackEngineBase(StrategyBase):
             ).copy()
             shm.close()
         else:
-            # noinspection PyUnresolvedReferences
             arry_code = pickle_read(shared_info['file_name'])
 
         if self.same_days and self.same_time:

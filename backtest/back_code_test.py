@@ -8,7 +8,7 @@ from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.static import timedelta_sec, qtest_qwait, now
 
 
-# noinspection PyUnusedLocal
+# noinspection PyUnusedLocal,PyUnresolvedReferences
 class BackCodeTest(QThread):
     def __init__(self, testQ, windowQ, stg, fm_list=None, var=None, ga=False):
         super().__init__()
@@ -22,7 +22,6 @@ class BackCodeTest(QThread):
         self.ms_analyzer = MicrostructureAnalyzer('stock')
         self.indicator   = indicator
 
-    # noinspection PyUnresolvedReferences
     def run(self):
         if self.stg is None:
             self.vars = {i: [[1, 2, 1], 1] for i in range(300)}

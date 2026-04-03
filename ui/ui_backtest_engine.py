@@ -184,12 +184,9 @@ def backengine_start(ui, gubun):
         query = GetMoneytopQuery(is_tick, gubun_, ui.startday, ui.endday, ui.starttime, ui.endtime)
         df_mt = pd.read_sql(query, con)
         if is_tick:
-            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
-            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
-        # noinspection PyUnresolvedReferences
         df_mt.set_index('index', inplace=True)
         con.close()
     except:
@@ -205,23 +202,19 @@ def backengine_start(ui, gubun):
         backtest_engine_kill(ui)
         return
 
-    # noinspection PyUnresolvedReferences
     if df_mt is None or df_mt.empty:
         ui.windowQ.put((ui_num['백테엔진'], '시작 또는 종료일자가 잘못 선택되었거나 해당 일자에 데이터가 존재하지 않습니다.'))
         backtest_engine_kill(ui)
         return
 
-    # noinspection PyUnresolvedReferences
     day_list = df_mt['일자'].unique()
 
     code_set = set()
-    # noinspection PyUnresolvedReferences
     for mt_text in df_mt['거래대금순위'].values:
         code_set.update(mt_text.split(';'))
 
     day_codes = {}
     for day in day_list:
-        # noinspection PyUnresolvedReferences
         df_mt_ = df_mt[df_mt['일자'] == day]
         codes = set()
         for mt_text in df_mt_['거래대금순위'].values:

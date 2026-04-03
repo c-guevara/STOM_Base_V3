@@ -398,12 +398,10 @@ class StrategyBase:
             sidx, eidx = self._get_double_pre_index(tick, pre)
             if self.is_tick:
                 arry_close = self.arry_code[sidx:eidx, self.dict_findex['현재가']]
-                # noinspection PyUnresolvedReferences
                 volatility = np.std(arry_close) / np.mean(arry_close) * 100
             else:
                 arry_high  = self.arry_code[sidx:eidx, self.dict_findex['분봉고가']]
                 arry_low   = self.arry_code[sidx:eidx, self.dict_findex['분봉저가']]
-                # noinspection PyUnresolvedReferences
                 volatility = np.std(arry_high - arry_low) / np.mean(arry_high - arry_low) * 100
             return volatility
         return 0

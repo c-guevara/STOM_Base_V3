@@ -345,7 +345,6 @@ class OptimizeGeneticAlgorithm:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 매도수전략 설정 완료'))
 
         arry_bct = np.zeros((len(df_mt), 3), dtype='float64')
-        # noinspection PyUnresolvedReferences
         arry_bct[:, 0] = df_mt['index'].values
         data = ('백테정보', self.ui_gubun, None, valid_days, arry_bct, betting, len(day_list))
         for q in self.bstq_list:
