@@ -5,8 +5,7 @@ from ui.ui_etc import auto_back_schedule
 from utility.static import now, qtest_qwait
 from ui.ui_button_clicked_dialog_database import *
 from ui.ui_backtest_engine import backtest_process_kill
-from ui.ui_button_clicked_editer_coin import coin_backtest_detail
-from ui.ui_button_clicked_editer_stock import stock_backtest_detail
+from ui.ui_button_clicked_editer_unified import backtest_detail
 from ui.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
 from ui.ui_process_alive import coin_strategy_process_alive, coin_receiver_process_alive, coin_trader_process_alive
 
@@ -117,9 +116,9 @@ class UpdateTextedit:
                             ('백파인더 COMPLETE', '최적화OG COMPLETE', '최적화OGV COMPLETE', '최적화OGVC COMPLETE',
                              '최적화OC COMPLETE', '최적화OCV COMPLETE', '최적화OCVC COMPLETE'):
                         if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
-                            stock_backtest_detail(self.ui)
+                            backtest_detail(self.ui, 'stock')
                         else:
-                            coin_backtest_detail(self.ui)
+                            backtest_detail(self.ui, 'coin')
 
                     if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
                         self.ui.ssicon_alert = False

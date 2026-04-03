@@ -7,6 +7,7 @@ from utility.static import qtest_qwait
 from PyQt5.QtWidgets import QMessageBox
 from utility.static import error_decorator
 from utility.strategy_version_manager import StrategyVersionManager
+from ui.ui_button_clicked_editer_unified import change_pre_button_edit, change_version_button_color
 
 
 SVM = StrategyVersionManager('stock', 'basic', 'buy', 'dummy')
@@ -125,14 +126,9 @@ def strategy_version(ui, market, gubun1, gubun2, strategy_name):
     for widget in version_widget_list:
         widget.setVisible(True)
 
-    if SVM.sorc == 's':
-        from ui.ui_button_clicked_editer_stock import change_pre_button_edit, change_version_button_color
-        change_pre_button_edit(ui)
-        change_version_button_color(ui)
-    else:
-        from ui.ui_button_clicked_editer_coin import change_pre_button_edit, change_version_button_color
-        change_pre_button_edit(ui)
-        change_version_button_color(ui)
+    gubun = 'stock' if SVM.sorc == 's' else 'coin'
+    change_pre_button_edit(ui, gubun)
+    change_version_button_color(ui, gubun)
 
     comboBox_reload(comboBox1, comboBox2)
 

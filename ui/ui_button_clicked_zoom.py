@@ -7,7 +7,7 @@ def group_animation(ui, pushButton, textEdit, pushButton_qrect, textEdit_qrect):
     current_geo_btn01 = pushButton.geometry()
     current_geo_tedt1 = textEdit.geometry()
 
-    ui.animation_group = QParallelAnimationGroup()
+    ui.animation_group3 = QParallelAnimationGroup()
 
     anim_btn01 = QPropertyAnimation(textEdit, b'geometry')
     anim_btn01.setDuration(300)
@@ -21,10 +21,10 @@ def group_animation(ui, pushButton, textEdit, pushButton_qrect, textEdit_qrect):
     anim_tedt1.setStartValue(current_geo_btn01)
     anim_tedt1.setEndValue(pushButton_qrect)
 
-    ui.animation_group.addAnimation(anim_btn01)
-    ui.animation_group.addAnimation(anim_tedt1)
+    ui.animation_group3.addAnimation(anim_btn01)
+    ui.animation_group3.addAnimation(anim_tedt1)
 
-    ui.animation_group.start()
+    ui.animation_group3.start()
 
 
 @error_decorator

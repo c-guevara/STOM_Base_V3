@@ -10,10 +10,9 @@ from multiprocessing import Process, shared_memory
 from ui.ui_process_alive import backtest_process_alive
 from utility.static import qtest_qwait, error_decorator
 from backtest.optimiz_conditions import OptimizeConditions
-from ui.ui_button_clicked_editer_coin import coin_backtest_log
+from ui.ui_button_clicked_editer_unified import backtest_log
 from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_01
 from PyQt5.QtWidgets import QLineEdit, QMessageBox, QApplication
-from ui.ui_button_clicked_editer_stock import stock_backtest_log
 from backtest.rolling_walk_forward_test import RollingWalkForwardTest
 from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
 from ui.ui_backtest_engine import clear_backtestQ, backengine_start, backengine_show
@@ -182,7 +181,7 @@ def sdbutton_clicked_02(ui):
                               bl, True, False)
                     )
                     ui.proc_backtester_bs.start()
-                    stock_backtest_log(ui)
+                    backtest_log(ui, 'stock')
                     ui.ss_progressBar_01.setValue(0)
                     ui.ssicon_alert = True
                 else:
@@ -195,7 +194,7 @@ def sdbutton_clicked_02(ui):
                               bl, True, False)
                     )
                     ui.proc_backtester_bs.start()
-                    coin_backtest_log(ui)
+                    backtest_log(ui, 'coin')
                     ui.cs_progressBar_01.setValue(0)
                     ui.csicon_alert = True
 
@@ -252,11 +251,11 @@ def sdbutton_clicked_02(ui):
                     ui.proc_backtester_ocvc.start()
 
                 if bt_gubun == '주식':
-                    stock_backtest_log(ui)
+                    backtest_log(ui, 'stock')
                     ui.ss_progressBar_01.setValue(0)
                     ui.ssicon_alert = True
                 else:
-                    coin_backtest_log(ui)
+                    backtest_log(ui, 'coin')
                     ui.cs_progressBar_01.setValue(0)
                     ui.csicon_alert = True
 
@@ -313,11 +312,11 @@ def sdbutton_clicked_02(ui):
                     ui.proc_backtester_ogvc.start()
 
                 if bt_gubun == '주식':
-                    stock_backtest_log(ui)
+                    backtest_log(ui, 'stock')
                     ui.ss_progressBar_01.setValue(0)
                     ui.ssicon_alert = True
                 else:
-                    coin_backtest_log(ui)
+                    backtest_log(ui, 'coin')
                     ui.cs_progressBar_01.setValue(0)
                     ui.csicon_alert = True
 
@@ -405,11 +404,11 @@ def sdbutton_clicked_02(ui):
                     ui.proc_backtester_brvc.start()
 
                 if bt_gubun == '주식':
-                    stock_backtest_log(ui)
+                    backtest_log(ui, 'stock')
                     ui.ss_progressBar_01.setValue(0)
                     ui.ssicon_alert = True
                 else:
-                    coin_backtest_log(ui)
+                    backtest_log(ui, 'coin')
                     ui.cs_progressBar_01.setValue(0)
                     ui.csicon_alert = True
 
@@ -538,11 +537,11 @@ def sdbutton_clicked_02(ui):
                     ui.proc_backtester_bvct.start()
 
                 if bt_gubun == '주식':
-                    stock_backtest_log(ui)
+                    backtest_log(ui, 'stock')
                     ui.ss_progressBar_01.setValue(0)
                     ui.ssicon_alert = True
                 else:
-                    coin_backtest_log(ui)
+                    backtest_log(ui, 'coin')
                     ui.cs_progressBar_01.setValue(0)
                     ui.csicon_alert = True
 

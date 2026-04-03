@@ -5,7 +5,7 @@ from ui.ui_strategy_version import strategy_version
 
 
 # UI 타입별 설정 매핑
-UI_CONFIG = {
+UI_ACTIBATED_CONFIG = {
     'coin': {
         'gubun_fn': lambda ui: 'upbit' if '업비트' in ui.dict_set['거래소'] else 'binance',
         'tables': [
@@ -82,33 +82,33 @@ UI_CONFIG = {
 # noinspection PyUnresolvedReferences
 def _activated_common(ui, ui_type, idx):
     """공통 activated 로직"""
-    config = UI_CONFIG[ui_type]
+    config = UI_ACTIBATED_CONFIG[ui_type]
     widgets = config['widgets']
     table = config['tables'][idx - 1]
-    
+
     combo_name = f'combo_{idx:02d}'
     line_name = f'line_{idx:02d}'
     text_name = f'text_{idx:02d}'
-    
+
     strategy_name = getattr(ui, widgets[combo_name]).currentText()
-    
+
     if not strategy_name:
         return
-    
+
     # gubun 계산 (stock/future 또는 upbit/binance)
     gubun = config['gubun_fn'](ui)
 
     # 테이블명 동적 치환 (stock의 경우)
     if '{' in table:
         table = table.format(gubun=gubun)
-    
+
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
-    
+
     if len(df) > 0:
         getattr(ui, widgets[text_name]).clear()
         getattr(ui, widgets[text_name]).append(df['전략코드'][strategy_name])
         getattr(ui, widgets[line_name]).setText(strategy_name)
-        
+
         if getattr(ui, widgets['push_41']).isVisible():
             stg_type = config['types'][idx - 1]
             buysell = config['buysell'][idx - 1]
@@ -161,18 +161,18 @@ def activated_08(ui, ui_type):
 @error_decorator
 def activated_09(ui, ui_type):
     """최적화용 전략 선택시 경고 메시지 (09번 공통)"""
-    config = UI_CONFIG[ui_type]
+    config = UI_ACTIBATED_CONFIG[ui_type]
     widgets = config['widgets']
 
     strategy_name = getattr(ui, widgets['combo_09']).currentText()
     if not strategy_name:
         return
-    
+
     gubun = config['gubun_fn'](ui)
     table = config['tables'][2].format(gubun=gubun) if ui_type == 'stock' else config['tables'][2]
-    
+
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
-    
+
     if len(df) > 0:
         try:
             optivars = [float(i) if '.' in i else int(i) for i in df['변수값'][strategy_name].split(';')]

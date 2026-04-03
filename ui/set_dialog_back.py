@@ -17,6 +17,37 @@ class SetDialogBack:
         self.wc = wc
         self.set()
 
+    def _create_widget_list(self, count, prefix, widget_type, parent, **kwargs):
+        """위젯 리스트를 동적으로 생성하는 헬퍼 메서드
+
+        Args:
+            count: 생성할 위젯 개수
+            prefix: 위젯명 접두사 (예: 'sd_gcomboBoxxxx')
+            widget_type: 위젯 타입 ('combobox', 'dateedit', 'lineedit', 'checkbox')
+            parent: 부모 위젯
+            **kwargs: 위젯 생성에 필요한 추가 인자
+        Returns:
+            생성된 위젯 리스트
+        """
+        widgets = []
+        for i in range(1, count + 1):
+            widget_name = f'{prefix}_{i:02d}'
+            if widget_type == 'combobox':
+                widget = self.wc.setCombobox(parent, **kwargs)
+            elif widget_type == 'dateedit':
+                widget = self.wc.setDateEdit(parent, **kwargs)
+            elif widget_type == 'lineedit':
+                widget = self.wc.setLineedit(parent, **kwargs)
+            elif widget_type == 'checkbox':
+                widget = self.wc.setCheckBox(kwargs.get('text', ''), parent, **{k: v for k, v in kwargs.items() if k != 'text'})
+            elif widget_type == 'progressbar':
+                widget = self.wc.setProgressBar(parent, **kwargs)
+            else:
+                continue
+            setattr(self.ui, widget_name, widget)
+            widgets.append(widget)
+        return widgets
+
     @error_decorator
     def set(self):
         self.ui.dialog_backengine = self.wc.setDialog('STOM BACKTEST ENGINE')
@@ -73,137 +104,30 @@ class SetDialogBack:
                '학습         검증         확인          횟수      최적화기준                  매수                                 ' \
                '매도                                   범위                                         상태'
         self.ui.sd_labellllllll_01 = QLabel(text, self.ui.sd_groupBoxxxxx_02)
-        self.ui.sd_checkBoxxxxx_01 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_02 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_03 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_04 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_05 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_06 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_07 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_08 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_09 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_10 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_11 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_12 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_13 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_14 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_15 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
-        self.ui.sd_checkBoxxxxx_16 = self.wc.setCheckBox('    ', self.ui.sd_groupBoxxxxx_02, changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx)
 
-        self.ui.list_checkBoxxxxxx = [
-            self.ui.sd_checkBoxxxxx_01, self.ui.sd_checkBoxxxxx_02, self.ui.sd_checkBoxxxxx_03, self.ui.sd_checkBoxxxxx_04,
-            self.ui.sd_checkBoxxxxx_05, self.ui.sd_checkBoxxxxx_06, self.ui.sd_checkBoxxxxx_07, self.ui.sd_checkBoxxxxx_08,
-            self.ui.sd_checkBoxxxxx_09, self.ui.sd_checkBoxxxxx_10, self.ui.sd_checkBoxxxxx_11, self.ui.sd_checkBoxxxxx_12,
-            self.ui.sd_checkBoxxxxx_13, self.ui.sd_checkBoxxxxx_14, self.ui.sd_checkBoxxxxx_15, self.ui.sd_checkBoxxxxx_16
-        ]
+        self.ui.list_checkBoxxxxxx = self._create_widget_list(
+            16, 'sd_checkBoxxxxx', 'checkbox', self.ui.sd_groupBoxxxxx_02, text='    ', changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx
+        )
 
-        self.ui.sd_gcomboBoxxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-        self.ui.sd_gcomboBoxxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_01(self.ui))
-
-        self.ui.list_gcomboBoxxxxx = [
-            self.ui.sd_gcomboBoxxxx_01, self.ui.sd_gcomboBoxxxx_02, self.ui.sd_gcomboBoxxxx_03, self.ui.sd_gcomboBoxxxx_04,
-            self.ui.sd_gcomboBoxxxx_05, self.ui.sd_gcomboBoxxxx_06, self.ui.sd_gcomboBoxxxx_07, self.ui.sd_gcomboBoxxxx_08,
-            self.ui.sd_gcomboBoxxxx_09, self.ui.sd_gcomboBoxxxx_10, self.ui.sd_gcomboBoxxxx_11, self.ui.sd_gcomboBoxxxx_12,
-            self.ui.sd_gcomboBoxxxx_13, self.ui.sd_gcomboBoxxxx_14, self.ui.sd_gcomboBoxxxx_15, self.ui.sd_gcomboBoxxxx_16
-        ]
+        self.ui.list_gcomboBoxxxxx = self._create_widget_list(
+            16, 'sd_gcomboBoxxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_01(self.ui)
+        )
 
         if self.ui.dict_set is not None:
             if self.ui.dict_set['백테날짜고정']:
-                self.ui.sd_sdateEditttt_01 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_02 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_03 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_04 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_05 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_06 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_07 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_08 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_09 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_10 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_11 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_12 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_13 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_14 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_15 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_16 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, qday=QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), changed=lambda: change_back_sdate(self.ui))
+                sdate_kwargs = {'qday': QDate.fromString(self.ui.dict_set['백테날짜'], 'yyyyMMdd'), 'changed': lambda: change_back_sdate(self.ui)}
             else:
-                self.ui.sd_sdateEditttt_01 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_02 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_03 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_04 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_05 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_06 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_07 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_08 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_09 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_10 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_11 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_12 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_13 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_14 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_15 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
-                self.ui.sd_sdateEditttt_16 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, addday=-int(self.ui.dict_set['백테날짜']), changed=lambda: change_back_sdate(self.ui))
+                sdate_kwargs = {'addday': -int(self.ui.dict_set['백테날짜']), 'changed': lambda: change_back_sdate(self.ui)}
         else:
-            self.ui.sd_sdateEditttt_01 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_02 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_03 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_04 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_05 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_06 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_07 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_08 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_09 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_10 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_11 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_12 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_13 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_14 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_15 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
-            self.ui.sd_sdateEditttt_16 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_sdate(self.ui))
+            sdate_kwargs = {'changed': lambda: change_back_sdate(self.ui)}
 
-        self.ui.list_sdateEdittttt = [
-            self.ui.sd_sdateEditttt_01, self.ui.sd_sdateEditttt_02, self.ui.sd_sdateEditttt_03, self.ui.sd_sdateEditttt_04,
-            self.ui.sd_sdateEditttt_05, self.ui.sd_sdateEditttt_06, self.ui.sd_sdateEditttt_07, self.ui.sd_sdateEditttt_08,
-            self.ui.sd_sdateEditttt_09, self.ui.sd_sdateEditttt_10, self.ui.sd_sdateEditttt_11, self.ui.sd_sdateEditttt_12,
-            self.ui.sd_sdateEditttt_13, self.ui.sd_sdateEditttt_14, self.ui.sd_sdateEditttt_15, self.ui.sd_sdateEditttt_16
-        ]
+        self.ui.list_sdateEdittttt = self._create_widget_list(
+            16, 'sd_sdateEditttt', 'dateedit', self.ui.sd_groupBoxxxxx_02, **sdate_kwargs
+        )
 
-        self.ui.sd_edateEditttt_01 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_02 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_03 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_04 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_05 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_06 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_07 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_08 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_09 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_10 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_11 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_12 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_13 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_14 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_15 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-        self.ui.sd_edateEditttt_16 = self.wc.setDateEdit(self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui))
-
-        self.ui.list_edateEdittttt = [
-            self.ui.sd_edateEditttt_01, self.ui.sd_edateEditttt_02, self.ui.sd_edateEditttt_03, self.ui.sd_edateEditttt_04,
-            self.ui.sd_edateEditttt_05, self.ui.sd_edateEditttt_06, self.ui.sd_edateEditttt_07, self.ui.sd_edateEditttt_08,
-            self.ui.sd_edateEditttt_09, self.ui.sd_edateEditttt_10, self.ui.sd_edateEditttt_11, self.ui.sd_edateEditttt_12,
-            self.ui.sd_edateEditttt_13, self.ui.sd_edateEditttt_14, self.ui.sd_edateEditttt_15, self.ui.sd_edateEditttt_16
-        ]
+        self.ui.list_edateEdittttt = self._create_widget_list(
+            16, 'sd_edateEditttt', 'dateedit', self.ui.sd_groupBoxxxxx_02, changed=lambda: change_back_edate(self.ui)
+        )
 
         if self.ui.dict_set is not None:
             if self.ui.dict_set['주식에이전트']:
@@ -219,317 +143,58 @@ class SetDialogBack:
             starttime = '090000'
             endtime   = '093000'
 
-        self.ui.sd_slineEditttt_01 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_02 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_03 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_04 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_05 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_06 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_07 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_08 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_09 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_10 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_11 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_12 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_13 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_14 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_15 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
-        self.ui.sd_slineEditttt_16 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui))
+        self.ui.list_slineEdittttt = self._create_widget_list(
+            16, 'sd_slineEditttt', 'lineedit', self.ui.sd_groupBoxxxxx_02, ltext=starttime, style=style_bc_dk, change=lambda: text_changed_01(self.ui)
+        )
 
-        self.ui.list_slineEdittttt = [
-            self.ui.sd_slineEditttt_01, self.ui.sd_slineEditttt_02, self.ui.sd_slineEditttt_03, self.ui.sd_slineEditttt_04,
-            self.ui.sd_slineEditttt_05, self.ui.sd_slineEditttt_06, self.ui.sd_slineEditttt_07, self.ui.sd_slineEditttt_08,
-            self.ui.sd_slineEditttt_09, self.ui.sd_slineEditttt_10, self.ui.sd_slineEditttt_11, self.ui.sd_slineEditttt_12,
-            self.ui.sd_slineEditttt_13, self.ui.sd_slineEditttt_14, self.ui.sd_slineEditttt_15, self.ui.sd_slineEditttt_16
-        ]
+        self.ui.list_elineEdittttt = self._create_widget_list(
+            16, 'sd_elineEditttt', 'lineedit', self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui)
+        )
 
-        self.ui.sd_elineEditttt_01 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_02 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_03 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_04 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_05 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_06 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_07 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_08 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_09 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_10 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_11 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_12 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_13 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_14 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_15 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
-        self.ui.sd_elineEditttt_16 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext=endtime, style=style_bc_dk, change=lambda: text_changed_02(self.ui))
+        self.ui.list_blineEdittttt = self._create_widget_list(
+            16, 'sd_blineEditttt', 'lineedit', self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui)
+        )
 
-        self.ui.list_elineEdittttt = [
-            self.ui.sd_elineEditttt_01, self.ui.sd_elineEditttt_02, self.ui.sd_elineEditttt_03, self.ui.sd_elineEditttt_04,
-            self.ui.sd_elineEditttt_05, self.ui.sd_elineEditttt_06, self.ui.sd_elineEditttt_07, self.ui.sd_elineEditttt_08,
-            self.ui.sd_elineEditttt_09, self.ui.sd_elineEditttt_10, self.ui.sd_elineEditttt_11, self.ui.sd_elineEditttt_12,
-            self.ui.sd_elineEditttt_13, self.ui.sd_elineEditttt_14, self.ui.sd_elineEditttt_15, self.ui.sd_elineEditttt_16
-        ]
+        self.ui.list_alineEdittttt = self._create_widget_list(
+            16, 'sd_alineEditttt', 'lineedit', self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui)
+        )
 
-        self.ui.sd_blineEditttt_01 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_02 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_03 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_04 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_05 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_06 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_07 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_08 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_09 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_10 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_11 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_12 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_13 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_14 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_15 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
-        self.ui.sd_blineEditttt_16 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='20', style=style_bc_dk, change=lambda: text_changed_03(self.ui))
+        self.ui.list_p1comboBoxxxx = self._create_widget_list(
+            16, 'sd_p1comboBoxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.list_blineEdittttt = [
-            self.ui.sd_blineEditttt_01, self.ui.sd_blineEditttt_02, self.ui.sd_blineEditttt_03, self.ui.sd_blineEditttt_04,
-            self.ui.sd_blineEditttt_05, self.ui.sd_blineEditttt_06, self.ui.sd_blineEditttt_07, self.ui.sd_blineEditttt_08,
-            self.ui.sd_blineEditttt_09, self.ui.sd_blineEditttt_10, self.ui.sd_blineEditttt_11, self.ui.sd_blineEditttt_12,
-            self.ui.sd_blineEditttt_13, self.ui.sd_blineEditttt_14, self.ui.sd_blineEditttt_15, self.ui.sd_blineEditttt_16
-        ]
+        self.ui.list_p2comboBoxxxx = self._create_widget_list(
+            16, 'sd_p2comboBoxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.sd_alineEditttt_01 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_02 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_03 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_04 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_05 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_06 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_07 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_08 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_09 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_10 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_11 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_12 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_13 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_14 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_15 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
-        self.ui.sd_alineEditttt_16 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_02, ltext='30', style=style_bc_dk, change=lambda: text_changed_04(self.ui))
+        self.ui.list_p3comboBoxxxx = self._create_widget_list(
+            16, 'sd_p3comboBoxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.list_alineEdittttt = [
-            self.ui.sd_alineEditttt_01, self.ui.sd_alineEditttt_02, self.ui.sd_alineEditttt_03, self.ui.sd_alineEditttt_04,
-            self.ui.sd_alineEditttt_05, self.ui.sd_alineEditttt_06, self.ui.sd_alineEditttt_07, self.ui.sd_alineEditttt_08,
-            self.ui.sd_alineEditttt_09, self.ui.sd_alineEditttt_10, self.ui.sd_alineEditttt_11, self.ui.sd_alineEditttt_12,
-            self.ui.sd_alineEditttt_13, self.ui.sd_alineEditttt_14, self.ui.sd_alineEditttt_15, self.ui.sd_alineEditttt_16
-        ]
+        self.ui.list_p4comboBoxxxx = self._create_widget_list(
+            16, 'sd_p4comboBoxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.sd_p1comboBoxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p1comboBoxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
+        self.ui.list_tcomboBoxxxxx = self._create_widget_list(
+            16, 'sd_tcomboBoxxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.list_p1comboBoxxxx = [
-            self.ui.sd_p1comboBoxxx_01, self.ui.sd_p1comboBoxxx_02, self.ui.sd_p1comboBoxxx_03, self.ui.sd_p1comboBoxxx_04,
-            self.ui.sd_p1comboBoxxx_05, self.ui.sd_p1comboBoxxx_06, self.ui.sd_p1comboBoxxx_07, self.ui.sd_p1comboBoxxx_08,
-            self.ui.sd_p1comboBoxxx_09, self.ui.sd_p1comboBoxxx_10, self.ui.sd_p1comboBoxxx_11, self.ui.sd_p1comboBoxxx_12,
-            self.ui.sd_p1comboBoxxx_13, self.ui.sd_p1comboBoxxx_14, self.ui.sd_p1comboBoxxx_15, self.ui.sd_p1comboBoxxx_16
-        ]
+        self.ui.list_bcomboBoxxxxx = self._create_widget_list(
+            16, 'sd_bcomboBoxxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.sd_p2comboBoxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p2comboBoxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
+        self.ui.list_scomboBoxxxxx = self._create_widget_list(
+            16, 'sd_scomboBoxxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.list_p2comboBoxxxx = [
-            self.ui.sd_p2comboBoxxx_01, self.ui.sd_p2comboBoxxx_02, self.ui.sd_p2comboBoxxx_03, self.ui.sd_p2comboBoxxx_04,
-            self.ui.sd_p2comboBoxxx_05, self.ui.sd_p2comboBoxxx_06, self.ui.sd_p2comboBoxxx_07, self.ui.sd_p2comboBoxxx_08,
-            self.ui.sd_p2comboBoxxx_09, self.ui.sd_p2comboBoxxx_10, self.ui.sd_p2comboBoxxx_11, self.ui.sd_p2comboBoxxx_12,
-            self.ui.sd_p2comboBoxxx_13, self.ui.sd_p2comboBoxxx_14, self.ui.sd_p2comboBoxxx_15, self.ui.sd_p2comboBoxxx_16
-        ]
+        self.ui.list_vcomboBoxxxxx = self._create_widget_list(
+            16, 'sd_vcomboBoxxxx', 'combobox', self.ui.sd_groupBoxxxxx_02, hover=False, activated=lambda: bactivated_02(self.ui)
+        )
 
-        self.ui.sd_p3comboBoxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p3comboBoxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
+        self.ui.list_progressBarrr = self._create_widget_list(
+            16, 'sd_progressBarr', 'progressbar', self.ui.sd_groupBoxxxxx_02, style=style_pgbar
+        )
 
-        self.ui.list_p3comboBoxxxx = [
-            self.ui.sd_p3comboBoxxx_01, self.ui.sd_p3comboBoxxx_02, self.ui.sd_p3comboBoxxx_03, self.ui.sd_p3comboBoxxx_04,
-            self.ui.sd_p3comboBoxxx_05, self.ui.sd_p3comboBoxxx_06, self.ui.sd_p3comboBoxxx_07, self.ui.sd_p3comboBoxxx_08,
-            self.ui.sd_p3comboBoxxx_09, self.ui.sd_p3comboBoxxx_10, self.ui.sd_p3comboBoxxx_11, self.ui.sd_p3comboBoxxx_12,
-            self.ui.sd_p3comboBoxxx_13, self.ui.sd_p3comboBoxxx_14, self.ui.sd_p3comboBoxxx_15, self.ui.sd_p3comboBoxxx_16
-        ]
-
-        self.ui.sd_p4comboBoxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_p4comboBoxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-
-        self.ui.list_p4comboBoxxxx = [
-            self.ui.sd_p4comboBoxxx_01, self.ui.sd_p4comboBoxxx_02, self.ui.sd_p4comboBoxxx_03, self.ui.sd_p4comboBoxxx_04,
-            self.ui.sd_p4comboBoxxx_05, self.ui.sd_p4comboBoxxx_06, self.ui.sd_p4comboBoxxx_07, self.ui.sd_p4comboBoxxx_08,
-            self.ui.sd_p4comboBoxxx_09, self.ui.sd_p4comboBoxxx_10, self.ui.sd_p4comboBoxxx_11, self.ui.sd_p4comboBoxxx_12,
-            self.ui.sd_p4comboBoxxx_13, self.ui.sd_p4comboBoxxx_14, self.ui.sd_p4comboBoxxx_15, self.ui.sd_p4comboBoxxx_16
-        ]
-
-        self.ui.sd_tcomboBoxxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_tcomboBoxxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-
-        self.ui.list_tcomboBoxxxxx = [
-            self.ui.sd_tcomboBoxxxx_01, self.ui.sd_tcomboBoxxxx_02, self.ui.sd_tcomboBoxxxx_03, self.ui.sd_tcomboBoxxxx_04,
-            self.ui.sd_tcomboBoxxxx_05, self.ui.sd_tcomboBoxxxx_06, self.ui.sd_tcomboBoxxxx_07, self.ui.sd_tcomboBoxxxx_08,
-            self.ui.sd_tcomboBoxxxx_09, self.ui.sd_tcomboBoxxxx_10, self.ui.sd_tcomboBoxxxx_11, self.ui.sd_tcomboBoxxxx_12,
-            self.ui.sd_tcomboBoxxxx_13, self.ui.sd_tcomboBoxxxx_14, self.ui.sd_tcomboBoxxxx_15, self.ui.sd_tcomboBoxxxx_16
-        ]
-
-        self.ui.sd_bcomboBoxxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_bcomboBoxxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-
-        self.ui.list_bcomboBoxxxxx = [
-            self.ui.sd_bcomboBoxxxx_01, self.ui.sd_bcomboBoxxxx_02, self.ui.sd_bcomboBoxxxx_03, self.ui.sd_bcomboBoxxxx_04,
-            self.ui.sd_bcomboBoxxxx_05, self.ui.sd_bcomboBoxxxx_06, self.ui.sd_bcomboBoxxxx_07, self.ui.sd_bcomboBoxxxx_08,
-            self.ui.sd_bcomboBoxxxx_09, self.ui.sd_bcomboBoxxxx_10, self.ui.sd_bcomboBoxxxx_11, self.ui.sd_bcomboBoxxxx_12,
-            self.ui.sd_bcomboBoxxxx_13, self.ui.sd_bcomboBoxxxx_14, self.ui.sd_bcomboBoxxxx_15, self.ui.sd_bcomboBoxxxx_16
-        ]
-
-        self.ui.sd_scomboBoxxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_scomboBoxxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-
-        self.ui.list_scomboBoxxxxx = [
-            self.ui.sd_scomboBoxxxx_01, self.ui.sd_scomboBoxxxx_02, self.ui.sd_scomboBoxxxx_03, self.ui.sd_scomboBoxxxx_04,
-            self.ui.sd_scomboBoxxxx_05, self.ui.sd_scomboBoxxxx_06, self.ui.sd_scomboBoxxxx_07, self.ui.sd_scomboBoxxxx_08,
-            self.ui.sd_scomboBoxxxx_09, self.ui.sd_scomboBoxxxx_10, self.ui.sd_scomboBoxxxx_11, self.ui.sd_scomboBoxxxx_12,
-            self.ui.sd_scomboBoxxxx_13, self.ui.sd_scomboBoxxxx_14, self.ui.sd_scomboBoxxxx_15, self.ui.sd_scomboBoxxxx_16
-        ]
-
-        self.ui.sd_vcomboBoxxxx_01 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_02 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_03 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_04 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_05 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_06 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_07 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_08 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_09 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_10 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_11 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_12 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_13 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_14 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_15 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-        self.ui.sd_vcomboBoxxxx_16 = self.wc.setCombobox(self.ui.sd_groupBoxxxxx_02, activated=lambda: bactivated_02(self.ui))
-
-        self.ui.list_vcomboBoxxxxx = [
-            self.ui.sd_vcomboBoxxxx_01, self.ui.sd_vcomboBoxxxx_02, self.ui.sd_vcomboBoxxxx_03, self.ui.sd_vcomboBoxxxx_04,
-            self.ui.sd_vcomboBoxxxx_05, self.ui.sd_vcomboBoxxxx_06, self.ui.sd_vcomboBoxxxx_07, self.ui.sd_vcomboBoxxxx_08,
-            self.ui.sd_vcomboBoxxxx_09, self.ui.sd_vcomboBoxxxx_10, self.ui.sd_vcomboBoxxxx_11, self.ui.sd_vcomboBoxxxx_12,
-            self.ui.sd_vcomboBoxxxx_13, self.ui.sd_vcomboBoxxxx_14, self.ui.sd_vcomboBoxxxx_15, self.ui.sd_vcomboBoxxxx_16
-        ]
-
-        self.ui.sd_progressBarr_01 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_02 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_03 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_04 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_05 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_06 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_07 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_08 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_09 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_10 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_11 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_12 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_13 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_14 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_15 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-        self.ui.sd_progressBarr_16 = self.wc.setProgressBar(self.ui.sd_groupBoxxxxx_02, style=style_pgbar)
-
-        self.ui.list_progressBarrr = [
-            self.ui.sd_progressBarr_01, self.ui.sd_progressBarr_02, self.ui.sd_progressBarr_03, self.ui.sd_progressBarr_04,
-            self.ui.sd_progressBarr_05, self.ui.sd_progressBarr_06, self.ui.sd_progressBarr_07, self.ui.sd_progressBarr_08,
-            self.ui.sd_progressBarr_09, self.ui.sd_progressBarr_10, self.ui.sd_progressBarr_11, self.ui.sd_progressBarr_12,
-            self.ui.sd_progressBarr_13, self.ui.sd_progressBarr_14, self.ui.sd_progressBarr_15, self.ui.sd_progressBarr_16
-        ]
         self.ui.dialog_backengine.setFixedSize(480, 600)
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:

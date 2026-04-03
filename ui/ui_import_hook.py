@@ -8,19 +8,18 @@ class ImportProgressHook:
         self.original_import = None
         self.modules = [
             'ui.ui_mainwindow', 'ui.set_style', 'utility.timesync', 'utility.setting_base', 'utility.webcrawling',
-            'utility.telegram_bot', 'utility.setting_user', 'utility.static', 'utility.chart_hoga_query_sound',
-            'utility.database_read_only', 'ui.set_icon', 'ui.set_table', 'ui.set_log_tap', 'ui.set_home_tap',
+            'utility.telegram_bot', 'utility.setting_user', 'utility.database_read_only', 'utility.static',
+            'utility.chart_hoga_query_sound', 'ui.set_icon', 'ui.set_table', 'ui.set_log_tap', 'ui.set_home_tap',
             'ui.set_widget', 'ui.set_setup_tap', 'ui.set_order_tap', 'ui.set_main_menu', 'ui.set_dialog_etc',
-            'ui.set_dialog_back', 'ui.set_stg_coin_tap', 'ui.set_dialog_chart', 'ui.set_stg_stock_tap',
-            'ui.set_dialog_formula', 'ui.set_dialog_strategy', 'ui.ui_draw_treemap', 'ui.ui_draw_chart_db',
-            'ui.ui_load_database', 'ui.ui_draw_home_chart', 'ui.ui_draw_chart_real', 'ui.ui_update_textedit',
-            'ui.ui_process_starter', 'ui.ui_update_tablewidget', 'ui.ui_process_alive', 'ui.ui_etc',
-            'ui.ui_event_filter', 'ui.ui_key_press_event', 'ui.ui_backtest_engine', 'ui.ui_update_progressbar',
+            'ui.set_dialog_back', 'ui.set_dialog_chart', 'ui.set_stg_unified_tap', 'ui.set_dialog_formula',
+            'ui.set_dialog_strategy', 'ui.ui_draw_treemap', 'ui.ui_draw_chart_db', 'ui.ui_load_database',
+            'ui.ui_draw_home_chart', 'ui.ui_draw_chart_real', 'ui.ui_update_textedit', 'ui.ui_process_starter',
+            'ui.ui_update_tablewidget', 'ui.ui_process_alive', 'ui.ui_etc', 'ui.ui_event_filter',
+            'ui.ui_key_press_event', 'ui.ui_backtest_engine', 'ui.ui_update_progressbar',
             'ui.ui_button_clicked_shortcut', 'ui.ui_button_clicked_strategy', 'ui.ui_button_clicked_settings',
-            'ui.ui_button_clicked_editer_coin', 'ui.ui_button_clicked_editer_stock',
-            'ui.ui_button_clicked_editer_backlog', 'ui.ui_button_clicked_dialog_backengine',
-            'ui.ui_button_clicked_editer_stg_sell_coin', 'ui.ui_button_clicked_editer_stg_sell_stock',
-            'ui.ui_button_clicked_dialog_elapsed_tick_number',
+            'ui.ui_button_clicked_editer_unified', 'ui.ui_button_clicked_editer_backlog',
+            'ui.ui_button_clicked_dialog_backengine', 'ui.ui_button_clicked_editer_stg_sell_unified',
+            'ui.ui_button_clicked_dialog_elapsed_tick_number'
         ]
         self.total_modules = len(self.modules)
         self.current_index = 0

@@ -3,8 +3,7 @@ from ui.set_style import color_bf_dk
 from ui.set_widget import PlainTextEdit
 from PyQt5.QtCore import QEvent, QTimer
 from ui.ui_button_clicked_zoom import *
-from ui.ui_button_clicked_editer_coin import *
-from ui.ui_button_clicked_editer_stock import *
+from ui.ui_button_clicked_editer_unified import *
 from ui.ui_extend_window import extend_window
 from PyQt5.QtWidgets import QMainWindow, QTextEdit
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
@@ -92,9 +91,9 @@ def handle_auto_indent(widget):
 
 
 @error_decorator
-def event_filter(ui, widget, event):
+def event_filter(_ui, widget, event):
     if event.type() != QEvent.KeyPress:
-        return QMainWindow.eventFilter(ui, widget, event)
+        return QMainWindow.eventFilter(_ui, widget, event)
 
     if widget.__class__ == PlainTextEdit and not (QApplication.keyboardModifiers() & Qt.AltModifier):
         widget_id = id(widget)
@@ -183,79 +182,59 @@ def event_filter(ui, widget, event):
             return True
 
     if event.key() == Qt.Key_Escape:
-        if not ui.svc_pushButton_24.isVisible():
-            if widget in (ui.ss_textEditttt_01, ui.ss_textEditttt_03):
-                sz_button_clicked_01(ui)
-            elif widget in (ui.ss_textEditttt_02, ui.ss_textEditttt_04):
-                sz_button_clicked_02(ui)
-        if not ui.cvc_pushButton_24.isVisible():
-            if widget in (ui.cs_textEditttt_01, ui.cs_textEditttt_03):
-                cz_button_clicked_01(ui)
-            elif widget in (ui.cs_textEditttt_02, ui.cs_textEditttt_04):
-                cz_button_clicked_02(ui)
+        if not _ui.svc_pushButton_24.isVisible():
+            if widget in (_ui.ss_textEditttt_01, _ui.ss_textEditttt_03):
+                sz_button_clicked_01(_ui)
+            elif widget in (_ui.ss_textEditttt_02, _ui.ss_textEditttt_04):
+                sz_button_clicked_02(_ui)
+        if not _ui.cvc_pushButton_24.isVisible():
+            if widget in (_ui.cs_textEditttt_01, _ui.cs_textEditttt_03):
+                cz_button_clicked_01(_ui)
+            elif widget in (_ui.cs_textEditttt_02, _ui.cs_textEditttt_04):
+                cz_button_clicked_02(_ui)
         return True
 
     elif event.key() == Qt.Key_E and (QApplication.keyboardModifiers() & Qt.ShiftModifier):
-        extend_window(ui)
+        extend_window(_ui)
         return True
 
     elif (QApplication.keyboardModifiers() & Qt.AltModifier) and \
             event.key() in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5,
                             Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0):
-        if ui.main_btn == 3:
+        if _ui.main_btn in (3, 4):
+            gubun_ = 'stock' if _ui.main_btn == 3 else 'coin'
             if event.key() == Qt.Key_1:
-                stock_stg_editer(ui)
+                stg_editer(_ui, gubun_)
             elif event.key() == Qt.Key_2:
-                stock_opti_editer(ui)
+                opti_editer(_ui, gubun_)
             elif event.key() == Qt.Key_3:
-                stock_opti_test_editer(ui)
+                opti_test_editer(_ui, gubun_)
             elif event.key() == Qt.Key_4:
-                stock_rwf_test_editer(ui)
+                rwf_test_editer(_ui, gubun_)
             elif event.key() == Qt.Key_5:
-                stock_opti_ga_editer(ui)
+                opti_ga_editer(_ui, gubun_)
             elif event.key() == Qt.Key_6:
-                stock_cond_editer(ui)
+                cond_editer(_ui, gubun_)
             elif event.key() == Qt.Key_7:
-                stock_opti_vars_editer(ui)
+                opti_vars_editer(_ui, gubun_)
             elif event.key() == Qt.Key_8:
-                stock_vars_editer(ui)
+                vars_editer(_ui, gubun_)
             elif event.key() == Qt.Key_9:
-                stock_backtest_log(ui)
+                backtest_log(_ui, gubun_)
             elif event.key() == Qt.Key_0:
-                stock_backtest_detail(ui)
-        elif ui.main_btn == 4:
-            if event.key() == Qt.Key_1:
-                coin_stg_editer(ui)
-            elif event.key() == Qt.Key_2:
-                coin_opti_editer(ui)
-            elif event.key() == Qt.Key_3:
-                coin_opti_test_editer(ui)
-            elif event.key() == Qt.Key_4:
-                coin_rwf_test_editer(ui)
-            elif event.key() == Qt.Key_5:
-                coin_opti_ga_editer(ui)
-            elif event.key() == Qt.Key_6:
-                coin_cond_editer(ui)
-            elif event.key() == Qt.Key_7:
-                coin_opti_vars_editer(ui)
-            elif event.key() == Qt.Key_8:
-                coin_vars_editer(ui)
-            elif event.key() == Qt.Key_9:
-                coin_backtest_log(ui)
-            elif event.key() == Qt.Key_0:
-                coin_backtest_detail(ui)
+                backtest_detail(_ui, gubun_)
         return True
 
-    return QMainWindow.eventFilter(ui, widget, event)
+    return QMainWindow.eventFilter(_ui, widget, event)
 
 
-def close_event(ui, a):
+def close_event(_ui, a):
     buttonReply = QMessageBox.question(
-        ui, "프로그램 종료", "프로그램을 종료합니다.",
+        _ui, "프로그램 종료", "프로그램을 종료합니다.",
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        ui.ProcessKill()
+        _ui.ProcessKill()
         a.accept()
     else:
         a.ignore()
