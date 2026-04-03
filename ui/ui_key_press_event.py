@@ -123,48 +123,27 @@ def key_press_event(_ui, event):
     elif (QApplication.keyboardModifiers() & Qt.AltModifier) and \
             event.key() in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5,
                             Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0):
-        if _ui.main_btn == 3:
-            if event.key() == Qt.Key_1:
-                stg_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_2:
-                opti_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_3:
-                opti_test_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_4:
-                rwf_test_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_5:
-                opti_ga_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_6:
-                cond_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_7:
-                opti_vars_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_8:
-                vars_editer(_ui, 'stock')
-            elif event.key() == Qt.Key_9:
-                backtest_log(_ui, 'stock')
-            elif event.key() == Qt.Key_0:
-                backtest_detail(_ui, 'stock')
-        elif _ui.main_btn == 4:
-            if event.key() == Qt.Key_1:
-                stg_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_2:
-                opti_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_3:
-                opti_test_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_4:
-                rwf_test_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_5:
-                opti_ga_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_6:
-                cond_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_7:
-                opti_vars_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_8:
-                vars_editer(_ui, 'coin')
-            elif event.key() == Qt.Key_9:
-                backtest_log(_ui, 'coin')
-            elif event.key() == Qt.Key_0:
-                backtest_detail(_ui, 'coin')
+        gubun_ = 'stock' if _ui.main_btn == 3 else 'coin'
+        if event.key() == Qt.Key_1:
+            stg_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_2:
+            opti_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_3:
+            opti_test_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_4:
+            rwf_test_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_5:
+            opti_ga_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_6:
+            cond_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_7:
+            opti_vars_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_8:
+            vars_editer(_ui, gubun_)
+        elif event.key() == Qt.Key_9:
+            backtest_log(_ui, gubun_)
+        elif event.key() == Qt.Key_0:
+            backtest_detail(_ui, gubun_)
 
     elif event.key() == Qt.Key_F1:
         if _ui.main_btn == 3:
