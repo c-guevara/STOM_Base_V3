@@ -50,8 +50,8 @@ class BackFinder:
         con.close()
 
         buystg = dfb['전략코드'][self.buystg_name]
-        cols_match = re.search(r"self.tickcols\s*=\s*\[(.*?)\]", buystg)
-        data_match = re.search(r"self.tickdata\s*=\s*\[(.*?)\]", buystg)
+        cols_match = re.search(r"self.tickcols\s*=\s*\[(.*?)]", buystg)
+        data_match = re.search(r"self.tickdata\s*=\s*\[(.*?)]", buystg)
         if cols_match and data_match:
             cols_text  = cols_match.group(1)
             data_text  = data_match.group(1)
