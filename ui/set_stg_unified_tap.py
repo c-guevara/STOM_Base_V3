@@ -124,7 +124,7 @@ class SetStrategyTab:
 
             text, tip = btn_texts.get(i, ('그래프', ''))
             setattr(self.ui, f'{self.prefix}_pushButtonn_{i:02d}',
-                    self.wc.setPushbutton(text, parent=self.tab, bounced=True, click=lambda h=handler: h(self.ui), 
+                    self.wc.setPushbutton(text, parent=self.tab, bounced=True, click=lambda _, h=handler: h(self.ui),
                                           color=4 if i == 7 else None, tip=tip))
 
         for i in range(1, 4):
@@ -191,7 +191,7 @@ class SetStrategyTab:
         for i, (text, code) in enumerate(buy_buttons, start=5):
             setattr(self.ui, f'{self.vjb_prefix}_pushButon_{i:02d}',
                     self.wc.setPushbutton(text, parent=self.tab, bounced=True,
-                                          click=lambda c=code: button_clicked_strategy(self.ui, c)))
+                                          click=lambda _, c=code: button_clicked_strategy(self.ui, c)))
 
         setattr(self.ui, f'{self.vjb_prefix}_pushButon_11',
                 self.wc.setPushbutton('매수시그널', parent=self.tab, bounced=True,
@@ -251,7 +251,7 @@ class SetStrategyTab:
         for i, (text, code) in enumerate(sell_buttons, start=5):
             setattr(self.ui, f'{self.vjs_prefix}_pushButon_{i:02d}',
                     self.wc.setPushbutton(text, parent=self.tab, bounced=True,
-                                          click=lambda c=code: button_clicked_strategy(self.ui, c)))
+                                          click=lambda _, c=code: button_clicked_strategy(self.ui, c)))
 
         setattr(self.ui, f'{self.vjs_prefix}_pushButon_13',
                 self.wc.setPushbutton('매도시그널', parent=self.tab, bounced=True,
