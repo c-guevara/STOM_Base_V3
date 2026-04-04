@@ -54,7 +54,7 @@ class BinanceTrader:
 
         self.order_time = now()
         self.dict_cj    = {}  # 체결목록
-        self.dict_jg    = {str: {}}  # 잔고목록
+        self.dict_jg    = {}  # 잔고목록
         self.dict_tj    = {}  # 잔고평가
         self.dict_td    = {}  # 거래목록
         self.dict_tt    = {}  # 평가손익
