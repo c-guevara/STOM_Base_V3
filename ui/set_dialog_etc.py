@@ -308,10 +308,10 @@ class SetDialogEtc:
         self.ui.set_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_setsj, click=lambda: setting_stock_elapsed_tick_number_load(self.ui))
         self.ui.set_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_setsj, click=lambda: setting_stock_elapsed_tick_number_save(self.ui))
         self.ui.set_groupBoxxx_01 = QGroupBox('', self.ui.dialog_setsj)
-        text = """
-    ▣ 백테 및 전략연산에서 사용할 경과틱수('조건명')을 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며
-    경과틱수 괄호안에 조건명을 넣어서 사용합니다. 조건은 전략탭에서 사용하는 전략(매도팩터제외)과 문법이 동일합니다.
-    예제에서 사용한 조건명 이평60데드는 경과틱수('이평60데드') 형태로 사용합니다. 반드시 조건명에 따옴표를 붙여야합니다."""
+        text = '''
+        ▣ 백테 및 전략연산에서 사용할 경과틱수('조건명')을 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며
+        경과틱수 괄호안에 조건명을 넣어서 사용합니다. 조건은 전략탭에서 사용하는 전략(매도팩터제외)과 문법이 동일합니다.
+        예제에서 사용한 조건명 이평60데드는 경과틱수('이평60데드') 형태로 사용합니다. 반드시 조건명에 따옴표를 붙여야합니다.'''
         self.ui.set_labellllll_01 = QLabel(text, self.ui.set_groupBoxxx_01)
         self.ui.set_labellllll_02 = QLabel('            조건명                        조건', self.ui.set_groupBoxxx_01)
         self.ui.set_lineEdittt_01 = self.wc.setLineedit(self.ui.set_groupBoxxx_01, aleft=True, style=style_bc_dk)
@@ -353,10 +353,10 @@ class SetDialogEtc:
         self.ui.cet_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_cetsj, click=lambda: setting_coin_elapsed_tick_number_load(self.ui))
         self.ui.cet_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_cetsj, click=lambda: setting_coin_elapsed_tick_number_save(self.ui))
         self.ui.cet_groupBoxxx_01 = QGroupBox('', self.ui.dialog_cetsj)
-        text = """
-    ▣ 백테 및 전략연산에서 사용할 "경과틱수('조건명')"를 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며
-    경과틱수 괄호안에 조건명을 넣어서 사용합니다. 조건은 전략탭에서 사용하는 전략(잔고종목변수제외)과 문법이 동일합니다.
-    예제에서 사용한 조건명 이평60데드는 경과틱수('이평60데드') 형태로 사용합니다. 반드시 조건명에 따옴표를 붙여야합니다."""
+        text = '''
+        ▣ 백테 및 전략연산에서 사용할 "경과틱수('조건명')"를 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며
+        경과틱수 괄호안에 조건명을 넣어서 사용합니다. 조건은 전략탭에서 사용하는 전략(잔고종목변수제외)과 문법이 동일합니다.
+        예제에서 사용한 조건명 이평60데드는 경과틱수('이평60데드') 형태로 사용합니다. 반드시 조건명에 따옴표를 붙여야합니다.'''
         self.ui.cet_labellllll_01 = QLabel(text, self.ui.cet_groupBoxxx_01)
         self.ui.cet_labellllll_02 = QLabel('              조건명                                 조건', self.ui.cet_groupBoxxx_01)
         self.ui.cet_lineEdittt_01 = self.wc.setLineedit(self.ui.cet_groupBoxxx_01, aleft=True, style=style_bc_dk)
