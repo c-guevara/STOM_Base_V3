@@ -22,51 +22,51 @@ class UpbitStrategyTick(StrategyBase):
            0        1       2      3       4      5      6      7       8         9         10     11      12
         """
         super().__init__()
-        self.windowQ          = qlist[0]
-        self.teleQ            = qlist[3]
-        self.ctraderQ         = qlist[9]
-        self.cstgQ            = qlist[10]
-        self.dict_set         = dict_set
-        self.indicator        = indicator
+        self.windowQ         = qlist[0]
+        self.teleQ           = qlist[3]
+        self.ctraderQ        = qlist[9]
+        self.cstgQ           = qlist[10]
+        self.dict_set        = dict_set
+        self.indicator       = indicator
 
-        self.code             = None
-        self.buystrategy      = None
-        self.sellstrategy     = None
-        self.chart_code       = None
-        self.arry_code        = None
-        self.info_for_signal  = None
+        self.code            = None
+        self.buystrategy     = None
+        self.sellstrategy    = None
+        self.chart_code      = None
+        self.arry_code       = None
+        self.info_for_signal = None
 
-        self.dict_signal      = {
+        self.dict_signal     = {
             '매수': [],
             '매도': []
         }
 
-        self.dict_data        = {}
-        self.dict_signal_num  = {}
-        self.dict_buy_num     = {}
-        self.dict_profit      = {}
-        self.dict_gj          = {}
-        self.dict_jg          = {}
+        self.dict_data       = {}
+        self.dict_signal_num = {}
+        self.dict_buy_num    = {}
+        self.dict_profit     = {}
+        self.dict_gj         = {}
+        self.dict_jg         = {}
 
-        self.indi_settings    = []
+        self.indi_settings   = []
 
-        self.int_tujagm       = 0
-        self.jgrv_count       = 0
-        self.비중조절기준        = 0
+        self.int_tujagm      = 0
+        self.jgrv_count      = 0
+        self.비중조절기준       = 0
 
-        self.market_gubun     = 3
-        self.ma_round_unit    = 8
-        self.is_tick          = self.dict_set['코인타임프레임']
-        self.avg_list         = [self.dict_set['코인평균값계산틱수']]
-        self.sma_list         = get_ema_list(self.is_tick)
-        self.data_cnt         = len(list_coin_tick) if self.is_tick else len(list_coin_min)
-        self.dict_findex      = {name: i for i, name in enumerate(list_coin_tick if self.is_tick else list_coin_min)}
-        self.base_cnt         = self.dict_findex['관심종목'] + 1
-        self.area_cnt         = self.dict_findex['전일비각도' if self.market_gubun == 1 else '당일거래대금각도'] + 1
-        self.angle_pct_cf     = get_angle_cf(self.market_gubun, self.is_tick, 0)
-        self.angle_dtm_cf     = get_angle_cf(self.market_gubun, self.is_tick, 1)
-        self.buy_hj_limit     = self.dict_set['코인매수시장가잔량범위']
-        self.sell_hj_limit    = self.dict_set['코인매도시장가잔량범위']
+        self.market_gubun    = 3
+        self.ma_round_unit   = 8
+        self.is_tick         = self.dict_set['코인타임프레임']
+        self.avg_list        = [self.dict_set['코인평균값계산틱수']]
+        self.sma_list        = get_ema_list(self.is_tick)
+        self.data_cnt        = len(list_coin_tick) if self.is_tick else len(list_coin_min)
+        self.dict_findex     = {name: i for i, name in enumerate(list_coin_tick if self.is_tick else list_coin_min)}
+        self.base_cnt        = self.dict_findex['관심종목'] + 1
+        self.area_cnt        = self.dict_findex['전일비각도' if self.market_gubun == 1 else '당일거래대금각도'] + 1
+        self.angle_pct_cf    = get_angle_cf(self.market_gubun, self.is_tick, 0)
+        self.angle_dtm_cf    = get_angle_cf(self.market_gubun, self.is_tick, 1)
+        self.buy_hj_limit    = self.dict_set['코인매수시장가잔량범위']
+        self.sell_hj_limit   = self.dict_set['코인매도시장가잔량범위']
 
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']

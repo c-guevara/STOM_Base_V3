@@ -2,15 +2,14 @@
 import sys
 import time
 import sqlite3
-import pyupbit
 import numpy as np
 import pandas as pd
 from traceback import format_exc
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from trade.upbit.upbit_websocket import WebSocketReceiver
-from utility.setting_base import ui_num, DB_COIN_TICK, DB_COIN_MIN
 from utility.static import now, str_ymdhms_utc, str_hms, now_utc
+from utility.setting_base import ui_num, DB_COIN_TICK, DB_COIN_MIN
+from trade.upbit.upbit_restapi import WebSocketReceiver, get_symbols_info
 
 
 class Updater(QThread):
@@ -96,12 +95,7 @@ class UpbitReceiverTick:
         app.exec_()
 
     def GetTickers(self):
-        self.codes = pyupbit.get_tickers(fiat="KRW")
-        url = "https://api.upbit.com/v1/ticker/all?quote_currencies=KRW"
-        headers = {"accept": "application/json"}
-        import requests
-        data = requests.get(url, headers=headers).json()
-        self.dict_daym = {d['market']: int(d['acc_trade_price']) for d in data}
+        self.dict_daym, self.codes = get_symbols_info()
         self.list_gsjm = [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:10]]
         data = tuple(self.list_gsjm)
         self.cstgQ.put(('관심목록', data))

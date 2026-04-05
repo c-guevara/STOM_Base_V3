@@ -86,7 +86,7 @@ STOM/
 |:----------:|:---------------------------------------|
 | **데이터 처리** | numpy, pandas, numba, talib            |
 | **UI/시각화** | PyQt5, pyqtgraph, matplotlib, squarify |
-| **거래소 연동** | python-binance, pyupbit, websockets    |
+| **거래소 연동** | python-binance, websockets             |
 |  **최적화**   | optuna, cmaes                          |
 | **통신/알림**  | zmq, pyttsx3, python-telegram-bot      |
 |   **기타**   | cryptography, pillow,                  |
