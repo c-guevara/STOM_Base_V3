@@ -9,7 +9,7 @@ from copy import deepcopy
 from traceback import format_exc
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from trade.risk_analyzer import RiskAnalyzer
-from trade.strategy_base import StrategyBase
+from trade.base_strategy import BaseStrategy
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, indicator, DB_FUTURE_MIN, DB_FUTURE_TICK, \
@@ -18,7 +18,7 @@ from utility.static import now, now_cme, get_buy_indi_stg, GetFutureLongPgSgSp, 
     get_ema_list, get_angle_cf, set_builtin_print
 
 
-class FutureStrategyTick(StrategyBase):
+class FutureStrategyTick(BaseStrategy):
     def __init__(self, qlist, dict_set):
         """
         self.mgzservQ, self.sagentQ, self.straderQ, self.sstgQ

@@ -9,7 +9,7 @@ from copy import deepcopy
 from traceback import format_exc
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from trade.risk_analyzer import RiskAnalyzer
-from trade.strategy_base import StrategyBase
+from trade.base_strategy import BaseStrategy
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_STOCK_TICK, DB_STOCK_MIN, indicator, \
@@ -19,7 +19,7 @@ from utility.static import now, timedelta_sec, GetKiwoomPgSgSp, GetHogaunit, get
     str_ymdhms, dt_ymdhms, get_angle_cf, get_ema_list, set_builtin_print, get_profile_text
 
 
-class KiwoomStrategyTick(StrategyBase):
+class KiwoomStrategyTick(BaseStrategy):
     def __init__(self, gubun, qlist, dict_set):
         """
         self.mgzservQ, self.sagentQ, self.straderQ, self.sstgQs

@@ -6,7 +6,7 @@ import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
 from trade.risk_analyzer import RiskAnalyzer
-from trade.strategy_base import StrategyBase
+from trade.base_strategy import BaseStrategy
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_COIN_TICK, DB_COIN_MIN, indicator, \
@@ -15,7 +15,7 @@ from utility.static import now, now_utc, GetBinanceShortPgSgSp, dt_ymdhms, get_b
     get_ema_list, get_angle_cf, set_builtin_print
 
 
-class BinanceStrategyTick(StrategyBase):
+class BinanceStrategyTick(BaseStrategy):
     def __init__(self, qlist, dict_set):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
