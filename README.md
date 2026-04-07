@@ -54,7 +54,7 @@ STOM/
 │   └── graph/                          # 백테스트 결과 그래프 저장
 │
 ├── trade/                              # 실시간 트레이딩 모듈
-│   ├── strategy_base.py                # 전략 기반 클래스 (230개+ 템플릿)
+│   ├── base_strategy.py                # 전략 기반 클래스 (230개+ 템플릿)
 │   ├── formula_manager.py              # 사용자 팩터, 수식관리자
 │   ├── risk_analyzer.py                # 리스크 분석
 │   ├── microstructure_analyzer.py      # 시장미시구조 분석
