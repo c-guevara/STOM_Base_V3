@@ -39,21 +39,20 @@ class FutureStrategyTick(BaseStrategy):
         self.arry_code        = None
         self.info_for_signal  = None
 
+        self.dict_data: dict[str, list] = {}
+        self.dict_gj: dict[str, dict[str, int | float]] = {}
+        self.dict_jg: dict[str, dict[str, int | float]] = {}
+        self.dict_profit: dict[str, list] = {}
+
         self.dict_info        = {}
+        self.dict_buy_num     = {}
+        self.dict_signal_num  = {}
         self.dict_signal      = {
             'BUY_LONG': [],
             'SELL_SHORT': [],
             'SELL_LONG': [],
             'BUY_SHORT': []
         }
-
-        self.dict_data        = {}
-        self.dict_signal_num  = {}
-        self.dict_buy_num     = {}
-        self.dict_profit      = {}
-        self.dict_gj          = {}
-        self.dict_jg          = {}
-
         self.indi_settings    = []
 
         self.jgrv_count       = 0
@@ -213,7 +212,7 @@ class FutureStrategyTick(BaseStrategy):
         elif data == '프로세스종료':
             self.SysExit()
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
+    # noinspection PyUnusedLocal
     def Strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \

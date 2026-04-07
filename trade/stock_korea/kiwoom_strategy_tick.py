@@ -39,18 +39,18 @@ class KiwoomStrategyTick(BaseStrategy):
         self.chart_code       = None
         self.info_for_signal  = None
 
+        self.dict_data: dict[str, list] = {}
+        self.dict_gj: dict[str, dict[str, int | float]] = {}
+        self.dict_jg: dict[str, dict[str, int | float]] = {}
+        self.dict_profit: dict[str, list] = {}
+
+        self.dict_info        = {}
+        self.dict_buy_num     = {}
+        self.dict_signal_num  = {}
         self.dict_signal      = {
             '매수': [],
             '매도': []
         }
-
-        self.dict_data        = {}
-        self.dict_signal_num  = {}
-        self.dict_buy_num     = {}
-        self.dict_profit      = {}
-        self.dict_gj          = {}
-        self.dict_jg          = {}
-
         self.indi_settings    = []
         self.tuple_kosd       = ()
 
@@ -229,7 +229,7 @@ class KiwoomStrategyTick(BaseStrategy):
             time.sleep(5)
             self.mgzservQ.put(('window', (ui_num['기본로그'], '시스템 명령 실행 알림 - 전략연산 종료')))
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
+    # noinspection PyUnusedLocal
     def Strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
             거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \

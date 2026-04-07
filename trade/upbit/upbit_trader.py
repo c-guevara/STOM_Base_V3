@@ -49,12 +49,12 @@ class UpbitTrader:
         self.liveQ         = qlist[11]
         self.dict_set      = dict_set
 
-        self.order_time    = now()
-        self.dict_cj       = {}  # 체결목록
-        self.dict_jg       = {}  # 잔고목록
-        self.dict_tj       = {}  # 잔고평가
-        self.dict_td       = {}  # 거래목록
-        self.dict_tt       = {}  # 평가손익
+        self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
+        self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록
+        self.dict_td: dict[str, dict[str, int | float]] = {}  # 거래목록
+
+        self.dict_tj    = {}  # 잔고평가
+        self.dict_tt    = {}  # 평가손익
         self.dict_info     = {}
         self.dict_curc     = {}
         self.dict_order_cc = {}
@@ -74,9 +74,10 @@ class UpbitTrader:
             '코인잔고청산': False
         }
 
-        self.upbit = Upbit(self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
-        self.jgcs_time = self.get_jgcs_time()
-        self.str_today = str_ymd(now_utc())
+        self.upbit      = Upbit(self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
+        self.jgcs_time  = self.get_jgcs_time()
+        self.str_today  = str_ymd(now_utc())
+        self.order_time = now()
 
         self.UpdateDictInfo()
         self.LoadDatabase()

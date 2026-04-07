@@ -47,14 +47,14 @@ class UpbitReceiverTick:
         self.cstgQ       = qlist[10]
         self.dict_set    = dict_set
 
-        self.dict_daym   = {}
+        self.dict_dtdm: dict[str, list]        = {}
+        self.dict_data: dict[str, list]        = {}
+        self.dict_money: dict[str, list]       = {}
+        self.dict_bmbyp: dict[str, np.ndarray] = {}
+        self.dict_smbyp: dict[str, np.ndarray] = {}
+        self.dict_index: dict[str, dict]       = {}
 
-        self.dict_dtdm   = {}
-        self.dict_data   = {}
-        self.dict_money  = {}
-        self.dict_bmbyp  = {}
-        self.dict_smbyp  = {}
-        self.dict_index  = {}
+        self.dict_daym   = {}
         self.dict_mtop   = {}
         self.dict_jgdt   = {}
 
@@ -105,7 +105,6 @@ class UpbitReceiverTick:
         self.teleQ.put(text)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 리시버 시작'))
 
-    # noinspection PyUnresolvedReferences
     def UpdateTickData(self, data):
         try:
             dt = int(str_ymdhms_utc(data['timestamp']))
@@ -201,7 +200,6 @@ class UpbitReceiverTick:
                 self.list_hgdt[0] = dt
                 self.list_hgdt[2:4] = [0, 0]
 
-    # noinspection PyUnresolvedReferences
     def UpdateHogaData(self, data):
         try:
             dt = int(str_ymdhms_utc(data['timestamp']))

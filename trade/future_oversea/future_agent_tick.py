@@ -73,16 +73,17 @@ class FutureAgentTick:
         self.tr_next     = None
         self.tr_df       = None
 
+        self.dict_dtdm: dict[str, list]        = {}
+        self.dict_data: dict[str, list]        = {}
+        self.dict_money: dict[str, list]       = {}
+        self.dict_bmbyp: dict[str, np.ndarray] = {}
+        self.dict_smbyp: dict[str, np.ndarray] = {}
+        self.dict_index: dict[str, dict]       = {}
+        self.dict_dlhp: dict[str, list]        = {}
+
         self.dict_info   = {}
         self.dict_hgbs   = {}
         self.dict_sncd   = {}
-
-        self.dict_dtdm   = {}
-        self.dict_data   = {}
-        self.dict_money  = {}
-        self.dict_bmbyp  = {}
-        self.dict_smbyp  = {}
-        self.dict_index  = {}
         self.dict_mtop   = {}
         self.dict_jgdt   = {}
 
@@ -380,7 +381,6 @@ class FutureAgentTick:
                 except:
                     self.mgzservQ.put(('window', (ui_num['시스템로그'], f'{format_exc()}오류 알림 - UpdateTickData')))
 
-    # noinspection PyUnresolvedReferences
     def UpdateTickData(self, code, dt, c, o, h, low, per, v, csp, cbp):
         data = self.dict_data.get(code)
         if data:
@@ -472,7 +472,6 @@ class FutureAgentTick:
                 self.list_hgdt[0] = dt
                 self.list_hgdt[2:4] = [0, 0]
 
-    # noinspection PyUnresolvedReferences
     def UpdateHogaData(self, dt, hoga_seprice, hoga_buprice, hoga_samount, hoga_bamount, hoga_tamount,
                        code, name, receivetime):
 
