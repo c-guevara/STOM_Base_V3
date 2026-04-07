@@ -311,7 +311,7 @@ class ChartHogaQuerySound:
                 if (gubun == 'C' and self.dict_set['코인타임프레임']) or \
                         ('해외선물' in self.dict_set['증권사'] and self.dict_set['주식타임프레임']):
                     jr = [data[self.fi['그외틱봉매도총잔']]] + data[self.fi['그외틱봉잔량시작']:self.fi['그외틱봉잔량종료']] + [data[self.fi['그외틱봉매수총잔']]]
-                    hg = [data[self.fi['고가']]]  + data[self.fi['그외틱봉호가시작']:self.fi['그외틱봉호가종료']] + [self.fi['저가']]
+                    hg = [data[self.fi['고가']]]  + data[self.fi['그외틱봉호가시작']:self.fi['그외틱봉호가종료']] + [data[self.fi['저가']]]
                 else:
                     jr = [data[self.fi['그외분봉매도총잔']]] + data[self.fi['그외분봉잔량시작']:self.fi['그외분봉잔량종료']] + [data[self.fi['그외분봉매수총잔']]]
                     hg = [data[self.fi['고가']]]  + data[self.fi['그외분봉호가시작']:self.fi['그외분봉호가종료']] + [data[self.fi['저가']]]
