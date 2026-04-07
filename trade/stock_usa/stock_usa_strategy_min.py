@@ -1,24 +1,18 @@
 
-import os
-import sys
 import numpy as np
 from traceback import format_exc
-from kiwoom_strategy_tick import KiwoomStrategyTick
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utility.setting_base import ui_num
-# noinspection PyUnresolvedReferences
-from utility.static import timedelta_sec, now, GetKiwoomPgSgSp, GetHogaunit, str_ymdhms, dt_ymdhms, GetIndicator, \
-    error_decorator
+from trade.stock_usa.stock_usa_strategy_tick import StockUsaStrategyTick
+from utility.static import now, now_utc, GetUpbitPgSgSp, dt_ymdhms, GetIndicator
 
 
-class KiwoomStrategyMin(KiwoomStrategyTick):
+class StockUsaStrategyMin(StockUsaStrategyTick):
     def UpdateGlobalsFunc(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
     def Strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
-            거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
@@ -26,9 +20,10 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
 
         시분초 = int(str(체결시간)[8:] + '00')
-        rw = 평균값계산틱수 = self.dict_set['주식평균값계산틱수']
+        rw = 평균값계산틱수 = self.dict_set['평균값계산틱수']
         순매수금액 = 분당매수금액 - 분당매도금액
-        self.hoga_unit = 호가단위 = GetHogaunit(종목코드 in self.tuple_kosd, 현재가, 체결시간)
+        호가빼기데이터 = (매도호가5 - 매도호가4, 매도호가4 - 매도호가3, 매도호가3 - 매도호가2, 매수호가2 - 매수호가3, 매수호가3 - 매수호가4, 매수호가4 - 매수호가5)
+        self.hoga_unit = 호가단위 = min(x for x in 호가빼기데이터 if x > 0)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -37,9 +32,7 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
 
         if 전략연산:
             new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
-            new_data = data[:self.base_cnt]
-            new_data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
-            new_data_tick[:self.base_cnt] = new_data
+            new_data_tick[:self.base_cnt] = data[:self.base_cnt]
 
             pre_data = self.dict_data.get(종목코드)
             if pre_data is not None:
@@ -84,7 +77,7 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                     try:
                         exec(v)
                     except:
-                        self.mgzservQ.put(('window', (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 경과틱수 연산오류')))
+                        self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 경과틱수 연산오류'))
 
             if 데이터길이 >= 평균값계산틱수 and self.fm_list:
                 for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
@@ -119,14 +112,14 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                                 price = self.arry_code[self.indexn, self.dict_findex[fname]]
                             self.arry_code[self.indexn, col_idx] = price
 
-            if 데이터길이 >= 평균값계산틱수 and not (매수잔량5 == 0 and 매도잔량5 == 0):
+            if 데이터길이 >= 평균값계산틱수:
                 jg_data = self.dict_jg.get(종목코드)
                 if jg_data:
                     if 종목코드 not in self.dict_buy_num:
                         self.dict_buy_num[종목코드] = self.indexn
                     # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
                     _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
-                    _, 수익금, 수익률 = GetKiwoomPgSgSp(매입금액, 보유수량 * 현재가)
+                    _, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 현재가)
                     profit_data = self.dict_profit.get(종목코드)
                     if profit_data:
                         if 수익률 > profit_data[0]:
@@ -137,21 +130,22 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                     else:
                         self.dict_profit[종목코드] = [수익률, 수익률]
                         최고수익률 = 최저수익률 = 수익률
-                    보유시간 = int((now() - dt_ymdhms(매수시간)).total_seconds() / 60)
+                    보유시간 = int((now_utc() - dt_ymdhms(매수시간)).total_seconds() / 60)
                     매수틱번호 = self.dict_buy_num[종목코드]
                 else:
-                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0
+                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_utc(), 0, 0, 0
+
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-                BBT = not self.dict_set['주식매수금지시간'] or not (self.dict_set['주식매수금지시작시간'] < 시분초 < self.dict_set['주식매수금지종료시간'])
-                BLK = not self.dict_set['주식매수금지블랙리스트'] or 종목코드 not in self.dict_set['주식블랙리스트']
+                BBT = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BLK = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
                 NIB = 종목코드 not in self.dict_signal['매수']
                 NIS = 종목코드 not in self.dict_signal['매도']
 
                 A = 관심종목 and NIB and 매수가 == 0
-                B = self.dict_set['주식매수분할시그널']
-                C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['주식매수분할횟수']
-                D = NIB and self.dict_set['주식매도취소매수시그널'] and not NIS
+                B = self.dict_set['매수분할시그널']
+                C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['매수분할횟수']
+                D = NIB and self.dict_set['매도취소매수시그널'] and not NIS
 
                 if BBT and BLK and (A or (B and C) or C or D):
                     self.info_for_signal = D, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
@@ -162,33 +156,33 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                             try:
                                 exec(self.buystrategy)
                             except:
-                                self.mgzservQ.put(('window', (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략')))
+                                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
                     elif C:
                         매수 = False
-                        분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['주식매수분할고정수익률'] else 수익률
-                        if self.dict_set['주식매수분할하방'] and 분할매수기준수익률 < -self.dict_set['주식매수분할하방수익률']:
+                        분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set[
+                            '매수분할고정수익률'] else 수익률
+                        if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
                             매수 = True
-                        elif self.dict_set['주식매수분할상방'] and 분할매수기준수익률 > self.dict_set['주식매수분할상방수익률']:
+                        elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
                             매수 = True
 
                         if 매수:
                             self.Buy()
 
-                SBT = not self.dict_set['주식매도금지시간'] or not (self.dict_set['주식매도금지시작시간'] < 시분초 < self.dict_set['주식매도금지종료시간'])
-                SCC = self.dict_set['주식매수분할횟수'] == 1 or not self.dict_set['주식매도금지매수횟수'] or 분할매수횟수 > self.dict_set['주식매도금지매수횟수값']
+                SBT = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set[
+                    '매도금지매수횟수값']
                 NIB = 종목코드 not in self.dict_signal['매수']
 
-                A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['주식매도분할횟수'] == 1
-                B = self.dict_set['주식매도분할시그널']
-                C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['주식매도분할횟수']
-                D = NIS and self.dict_set['주식매수취소매도시그널'] and not NIB
-                E = NIB and NIS and 매수가 != 0 and self.dict_set['주식매도익절수익률청산'] and 수익률 > self.dict_set['주식매도익절수익률']
-                F = NIB and NIS and 매수가 != 0 and self.dict_set['주식매도익절수익금청산'] and 수익금 > self.dict_set['주식매도익절수익금']
-                G = NIB and NIS and 매수가 != 0 and self.dict_set['주식매도손절수익률청산'] and 수익률 < -self.dict_set['주식매도손절수익률']
-                H = NIB and NIS and 매수가 != 0 and self.dict_set['주식매도손절수익금청산'] and 수익금 < -self.dict_set['주식매도손절수익금']
+                A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
+                B = self.dict_set['매도분할시그널']
+                C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
+                D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
+                E = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                F = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
 
-                if SBT and (A or (B and C) or C or D or E or F or G or H):
-                    강제청산 = E or F or G or H
+                if SBT and (A or (B and C) or C or D or E or F):
+                    강제청산 = E or F
                     전량매도 = A or 강제청산
                     self.info_for_signal = D, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
@@ -198,20 +192,18 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                             try:
                                 exec(self.sellstrategy)
                             except:
-                                self.mgzservQ.put(('window', (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매도전략')))
-
+                                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매도전략'))
                     elif C or 강제청산:
                         if C:
-                            if self.dict_set['주식매도분할하방'] and 수익률 < -self.dict_set['주식매도분할하방수익률'] * (분할매도횟수 + 1):
+                            if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
                                 매도 = True
-                            elif self.dict_set['주식매도분할상방'] and 수익률 > self.dict_set['주식매도분할상방수익률'] * (분할매도횟수 + 1):
+                            elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
                                 매도 = True
-                        else:
+                        elif 강제청산:
                             매도 = True
 
                         if 매도:
                             self.Sell()
-
         else:
             pre_data = self.dict_data.get(종목코드)
             if pre_data is None:
@@ -222,7 +214,7 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
         if 관심종목:
             # ['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']
             self.dict_gj[종목코드] = {
-                '종목명': 종목명,
+                '종목명': 종목코드,
                 'per': 등락율,
                 'hlp': 고저평균대비등락율,
                 'lhp': 저가대비고가등락율,
@@ -236,9 +228,7 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
         if self.chart_code == 종목코드 and 데이터길이 >= 평균값계산틱수:
             if not 전략연산:
                 new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
-                new_data = data[:self.base_cnt]
-                new_data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
-                new_data_tick[:self.base_cnt] = new_data
+                new_data_tick[:self.base_cnt] = data[:self.base_cnt]
                 self.arry_code = np.concatenate([pre_data, [new_data_tick]])
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
                 self.arry_code[-1, self.area_cnt:self.data_cnt] = GetIndicator(
@@ -281,8 +271,8 @@ class KiwoomStrategyMin(KiwoomStrategyTick):
                                     price = self.arry_code[self.indexn, self.dict_findex[fname]]
                                 self.arry_code[self.indexn, col_idx] = price
 
-            self.mgzservQ.put(('window', (ui_num['실시간차트'], 종목코드, self.arry_code)))
+            self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
 
         if 틱수신시간 != 0:
             gap = (now() - 틱수신시간).total_seconds()
-            self.mgzservQ.put(('window', (ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.')))
+            self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))

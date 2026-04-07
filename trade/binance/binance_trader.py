@@ -42,15 +42,15 @@ class BinanceTrader:
         """
         app = QApplication(sys.argv)
 
-        self.windowQ    = qlist[0]
-        self.soundQ     = qlist[1]
-        self.queryQ     = qlist[2]
-        self.teleQ      = qlist[3]
-        self.creceivQ   = qlist[8]
-        self.ctraderQ   = qlist[9]
-        self.cstgQ      = qlist[10]
-        self.liveQ      = qlist[11]
-        self.dict_set   = dict_set
+        self.windowQ   = qlist[0]
+        self.soundQ    = qlist[1]
+        self.queryQ    = qlist[2]
+        self.teleQ     = qlist[3]
+        self.creceivQ  = qlist[8]
+        self.ctraderQ  = qlist[9]
+        self.cstgQ     = qlist[10]
+        self.liveQ     = qlist[11]
+        self.dict_set  = dict_set
 
         self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
         self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록
@@ -75,7 +75,7 @@ class BinanceTrader:
             '종목당투자금': 0
         }
         self.dict_bool  = {
-            '코인잔고청산': False
+            '잔고청산': False
         }
 
         self.binance    = binance.Client(self.dict_set['Access_key2'], self.dict_set['Secret_key2'])
@@ -88,7 +88,7 @@ class BinanceTrader:
         self.SetPosition()
 
         self.ws_thread = None
-        if not self.dict_set['코인모의투자']:
+        if not self.dict_set['모의투자']:
             self.ws_thread = WebSocketTrader(self.dict_set['Access_key2'], self.dict_set['Secret_key2'], self.windowQ)
             self.ws_thread.signal1.connect(self.UpdateUserData)
             self.ws_thread.start()
@@ -113,7 +113,7 @@ class BinanceTrader:
         app.exec_()
 
     def get_jgcs_time(self):
-        return int(str_hms(timedelta_sec(-120, dt_hms(str(self.dict_set['코인전략종료시간'])))))
+        return int(str_hms(timedelta_sec(-120, dt_hms(str(self.dict_set['전략종료시간'])))))
 
     def LoadDatabase(self):
         con = sqlite3.connect(DB_TRADELIST)
@@ -125,7 +125,7 @@ class BinanceTrader:
         if len(df_td) > 0:
             self.dict_td = df_td.to_dict('index')
             self.windowQ.put((ui_num['C거래목록'], df_td[::-1]))
-        if self.dict_set['코인모의투자']:
+        if self.dict_set['모의투자']:
             df_jg = pd.read_sql(f'SELECT * FROM c_jangolist_future', con).set_index('index')
             if len(df_jg) > 0:
                 self.dict_jg = df_jg.to_dict('index')
@@ -134,7 +134,7 @@ class BinanceTrader:
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 데이터베이스 불러오기 완료'))
 
     def GetBalances(self):
-        if self.dict_set['코인모의투자']:
+        if self.dict_set['모의투자']:
             con = sqlite3.connect(DB_TRADELIST)
             df = pd.read_sql('SELECT * FROM c_tradelist_future', con)
             con.close()
@@ -181,7 +181,7 @@ class BinanceTrader:
         self.cstgQ.put(('바낸선물단위정보', self.dict_info))
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 호가단위 및 소숫점자리수 조회 완료'))
 
-        if not self.dict_set['코인모의투자']:
+        if not self.dict_set['모의투자']:
             for code in self.dict_info:
                 try:
                     if self.dict_set['바이낸스선물고정레버리지']:
@@ -198,8 +198,8 @@ class BinanceTrader:
 
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 마진타입 및 레버리지 설정 완료'))
 
-        text = '코인 전략연산 및 트레이더를 시작하였습니다.'
-        if self.dict_set['코인알림소리']: self.soundQ.put(text)
+        text = '전략연산 및 트레이더를 시작하였습니다.'
+        if self.dict_set['알림소리']: self.soundQ.put(text)
         self.teleQ.put(text)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 트레이더 시작'))
 
@@ -208,9 +208,9 @@ class BinanceTrader:
 
     def Scheduler2(self):
         inthms = int(str_hms(now_utc()))
-        if self.dict_set['코인타임프레임'] and inthms < self.dict_set['코인전략종료시간']:
+        if self.dict_set['타임프레임'] and inthms < self.dict_set['전략종료시간']:
             self.OrderTimeControl()
-        if self.dict_set['코인잔고청산'] and not self.dict_bool['코인잔고청산'] and self.jgcs_time < inthms < self.jgcs_time + 10:
+        if self.dict_set['잔고청산'] and not self.dict_bool['잔고청산'] and self.jgcs_time < inthms < self.jgcs_time + 10:
             self.JangoCheongsan('자동')
         self.UpdateTotaljango()
 
@@ -236,23 +236,23 @@ class BinanceTrader:
         if 잔고청산:
             if 잔고없음 or (주문구분 == 'SELL_LONG' and 롱매도주문중) or (주문구분 == 'BUY_SHORT' and 숏매도주문중):
                 주문취소 = True
-        elif self.dict_bool['코인잔고청산']:
+        elif self.dict_bool['잔고청산']:
             주문취소 = True
         elif 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
             inthmsutc = int(str_hms(now_utc()))
             거래횟수 = len(set([v['체결시간'] for v in self.dict_td.values() if v['종목명'] == 종목코드]))
             손절횟수 = len(set([v['체결시간'] for v in self.dict_td.values() if v['종목명'] == 종목코드 and v['수익률'] < 0]))
-            if self.dict_set['코인매수금지거래횟수'] and self.dict_set['코인매수금지거래횟수값'] <= 거래횟수:
+            if self.dict_set['매수금지거래횟수'] and self.dict_set['매수금지거래횟수값'] <= 거래횟수:
                 주문취소 = True
-            elif self.dict_set['코인매수금지손절횟수'] and self.dict_set['코인매수금지손절횟수값'] <= 손절횟수:
+            elif self.dict_set['매수금지손절횟수'] and self.dict_set['매수금지손절횟수값'] <= 손절횟수:
                 주문취소 = True
-            elif 잔고없음 and inthmsutc < self.dict_set['코인전략종료시간'] and len(self.dict_jg) >= self.dict_set['코인최대매수종목수']:
+            elif 잔고없음 and inthmsutc < self.dict_set['전략종료시간'] and len(self.dict_jg) >= self.dict_set['최대매수종목수']:
                 주문취소 = True
-            elif self.dict_set['코인매수금지간격'] and 현재시간 < self.dict_info[종목코드]['최종거래시간']:
+            elif self.dict_set['매수금지간격'] and 현재시간 < self.dict_info[종목코드]['최종거래시간']:
                 주문취소 = True
-            elif self.dict_set['코인매수금지손절간격'] and 현재시간 < self.dict_info[종목코드]['손절거래시간']:
+            elif self.dict_set['매수금지손절간격'] and 현재시간 < self.dict_info[종목코드]['손절거래시간']:
                 주문취소 = True
-            elif not 잔고없음 and self.dict_jg[종목코드]['분할매수횟수'] >= self.dict_set['코인매수분할횟수']:
+            elif not 잔고없음 and self.dict_jg[종목코드]['분할매수횟수'] >= self.dict_set['매수분할횟수']:
                 주문취소 = True
             elif self.dict_intg['추정예수금'] < 주문수량 * 주문가격:
                 if 현재시간 > self.dict_info[종목코드]['시드부족시간']:
@@ -268,7 +268,7 @@ class BinanceTrader:
             elif 포지션 == 'SHORT' and 'LONG' in 주문구분: 주문취소 = True
             elif 주문구분 == 'SELL_LONG' and 롱매도주문중:  주문취소 = True
             elif 주문구분 == 'BUY_SHORT' and 숏매도주문중:  주문취소 = True
-            elif self.dict_set['코인매도금지간격'] and 현재시간 < self.dict_info[종목코드]['최종거래시간']:
+            elif self.dict_set['매도금지간격'] and 현재시간 < self.dict_info[종목코드]['최종거래시간']:
                 주문취소 = True
         elif 'CANCEL' in 주문구분:
             if 주문구분 == 'BUY_LONG_CANCEL' and not 롱매수주문중:     주문취소 = True
@@ -285,26 +285,26 @@ class BinanceTrader:
                 self.CreateOrder(주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 0, 수동주문유형)
             else:
                 if 주문구분 == 'BUY_LONG':
-                    if self.dict_set['코인매도취소매수시그널'] and 롱매도주문중: self.CancelOrder(종목코드, 주문구분)
+                    if self.dict_set['매도취소매수시그널'] and 롱매도주문중: self.CancelOrder(종목코드, 주문구분)
                 elif 주문구분 == 'SELL_SHORT':
-                    if self.dict_set['코인매도취소매수시그널'] and 숏매도주문중: self.CancelOrder(종목코드, 주문구분)
+                    if self.dict_set['매도취소매수시그널'] and 숏매도주문중: self.CancelOrder(종목코드, 주문구분)
                 elif 주문구분 == 'SELL_LONG':
-                    if self.dict_set['코인매수취소매도시그널'] and 롱매수주문중: self.CancelOrder(종목코드, 주문구분)
+                    if self.dict_set['매수취소매도시그널'] and 롱매수주문중: self.CancelOrder(종목코드, 주문구분)
                 elif 주문구분 == 'BUY_SHORT':
-                    if self.dict_set['코인매수취소매도시그널'] and 숏매수주문중: self.CancelOrder(종목코드, 주문구분)
+                    if self.dict_set['매수취소매도시그널'] and 숏매수주문중: self.CancelOrder(종목코드, 주문구분)
                 self.cstgQ.put((f'{주문구분}_CANCEL', 종목코드))
 
     def CreateOrder(self, 주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형):
         if 주문구분 in ('BUY_LONG', 'SELL_SHORT') and 정정횟수 == 0:
-            if 수동주문유형 is None and '지정가' in self.dict_set['코인매수주문구분']:
-                gap = self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매수지정가호가번호']
+            if 수동주문유형 is None and '지정가' in self.dict_set['매수주문구분']:
+                gap = self.dict_info[종목코드]['호가단위'] * self.dict_set['매수지정가호가번호']
                 if 주문구분 == 'BUY_LONG':
                     주문가격 = round(주문가격 + gap, self.dict_info[종목코드]['소숫점자리수'])
                 else:
                     주문가격 = round(주문가격 - gap, self.dict_info[종목코드]['소숫점자리수'])
         elif 주문구분 in ('SELL_LONG', 'BUY_SHORT') and 정정횟수 == 0:
-            if 수동주문유형 is None and '지정가' in self.dict_set['코인매도주문구분']:
-                gap = self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매도지정가호가번호']
+            if 수동주문유형 is None and '지정가' in self.dict_set['매도주문구분']:
+                gap = self.dict_info[종목코드]['호가단위'] * self.dict_set['매도지정가호가번호']
                 if 주문구분 == 'SELL_LONG':
                     주문가격 = round(주문가격 + gap, self.dict_info[종목코드]['소숫점자리수'])
                 else:
@@ -318,12 +318,12 @@ class BinanceTrader:
         if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
             주문수량 = round(주문수량 * self.dict_lvrg[종목코드], self.dict_info[종목코드]['소숫점자리수'])
 
-        if self.dict_set['코인모의투자'] or 주문구분 == '시드부족':
+        if self.dict_set['모의투자'] or 주문구분 == '시드부족':
             self.OrderTimeLog(시그널시간)
             if 주문구분 == '시드부족':
                 self.UpdateChejanData(주문구분, 종목코드, 주문수량, 0, 주문수량, 주문가격, 0, '')
             else:
-                self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['코인매수취소시간초']), 정정횟수, 주문가격, self.dict_lvrg[종목코드]]
+                self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['매수취소시간초']), 정정횟수, 주문가격, self.dict_lvrg[종목코드]]
                 self.UpdateChejanData(주문구분, 종목코드, 주문수량, 주문수량, 0, 주문가격, 주문가격, '')
         else:
             data = (주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형)
@@ -346,13 +346,13 @@ class BinanceTrader:
         if 'CANCEL' not in 주문구분:
             try:
                 ret = None
-                if 수동주문유형 == '시장가' or (수동주문유형 is None and self.dict_set['코인매수주문구분'] == '시장가') or 잔고청산:
+                if 수동주문유형 == '시장가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '시장가') or 잔고청산:
                     ret = self.binance.futures_create_order(symbol=종목코드, side=매도수구분, type='MARKET', quantity=주문수량)
-                elif 수동주문유형 == '지정가' or (수동주문유형 is None and self.dict_set['코인매수주문구분'] == '지정가'):
+                elif 수동주문유형 == '지정가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '지정가'):
                     ret = self.binance.futures_create_order(symbol=종목코드, side=매도수구분, type='LIMIT', price=주문가격, timeInForce='GTC', quantity=주문수량)
-                elif 수동주문유형 == '지정가IOC' or (수동주문유형 is None and self.dict_set['코인매수주문구분'] == '지정가IOC'):
+                elif 수동주문유형 == '지정가IOC' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '지정가IOC'):
                     ret = self.binance.futures_create_order(symbol=종목코드, side=매도수구분, type='LIMIT', price=주문가격, timeInForce='IOC', quantity=주문수량)
-                elif 수동주문유형 == '지정가FOK' or (수동주문유형 is None and self.dict_set['코인매수주문구분'] == '지정가FOK'):
+                elif 수동주문유형 == '지정가FOK' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '지정가FOK'):
                     ret = self.binance.futures_create_order(symbol=종목코드, side=매도수구분, type='LIMIT', price=주문가격, timeInForce='FOK', quantity=주문수량)
             except:
                 self.cstgQ.put((f'{주문구분}_CANCEL', 종목코드))
@@ -362,10 +362,10 @@ class BinanceTrader:
                 orderId = int(ret['orderId'])
                 dt = self.GetIndex()
                 if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
-                    self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['코인매수취소시간초']), 정정횟수, 주문가격, self.dict_lvrg[종목코드]]
+                    self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['매수취소시간초']), 정정횟수, 주문가격, self.dict_lvrg[종목코드]]
                     self.dict_intg['추정예수금'] -= 주문수량 * 주문가격
                 else:
-                    self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['코인매도취소시간초']), 정정횟수, 주문가격]
+                    self.dict_order[주문구분][종목코드] = [timedelta_sec(self.dict_set['매도취소시간초']), 정정횟수, 주문가격]
                 self.dict_pos[종목코드] = 포지션
                 self.UpdateChegeollist(dt, 종목코드, f'{주문구분}_REG', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, orderId)
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_REG] {종목코드} | {주문가격} | {주문수량} | '))
@@ -432,9 +432,9 @@ class BinanceTrader:
                 매입금액 = self.dict_jg[종목코드]['매입금액']
                 보유수량 = self.dict_jg[종목코드]['보유수량']
                 if 포지션 == 'LONG':
-                    평가금액, 평가손익, 수익률 = GetBinanceLongPgSgSp(매입금액, 보유수량 * 현재가, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                    평가금액, 평가손익, 수익률 = GetBinanceLongPgSgSp(매입금액, 보유수량 * 현재가, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                 else:
-                    평가금액, 평가손익, 수익률 = GetBinanceShortPgSgSp(매입금액, 보유수량 * 현재가, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                    평가금액, 평가손익, 수익률 = GetBinanceShortPgSgSp(매입금액, 보유수량 * 현재가, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                 self.dict_jg[종목코드].update({
                     '현재가': 현재가,
                     '수익률': 수익률,
@@ -453,13 +453,13 @@ class BinanceTrader:
                 if code_ is None or code == code_:
                     order_info = self.dict_order[gubun][code]
                     if gubun in ('BUY_LONG', 'SELL_SHORT'):
-                        if self.dict_set['코인매수취소시간'] and now() > order_info[0]:
+                        if self.dict_set['매수취소시간'] and now() > order_info[0]:
                             cancel_list.append((code, gubun))
                     else:
-                        if self.dict_set['코인매도취소시간'] and now() > order_info[0]:
+                        if self.dict_set['매도취소시간'] and now() > order_info[0]:
                             cancel_list.append((code, gubun))
 
-                    text = '코인매수' if gubun in ('BUY_LONG', 'SELL_SHORT') else '코인매도'
+                    text = '매수' if gubun in ('BUY_LONG', 'SELL_SHORT') else '매도'
                     if gubun in ('BUY_LONG', 'BUY_SHORT'):
                         if order_info[1] < self.dict_set[f'{text}정정횟수'] and code in self.dict_curc and \
                                 self.dict_curc[code] >= order_info[2] + self.dict_info[code]['호가단위'] * self.dict_set[f'{text}정정호가차이']:
@@ -484,7 +484,7 @@ class BinanceTrader:
                     if lhp.__class__ == list: lhp = lhp[1]
                     leverage = self.GetLeverage(lhp)
                     self.dict_lvrg[code] = leverage
-                    if not self.dict_set['코인모의투자']:
+                    if not self.dict_set['모의투자']:
                         self.binance.futures_change_leverage(symbol=code, leverage=leverage)
                 except:
                     pass
@@ -514,13 +514,13 @@ class BinanceTrader:
             미체결수량 = last_value['미체결수량']
             if 미체결수량 > 0:
                 if 주문구분 == 'BUY_LONG':
-                    정정가격 = self.dict_curc[종목코드] - self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매수정정호가']
+                    정정가격 = self.dict_curc[종목코드] - self.dict_info[종목코드]['호가단위'] * self.dict_set['매수정정호가']
                 elif 주문구분 == 'SELL_SHORT':
-                    정정가격 = self.dict_curc[종목코드] + self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매수정정호가']
+                    정정가격 = self.dict_curc[종목코드] + self.dict_info[종목코드]['호가단위'] * self.dict_set['매수정정호가']
                 elif 주문구분 == 'SELL_LONG':
-                    정정가격 = self.dict_curc[종목코드] + self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매도정정호가']
+                    정정가격 = self.dict_curc[종목코드] + self.dict_info[종목코드]['호가단위'] * self.dict_set['매도정정호가']
                 else:
-                    정정가격 = self.dict_curc[종목코드] - self.dict_info[종목코드]['호가단위'] * self.dict_set['코인매도정정호가']
+                    정정가격 = self.dict_curc[종목코드] - self.dict_info[종목코드]['호가단위'] * self.dict_set['매도정정호가']
 
                 현재시간 = now()
                 정정횟수 = self.dict_order[주문구분][종목코드][1] + 1
@@ -535,25 +535,25 @@ class BinanceTrader:
 
         if self.dict_jg:
             if gubun == '수동':
-                self.teleQ.put('코인 잔고청산 주문을 전송합니다.')
+                self.teleQ.put('잔고청산 주문을 전송합니다.')
             for 종목코드 in self.dict_jg.copy():
                 포지션 = self.dict_jg[종목코드]['포지션']
                 현재가 = self.dict_jg[종목코드]['현재가']
                 보유수량 = self.dict_jg[종목코드]['보유수량']
                 주문구분 = 'SELL_LONG' if 포지션 == 'LONG' else 'BUY_SHORT'
-                if self.dict_set['코인모의투자']:
+                if self.dict_set['모의투자']:
                     self.UpdateChejanData(주문구분, 종목코드, 보유수량, 보유수량, 0, 현재가, 현재가, '')
                 else:
                     self.CheckOrder((주문구분, 종목코드, 현재가, 보유수량, now(), True))
-            if self.dict_set['코인알림소리']:
-                self.soundQ.put('코인 잔고청산 주문을 전송하였습니다.')
-            self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 코인 잔고청산 주문 완료'))
+            if self.dict_set['알림소리']:
+                self.soundQ.put('잔고청산 주문을 전송하였습니다.')
+            self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 잔고청산 주문 완료'))
         elif gubun == '수동':
-            self.teleQ.put('현재는 코인 보유종목이 없습니다.')
-        self.dict_bool['코인잔고청산'] = True
+            self.teleQ.put('현재는 보유종목이 없습니다.')
+        self.dict_bool['잔고청산'] = True
 
     def SysExit(self):
-        if not self.dict_set['코인모의투자']:
+        if not self.dict_set['모의투자']:
             self.WebProcessKill()
         qtest_qwait(5)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 트레이더 종료'))
@@ -613,9 +613,9 @@ class BinanceTrader:
                     매수가 = round(매입금액 / 보유수량, 8)
                     평가금액 = round(체결가격 * 보유수량, 4)
                     if 주문구분 == 'BUY_LONG':
-                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     else:
-                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     self.dict_jg[종목코드].update({
                         '매수가': 매수가,
                         '현재가': 체결가격,
@@ -631,10 +631,10 @@ class BinanceTrader:
                     레버리지 = self.dict_set['바이낸스선물고정레버리지값'] if self.dict_set['바이낸스선물고정레버리지'] else self.dict_order[주문구분][종목코드][3]
                     if 주문구분 == 'BUY_LONG':
                         포지션 = 'LONG'
-                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 매입금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 매입금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     else:
                         포지션 = 'SHORT'
-                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 매입금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 매입금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     self.dict_jg[종목코드] = {
                         '종목명': 종목코드,
                         '포지션': 포지션,
@@ -665,9 +665,9 @@ class BinanceTrader:
                     매입금액 = round(매수가 * 보유수량, 4)
                     평가금액 = round(체결가격 * 보유수량, 4)
                     if 주문구분 == 'SELL_LONG':
-                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     else:
-                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                        평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                     # ['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']
                     self.dict_jg[종목코드].update({
                         '현재가': 체결가격,
@@ -689,18 +689,18 @@ class BinanceTrader:
                 매입금액 = round(매수가 * 체결수량, 4)
                 평가금액 = round(체결가격 * 체결수량, 4)
                 if 주문구분 == 'SELL_LONG':
-                    평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                    평가금액, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                 else:
-                    평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['코인매수주문구분'], '시장가' in self.dict_set['코인매도주문구분'])
+                    평가금액, 수익금, 수익률 = GetBinanceShortPgSgSp(매입금액, 평가금액, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                 if -100 < 수익률 < 100: self.UpdateTradelist(index, 종목코드, 포지션, 매입금액, 평가금액, 체결수량, 수익률, 수익금, index[:14])
-                if 수익률 < 0: self.dict_info[종목코드]['손절거래시간'] = timedelta_sec(self.dict_set['코인매수금지손절간격초'])
+                if 수익률 < 0: self.dict_info[종목코드]['손절거래시간'] = timedelta_sec(self.dict_set['매수금지손절간격초'])
 
             self.dict_jg = dict(sorted(self.dict_jg.items(), key=lambda x: x[1]['매입금액'], reverse=True))
 
             if 미체결수량 == 0: self.cstgQ.put((f'{주문구분}_COMPLETE', 종목코드))
             self.UpdateChegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
-            if self.dict_set['코인모의투자']:
+            if self.dict_set['모의투자']:
                 if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
                     self.dict_intg['예수금'] -= 체결수량 * 체결가격
                     self.dict_intg['추정예수금'] -= 체결수량 * 체결가격
@@ -710,7 +710,7 @@ class BinanceTrader:
 
             df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
             self.queryQ.put(('거래디비', df_jg, 'c_jangolist_future', 'replace'))
-            if self.dict_set['코인알림소리']:
+            if self.dict_set['알림소리']:
                 text = ''
                 if 주문구분 == 'BUY_LONG':     text = '롱포지션을 진입'
                 elif 주문구분 == 'SELL_SHORT': text = '숏포지션을 진입'
@@ -732,7 +732,7 @@ class BinanceTrader:
             self.cstgQ.put((주문구분, 종목코드))
             self.UpdateChegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
-            if self.dict_set['코인알림소리']:
+            if self.dict_set['알림소리']:
                 text = ''
                 if 주문구분 == 'BUY_LONG_CANCEL':     text = '롱포지션 진입을 취소'
                 elif 주문구분 == 'SELL_SHORT_CANCEL': text = '숏포지션 진입을 취소'
@@ -794,11 +794,11 @@ class BinanceTrader:
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
             data_list = [거래횟수, 총매수금액, 총매도금액, 총수익금액, 총손실금액, 수익률, 수익금합계]
-            self.liveQ.put(('코인', data_list))
+            self.liveQ.put(('', data_list))
 
     def UpdateChegeollist(self, index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호):
         # ['종목명', '주문구분', '주문수량', '체결수량', '미체결수량', '체결가', '체결시간', '주문가격', '주문번호']
-        self.dict_info[종목코드]['최종거래시간'] = timedelta_sec(self.dict_set['코인매수금지간격초'])
+        self.dict_info[종목코드]['최종거래시간'] = timedelta_sec(self.dict_set['매수금지간격초'])
         self.dict_cj[index] = {
             '종목명': 종목코드,
             '주문구분': 주문구분,
@@ -840,17 +840,17 @@ class BinanceTrader:
 
         거래수익금합계 = sum([v['수익금'] for v in self.dict_td.values()])
         당일평가손익 = 총평가손익 + 거래수익금합계
-        if self.dict_set['코인손실중지']:
-            기준손실금 = self.dict_intg['추정예탁자산'] * self.dict_set['코인손실중지수익률'] / 100
+        if self.dict_set['손실중지']:
+            기준손실금 = self.dict_intg['추정예탁자산'] * self.dict_set['손실중지수익률'] / 100
             if 기준손실금 < -당일평가손익: self.StrategyStop()
-        if self.dict_set['코인수익중지']:
-            기준수익금 = self.dict_intg['추정예탁자산'] * self.dict_set['코인수익중지수익률'] / 100
+        if self.dict_set['수익중지']:
+            기준수익금 = self.dict_intg['추정예탁자산'] * self.dict_set['수익중지수익률'] / 100
             if 기준수익금 < 당일평가손익: self.StrategyStop()
 
-        if self.dict_set['코인투자금고정']:
-            종목당투자금 = int(self.dict_set['코인투자금'])
+        if self.dict_set['투자금고정']:
+            종목당투자금 = int(self.dict_set['투자금'])
         else:
-            종목당투자금 = int(self.dict_intg['추정예탁자산'] * 0.98 / self.dict_set['코인최대매수종목수'])
+            종목당투자금 = int(self.dict_intg['추정예탁자산'] * 0.98 / self.dict_set['최대매수종목수'])
 
         if self.dict_intg['종목당투자금'] != 종목당투자금:
             self.dict_intg['종목당투자금'] = 종목당투자금

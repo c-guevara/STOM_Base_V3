@@ -1,5 +1,4 @@
 
-OPENAPI_PATH             = 'C:/OpenAPI'
 ICON_PATH                = './ui/icon'
 STOCK_LOGIN_PATH         = './trade/stock_korea/login_kiwoom'
 FUTURE_LOGIN_PATH        = './trade/future_oversea/login_future'
@@ -71,6 +70,49 @@ DICT_MARKET_BACKDB = {
     7: {0: DB_FUTURE_NT_MIN_BACK, 1: DB_FUTURE_NT_TICK_BACK},
     8: {0: DB_FUTURE_OS_MIN_BACK, 1: DB_FUTURE_OS_TICK_BACK},
     9: {0: DB_COIN_FUTURE_MIN_BACK, 1: DB_COIN_FUTURE_TICK_BACK}
+}
+
+DICT_MARKET_GUBUN = {
+    '국내주식01': 1,
+    '국내주식02': 1,
+    '국내주식ETF03': 2,
+    '국내주식ETF04': 2,
+    '국내주식ETN05': 3,
+    '국내주식ETN06': 3,
+    '해외주식07': 4,
+    '해외주식08': 4,
+    '업비트09': 5,
+    '업비트10': 5,
+    '지수선물11': 6,
+    '지수선물12': 6,
+    '야간선물13': 7,
+    '야간선물14': 7,
+    '해외선물15': 8,
+    '해외선물16': 8,
+    '바이낸스선물17': 9,
+    '바이낸스선물18': 9,
+}
+
+DICT_MTOP_RANK = {
+    1: 100,
+    2: 10,
+    3: 10,
+    4: 100,
+    5: 10,
+    6: 100,
+    7: 100,
+    8: 10,
+    9: 10
+}
+
+DICT_CODE_INFO_TNAME = {
+    1: 'stockinfo',
+    2: 'stocketfinfo',
+    3: 'stocketninfo',
+    4: 'stockusainfo',
+    6: 'futureinfo',
+    7: 'futurentinfo',
+    8: 'futureosinfo'
 }
 
 ui_num = {'설정로그': 1, '종목명데이터': 2, '백테엔진': 3, '기본로그': 4, '타임로그': 5, '시스템로그': 6, 'S백테스트': 7, 'SF백테스트': 8,

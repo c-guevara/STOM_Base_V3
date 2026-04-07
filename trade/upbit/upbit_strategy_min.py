@@ -17,10 +17,10 @@ class UpbitStrategyMin(UpbitStrategyTick):
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
             매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
-            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 틱수신시간, 전략연산 = data
+            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간, 전략연산 = data
 
         시분초 = int(str(체결시간)[8:] + '00')
-        rw = 평균값계산틱수 = self.dict_set['코인평균값계산틱수']
+        rw = 평균값계산틱수 = self.dict_set['평균값계산틱수']
         순매수금액 = 분당매수금액 - 분당매도금액
         self.hoga_unit = 호가단위 = GetUpbitHogaunit(현재가)
 
@@ -136,18 +136,17 @@ class UpbitStrategyMin(UpbitStrategyTick):
 
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-                BBT = not self.dict_set['코인매수금지시간'] or not (self.dict_set['코인매수금지시작시간'] < 시분초 < self.dict_set['코인매수금지종료시간'])
-                BLK = not self.dict_set['코인매수금지블랙리스트'] or 종목코드 not in self.dict_set['코인블랙리스트']
-                C20 = not self.dict_set['코인매수금지200원이하'] or 현재가 > 200
+                BBT = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BLK = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
                 NIB = 종목코드 not in self.dict_signal['매수']
                 NIS = 종목코드 not in self.dict_signal['매도']
 
                 A = 관심종목 and NIB and 매수가 == 0
-                B = self.dict_set['코인매수분할시그널']
-                C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['코인매수분할횟수']
-                D = NIB and self.dict_set['코인매도취소매수시그널'] and not NIS
+                B = self.dict_set['매수분할시그널']
+                C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['매수분할횟수']
+                D = NIB and self.dict_set['매도취소매수시그널'] and not NIS
 
-                if BBT and BLK and C20 and (A or (B and C) or C or D):
+                if BBT and BLK and (A or (B and C) or C or D):
                     self.info_for_signal = D, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                     if A or (B and C) or D:
@@ -160,28 +159,28 @@ class UpbitStrategyMin(UpbitStrategyTick):
                     elif C:
                         매수 = False
                         분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set[
-                            '코인매수분할고정수익률'] else 수익률
-                        if self.dict_set['코인매수분할하방'] and 분할매수기준수익률 < -self.dict_set['코인매수분할하방수익률']:
+                            '매수분할고정수익률'] else 수익률
+                        if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
                             매수 = True
-                        elif self.dict_set['코인매수분할상방'] and 분할매수기준수익률 > self.dict_set['코인매수분할상방수익률']:
+                        elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
                             매수 = True
 
                         if 매수:
                             self.Buy()
 
-                SBT = not self.dict_set['코인매도금지시간'] or not (self.dict_set['코인매도금지시작시간'] < 시분초 < self.dict_set['코인매도금지종료시간'])
-                SCC = self.dict_set['코인매수분할횟수'] == 1 or not self.dict_set['코인매도금지매수횟수'] or 분할매수횟수 > self.dict_set[
-                    '코인매도금지매수횟수값']
+                SBT = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set[
+                    '매도금지매수횟수값']
                 NIB = 종목코드 not in self.dict_signal['매수']
 
-                A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['코인매도분할횟수'] == 1
-                B = self.dict_set['코인매도분할시그널']
-                C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['코인매도분할횟수']
-                D = NIS and self.dict_set['코인매수취소매도시그널'] and not NIB
-                E = NIB and NIS and 매수가 != 0 and self.dict_set['코인매도익절수익률청산'] and 수익률 > self.dict_set['코인매도익절수익률']
-                F = NIB and NIS and 매수가 != 0 and self.dict_set['코인매도익절수익금청산'] and 수익금 > self.dict_set['코인매도익절수익금']
-                G = NIB and NIS and 매수가 != 0 and self.dict_set['코인매도손절수익률청산'] and 수익률 < -self.dict_set['코인매도손절수익률']
-                H = NIB and NIS and 매수가 != 0 and self.dict_set['코인매도손절수익금청산'] and 수익금 < -self.dict_set['코인매도손절수익금']
+                A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
+                B = self.dict_set['매도분할시그널']
+                C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
+                D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
+                E = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+                F = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+                G = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                H = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
 
                 if SBT and (A or (B and C) or C or D or E or F or G or H):
                     강제청산 = E or F or G or H
@@ -198,9 +197,9 @@ class UpbitStrategyMin(UpbitStrategyTick):
 
                     elif C or 강제청산:
                         if C:
-                            if self.dict_set['코인매도분할하방'] and 수익률 < -self.dict_set['코인매도분할하방수익률'] * (분할매도횟수 + 1):
+                            if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
                                 매도 = True
-                            elif self.dict_set['코인매도분할상방'] and 수익률 > self.dict_set['코인매도분할상방수익률'] * (분할매도횟수 + 1):
+                            elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
                                 매도 = True
                         elif 강제청산:
                             매도 = True

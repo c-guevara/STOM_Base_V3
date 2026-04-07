@@ -4,10 +4,10 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from trade.upbit.upbit_restapi import Upbit, get_symbols_info
+from trade.restapi_ls import LsRestAPI, WebSocketTrader
 from utility.setting_base import columns_cj, columns_td, ui_num, DB_TRADELIST, columns_jg
-from utility.static import now, timedelta_sec, GetUpbitHogaunit, GetUpbitPgSgSp, now_utc, str_ymdhmsf, str_hmsf, \
-    str_hms, str_ymd, dt_hms, qtest_qwait, set_builtin_print, error_decorator
+from utility.static import now, timedelta_sec, now_utc, str_ymdhmsf, str_hmsf, str_hms, str_ymd, dt_hms, qtest_qwait, \
+    set_builtin_print, error_decorator
 
 
 class Updater(QThread):
@@ -31,35 +31,33 @@ class Updater(QThread):
                 self.signal3.emit(data)
 
 
-class UpbitTrader:
+class StockUsaTrader:
     def __init__(self, qlist, dict_set):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
-           0        1       2      3       4      5      6      7       8        9       10     11
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
+           0        1       2      3       4      5      6      7       8         9         10     11      12
         """
         app = QApplication(sys.argv)
 
-        self.windowQ  = qlist[0]
-        self.soundQ   = qlist[1]
-        self.queryQ   = qlist[2]
-        self.teleQ    = qlist[3]
-        self.receivQ  = qlist[8]
-        self.traderQ  = qlist[9]
-        self.stgQs    = qlist[10]
-        self.stgQ     = self.stgQs[0]
-        self.liveQ    = qlist[11]
-        self.dict_set = dict_set
+        self.windowQ       = qlist[0]
+        self.soundQ        = qlist[1]
+        self.queryQ        = qlist[2]
+        self.teleQ         = qlist[3]
+        self.creceivQ      = qlist[8]
+        self.ctraderQ      = qlist[9]
+        self.cstgQ         = qlist[10]
+        self.liveQ         = qlist[11]
+        self.dict_set      = dict_set
 
         self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
         self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록
         self.dict_td: dict[str, dict[str, int | float]] = {}  # 거래목록
 
-        self.dict_tj       = {}  # 잔고평가
-        self.dict_tt       = {}  # 평가손익
-        self.dict_info     = {}
-        self.dict_curc     = {}
-        self.dict_order_cc = {}
-        self.dict_order    = {
+        self.dict_tj    = {}  # 잔고평가
+        self.dict_tt    = {}  # 평가손익
+        self.dict_info  = {}
+        self.dict_curc  = {}
+        self.dict_order = {
             '매수': {},
             '매도': {},
             '매수취소': {},
@@ -75,10 +73,19 @@ class UpbitTrader:
             '잔고청산': False
         }
 
-        self.upbit      = Upbit(self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
+        self.symbols    = []
         self.jgcs_time  = self.get_jgcs_time()
         self.str_today  = str_ymd(now_utc())
         self.order_time = now()
+
+        self.ls = LsRestAPI(self.windowQ, self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
+        self.token = self.ls.create_token()
+
+        self.ws_thread = None
+        if not self.dict_set['모의투자']:
+            self.ws_thread = WebSocketTrader('해외주식', self.token, self.windowQ)
+            self.ws_thread.signal.connect(self.UpdateUserData)
+            self.ws_thread.start()
 
         self.UpdateDictInfo()
         self.LoadDatabase()
@@ -94,7 +101,7 @@ class UpbitTrader:
         self.qtimer2.timeout.connect(self.Scheduler2)
         self.qtimer2.start()
 
-        self.updater = Updater(self.traderQ)
+        self.updater = Updater(self.ctraderQ)
         self.updater.signal1.connect(self.CheckOrder)
         self.updater.signal2.connect(self.UpdateTuple)
         self.updater.signal3.connect(self.UpdateString)
@@ -108,13 +115,14 @@ class UpbitTrader:
 
     def UpdateDictInfo(self):
         dummy_time = timedelta_sec(-3600)
-        _, codes = get_symbols_info()
-        for code in codes:
-            self.dict_info[code] = {
+        self.dict_info, self.symbols = self.ls.get_code_info_stock_usa()
+        for code in self.dict_info.copy():
+            self.dict_info[code].update({
                 '시드부족시간': dummy_time,
                 '최종거래시간': dummy_time,
                 '손절거래시간': dummy_time
-            }
+            })
+
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 종목정보 수집 완료'))
 
     def LoadDatabase(self):
@@ -131,7 +139,7 @@ class UpbitTrader:
             df_jg = pd.read_sql(f'SELECT * FROM c_jangolist', con).set_index('index')
             if len(df_jg) > 0:
                 self.dict_jg = df_jg.to_dict('index')
-                self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
+                self.creceivQ.put(('잔고목록', tuple(self.dict_jg)))
         con.close()
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 데이터베이스 불러오기 완료'))
 
@@ -144,9 +152,9 @@ class UpbitTrader:
             chujeonjasan = 100_000_000 + tcg
             if chujeonjasan < 100_000_000: chujeonjasan = 100_000_000
         else:
-            ret = self.upbit.get_balances()
-            if self.CheckError(ret):
-                chujeonjasan = int(float(ret[0]['balance']))
+            out_block1, _ = self.ls.get_balance_stock_usa()
+            if out_block1:
+                chujeonjasan = int(float(out_block1['D2EstiDps']))
             else:
                 chujeonjasan = 0
 
@@ -164,15 +172,8 @@ class UpbitTrader:
         self.teleQ.put(text)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 트레이더 시작'))
 
-    def CheckError(self, ret):
-        if ret.__class__ == dict and list(ret)[0] == 'error':
-            self.windowQ.put((ui_num['시스템로그'], f"오류 알림 - {ret['error']['name']} : {ret['error']['message']}"))
-            return False
-        return True
-
     def Scheduler1(self):
-        self.stgQ.put(('잔고목록', self.dict_jg.copy()))
-        if not self.dict_set['모의투자']: self.CheckChegeol()
+        self.cstgQ.put(('잔고목록', self.dict_jg.copy()))
 
     def Scheduler2(self):
         inthms = int(str_hms(now_utc()))
@@ -238,30 +239,25 @@ class UpbitTrader:
 
         if 주문취소:
             if '취소' not in 주문구분:
-                self.stgQ.put((f'{주문구분}취소', 종목코드))
+                self.cstgQ.put((f'{주문구분}취소', 종목코드))
         else:
             if 주문수량 > 0:
-                if 잔고청산: self.stgQ.put((f'{주문구분}주문', 종목코드))
+                if 잔고청산: self.cstgQ.put((f'{주문구분}주문', 종목코드))
                 self.CreateOrder(주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 0, 수동주문유형)
             else:
                 if 주문구분 == '매수':
                     if self.dict_set['매도취소매수시그널'] and 매도주문중: self.CancelOrder(종목코드, 주문구분)
                 elif 주문구분 == '매도':
                     if self.dict_set['매수취소매도시그널'] and 매수주문중: self.CancelOrder(종목코드, 주문구분)
-                self.stgQ.put((f'{주문구분}취소', 종목코드))
+                self.cstgQ.put((f'{주문구분}취소', 종목코드))
 
     def CreateOrder(self, 주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형):
         if 주문구분 == '매수' and 정정횟수 == 0:
             if 수동주문유형 is None and '지정가' in self.dict_set['매수주문구분']:
-                주문가격 = round(주문가격 + GetUpbitHogaunit(주문가격) * self.dict_set['매수지정가호가번호'], 8)
+                주문가격 = round(주문가격 + 0.01 * self.dict_set['매수지정가호가번호'], 2)
         elif 주문구분 == '매도' and 정정횟수 == 0:
             if 수동주문유형 is None and '지정가' in self.dict_set['매도주문구분']:
-                주문가격 = round(주문가격 + GetUpbitHogaunit(주문가격) * self.dict_set['매도지정가호가번호'], 8)
-
-        if 주문수량 * 주문가격 < 5000:
-            self.windowQ.put((ui_num['시스템로그'], f'오류 알림 - 주문금액이 5천원미만입니다.'))
-            self.stgQ.put((f'{주문구분}취소', 종목코드))
-            return
+                주문가격 = round(주문가격 + 0.01 * self.dict_set['매도지정가호가번호'], 2)
 
         if self.dict_set['모의투자'] or 주문구분 == '시드부족':
             self.OrderTimeLog(시그널시간)
@@ -285,57 +281,64 @@ class UpbitTrader:
             return
 
         주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형 = data
+        주문시장코드 = self.dict_info[종목코드]['거래소코드']
         self.OrderTimeLog(시그널시간)
-
+        od_no, msg = None, None
         if 주문구분 == '매수':
-            ret = None
             if 수동주문유형 == '시장가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '시장가'):
-                ret = self.upbit.buy_market_order(종목코드, int(주문가격 * 주문수량))
+                od_no, msg = self.ls.order_stock_usa('매수', 주문시장코드, 종목코드, 주문수량, 주문가격, '시장가')
             elif 수동주문유형 == '지정가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '지정가'):
-                ret = self.upbit.buy_limit_order(종목코드, 주문가격, 주문수량)
+                od_no, msg = self.ls.order_stock_usa('매수', 주문시장코드, 종목코드, 주문수량, 주문가격, '지정가')
 
-            if ret is not None:
-                if self.CheckError(ret):
-                    dt = self.GetIndex()
-                    self.dict_intg['추정예수금'] -= 주문수량 * 주문가격
-                    # noinspection PyUnresolvedReferences
-                    self.dict_order[주문구분][종목코드] = [ret['uuid'], timedelta_sec(self.dict_set['매수취소시간초']), 정정횟수, 주문가격, GetUpbitHogaunit(주문가격)]
-                    # noinspection PyUnresolvedReferences
-                    self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, ret['uuid'])
-                    self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
+            if od_no != '0':
+                dt = self.GetIndex()
+                self.dict_intg['추정예수금'] -= 주문수량 * 주문가격
+                self.dict_order[주문구분][종목코드] = [od_no, timedelta_sec(self.dict_set['매수취소시간초']), 정정횟수, 주문가격, 0.01]
+                self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, od_no)
+                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
             else:
-                self.stgQ.put(('매수취소', 종목코드))
+                self.cstgQ.put(('매수취소', 종목코드))
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문실패] {종목코드} | {주문가격} | {주문수량}'))
 
         elif 주문구분 == '매도':
-            ret = None
             if 수동주문유형 == '시장가' or self.dict_set['매도주문구분'] == '시장가' or 잔고청산:
-                ret = self.upbit.sell_market_order(종목코드, 주문수량)
+                od_no, msg = self.ls.order_stock_usa('매도', 주문시장코드, 종목코드, 주문수량, 주문가격, '시장가')
             elif 수동주문유형 == '지정가' or self.dict_set['매도주문구분'] == '지정가':
-                ret = self.upbit.sell_limit_order(종목코드, 주문가격, 주문수량)
+                od_no, msg = self.ls.order_stock_usa('매도', 주문시장코드, 종목코드, 주문수량, 주문가격, '지정가')
 
-            if ret is not None:
-                if self.CheckError(ret):
-                    dt = self.GetIndex()
-                    # noinspection PyUnresolvedReferences
-                    self.dict_order[주문구분][종목코드] = [ret['uuid'], timedelta_sec(self.dict_set['매도취소시간초']), 정정횟수, 주문가격, GetUpbitHogaunit(주문가격)]
-                    # noinspection PyUnresolvedReferences
-                    self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, ret['uuid'])
-                    self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
+            if od_no != '0':
+                dt = self.GetIndex()
+                self.dict_order[주문구분][종목코드] = [od_no, timedelta_sec(self.dict_set['매도취소시간초']), 정정횟수, 주문가격, 0.01]
+                self.UpdateChegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, od_no)
+                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
             else:
-                self.stgQ.put(('매도취소', 종목코드))
+                self.cstgQ.put(('매도취소', 종목코드))
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문실패] {종목코드} | {주문가격} | {주문수량} | {주문구분}'))
 
-        elif 주문구분 in ('매수취소', '매도취소'):
-            ret = self.upbit.cancel_order(주문번호)
-            if ret is not None:
-                if self.CheckError(ret):
-                    self.dict_order[주문구분][종목코드] = ret['uuid']
+        elif 주문구분 == '매수취소':
+            if 수동주문유형 == '시장가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '시장가'):
+                od_no, msg = self.ls.order_stock_usa('취소', 주문시장코드, 종목코드, 주문수량, 주문가격, '시장가')
+            elif 수동주문유형 == '지정가' or (수동주문유형 is None and self.dict_set['매수주문구분'] == '지정가'):
+                od_no, msg = self.ls.order_stock_usa('취소', 주문시장코드, 종목코드, 주문수량, 주문가격, '지정가')
+
+            if od_no != '0':
+                self.dict_order[주문구분][종목코드] = od_no
+            else:
+                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문 실패] {종목코드} | {주문가격} | {주문수량} | {주문구분}'))
+
+        elif 주문구분 == '매도취소':
+            if 수동주문유형 == '시장가' or self.dict_set['매도주문구분'] == '시장가' or 잔고청산:
+                od_no, msg = self.ls.order_stock_usa('취소', 주문시장코드, 종목코드, 주문수량, 주문가격, '시장가')
+            elif 수동주문유형 == '지정가' or self.dict_set['매도주문구분'] == '지정가':
+                od_no, msg = self.ls.order_stock_usa('취소', 주문시장코드, 종목코드, 주문수량, 주문가격, '지정가')
+
+            if od_no != '0':
+                self.dict_order[주문구분][종목코드] = od_no
             else:
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문 실패] {종목코드} | {주문가격} | {주문수량} | {주문구분}'))
 
         self.order_time = timedelta_sec(0.3)
-        self.receivQ.put(('주문목록', self.GetOrderCodeList()))
+        self.creceivQ.put(('주문목록', self.GetOrderCodeList()))
 
     def GetOrderCodeList(self):
         return tuple(self.dict_order['매수']) + tuple(self.dict_order['매도'])
@@ -372,64 +375,11 @@ class UpbitTrader:
         elif data == '프로세스종료':
             self.SysExit()
 
-    def CheckChegeol(self):
-        order_info_list = []
-        for gubun in self.dict_order:
-            for code, orders in self.dict_order[gubun].items():
-                order_info = self.GetOrderInfo(code, orders[0])
-                if order_info is not None:
-                    order_info_list.append([gubun] + order_info)
-                qtest_qwait(0.1)
-
-        if order_info_list:
-            for 주문구분, 종목코드, 주문수량, 총체결수량, 미체결수량, 체결가격, 주문가격, 주문번호 in order_info_list:
-                self.UpdateChejanData(주문구분, 종목코드, 주문수량, 총체결수량, 미체결수량, 체결가격, 주문가격, 주문번호)
-
-    def GetOrderInfo(self, 종목코드, 주문번호):
-        order_info = None
-        ret = self.upbit.get_order(주문번호)
-        if ret is not None and self.CheckError(ret):
-            try:
-                주문가격 = float(ret['price'])
-            except:
-                주문가격 = 0.
-            try:
-                주문수량 = float(ret['volume'])
-            except:
-                주문수량 = 0.
-            try:
-                미체결수량 = float(ret['remaining_volume'])
-            except:
-                미체결수량 = 0.
-
-            총체결수량, 체결가격, 매입금액 = 0., 0., 0.
-            if ret['trades_count'] > 0:
-                trades = ret['trades']
-                for i in range(len(trades)):
-                    매입금액 += float(trades[i]['funds'])
-                    총체결수량 += float(trades[i]['volume'])
-                if 총체결수량 > 0:
-                    체결가격 = round(매입금액 / 총체결수량, 4)
-                    총체결수량 = round(총체결수량, 8)
-
-            if 총체결수량 > 0:
-                if 주문번호 not in self.dict_order_cc:
-                    order_info = [종목코드, 주문수량, 총체결수량, 미체결수량, 체결가격, 주문가격, 주문번호]
-                else:
-                    체결수량 = round(총체결수량 - self.dict_order_cc[주문번호], 8)
-                    if 체결수량 > 0:
-                        order_info = [종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 주문번호]
-
-                self.dict_order_cc[주문번호] = 총체결수량
-                if 미체결수량 == 0 and 주문번호 in self.dict_order_cc:
-                    del self.dict_order_cc[주문번호]
-
-        return order_info
-
     def UpdateJango(self, data):
         종목코드, 현재가 = data
         self.dict_curc[종목코드] = 현재가
         try:
+            # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
             if 현재가 != self.dict_jg[종목코드]['현재가']:
                 매입금액 = self.dict_jg[종목코드]['매입금액']
                 보유수량 = self.dict_jg[종목코드]['보유수량']
@@ -528,6 +478,9 @@ class UpbitTrader:
         qtest_qwait(5)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 트레이더 종료'))
 
+    def UpdateUserData(self, data):
+        pass
+
     def GetIndex(self):
         index = str_ymdhmsf(now_utc())
         if index in self.dict_cj:
@@ -611,7 +564,7 @@ class UpbitTrader:
 
             self.dict_jg = dict(sorted(self.dict_jg.items(), key=lambda x: x[1]['매입금액'], reverse=True))
 
-            if 미체결수량 == 0: self.stgQ.put((주문구분 + '완료', 종목코드))
+            if 미체결수량 == 0: self.cstgQ.put((주문구분 + '완료', 종목코드))
             self.UpdateChegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
             if 주문구분 == '매수':
@@ -638,14 +591,14 @@ class UpbitTrader:
             elif 종목코드 in self.dict_order[주문구분]:
                 del self.dict_order[주문구분][종목코드]
 
-            self.stgQ.put((주문구분, 종목코드))
+            self.cstgQ.put((주문구분, 종목코드))
             self.UpdateChegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
             if self.dict_set['알림소리']: self.soundQ.put(f"{종목코드} {주문구분}하였습니다.")
             self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}] {종목코드} | {주문가격} | {주문수량}'))
 
-        self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self.GetOrderCodeList()))
+        self.creceivQ.put(('잔고목록', tuple(self.dict_jg)))
+        self.creceivQ.put(('주문목록', self.GetOrderCodeList()))
 
     def UpdateTradelist(self, index, 종목코드, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간):
         # ['종목명', '매수금액', '매도금액', '주문수량', '수익률', '수익금', '체결시간']
@@ -696,7 +649,7 @@ class UpbitTrader:
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
             data_list = [거래횟수, 총매수금액, 총매도금액, 총수익금액, 총손실금액, 수익률, 수익금합계]
-            self.liveQ.put(('코인', data_list))
+            self.liveQ.put(('주식', data_list))
 
     def UpdateChegeollist(self, index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호):
         # ['종목명', '주문구분', '주문수량', '체결수량', '미체결수량', '체결가', '체결시간', '주문가격', '주문번호']
@@ -758,7 +711,7 @@ class UpbitTrader:
 
         if self.dict_intg['종목당투자금'] != 종목당투자금:
             self.dict_intg['종목당투자금'] = 종목당투자금
-            self.stgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
+            self.cstgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
         if self.dict_jg:
             df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
@@ -769,5 +722,5 @@ class UpbitTrader:
         self.windowQ.put((ui_num['C잔고평가'], df_tj))
 
     def StrategyStop(self):
-        self.stgQ.put('매수전략중지')
+        self.cstgQ.put('매수전략중지')
         self.JangoCheongsan('수동')
