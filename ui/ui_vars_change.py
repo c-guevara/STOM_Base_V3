@@ -8,7 +8,8 @@ from ui.set_text import buy_signal, sell_signal, future_buy_signal, future_sell_
 @error_decorator
 def get_fix_strategy(ui, strategy, gubun):
     if gubun == '매수':
-        if '키움증권' in ui.dict_set['증권사'] or ui.dict_set['거래소'] == '업비트':
+        if (ui.main_btn == 3 and '키움증권' in ui.dict_set['증권사']) or \
+                (ui.main_btn == 4 and ui.dict_set['거래소'] == '업비트'):
             if '\nif 매수:' in strategy:
                 strategy = strategy.split('\nif 매수:')[0] + buy_signal
             elif 'self.tickdata' not in strategy and buy_signal not in strategy:
@@ -19,7 +20,8 @@ def get_fix_strategy(ui, strategy, gubun):
             elif 'self.tickdata' not in strategy and future_buy_signal not in strategy:
                 strategy += '\n' + future_buy_signal
     else:
-        if '키움증권' in ui.dict_set['증권사'] or ui.dict_set['거래소'] == '업비트':
+        if (ui.main_btn == 3 and '키움증권' in ui.dict_set['증권사']) or \
+                (ui.main_btn == 4 and ui.dict_set['거래소'] == '업비트'):
             if '\nif 매도:' in strategy:
                 strategy = strategy.split('\nif 매도:')[0] + sell_signal
             elif 'self.tickdata' not in strategy and sell_signal not in strategy:
