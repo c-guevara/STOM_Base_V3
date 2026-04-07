@@ -11,7 +11,7 @@ from trade.microstructure_analyzer import MicrostructureAnalyzer
 from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
     get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
 from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK_MIN_BACK, indicator, \
-    DB_FUTURE_TICK_BACK, DB_FUTURE_MIN_BACK, DB_COIN_TICK_BACK, DB_COIN_MIN_BACK, list_stock_tick, \
+    DB_FUTURE_OS_TICK_BACK, DB_FUTURE_OS_MIN_BACK, DB_COIN_TICK_BACK, DB_COIN_MIN_BACK, list_stock_tick, \
     list_stock_min, list_coin_tick, list_coin_min
 from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
     add_rolling_data, set_builtin_print, get_profile_text
@@ -351,7 +351,7 @@ class BackEngineBase(BaseStrategy):
         if self.market_gubun == 1:
             con = sqlite3.connect(DB_STOCK_TICK_BACK if self.is_tick else DB_STOCK_MIN_BACK)
         elif self.market_gubun == 2:
-            con = sqlite3.connect(DB_FUTURE_TICK_BACK if self.is_tick else DB_FUTURE_MIN_BACK)
+            con = sqlite3.connect(DB_FUTURE_OS_TICK_BACK if self.is_tick else DB_FUTURE_OS_MIN_BACK)
         else:
             con = sqlite3.connect(DB_COIN_TICK_BACK if self.is_tick else DB_COIN_MIN_BACK)
 

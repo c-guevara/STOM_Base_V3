@@ -12,7 +12,7 @@ from trade.risk_analyzer import RiskAnalyzer
 from trade.base_strategy import BaseStrategy
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
-from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, indicator, DB_FUTURE_MIN, DB_FUTURE_TICK, \
+from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, indicator, DB_FUTURE_OS_MIN, DB_FUTURE_OS_TICK, \
     list_coin_tick, list_coin_min
 from utility.static import now, now_cme, get_buy_indi_stg, GetFutureLongPgSgSp, GetFutureShortPgSgSp, dt_ymdhms, \
     get_ema_list, get_angle_cf, set_builtin_print
@@ -590,7 +590,7 @@ class FutureStrategyTick(BaseStrategy):
     def SaveData(self):
         last = len(self.dict_data)
         columns_ = list_coin_tick[:self.base_cnt] if self.dict_set['주식타임프레임'] else list_coin_min[:self.base_cnt]
-        con = sqlite3.connect(DB_FUTURE_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_MIN)
+        con = sqlite3.connect(DB_FUTURE_OS_TICK if self.dict_set['주식타임프레임'] else DB_FUTURE_OS_MIN)
         if last > 0:
             start = now()
             cllen = len(columns_)
