@@ -361,7 +361,7 @@ class UpbitTrader:
             df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
             self.teleQ.put(df_td) if len(df_td) > 0 else self.teleQ.put('현재는 업비트 거래목록이 없습니다.')
         elif data == '잔고평가':
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jg)
             self.teleQ.put(df_jg) if len(df_jg) > 0 else self.teleQ.put('현재는 업비트 잔고목록이 없습니다.')
         elif data == '잔고청산':
             self.JangoCheongsan('수동')
@@ -619,7 +619,7 @@ class UpbitTrader:
                 self.dict_intg['예수금'] += 매입금액 + 수익금
                 self.dict_intg['추정예수금'] += 매입금액 + 수익금
 
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jg)
             self.queryQ.put(('거래디비', df_jg, 'c_jangolist', 'replace'))
             if self.dict_set['코인알림소리']: self.soundQ.put(f"{종목코드} {주문구분}하였습니다.")
             self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}체결] {종목코드} | {체결가격} | {체결수량}'))
@@ -758,7 +758,7 @@ class UpbitTrader:
             self.cstgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
         if self.dict_jg:
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jg)
         else:
             df_jg = pd.DataFrame(columns=columns_jg)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')

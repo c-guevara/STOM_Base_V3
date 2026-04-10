@@ -321,7 +321,7 @@ class FutureTrader:
             df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
             self.mgzservQ.put(('tele', df_td)) if len(df_td) > 0 else self.mgzservQ.put(('tele', '현재는 해선 거래목록이 없습니다.'))
         elif data == '잔고평가':
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgf)
             self.mgzservQ.put(('tele', df_jg)) if len(df_jg) > 0 else self.mgzservQ.put(('tele', '현재는 해선 잔고목록이 없습니다.'))
         elif data == '잔고청산':
             self.JangoCheongsan('수동')
@@ -615,7 +615,7 @@ class FutureTrader:
                 self.dict_intg['예수금'] += 총위탁증거금 + 수익금
                 self.dict_intg['추정예수금'] += 총위탁증거금 + 수익금
 
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgf)
             self.mgzservQ.put(('query', ('거래디비', df_jg, 'f_jangolist', 'replace')))
             if self.dict_set['주식알림소리']: self.mgzservQ.put(('sound', f'{종목명} {체결수량}주를 {주문구분}하였습니다'))
             self.mgzservQ.put(('window', (ui_num['기본로그'], f'주문 관리 시스템 알림 - [{gubun}] {종목명} | {체결가격} | {체결수량}')))
@@ -755,7 +755,7 @@ class FutureTrader:
             if 기준수익금 < 당일평가손익: self.StrategyStop()
 
         if self.dict_jg:
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgf)
         else:
             df_jg = pd.DataFrame(columns=columns_jgf)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')

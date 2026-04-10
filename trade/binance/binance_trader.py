@@ -415,7 +415,7 @@ class BinanceTrader:
             df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
             self.teleQ.put(df_td) if len(df_td) > 0 else self.teleQ.put('현재는 바이낸스 거래목록이 없습니다.')
         elif data == '잔고평가':
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgcf)
             self.teleQ.put(df_jg) if len(df_jg) > 0 else self.teleQ.put('현재는 바이낸스 잔고목록이 없습니다.')
         elif data == '잔고청산':
             self.JangoCheongsan('수동')
@@ -708,7 +708,7 @@ class BinanceTrader:
                     self.dict_intg['예수금'] += 매입금액 + 수익금
                     self.dict_intg['추정예수금'] += 매입금액 + 수익금
 
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgcf)
             self.queryQ.put(('거래디비', df_jg, 'c_jangolist_future', 'replace'))
             if self.dict_set['코인알림소리']:
                 text = ''
@@ -857,7 +857,7 @@ class BinanceTrader:
             self.cstgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
         if self.dict_jg:
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jgcf)
         else:
             df_jg = pd.DataFrame(columns=columns_jgcf)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
