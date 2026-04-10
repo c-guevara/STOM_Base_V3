@@ -84,7 +84,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
         qtest_qwait(3)
 
         market = ui.dict_set['거래소']
-        acc_no = int(market[-2:])
+        acc_no = market[-2:]
         if ui.dict_set[f'access_key{acc_no}'] is None or ui.dict_set[f'secret_key{acc_no}'] is None:
             QMessageBox.critical(ui, '오류 알림', '계정이 설정되지 않아 매매시스템을 시작할 수 없습니다.\n계정 설정 후 다시 시작하십시오.\n')
         else:

@@ -188,11 +188,6 @@ def event_filter(_ui, widget, event):
                     sz_button_clicked_01(_ui)
                 elif widget in (_ui.ss_textEditttt_02, _ui.ss_textEditttt_04):
                     sz_button_clicked_02(_ui)
-            if not _ui.cvc_pushButton_24.isVisible():
-                if widget in (_ui.cs_textEditttt_01, _ui.cs_textEditttt_03):
-                    cz_button_clicked_01(_ui)
-                elif widget in (_ui.cs_textEditttt_02, _ui.cs_textEditttt_04):
-                    cz_button_clicked_02(_ui)
             return True
 
         elif event.key() == Qt.Key_E and (QApplication.keyboardModifiers() & Qt.ShiftModifier):

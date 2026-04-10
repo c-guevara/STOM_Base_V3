@@ -64,6 +64,7 @@ class BackTest:
             self.wq.put((ui_num['시스템로그'], format_exc()))
             self._sys_exit(True)
 
+    # noinspection PyUnresolvedReferences
     def _start(self):
         con   = sqlite3.connect(self.market_info['백테디비'][self.is_tick])
         query = get_moneytop_query(self.is_tick, self.startday, self.endday, self.starttime, self.endtime)

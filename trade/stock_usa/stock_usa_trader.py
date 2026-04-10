@@ -7,7 +7,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from trade.restapi_ls import LsRestAPI, WebSocketTrader
 from utility.setting_base import columns_cj, columns_td, ui_num, DB_TRADELIST, columns_jg
 from utility.static import now, timedelta_sec, now_cme, str_ymdhmsf, str_hmsf, str_hms, str_ymd, dt_hms, qtest_qwait, \
-    set_builtin_print, error_decorator
+    set_builtin_print, error_decorator, get_stock_os_profit
 
 
 class Updater(QThread):
@@ -379,7 +379,7 @@ class StockUsaTrader:
             if 현재가 != self.dict_jg[종목코드]['현재가']:
                 매입금액 = self.dict_jg[종목코드]['매입금액']
                 보유수량 = self.dict_jg[종목코드]['보유수량']
-                평가금액, 평가손익, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 현재가)
+                평가금액, 평가손익, 수익률 = get_stock_os_profit(매입금액, 보유수량 * 현재가)
                 self.dict_jg[종목코드].update({
                     '현재가': 현재가,
                     '수익률': 수익률,
@@ -495,7 +495,7 @@ class StockUsaTrader:
                     보유수량 = round(self.dict_jg[종목코드]['보유수량'] + 체결수량, 8)
                     매입금액 = int(self.dict_jg[종목코드]['매입금액'] + 체결수량 * 체결가격)
                     매수가 = round(매입금액 / 보유수량, 4)
-                    평가금액, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 체결가격)
+                    평가금액, 수익금, 수익률 = get_stock_os_profit(매입금액, 보유수량 * 체결가격)
                     self.dict_jg[종목코드].update({
                         '매수가': 매수가,
                         '현재가': 체결가격,
@@ -508,7 +508,7 @@ class StockUsaTrader:
                     })
                 else:
                     매입금액 = int(체결수량 * 체결가격)
-                    평가금액, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 체결수량 * 체결가격)
+                    평가금액, 수익금, 수익률 = get_stock_os_profit(매입금액, 체결수량 * 체결가격)
                     self.dict_jg[종목코드] = {
                         '종목명': 종목코드,
                         '매수가': 체결가격,
@@ -534,7 +534,7 @@ class StockUsaTrader:
                 보유수량 = round(self.dict_jg[종목코드]['보유수량'] - 체결수량, 8)
                 if 보유수량 != 0:
                     매입금액 = int(매수가 * 보유수량)
-                    평가금액, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 체결가격)
+                    평가금액, 수익금, 수익률 = get_stock_os_profit(매입금액, 보유수량 * 체결가격)
                     # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
                     self.dict_jg[종목코드].update({
                         '현재가': 체결가격,
@@ -554,7 +554,7 @@ class StockUsaTrader:
                         del self.dict_order[주문구분][종목코드]
 
                 매입금액 = 매수가 * 체결수량
-                평가금액, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 체결수량 * 체결가격)
+                평가금액, 수익금, 수익률 = get_stock_os_profit(매입금액, 체결수량 * 체결가격)
                 if -100 < 수익률 < 100: self._update_tradelist(index, 종목코드, 매입금액, 평가금액, 체결수량, 수익률, 수익금, index[:14])
                 if 수익률 < 0: self.dict_info[종목코드]['손절거래시간'] = timedelta_sec(self.dict_set['매수금지손절간격초'])
 

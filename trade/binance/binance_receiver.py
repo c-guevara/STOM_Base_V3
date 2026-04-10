@@ -5,7 +5,7 @@ from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
 from trade.binance.binance_websocket import WebSocketReceiver
-from utility.static import now, str_ymdhms_utc, now_utc, str_hms, str_ymd
+from utility.static import now, str_ymdhms_utc, now_utc, str_ymd
 
 
 class BinanceReceiver(BaseReceiver):

@@ -173,11 +173,10 @@ class BackEngineFutureTick(BackEngineBase):
     def _get_profit_info(self, 현재가, 매수가, 보유수량):
         매입금액 = self.dict_info[self.code]['위탁증거금'] * 보유수량
         평가금액 = 매입금액 + (현재가 - 매수가) * self.dict_info[self.code]['틱가치'] * 보유수량
-        mini = self.code.startswith('M') or self.code.startswith('SIL')
         if self.curr_trade_info['보유중'] == 1:
             포지션 = 'LONG'
-            평가금액, 수익금, 수익률 = get_future_long_profit(mini, 매입금액, 평가금액)
+            평가금액, 수익금, 수익률 = get_future_long_profit(매입금액, 평가금액)
         else:
             포지션 = 'SHORT'
-            평가금액, 수익금, 수익률 = get_future_short_profit(mini, 매입금액, 평가금액)
+            평가금액, 수익금, 수익률 = get_future_short_profit(매입금액, 평가금액)
         return 포지션, 평가금액, 수익금, 수익률

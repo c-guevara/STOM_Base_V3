@@ -18,8 +18,7 @@ class ImportProgressHook:
             'ui.ui_key_press_event', 'ui.ui_backtest_engine', 'ui.ui_update_progressbar',
             'ui.ui_button_clicked_shortcut', 'ui.ui_button_clicked_strategy', 'ui.ui_button_clicked_settings',
             'ui.ui_button_clicked_editer', 'ui.ui_button_clicked_editer_backlog',
-            'ui.ui_button_clicked_dialog_backengine', 'ui.ui_button_clicked_editer_stg_sell',
-            'ui.ui_button_clicked_dialog_pass_ticks'
+            'ui.ui_button_clicked_dialog_backengine'
         ]
         self.total_modules = len(self.modules)
         self.current_index = 0
