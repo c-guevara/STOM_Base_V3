@@ -65,7 +65,6 @@ class BaseReceiver:
         self.dict_mtop = {}
         self.dict_jgdt = {}
         self.dict_prec = {}
-        self.dict_set  = {}
         self.dict_bool = {
             '프로세스종료': False
         }
@@ -113,6 +112,11 @@ class BaseReceiver:
         self.qtimer.setInterval(1 * 1000)
         self.qtimer.timeout.connect(self._scheduler)
         self.qtimer.start()
+
+        if self.dict_set['리시버프로파일링']:
+            import cProfile
+            self.pr = cProfile.Profile()
+            self.pr.enable()
 
         set_builtin_print(self.windowQ)
         app.exec_()
