@@ -10,8 +10,8 @@ import pandas as pd
 from traceback import format_exc
 from multiprocessing import Process, Queue
 from backtest.back_static_numba import get_result, bootstrap_test
-from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd
-from utility.setting_base import ui_num, DB_STRATEGY, DB_BACKTEST, DB_OPTUNA
+from utility.settings.setting_base import ui_num, DB_STRATEGY, DB_BACKTEST, DB_OPTUNA
+from utility.static_method.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd
 from backtest.back_static import send_result, get_moneytop_query, plot_show, get_result_dataframe, add_mdd
 
 

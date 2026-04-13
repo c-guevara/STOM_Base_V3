@@ -2,14 +2,14 @@
 import numpy as np
 import pandas as pd
 from traceback import format_exc
-from utility.setting_base import ui_num
-from utility.static import thread_decorator
+from utility.settings.setting_base import ui_num
+from utility.static_method.static import thread_decorator
 
 
 @thread_decorator
 def RunOptunaServer():
     from optuna_dashboard import run_server
-    from utility.setting_base import DB_OPTUNA
+    from utility.settings.setting_base import DB_OPTUNA
     try:
         run_server(DB_OPTUNA)
     except:
@@ -17,7 +17,7 @@ def RunOptunaServer():
 
 
 def get_trade_info(gubun):
-    from utility.static import dt_ymd
+    from utility.static_method.static import dt_ymd
     buy_time = dt_ymd('20000101')
     if gubun == 1:
         v = {
@@ -412,9 +412,9 @@ def plot_show(gubun, is_tick, teleQ, df_tsg, df_bct, market_gubun, seed, mdd, st
               list_days, backname, back_text, label_text, save_file_name, schedul, notplotshow,
               buy_vars=None, sell_vars=None):
 
-    from utility.setting_base import GRAPH_PATH
+    from utility.settings.setting_base import GRAPH_PATH
     from matplotlib import pyplot as plt, font_manager, gridspec
-    from utility.static import dt_hms, dt_hm, dt_ymd, dt_ymdhms, dt_ymdhm, str_ymd_ios, str_ymdhms_ios
+    from utility.static_method.static import dt_hms, dt_hm, dt_ymd, dt_ymdhms, dt_ymdhm, str_ymd_ios, str_ymdhms_ios
 
     plt.rcParams['figure.max_open_warning'] = 0
     plt.rcParams['font.family'] = font_manager.FontProperties(fname='C:/Windows/Fonts/malgun.ttf').get_name()

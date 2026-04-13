@@ -1,6 +1,6 @@
 
 from backtest.backengine_future_min2 import BackEngineFutureMin2
-from utility.static import get_profit_coin_future_long, get_profit_coin_future_short
+from utility.static_method.static import get_profit_coin_future_long, get_profit_coin_future_short
 
 
 class BackEngineBinanceMin2(BackEngineFutureMin2):

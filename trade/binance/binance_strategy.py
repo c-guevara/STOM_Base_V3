@@ -1,6 +1,6 @@
 
 from trade.base_strategy import BaseStrategy
-from utility.static import now_utc, dt_ymdhms, get_profit_coin_future_short, get_profit_coin_future_long
+from utility.static_method.static import now_utc, dt_ymdhms, get_profit_coin_future_short, get_profit_coin_future_long
 
 
 class BinanceStrategy(BaseStrategy):
@@ -9,6 +9,9 @@ class BinanceStrategy(BaseStrategy):
 
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
+
+    def _get_hogaunit(self, 주문가격또는종목코드):
+        return self.dict_info[주문가격또는종목코드]['호가단위']
 
     def _get_profit_long(self, 매입금액, 보유금액):
         return get_profit_coin_future_long(

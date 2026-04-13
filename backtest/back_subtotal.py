@@ -1,8 +1,8 @@
 
 import numpy as np
 from traceback import format_exc
-from utility.setting_base import ui_num
 from backtest.back_static import add_mdd
+from utility.settings.setting_base import ui_num
 from backtest.back_static_numba import get_result
 
 

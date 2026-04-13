@@ -1,8 +1,8 @@
 
 import asyncio
 from traceback import format_exc
-from utility.setting_base import ui_num
 from PyQt5.QtCore import QThread, pyqtSignal
+from utility.settings.setting_base import ui_num
 from binance import AsyncClient, BinanceSocketManager
 
 

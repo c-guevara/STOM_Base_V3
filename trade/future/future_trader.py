@@ -2,11 +2,11 @@
 import sys
 from PyQt5.QtCore import QTimer
 from trade.restapi_ls import LsRestAPI
-from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
-from trade.restapi_ls_data import LsRestData
+from trade.restapi_lsdata import LsRestData
+from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
-from utility.static import now, timedelta_sec, get_profit_future_long, get_profit_future_short
+from utility.static_method.static import now, timedelta_sec, get_profit_future_long, get_profit_future_short
 
 
 class FutureTrader(BaseTrader):

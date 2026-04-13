@@ -19,5 +19,5 @@ if '%errorlevel%' NEQ '0' (
 :gotAdmin
     pushd "%CD%"
     CD /D "%~dp0"
-    python ./utility/update_db_20260420.py
+    python ./utility/db_control/update_db_20260420.py
     pause

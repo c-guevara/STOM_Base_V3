@@ -6,9 +6,9 @@ import sqlite3
 import numpy as np
 import pandas as pd
 from traceback import format_exc
-from utility.static import now, str_ymdhms
+from utility.static_method.static import now, str_ymdhms
 from backtest.back_static_numba import get_result, bootstrap_test
-from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num, columns_vj
+from utility.settings.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num, columns_vj
 from backtest.back_static import plot_show, get_moneytop_query, get_result_dataframe, add_mdd
 
 

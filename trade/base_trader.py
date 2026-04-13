@@ -2,9 +2,10 @@
 import sqlite3
 import pandas as pd
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.setting_base import ui_num, columns_cj, columns_jg, columns_td, columns_tdf, columns_jgf, columns_jgcf
-from utility.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, error_decorator, set_builtin_print, \
-    get_inthms, get_str_ymdhms, get_str_ymdhmsf
+from utility.settings.setting_base import ui_num, columns_cj, columns_jg, columns_td, columns_tdf, columns_jgf, \
+    columns_jgcf
+from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, error_decorator, \
+    set_builtin_print, get_inthms, get_str_ymdhms, get_str_ymdhmsf
 
 
 class MonitorTraderQ(QThread):
@@ -109,7 +110,7 @@ class BaseTrader:
 
     def _get_yesugm_for_paper_trading(self):
         """모의투자용 예수금 조회"""
-        from utility.setting_base import DB_TRADELIST
+        from utility.settings.setting_base import DB_TRADELIST
         con = sqlite3.connect(DB_TRADELIST)
         df = pd.read_sql(f"SELECT * FROM {self.market_info['거래디비']}", con)
         con.close()
@@ -135,7 +136,7 @@ class BaseTrader:
 
     def _load_database(self):
         """체결 및 거래목록 데이터 수집"""
-        from utility.setting_base import DB_TRADELIST
+        from utility.settings.setting_base import DB_TRADELIST
         con = sqlite3.connect(DB_TRADELIST)
         df_cj = pd.read_sql(f"SELECT * FROM {self.market_info['체결디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
         df_td = pd.read_sql(f"SELECT * FROM {self.market_info['거래디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
@@ -642,7 +643,7 @@ class BaseTrader:
     def _sys_exit(self):
         """프로세스 종료 명령 실행"""
         import sys
-        from utility.static import qtest_qwait
+        from utility.static_method.static import qtest_qwait
         self._websocket_kill()
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 종료"))
         qtest_qwait(1)
@@ -751,6 +752,7 @@ class BaseTrader:
 
             if 미체결수량 == 0:
                 self._put_order_complete(f'{주문구분}완료', 종목코드)
+
             self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호)
 
             if 주문구분 == '매수':
@@ -782,6 +784,7 @@ class BaseTrader:
                     self.dict_intg['추정예수금'] += 미체결수량 * 주문가격
 
                 del self.dict_order[주문구분][종목코드]
+
                 self._put_order_complete(주문구분, 종목코드)
 
             self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호)
@@ -1194,6 +1197,7 @@ class BaseTrader:
             '수익률': 수익률,
             '수익금합계': 수익금합계
         }
+
         df_tt = pd.DataFrame.from_dict(self.dict_tt, orient='index')
         delete_query = f"DELETE FROM {self.market_info['손익디비']} WHERE `index` = '{self.str_today}'"
         self.queryQ.put(('거래디비', delete_query))
@@ -1222,9 +1226,11 @@ class BaseTrader:
             '주문가격': 주문가격,
             '주문번호': 주문번호
         }
+
         self.dict_cj = dict(sorted(self.dict_cj.items(), key=lambda x: x[0]))
         df_cj = pd.DataFrame.from_dict(self.dict_cj, orient='index')
         self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
+
         df = pd.DataFrame(
             [[종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호]],
             columns=columns_cj,
@@ -1258,10 +1264,12 @@ class BaseTrader:
 
         거래수익금합계 = sum([v['수익금'] for v in self.dict_td.values()])
         당일평가손익 = 총평가손익 + 거래수익금합계
+
         if self.dict_set['손실중지']:
             기준손실금 = self.dict_intg['추정예탁자산'] * self.dict_set['손실중지수익률'] / 100
             if 기준손실금 < -당일평가손익:
                 self._strategy_stop()
+
         if self.dict_set['수익중지']:
             기준수익금 = self.dict_intg['추정예탁자산'] * self.dict_set['수익중지수익률'] / 100
             if 기준수익금 < 당일평가손익:
@@ -1284,6 +1292,7 @@ class BaseTrader:
             df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
         else:
             df_jg = pd.DataFrame(columns=columns_jg)
+
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
         self.windowQ.put((ui_num['잔고목록'], df_jg))
         self.windowQ.put((ui_num['잔고평가'], df_tj))

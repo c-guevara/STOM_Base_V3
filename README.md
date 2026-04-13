@@ -110,103 +110,103 @@ STOM/
 ## STOM 주요 화면 및 기능 설명
 
 ### 홈 화면: 주요 지수 및 시장 지표
-![홈화면](./utility/imagefiles/00_홈화면.png)
+![홈화면](utility/_imagefiles/00_홈화면.png)
 
 ### 메인 트레이딩 화면: 관심종목, 체결목록, 잔고목록, 잔고평가, 거래목록, 실현손익
-![기본창](./utility/imagefiles/01_기본창.png)
+![기본창](utility/_imagefiles/01_기본창.png)
 
 ### 거래집계: 일별, 월별, 연도별 집계
-![집계창](./utility/imagefiles/02_집계창.png)
+![집계창](utility/_imagefiles/02_집계창.png)
 
 ### 전략편집기: 매수/매도 전략 조건 설정 및 편집
-![전략편집기](./utility/imagefiles/03_전략편집기.png)
+![전략편집기](utility/_imagefiles/03_전략편집기.png)
 
 ### 백파인더: 전략에 사용할 팩터의 데이터 탐색
-![백파인더](./utility/imagefiles/04_백파인더.png)
+![백파인더](utility/_imagefiles/04_백파인더.png)
 
 ### 최적화편집기: 그리드 최적화, 검증 최적화, 교차검증 최적화, 옵튜나 최적화
-![최적화편집기](./utility/imagefiles/05_최적화편집기.png)
+![최적화편집기](utility/_imagefiles/05_최적화편집기.png)
 
 ### 테스트편집기: 각종 최적화 테스트
-![테스트편집기](./utility/imagefiles/06_테스트편집기.png)
+![테스트편집기](utility/_imagefiles/06_테스트편집기.png)
 
 ### 전진분석: 최적화 테스트를 반복하는 전진분석
-![전진분석](./utility/imagefiles/07_전진분석.png)
+![전진분석](utility/_imagefiles/07_전진분석.png)
 
 ### 변수편집기: 최적화 파라미터 설정
-![변수편집기](./utility/imagefiles/08_변수편집기.png)
+![변수편집기](utility/_imagefiles/08_변수편집기.png)
 
 ### 범위편집기: 최적화 파라미터의 범위 설정
-![범위편집기](./utility/imagefiles/09_범위편집기.png)
+![범위편집기](utility/_imagefiles/09_범위편집기.png)
 
 ### 조건편집기: 조건 조합 최적화로 전략 탐색
-![조건편집기](./utility/imagefiles/10_조건편집기.png)
+![조건편집기](utility/_imagefiles/10_조건편집기.png)
 
 ### GA편집기: 유전 알고리즘 최적화
-![GA편집기](./utility/imagefiles/11_GA편집기.png)
+![GA편집기](utility/_imagefiles/11_GA편집기.png)
 
 ### 백테스트로그: 백테스트 진행 상황 및 로그
-![백테로그](./utility/imagefiles/12_백테로그.png)
+![백테로그](utility/_imagefiles/12_백테로그.png)
 
 ### 상세기록: 백테스트 결과 기록 및 관리
-![백테기록](./utility/imagefiles/13_백테기록.png)
+![백테기록](utility/_imagefiles/13_백테기록.png)
 
 ### 백테스트 그래프 비교: 여러 전략의 백테 그래프 비교
-![백테기록_그래프비교](./utility/imagefiles/14_백테기록_그래프비교.png)
+![백테기록_그래프비교](utility/_imagefiles/14_백테기록_그래프비교.png)
 
 ### 백테스트 스케줄러: 여러개의 백테스트 및 최적화를 스케줄링하여 실행
-![백테스케쥴러](./utility/imagefiles/15_백테스케쥴러.png)
+![백테스케쥴러](utility/_imagefiles/15_백테스케쥴러.png)
 
 ### 로그: 시스템 로그 및 오류 메시지
-![로그창](./utility/imagefiles/16_로그창.png)
+![로그창](utility/_imagefiles/16_로그창.png)
 
 ### 설정: 기본 설정, 전략 설정, 백테 설정, 기타 설정
-![설정창](./utility/imagefiles/17_설정창.png)
+![설정창](utility/_imagefiles/17_설정창.png)
 
 ### 주문관리: 주문 관리 설정 및 위험 관리 설정
-![주문관리](./utility/imagefiles/18_주문관리.png)
+![주문관리](utility/_imagefiles/18_주문관리.png)
 
 ### STOM Live: 사용자들의 실시간 매매 및 백테 정보
-![스톰라이브](./utility/imagefiles/19_스톰라이브.png)
+![스톰라이브](utility/_imagefiles/19_스톰라이브.png)
 
 ### 데이터베이스 관리
-![디비관리](./utility/imagefiles/20_디비관리.png)
+![디비관리](utility/_imagefiles/20_디비관리.png)
 
 ### 김프
-![김프창](./utility/imagefiles/21_김프창.png)
+![김프창](utility/_imagefiles/21_김프창.png)
 
 ### 차트: 실시간 및 DB 차트 표시
-![차트창](./utility/imagefiles/22_차트창.png)
+![차트창](utility/_imagefiles/22_차트창.png)
 
 ### 수식관리자: 사용자 팩터 추가, 수식명으로 전략 및 백테에서 바로 사용 가능
-![수식관리자](./utility/imagefiles/23_수식관리자.png)
+![수식관리자](utility/_imagefiles/23_수식관리자.png)
 
 ### 전략모듈: Ctrl+클릭으로 버튼명 및 내용 편집 가능
-![전략모듈](./utility/imagefiles/24_전략모듈.png)
+![전략모듈](utility/_imagefiles/24_전략모듈.png)
 
 ### 호가창: 실시간 호가 정보 및 차트 부가 정보 표시
-![호가창](./utility/imagefiles/25_호가창.png)
+![호가창](utility/_imagefiles/25_호가창.png)
 
 ### 기업정보: 기업개요, 공시, 뉴스, 재무재표
-![기업정보](./utility/imagefiles/26_기업정보.png)
+![기업정보](utility/_imagefiles/26_기업정보.png)
 
 ### 백테스트엔진: 엔진 설정 및 실행
-![백테엔진창](./utility/imagefiles/27_백테엔진창.png)
+![백테엔진창](utility/_imagefiles/27_백테엔진창.png)
 
 ### 업종별/테마별 트리맵
-![업종별테마별트리맵](./utility/imagefiles/28_업종별테마별트리맵.png)
+![업종별테마별트리맵](utility/_imagefiles/28_업종별테마별트리맵.png)
 
 ### 백테스트 결과 그래프
-![백테결과그래프](./utility/imagefiles/29_백테결과그래프.png)
+![백테결과그래프](utility/_imagefiles/29_백테결과그래프.png)
 
 ### 백테스트 결과 부가정보
-![백테결과부가정보](./utility/imagefiles/30_백테결과부가정보.png)
+![백테결과부가정보](utility/_imagefiles/30_백테결과부가정보.png)
 
 ### 텔레그램
-![텔레그램 사용자버튼](./utility/imagefiles/31_텔레그램_사용자버튼.png)
+![텔레그램 사용자버튼](utility/_imagefiles/31_텔레그램_사용자버튼.png)
 
 ### 시스템 다이어그램 I
-![시스템 구조도](./utility/imagefiles/diagram_01.png)
+![시스템 구조도](utility/_imagefiles/diagram_01.png)
 
 ### 시스템 다이어그램 II
-![데이터 흐름도](./utility/imagefiles/diagram_02.png)
+![데이터 흐름도](utility/_imagefiles/diagram_02.png)

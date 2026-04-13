@@ -1,6 +1,6 @@
 
 from trade.base_strategy import BaseStrategy
-from utility.static import get_profit_coin, now_utc, dt_ymdhms
+from utility.static_method.static import get_profit_coin, now_utc, dt_ymdhms, get_hogaunit_coin
 
 
 class UpbitStrategy(BaseStrategy):
@@ -9,6 +9,9 @@ class UpbitStrategy(BaseStrategy):
 
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
+
+    def _get_hogaunit(self, 주문가격또는종목코드):
+        return get_hogaunit_coin(주문가격또는종목코드)
 
     def _get_profit(self, 매입금액, 보유금액):
         return get_profit_coin(매입금액, 보유금액)

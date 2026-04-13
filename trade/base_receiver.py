@@ -2,10 +2,10 @@
 import sqlite3
 import numpy as np
 import pandas as pd
-from utility.setting_base import ui_num
 from trade.restapi_ls import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.static import now, timedelta_sec, get_inthms, get_vi_price, threading_timer, set_builtin_print
+from utility.settings.setting_base import ui_num
+from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_price, threading_timer, set_builtin_print
 
 
 class MonitorReceivQ(QThread):
@@ -557,7 +557,7 @@ class BaseReceiver:
     def _sys_exit(self, data):
         """프로세스 종료 명령 실행"""
         import sys
-        from utility.static import qtest_qwait
+        from utility.static_method.static import qtest_qwait
         self._websocket_kill()
         if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_moneytop()

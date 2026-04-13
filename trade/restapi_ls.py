@@ -6,10 +6,10 @@ import asyncio
 import requests
 import websockets
 from traceback import format_exc
-from utility.setting_base import ui_num
-from trade.restapi_ls_data import LsRestData
+from trade.restapi_lsdata import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.static import now, timedelta_sec
+from utility.settings.setting_base import ui_num
+from utility.static_method.static import now, timedelta_sec
 
 
 class LsRestAPI:

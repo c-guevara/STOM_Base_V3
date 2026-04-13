@@ -2,8 +2,8 @@
 import sys
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
-from utility.static import now, error_decorator
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
+from utility.static_method.static import now, error_decorator
 from trade.restapi_ls import LsRestAPI, LsRestData, LsWebSocketReceiver
 
 

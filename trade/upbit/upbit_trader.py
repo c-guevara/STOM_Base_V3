@@ -1,11 +1,11 @@
 
 import sys
 from PyQt5.QtCore import QTimer
-from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
+from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
 from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
-from utility.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, error_decorator
+from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, error_decorator
 
 
 class UpbitTrader(BaseTrader):

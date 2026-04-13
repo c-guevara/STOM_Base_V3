@@ -3,9 +3,9 @@ import sys
 from PyQt5.QtCore import QTimer
 from trade.restapi_ls import LsRestData
 from PyQt5.QtWidgets import QApplication
-from utility.static import now, error_decorator
 from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
+from utility.static_method.static import now, error_decorator
 
 
 class StockReceiver(BaseReceiver):

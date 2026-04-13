@@ -2,10 +2,10 @@
 import re
 from traceback import format_exc
 from PyQt5.QtCore import QThread
-from utility.setting_base import indicator, ui_num
-from trade.manager_microstruc import ManagerMicrostructure
+from utility.settings.setting_base import indicator, ui_num
+from trade.analyzer_microstruc import AnalyzerMicrostructure
 # noinspection PyUnresolvedReferences
-from utility.static import timedelta_sec, qtest_qwait, now
+from utility.static_method.static import timedelta_sec, qtest_qwait, now
 
 
 # noinspection PyUnusedLocal,PyUnresolvedReferences
@@ -19,7 +19,7 @@ class BackCodeTest(QThread):
         self.vars        = None
         self.var         = var
         self.ga          = ga
-        self.ms_analyzer = ManagerMicrostructure('stock', [])
+        self.ms_analyzer = AnalyzerMicrostructure('stock', [])
         self.indicator   = indicator
 
     def run(self):

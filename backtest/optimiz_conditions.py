@@ -7,9 +7,9 @@ import numpy as np
 import pandas as pd
 from traceback import format_exc
 from multiprocessing import Process, Queue
-from utility.setting_base import ui_num, DB_BACKTEST
+from utility.settings.setting_base import ui_num, DB_BACKTEST
 from backtest.back_static import send_result, get_moneytop_query
-from utility.static import factorial, now, timedelta_day, timedelta_sec, str_ymd, str_ymdhms, dt_ymd
+from utility.static_method.static import factorial, now, timedelta_day, timedelta_sec, str_ymd, str_ymdhms, dt_ymd
 
 
 class Total:

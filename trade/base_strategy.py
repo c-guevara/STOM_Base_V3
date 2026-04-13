@@ -5,19 +5,17 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from trade.manager_risk import ManagerRisk
+from trade.analyzer_risk import AnalyzerRisk
+from trade.stg_globals_func import StgGlobalsFunc
 from trade.manager_formula import get_formula_data
-from utility.setting_base import indicator, DB_SETTING
-from trade.stg_globals_func import StrategyGlobalsFunc
-from trade.manager_microstruc import ManagerMicrostructure
-from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
+from trade.analyzer_microstruc import AnalyzerMicrostructure
+from utility.settings.setting_base import indicator, DB_SETTING
+from utility.settings.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
 # noinspection PyUnusedImports
-from utility.static import now, dt_ymdhms, timedelta_sec, get_hogaunit_stock, get_profit_stock, str_ymdhms, \
-    get_ema_list, set_builtin_print, get_hogaunit_coin, get_profit_stock_os, get_profit_coin, now_cme, now_utc, \
-    get_indicator
+from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema_list, set_builtin_print, get_indicator
 
 
-class BaseStrategy(StrategyGlobalsFunc):
+class BaseStrategy(StgGlobalsFunc):
     def __init__(self, gubun, qlist, dict_set, market_info):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
@@ -107,8 +105,8 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = ManagerMicrostructure(self.market_info['마켓구분'], factor_list)
-        self.rk_analyzer = ManagerRisk(self.market_info['마켓구분'], factor_list)
+        self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
+        self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
 
         set_builtin_print(self.windowQ)
         self._set_formula_data()
@@ -125,11 +123,12 @@ class BaseStrategy(StrategyGlobalsFunc):
 
     def _set_strategy_and_blacklist(self):
         """전략 및 블랙리스트 데이터 처리"""
-        table_name_stg_buy       = f"{self.market_info['전략구분']}_buy"
-        table_name_stg_sell      = f"{self.market_info['전략구분']}_sell"
-        table_name_stg_optibuy   = f"{self.market_info['전략구분']}_optibuy"
-        table_name_stg_optisell  = f"{self.market_info['전략구분']}_optisell"
-        table_name_stg_passticks = f"{self.market_info['전략구분']}_passticks"
+        first_name               = self.market_info['전략구분']
+        table_name_stg_buy       = f"{first_name}_buy"
+        table_name_stg_sell      = f"{first_name}_sell"
+        table_name_stg_optibuy   = f"{first_name}_optibuy"
+        table_name_stg_optisell  = f"{first_name}_optisell"
+        table_name_stg_passticks = f"{first_name}_passticks"
         con  = sqlite3.connect(DB_STRATEGY)
         dfb  = pd.read_sql(f'SELECT * FROM {table_name_stg_buy}', con).set_index('index')
         dfs  = pd.read_sql(f'SELECT * FROM {table_name_stg_sell}', con).set_index('index')
@@ -320,7 +319,6 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
             data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
-            self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
         elif self.market_gubun == 4:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
                 초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
@@ -328,7 +326,6 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
-            self.hoga_unit = 호가단위 = 0.01
         else:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
                 초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
@@ -336,9 +333,9 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
-            self.hoga_unit = 호가단위 = get_hogaunit_coin(현재가)
 
         시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
+        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -530,7 +527,6 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
             data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
-            self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
         elif self.market_gubun == 4:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
                 분봉시가, 분봉고가, 분봉저가, \
@@ -539,7 +535,6 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
-            self.hoga_unit = 호가단위 = 0.01
         else:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
                 분봉시가, 분봉고가, 분봉저가, \
@@ -548,9 +543,9 @@ class BaseStrategy(StrategyGlobalsFunc):
                 매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
                 매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
-            self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
 
         시분초, 순매수금액 = int(str(체결시간)[8:] + '00'), 분당매수금액 - 분당매도금액
+        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -803,7 +798,7 @@ class BaseStrategy(StrategyGlobalsFunc):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
 
         시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
-        self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
+        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -1032,9 +1027,9 @@ class BaseStrategy(StrategyGlobalsFunc):
             매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
             매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
-        시분초 = int(str(체결시간)[8:] + '00')
-        순매수금액 = 분당매수금액 - 분당매도금액
-        self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
+
+        시분초, 순매수금액 = int(str(체결시간)[8:] + '00'), 분당매수금액 - 분당매도금액
+        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -1529,6 +1524,9 @@ class BaseStrategy(StrategyGlobalsFunc):
                     high_low[3] = self.indexn
             else:
                 self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
+
+    def _get_hogaunit(self, 주문가격또는종목코드):
+        return 0
 
     def _get_profit(self, 매입금액, 보유금액):
         return 0

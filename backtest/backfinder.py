@@ -5,8 +5,8 @@ import time
 import sqlite3
 import pandas as pd
 from traceback import format_exc
-from utility.static import now, str_ymdhms
-from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num
+from utility.static_method.static import now, str_ymdhms
+from utility.settings.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num
 
 
 class BackFinder:

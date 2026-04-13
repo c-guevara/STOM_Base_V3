@@ -1,11 +1,11 @@
 
-from backtest.backengine_stock_tick import BackEngineStockTick
-from utility.static import dt_ymdhms, get_indicator, get_hogaunit_stock
+from backtest.stock_korea.backengine_stock import BackEngineStock
+from utility.static_method.static import dt_ymdhms, get_indicator, get_hogaunit_stock
 # noinspection PyUnresolvedReferences
-from utility.static import timedelta_sec
+from utility.static_method.static import timedelta_sec
 
 
-class BackEngineStockMin(BackEngineStockTick):
+class BackEngineStockMin(BackEngineStock):
     # noinspection PyUnusedLocal
     def _strategy(self):
         현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \

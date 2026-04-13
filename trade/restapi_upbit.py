@@ -8,9 +8,9 @@ import asyncio
 import requests
 import websockets
 from traceback import format_exc
-from utility.setting_base import ui_num
 from urllib.parse import unquote, urlencode
 from PyQt5.QtCore import QThread, pyqtSignal
+from utility.settings.setting_base import ui_num
 
 
 def get_symbols_info():

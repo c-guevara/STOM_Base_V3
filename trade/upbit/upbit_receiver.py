@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication
 from trade.restapi_upbit import get_symbols_info
 from trade.restapi_upbit import UpbitWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from utility.static import now, str_ymdhms_utc, error_decorator
+from utility.static_method.static import now, str_ymdhms_utc, error_decorator
 
 
 class UpbitReceiver(BaseReceiver):

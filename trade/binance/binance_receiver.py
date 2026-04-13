@@ -4,9 +4,9 @@ import sys
 import binance
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
-from trade.base_receiver import BaseReceiver, MonitorReceivQ
 from trade.restapi_binance import BinanceWebSocketReceiver
-from utility.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
+from trade.base_receiver import BaseReceiver, MonitorReceivQ
+from utility.static_method.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
 
 
 class BinanceReceiver(BaseReceiver):
@@ -53,6 +53,7 @@ class BinanceReceiver(BaseReceiver):
                 '가격소숫점자리수': get_decimal_place(tick_size),
                 '수량소숫점자리수': get_decimal_place(data['filters'][2]['minQty'])
             }
+
         self.traderQ.put(('종목정보', self.dict_info))
         self.stgQ.put(('종목정보', self.dict_info))
 

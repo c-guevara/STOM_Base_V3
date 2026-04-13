@@ -1,10 +1,10 @@
 
 import numpy as np
 from talib import stream
-from utility.static import dt_ymdhms, dt_ymdhm
+from utility.static_method.static import dt_ymdhms, dt_ymdhm
 
 
-class StrategyGlobalsFunc:
+class StgGlobalsFunc:
     def __init__(self):
         self.code             = None
         self.name             = None

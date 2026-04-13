@@ -3,10 +3,10 @@ import sys
 import binance
 from PyQt5.QtCore import QTimer
 from traceback import format_exc
-from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
+from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
-from utility.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, get_str_ymdhms
+from utility.static_method.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, get_str_ymdhms
 
 
 class BinanceTrader(BaseTrader):

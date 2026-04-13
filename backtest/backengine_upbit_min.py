@@ -1,9 +1,9 @@
 
-from utility.static import get_indicator, get_hogaunit_coin
-from backtest.backengine_upbit_tick import BackEngineUpbitTick
+from backtest.upbit.backengine_upbit import BackEngineUpbit
+from utility.static_method.static import get_indicator, get_hogaunit_coin
 
 
-class BackEngineUpbitMin(BackEngineUpbitTick):
+class BackEngineUpbitMin(BackEngineUpbit):
     # noinspection PyUnusedLocal
     def _strategy(self):
         현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \

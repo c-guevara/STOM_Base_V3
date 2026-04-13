@@ -1,9 +1,9 @@
 
-from utility.static import get_indicator
-from backtest.backengine_future_tick import BackEngineFutureTick
+from utility.static_method.static import get_indicator
+from backtest.future.backengine_future import BackEngineFuture
 
 
-class BackEngineFutureMin(BackEngineFutureTick):
+class BackEngineFutureMin(BackEngineFuture):
     # noinspection PyUnusedLocal
     def _strategy(self):
         현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
