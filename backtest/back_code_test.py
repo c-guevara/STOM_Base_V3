@@ -30,7 +30,7 @@ class BackCodeTest(QThread):
             try:
                 exec(compile(self.var, '<string>', 'exec'))
             except:
-                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - exec(self.vars)'))
+                self.windowQ.put((ui_num['시스템로그'], format_exc()))
                 error = True
 
             for i, var in enumerate(self.vars.values()):
@@ -63,7 +63,7 @@ class BackCodeTest(QThread):
             try:
                 self.stg = compile(self.stg, '<string>', 'exec')
             except:
-                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - exec(strategy)'))
+                self.windowQ.put((ui_num['시스템로그'], format_exc()))
                 error = True
 
             if error:
@@ -647,7 +647,7 @@ class BackCodeTest(QThread):
         try:
             exec(self.stg)
         except:
-            self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - exec(self.stg)'))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             self._error_end()
         else:
             self._no_error_end()

@@ -83,8 +83,8 @@ class UpdateTablewidget:
 
         self.col_auto_resize_uinums = (ui_num['상세기록'], ui_num['잔고목록'], ui_num['체결목록'])
 
-        self.col_fixed_size_uinums = (ui_num['호가종목'], ui_num['호가잔량'],
-                                      ui_num['기업공시'], ui_num['기업뉴스'], ui_num['재무년도'], ui_num['재무분기'])
+        self.col_fixed_size_uinums = (ui_num['호가종목'], ui_num['호가잔량'], ui_num['기업공시'], ui_num['기업뉴스'],
+                                      ui_num['재무년도'], ui_num['재무분기'])
 
         self.columns_time = ('체결시간', '매수시간', '매도시간')
         self.columns_day = ('거래일자', '일자', '일자 및 시간')
@@ -93,11 +93,10 @@ class UpdateTablewidget:
         self.columns_dot4 = ('매입금액', '평가금액', '평가손익', '매수금액', '매도금액', '수익금', '총매수금액', '총매도금액',
                              '총수익금액', '총손실금액', '수익금합계', '총평가손익', '총매입금액', '총평가금액')
 
-        self.columns_str = ('종목명', '포지션', '주문번호', '주문구분코드', '공시', '정보제공', '언론사', '제목', '링크', '구분', 'period',
-                            'time', '추가매수시간')
+        self.columns_str = ('종목명', '포지션', '주문번호', '주문구분코드', '공시', '정보제공', '언론사', '제목', '링크', '구분',
+                            'period', 'time', '추가매수시간')
 
         self.uinums_dot8 = (ui_num['잔고목록'], ui_num['체결목록'], ui_num['거래목록'], ui_num['호가체결'], ui_num['호가잔량'])
-        self.uinums_dotx = (ui_num['잔고목록'], ui_num['체결목록'], ui_num['거래목록'], ui_num['호가체결'], ui_num['호가잔량'])
 
         self.uinums_numeric = (ui_num['관심종목'], ui_num['상세기록'], ui_num['당일상세'], ui_num['누적상세'],
                                ui_num['스톰라이브1'], ui_num['스톰라이브3'], ui_num['스톰라이브4'], ui_num['스톰라이브6'],
@@ -115,7 +114,6 @@ class UpdateTablewidget:
         self.uinums_hogarem = (ui_num['호가잔량'], ui_num['호가잔량'])
         self.uinums_detail1 = (ui_num['상세기록'], ui_num['상세기록'])
         self.uinums_detail2 = (ui_num['당일상세'], ui_num['당일상세'])
-        self.uinums_chegyeol = (ui_num['체결목록'], ui_num['체결목록'])
 
         self.uinums_str = (ui_num['재무년도'], ui_num['재무분기'])
         self.uinums_giup = (ui_num['기업공시'], ui_num['기업뉴스'])
@@ -209,30 +207,26 @@ class UpdateTablewidget:
                     if '.' not in day: day = day[:4] + '.' + day[4:6] + '.' + day[6:]
                     item = QTableWidgetItem(day)
 
-                elif gubun in self.uinums_dot4 and column in self.columns_dot4:
+                elif self.ui.market_gubun in (5, 9) and gubun in self.uinums_dot4 and column in self.columns_dot4:
                     item = QTableWidgetItem(change_format(value, dotdown4=True))
 
-                elif column in self.columns_str or gubun in self.uinums_str or (self.ui.database_chart and column == '체결수량'):
+                elif column in self.columns_str or (self.ui.database_chart and column == '체결수량'):
                     item = QTableWidgetItem(str(value))
 
                 elif '량' in column and gubun in self.uinums_dot8:
-                    item = QTableWidgetItem(change_format(value, dotdown8=True))
-
-                elif '해외선물' in self.ui.dict_set['거래소'] and '량' in column and gubun in self.uinums_dotx:
-                    item = QTableWidgetItem(change_format(value, dotdowndel=True))
+                    if self.ui.market_gubun in (5, 9):
+                        item = QTableWidgetItem(change_format(value, dotdown8=True))
+                    else:
+                        item = QTableWidgetItem(change_format(value, dotdowndel=True))
 
                 elif (gubun == ui_num['잔고목록'] and column in self.columns_price1) or \
                         (gubun == ui_num['체결목록'] and column in self.columns_price2) or \
                         (gubun == ui_num['호가종목'] and column in self.columns_price3) or \
                         (gubun == ui_num['호가잔량'] and column == '호가'):
-                    item = QTableWidgetItem(change_format(value, dotdown8=True))
-
-                elif '해외선물' in self.ui.dict_set['거래소'] and (
-                        (gubun == ui_num['잔고목록'] and column in self.columns_price1) or
-                        (gubun == ui_num['체결목록'] and column in self.columns_price2) or
-                        (gubun == ui_num['호가종목'] and column in self.columns_price3) or
-                        (gubun == ui_num['호가잔량'] and column == '호가')):
-                    item = NumericItem(change_format(value))
+                    if self.ui.market_gubun in (5, 9):
+                        item = NumericItem(change_format(value, dotdown8=True))
+                    else:
+                        item = NumericItem(change_format(value))
 
                 elif gubun in self.uinums_numeric:
                     value = str(value)
@@ -310,7 +304,7 @@ class UpdateTablewidget:
                     color = color_fg_bt if arry[i, columns_list.index('총평가손익')] >= 0 else color_fg_dk
                     item.setForeground(color)
 
-                elif gubun in self.uinums_chegyeol:
+                elif gubun in ui_num['체결목록']:
                     order_gubun = arry[i, 1]
                     if order_gubun == '매수':   item.setForeground(color_fg_bt)
                     elif order_gubun == '매도': item.setForeground(color_fg_dk)
@@ -322,16 +316,16 @@ class UpdateTablewidget:
                             color = color_fg_bt if value > arry[11 if i == 0 else 0, 0] else color_fg_dk
                             item.setForeground(color)
                         else:
-                            if '해외선물' not in self.ui.dict_set['거래소'] or gubun == ui_num['호가체결']:
+                            if self.ui.market_gubun < 6 or gubun == ui_num['호가체결']:
                                 func = comma2int if gubun == ui_num['호가체결'] else comma2float
                                 c = func(self.ui.hg_tableWidgett_01.item(5, columns_hg.index('호가')).text())
                                 if value > 0:
                                     item.setForeground(color_fg_bt)
-                                    if value * c > 90_000_000:
+                                    if value * c > (90_000_000 if self.ui.market_gubun != 4 else 60_000):
                                         item.setBackground(color_bf_bt)
                                 else:
                                     item.setForeground(color_fg_dk)
-                                    if value * c < -90_000_000:
+                                    if value * c < (-90_000_000 if self.ui.market_gubun != 4 else -60_000):
                                         item.setBackground(color_bf_dk)
 
                     elif column == '체결강도':

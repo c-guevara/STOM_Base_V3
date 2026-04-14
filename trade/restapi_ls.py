@@ -97,7 +97,7 @@ class LsRestAPI:
             })
             if i % 100 == 0 or i == last - 1:
                 if not debug:
-                    self.windowQ.put((ui_num['시스템로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
+                    self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
                 else:
                     print(f'상장수식주 조회 중 ... [{i+1}/{last}]')
             time.sleep(0.1)
@@ -461,7 +461,7 @@ class LsWebSocketReceiver(QThread):
                     asyncio.create_task(self._real_reg())
                 await self._receive_message()
             except:
-                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - WebSocketReceiver'))
+                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketReceiver'))
 
             await self._disconnect()
 
@@ -581,7 +581,7 @@ class LsWebSocketTrader(QThread):
                     await self._connect()
                 await self._receive_message()
             except:
-                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - WebSocketTrader'))
+                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketTrader'))
 
             await self._disconnect()
 

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMessageBox
 from utility.settings.setting_base import GRAPH_PATH, ui_num
 from ui.create_widget.set_style import style_bc_bb, style_bc_st
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QSize, QEasingCurve
-from utility.static_method.static import qtest_qwait, error_decorator, cme_normal_open, now
+from utility.static_method.static import qtest_qwait, error_decorator, cme_normal_open, now, thread_decorator
 from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
 
@@ -165,26 +165,23 @@ def mnbutton_c_clicked_06(ui):
             QMessageBox.information(ui, '알림', '계정 설정 항목이 모두 초기화되었습니다.')
 
 
-@error_decorator
+@thread_decorator
 def trade_process_start(ui):
-    if not receiver_process_alive(ui):
-        target = ui.market_info['프로세스'][0]
-        ui.proc_receiver = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
-        ui.proc_receiver.start()
+    target = ui.market_info['프로세스'][0]
+    ui.proc_receiver = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
+    ui.proc_receiver.start()
 
-    if not trader_process_alive(ui):
-        target = ui.market_info['프로세스'][1]
-        ui.proc_trader = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
-        ui.proc_trader.start()
+    target = ui.market_info['프로세스'][1]
+    ui.proc_trader = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
+    ui.proc_trader.start()
 
-    if not strategy_process_alive(ui):
-        target = ui.market_info['프로세스'][2]
-        if ui.market_gubun in (1, 2, 4):
-            for i in range(8):
-                p = Process(target=target, args=(i, ui.qlist, ui.dict_set, ui.market_infos))
-                p.start()
-                ui.proc_strategys.append(p)
-        else:
-            p = Process(target=target, args=(0, ui.qlist, ui.dict_set, ui.market_infos))
+    target = ui.market_info['프로세스'][2]
+    if ui.market_gubun in (1, 2, 4):
+        for i in range(8):
+            p = Process(target=target, args=(i, ui.qlist, ui.dict_set, ui.market_infos))
             p.start()
             ui.proc_strategys.append(p)
+    else:
+        p = Process(target=target, args=(0, ui.qlist, ui.dict_set, ui.market_infos))
+        p.start()
+        ui.proc_strategys.append(p)

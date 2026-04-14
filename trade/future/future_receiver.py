@@ -52,7 +52,7 @@ class FutureReceiver(BaseReceiver):
         tr_cd = data['header']['tr_cd']
         if tr_cd == self.tr_cd_hoga:
             int_hms = int(body['hotime'])
-            if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
+            if self.dict_set['전략종료시간'] < int_hms:
                 return
             dt = int(f"{self.str_today}{int_hms}")
             code = body['futcode']
@@ -65,8 +65,8 @@ class FutureReceiver(BaseReceiver):
                 float(body['bidho4']), float(body['bidho5'])
             ]
             hoga_samount = [
-                float(body['offerrem1']), float(body['offerrem2']), float(body['offerrem3']),
-                float(body['offerrem4']), float(body['offerrem5'])
+                int(body['offerrem1']), int(body['offerrem2']), int(body['offerrem3']),
+                int(body['offerrem4']), int(body['offerrem5'])
             ]
             hoga_bamount = [
                 int(body['bidrem1']), int(body['bidrem2']), int(body['bidrem3']),
@@ -80,7 +80,7 @@ class FutureReceiver(BaseReceiver):
 
         elif tr_cd == self.tr_cd_trade:
             int_hms = int(body['chetime'])
-            if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
+            if self.dict_set['전략종료시간'] < int_hms:
                 return
             dt = int(f"{self.str_today}{int_hms}")
             code  = body['futcode']
@@ -88,7 +88,7 @@ class FutureReceiver(BaseReceiver):
             o     = float(body['open'])
             h     = float(body['high'])
             low   = float(body['low'])
-            v     = float(body['cvolume'])
+            v     = int(body['cvolume'])
             per   = float(body['drate'])
             dm    = int(body['value'])
             cg    = body['cgubun']

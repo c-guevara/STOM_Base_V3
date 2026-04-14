@@ -62,8 +62,8 @@ class FutureOsReceiver(BaseReceiver):
                 float(body['bidho4']), float(body['bidho5'])
             ]
             hoga_samount = [
-                float(body['offerrem1']), float(body['offerrem2']), float(body['offerrem3']),
-                float(body['offerrem4']), float(body['offerrem5'])
+                int(body['offerrem1']), int(body['offerrem2']), float(body['offerrem3']),
+                int(body['offerrem4']), int(body['offerrem5'])
             ]
             hoga_bamount = [
                 int(body['bidrem1']), int(body['bidrem2']), int(body['bidrem3']),
@@ -85,7 +85,7 @@ class FutureOsReceiver(BaseReceiver):
             o     = float(body['open'])
             h     = float(body['high'])
             low   = float(body['low'])
-            v     = float(body['trdq'])
+            v     = int(body['trdq'])
             per   = float(body['chgrate'])
             dm    = int(body['amount'])
             cg    = body['cgubun']
