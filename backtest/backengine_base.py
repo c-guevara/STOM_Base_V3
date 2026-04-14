@@ -12,7 +12,7 @@ from utility.settings.setting_base import indicator, ui_num, BACK_TEMP, DB_STRAT
 from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
     set_builtin_print, get_profile_text
 from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
-    get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
+    get_back_load_code_query_batch, get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
 
 
 class BackEngineBase(StgGlobalsFunc):
@@ -370,7 +370,13 @@ class BackEngineBase(StgGlobalsFunc):
         Args:
             data: 로드에 필요한 데이터 튜플
         """
+        def get_batch_size(days):
+            """일자수에 따른 배치 크기 계산"""
+            batch_size_ = max(1, len(days) // 10)
+            return min(batch_size_, 50)
+
         def load(days):
+            """종목코드별 로드"""
             try:
                 df = pd.read_sql(get_back_load_code_query(self.is_tick, code, days, starttime, endtime), con)
             except:
@@ -386,6 +392,27 @@ class BackEngineBase(StgGlobalsFunc):
                         'size': arry.shape[0] * arry.shape[1] * arry.dtype.itemsize
                     })
 
+        def load_batch(code_batch_, days):
+            """배치 쿼리로 여러 종목 한번에 로드"""
+            try:
+                df = pd.read_sql(get_back_load_code_query_batch(self.is_tick, code_batch_, days, starttime, endtime), con)
+            except:
+                pass
+            else:
+                if len(df) > 0:
+                    for code_ in code_batch_:
+                        # noinspection PyUnresolvedReferences
+                        code_df = df[df['code'] == code_].drop('code', axis=1)
+                        if len(code_df) > 0:
+                            arry = add_rolling_data(code_df, round_unit, angle_cf_list, self.is_tick, avg_list)
+                            all_data.append({
+                                'code': code,
+                                'data': arry,
+                                'shape': arry.shape,
+                                'dtype': arry.dtype,
+                                'size': arry.shape[0] * arry.shape[1] * arry.dtype.itemsize
+                            })
+
         self._update_sub_vars()
 
         round_unit = self.market_info['반올림단위']
@@ -397,15 +424,29 @@ class BackEngineBase(StgGlobalsFunc):
         divid_mode = data[-1]
         if divid_mode == '종목코드별 분류':
             _, startday, endday, starttime, endtime, code_list, avg_list, code_days, _, _, _ = data
-            for i, code in enumerate(code_list):
-                load(code_days[code])
+            if len(code_list) > 1:
+                first_code = code_list[0]
+                batch_size = get_batch_size(code_days[first_code])
+                for i in range(0, len(code_list), batch_size):
+                    code_batch = code_list[i:i + batch_size]
+                    all_days = set()
+                    for code in code_batch:
+                        all_days.update(code_days[code])
+                    load_batch(code_batch, list(all_days))
+            else:
+                for code in code_list:
+                    load(code_days[code])
         elif divid_mode == '일자별 분류':
             _, startday, endday, starttime, endtime, day_list, avg_list, _, day_codes, _, _ = data
-            code_list = set()
-            for day in day_list:
-                code_list.update(day_codes[day])
-            for i, code in enumerate(code_list):
-                load(day_list)
+            code_list = list(set().union(*day_codes.values()))
+            if len(code_list) > 1:
+                batch_size = get_batch_size(day_list)
+                for i in range(0, len(code_list), batch_size):
+                    code_batch = code_list[i:i + batch_size]
+                    load_batch(code_batch, day_list)
+            else:
+                for code in code_list:
+                    load(day_list)
         else:
             _, startday, endday, starttime, endtime, day_list, avg_list, _, _, code, _ = data
             for i, day in enumerate(day_list):
