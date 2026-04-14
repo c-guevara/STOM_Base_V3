@@ -3,7 +3,7 @@ import pyqtgraph as pg
 from PyQt5.QtGui import QColor
 from ui.draw_chart.draw_crosshair import CrossHair
 from ui.draw_chart.draw_label_text import get_label_text
-from utility.static_method.static import set_builtin_print
+from utility.static_method.static import set_builtin_print, from_timestamp
 from ui.draw_chart.draw_chart_items import CandlestickItem, VolumeBarItem, AreaItem
 from ui.create_widget.set_style import qfont12, color_fg_bt, color_bg_bt, color_bg_ld
 
@@ -35,8 +35,8 @@ class DrawChartBase:
         self.last_index = None
         self.drop_zero_factors = None
 
+        self.is_min     = not self.ui.dict_set['타임프레임']
         self.real       = False
-        self.is_min     = False
         self.same_code  = False
         self.same_time  = False
 
@@ -67,205 +67,17 @@ class DrawChartBase:
         """
         return self.ui.dict_findex[fname]
 
-    def update_factor_list(self):
-        """요소 리스트를 업데이트합니다."""
-        if not (self.same_code and self.same_time):
-            self.ui.ctpg_item   = {}
-            self.ui.ctpg_data   = {}
-            self.ui.ctpg_legend = {}
-
-        self.ui.ctpg_factors = []
-        if self.ui.ft_checkBoxxxxx_01.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_01.text())
-        if self.ui.ft_checkBoxxxxx_02.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_02.text())
-        if self.ui.ft_checkBoxxxxx_03.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_03.text())
-        if self.ui.ft_checkBoxxxxx_04.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_04.text())
-        if self.ui.ft_checkBoxxxxx_05.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_05.text())
-        if self.ui.ft_checkBoxxxxx_06.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_06.text())
-        if self.ui.ft_checkBoxxxxx_07.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_07.text())
-        if self.ui.ft_checkBoxxxxx_08.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_08.text())
-        if self.ui.ft_checkBoxxxxx_09.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_09.text())
-        if self.ui.ft_checkBoxxxxx_10.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_10.text())
-        if self.ui.ft_checkBoxxxxx_11.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_11.text())
-        if self.ui.ft_checkBoxxxxx_12.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_12.text())
-        if self.ui.ft_checkBoxxxxx_13.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_13.text())
-        if self.ui.ft_checkBoxxxxx_14.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_14.text())
-        if self.ui.ft_checkBoxxxxx_15.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_15.text())
-        if self.ui.ft_checkBoxxxxx_16.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_16.text())
-        if self.ui.ft_checkBoxxxxx_17.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_17.text())
-        if self.ui.ft_checkBoxxxxx_18.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_18.text())
-        if self.is_min:
-            if self.ui.ft_checkBoxxxxx_19.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_19.text())
-            if self.ui.ft_checkBoxxxxx_20.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_20.text())
-            if self.ui.ft_checkBoxxxxx_21.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_21.text())
-            if self.ui.ft_checkBoxxxxx_22.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_22.text())
-            if self.ui.ft_checkBoxxxxx_23.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_23.text())
-            if self.ui.ft_checkBoxxxxx_24.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_24.text())
-            if self.ui.ft_checkBoxxxxx_25.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_25.text())
-            if self.ui.ft_checkBoxxxxx_26.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_26.text())
-            if self.ui.ft_checkBoxxxxx_27.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_27.text())
-            if self.ui.ft_checkBoxxxxx_28.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_28.text())
-            if self.ui.ft_checkBoxxxxx_29.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_29.text())
-            if self.ui.ft_checkBoxxxxx_30.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_30.text())
-            if self.ui.ft_checkBoxxxxx_31.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_31.text())
-            if self.ui.ft_checkBoxxxxx_32.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_32.text())
-            if self.ui.ft_checkBoxxxxx_33.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_33.text())
-            if self.ui.ft_checkBoxxxxx_34.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_34.text())
-            if self.ui.ft_checkBoxxxxx_35.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_35.text())
-            if self.ui.ft_checkBoxxxxx_36.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_36.text())
-            if self.ui.ft_checkBoxxxxx_37.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_37.text())
-            if self.ui.ft_checkBoxxxxx_38.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_38.text())
-
-    def update_dict_idxs(self):
-        """요소 인덱스 딕셔너리를 업데이트합니다."""
-        if self.dict_idxs is not None:
-            return
-
-        if self.is_min:
-            self.dict_idxs = {
-                '체결강도': [self.fi('체결강도'), self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('체결강도평균')],
-                '호가총잔량': [self.fi('매도총잔량'), self.fi('매수총잔량')],
-                '당일매도수금액': [self.fi('당일매도금액'), self.fi('당일매수금액')],
-                '최고매도수금액': [self.fi('최고매도금액'), self.fi('최고매수금액')],
-                '최고매도수가격': [self.fi('최고매도가격'), self.fi('최고매수가격')],
-                '매도수호가잔량1': [self.fi('매도잔량1'), self.fi('매수잔량1')],
-
-                '이동평균': [self.fi('이동평균5'), self.fi('이동평균10'), self.fi('이동평균20'), self.fi('이동평균60'), self.fi('이동평균120')],
-                '분당거래대금': [self.fi('분당거래대금'), self.fi('분당거래대금평균')],
-                '분당체결수량': [self.fi('분당매도수량'), self.fi('분당매수수량')],
-                '분당매도수금액': [self.fi('분당매도금액'), self.fi('분당매수금액')],
-                '누적분당매도수수량': [self.fi('누적분당매도수량'), self.fi('누적분당매수수량')],
-
-                '현재가': [self.fi('현재가'), self.fi('분봉시가'), self.fi('분봉고가'), self.fi('분봉저가')],
-                '양음봉구분': [self.fi('현재가'), self.fi('분봉시가')],
-
-                'BBAND': [self.fi('현재가'), self.fi('BBU'), self.fi('BBL'), self.fi('BBM')],
-                'MACD': [self.fi('MACDS'), self.fi('MACDH'), self.fi('MACD')],
-                'STOCHS': [self.fi('STOCHSK'), self.fi('STOCHSD')],
-                'STOCHF': [self.fi('STOCHFK'), self.fi('STOCHFD')],
-                'AROON': [self.fi('AROONU'), self.fi('AROOND')],
-                'DMI': [self.fi('DIP'), self.fi('DIM')]
-            }
-        else:
-            self.dict_idxs = {
-                '체결강도': [self.fi('체결강도'), self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('체결강도평균')],
-                '호가총잔량': [self.fi('매도총잔량'), self.fi('매수총잔량')],
-                '당일매도수금액': [self.fi('당일매도금액'), self.fi('당일매수금액')],
-                '최고매도수금액': [self.fi('최고매도금액'), self.fi('최고매수금액')],
-                '최고매도수가격': [self.fi('최고매도가격'), self.fi('최고매수가격')],
-                '매도수호가잔량1': [self.fi('매도잔량1'), self.fi('매수잔량1')],
-
-                '이동평균': [self.fi('이동평균60'), self.fi('이동평균150'), self.fi('이동평균300'), self.fi('이동평균600'), self.fi('이동평균1200')],
-                '초당거래대금': [self.fi('초당거래대금'), self.fi('초당거래대금평균')],
-                '초당체결수량': [self.fi('초당매도수량'), self.fi('초당매수수량')],
-                '초당매도수금액': [self.fi('초당매도금액'), self.fi('초당매수금액')],
-                '누적초당매도수수량': [self.fi('누적초당매도수량'), self.fi('누적초당매수수량')]
-            }
-
-    def update_ctpg_date(self):
-        """차트 데이터를 업데이트합니다."""
-        if self.same_code and self.same_time:
-            self._incremental_update()
-        else:
-            self._process_all_data()
-
-        tlen = len(self.ui.ctpg_arry)
-        self.last = tlen - 1
-        self.len_list = [tlen - len(x) for x in self.ui.ctpg_data.values()]
-
-    def _incremental_update(self):
-        """증분 업데이트를 수행합니다."""
-        for i, row in enumerate(self.ui.ctpg_arry[-1]):
-            if len(self.ui.ctpg_data[i]) > 0:
-                self.ui.ctpg_data[i][-1] = row
-
-    def _process_all_data(self):
-        """모든 데이터를 처리합니다."""
-        if self.drop_zero_factors is None:
-            self.drop_zero_factors = self.get_drop_zero_factors()
-
-        for i, col in enumerate(self.ui.ctpg_arry.T):
-            if i in self.drop_zero_factors:
-                self.ui.ctpg_data[i] = col[col != 0]
-            else:
-                self.ui.ctpg_data[i] = col
-
-    def get_optimized_min_max(self, fidx_list):
-        """최적화된 최소/최대값을 계산합니다.
-        Args:
-            fidx_list: 요소 인덱스 리스트
-        """
-        fidx_tuple = fidx_list if isinstance(fidx_list, tuple) else (fidx_list,)
-        if self.same_code and self.same_time and fidx_tuple in self.cached_min_max:
-            self._incremental_min_max_update(fidx_tuple)
-        else:
-            self._full_min_max_calculation(fidx_tuple)
-
-    def _incremental_min_max_update(self, fidx_tuple):
-        """증분 최소/최대값 업데이트를 수행합니다.
-        Args:
-            fidx_tuple: 요소 인덱스 튜플
-        """
-        cached_ymax, cached_ymin = self.cached_min_max[fidx_tuple]
-        new_values = []
-        for fidx in fidx_tuple:
-            if fidx in self.ui.ctpg_data and len(self.ui.ctpg_data[fidx]) > 0:
-                new_values.append(self.ui.ctpg_data[fidx][-1])
-
-        if new_values:
-            new_max = max(new_values)
-            new_min = min(new_values)
-            self.ymax = max(cached_ymax, new_max)
-            self.ymin = min(cached_ymin, new_min)
-            self.cached_min_max[fidx_tuple] = (self.ymax, self.ymin)
-        else:
-            self.ymax, self.ymin = cached_ymax, cached_ymin
-
-    def _full_min_max_calculation(self, fidx_tuple):
-        """전체 최소/최대값 계산을 수행합니다.
-        Args:
-            fidx_tuple: 요소 인덱스 튜플
-        """
-        all_values = []
-        for fidx in fidx_tuple:
-            if fidx in self.ui.ctpg_data and len(self.ui.ctpg_data[fidx]) > 0:
-                all_values.extend(self.ui.ctpg_data[fidx])
-
-        if all_values:
-            self.ymax = max(all_values)
-            self.ymin = min(all_values)
-            self.cached_min_max[fidx_tuple] = (self.ymax, self.ymin)
-        else:
-            self.ymax, self.ymin = 0, 0
-            self.cached_min_max[fidx_tuple] = (0, 0)
-
-    def get_drop_zero_factors(self):
-        """0값 제거 요소 인덱스를 반환합니다.
-        Returns:
-            0값 제거 요소 인덱스 튜플
-        """
-        if self.is_min:
-            drop_zero_factors = (
-                self.fi('이동평균5'), self.fi('이동평균10'), self.fi('이동평균20'), self.fi('이동평균60'), self.fi('이동평균120'),
-                self.fi('최고현재가'), self.fi('최저현재가'), self.fi('최고분봉고가'), self.fi('최저분봉저가'), self.fi('체결강도평균'),
-                self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('최고분당매수수량'), self.fi('최고분당매도수량'),
-                self.fi('누적분당매수수량'), self.fi('누적분당매도수량'), self.fi('분당거래대금평균'),
-                self.fi('ADXR'), self.fi('ATR'), self.fi('BBU'), self.fi('BBM'), self.fi('BBL'), self.fi('DIM'),
-                self.fi('DIP'), self.fi('OBV'), self.fi('SAR')
-            )
-        else:
-            drop_zero_factors = (
-                self.fi('이동평균60'), self.fi('이동평균150'), self.fi('이동평균300'), self.fi('이동평균600'),
-                self.fi('이동평균1200'), self.fi('최고현재가'), self.fi('최저현재가'), self.fi('체결강도평균'),
-                self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('최고초당매수수량'), self.fi('최고초당매도수량'),
-                self.fi('누적초당매수수량'), self.fi('누적초당매도수량'), self.fi('초당거래대금평균')
-            )
-        return drop_zero_factors
-
     def draw_all_chart(self):
         """모든 차트를 그립니다."""
         if not self.real:
             self.dict_idxs = None
             self.drop_zero_factors = None
+
+        self.chart_cnt = len(self.ui.ctpg)
+        self.is_min = not self.ui.dict_set['타임프레임']
+        self.gsjm_arry = self.ui.ctpg_arry[:, self.fi('관심종목')]
+        self.xmin, self.xmax = self.ui.ctpg_xticks[0], self.ui.ctpg_xticks[-1]
+        self.hms = from_timestamp(self.xmax).strftime('%H:%M' if self.is_min else '%H:%M:%S')
 
         self.update_factor_list()
         self.update_dict_idxs()
@@ -390,12 +202,206 @@ class DrawChartBase:
             self.draw_legend(i)
             if i == self.chart_cnt - 1: break
 
-        if not (self.same_code and self.same_time) and self.ui.ct_checkBoxxxxx_01.isChecked():
+        if self.ui.ct_checkBoxxxxx_01.isChecked():
             self.insert_crosshair()
 
         self.ui.ctpg_code = self.code
         if self.real and self.ui.database_chart: self.ui.database_chart = False
         if not self.real and not self.ui.database_chart: self.ui.database_chart = True
+
+    def update_factor_list(self):
+        """요소 리스트를 업데이트합니다."""
+        if not (self.same_code and self.same_time):
+            self.ui.ctpg_item   = {}
+            self.ui.ctpg_data   = {}
+            self.ui.ctpg_legend = {}
+
+        self.ui.ctpg_factors = []
+        if self.ui.ft_checkBoxxxxx_01.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_01.text())
+        if self.ui.ft_checkBoxxxxx_02.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_02.text())
+        if self.ui.ft_checkBoxxxxx_03.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_03.text())
+        if self.ui.ft_checkBoxxxxx_04.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_04.text())
+        if self.ui.ft_checkBoxxxxx_05.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_05.text())
+        if self.ui.ft_checkBoxxxxx_06.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_06.text())
+        if self.ui.ft_checkBoxxxxx_07.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_07.text())
+        if self.ui.ft_checkBoxxxxx_08.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_08.text())
+        if self.ui.ft_checkBoxxxxx_09.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_09.text())
+        if self.ui.ft_checkBoxxxxx_10.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_10.text())
+        if self.ui.ft_checkBoxxxxx_11.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_11.text())
+        if self.ui.ft_checkBoxxxxx_12.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_12.text())
+        if self.ui.ft_checkBoxxxxx_13.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_13.text())
+        if self.ui.ft_checkBoxxxxx_14.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_14.text())
+        if self.ui.ft_checkBoxxxxx_15.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_15.text())
+        if self.ui.ft_checkBoxxxxx_16.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_16.text())
+        if self.ui.ft_checkBoxxxxx_17.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_17.text())
+        if self.ui.ft_checkBoxxxxx_18.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_18.text())
+        if self.is_min:
+            if self.ui.ft_checkBoxxxxx_19.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_19.text())
+            if self.ui.ft_checkBoxxxxx_20.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_20.text())
+            if self.ui.ft_checkBoxxxxx_21.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_21.text())
+            if self.ui.ft_checkBoxxxxx_22.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_22.text())
+            if self.ui.ft_checkBoxxxxx_23.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_23.text())
+            if self.ui.ft_checkBoxxxxx_24.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_24.text())
+            if self.ui.ft_checkBoxxxxx_25.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_25.text())
+            if self.ui.ft_checkBoxxxxx_26.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_26.text())
+            if self.ui.ft_checkBoxxxxx_27.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_27.text())
+            if self.ui.ft_checkBoxxxxx_28.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_28.text())
+            if self.ui.ft_checkBoxxxxx_29.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_29.text())
+            if self.ui.ft_checkBoxxxxx_30.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_30.text())
+            if self.ui.ft_checkBoxxxxx_31.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_31.text())
+            if self.ui.ft_checkBoxxxxx_32.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_32.text())
+            if self.ui.ft_checkBoxxxxx_33.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_33.text())
+            if self.ui.ft_checkBoxxxxx_34.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_34.text())
+            if self.ui.ft_checkBoxxxxx_35.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_35.text())
+            if self.ui.ft_checkBoxxxxx_36.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_36.text())
+            if self.ui.ft_checkBoxxxxx_37.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_37.text())
+            if self.ui.ft_checkBoxxxxx_38.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_38.text())
+
+    def update_dict_idxs(self):
+        """요소 인덱스 딕셔너리를 업데이트합니다."""
+        if self.dict_idxs is not None:
+            return
+
+        if self.is_min:
+            self.dict_idxs = {
+                '체결강도': [self.fi('체결강도'), self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('체결강도평균')],
+                '호가총잔량': [self.fi('매도총잔량'), self.fi('매수총잔량')],
+                '당일매도수금액': [self.fi('당일매도금액'), self.fi('당일매수금액')],
+                '최고매도수금액': [self.fi('최고매도금액'), self.fi('최고매수금액')],
+                '최고매도수가격': [self.fi('최고매도가격'), self.fi('최고매수가격')],
+                '매도수호가잔량1': [self.fi('매도잔량1'), self.fi('매수잔량1')],
+
+                '이동평균': [self.fi('이동평균5'), self.fi('이동평균10'), self.fi('이동평균20'), self.fi('이동평균60'), self.fi('이동평균120')],
+                '분당거래대금': [self.fi('분당거래대금'), self.fi('분당거래대금평균')],
+                '분당체결수량': [self.fi('분당매도수량'), self.fi('분당매수수량')],
+                '분당매도수금액': [self.fi('분당매도금액'), self.fi('분당매수금액')],
+                '누적분당매도수수량': [self.fi('누적분당매도수량'), self.fi('누적분당매수수량')],
+
+                '현재가': [self.fi('현재가'), self.fi('분봉시가'), self.fi('분봉고가'), self.fi('분봉저가')],
+                '양음봉구분': [self.fi('현재가'), self.fi('분봉시가')],
+
+                'BBAND': [self.fi('현재가'), self.fi('BBU'), self.fi('BBL'), self.fi('BBM')],
+                'MACD': [self.fi('MACDS'), self.fi('MACDH'), self.fi('MACD')],
+                'STOCHS': [self.fi('STOCHSK'), self.fi('STOCHSD')],
+                'STOCHF': [self.fi('STOCHFK'), self.fi('STOCHFD')],
+                'AROON': [self.fi('AROONU'), self.fi('AROOND')],
+                'DMI': [self.fi('DIP'), self.fi('DIM')]
+            }
+        else:
+            self.dict_idxs = {
+                '체결강도': [self.fi('체결강도'), self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('체결강도평균')],
+                '호가총잔량': [self.fi('매도총잔량'), self.fi('매수총잔량')],
+                '당일매도수금액': [self.fi('당일매도금액'), self.fi('당일매수금액')],
+                '최고매도수금액': [self.fi('최고매도금액'), self.fi('최고매수금액')],
+                '최고매도수가격': [self.fi('최고매도가격'), self.fi('최고매수가격')],
+                '매도수호가잔량1': [self.fi('매도잔량1'), self.fi('매수잔량1')],
+
+                '이동평균': [self.fi('이동평균60'), self.fi('이동평균150'), self.fi('이동평균300'), self.fi('이동평균600'), self.fi('이동평균1200')],
+                '초당거래대금': [self.fi('초당거래대금'), self.fi('초당거래대금평균')],
+                '초당체결수량': [self.fi('초당매도수량'), self.fi('초당매수수량')],
+                '초당매도수금액': [self.fi('초당매도금액'), self.fi('초당매수금액')],
+                '누적초당매도수수량': [self.fi('누적초당매도수량'), self.fi('누적초당매수수량')]
+            }
+
+    def update_ctpg_date(self):
+        """차트 데이터를 업데이트합니다."""
+        if self.same_code and self.same_time:
+            self._incremental_update()
+        else:
+            self._process_all_data()
+
+        tlen = len(self.ui.ctpg_arry)
+        self.last = tlen - 1
+        self.len_list = [tlen - len(x) for x in self.ui.ctpg_data.values()]
+
+    def _incremental_update(self):
+        """증분 업데이트를 수행합니다."""
+        for i, row in enumerate(self.ui.ctpg_arry[-1]):
+            if len(self.ui.ctpg_data[i]) > 0:
+                self.ui.ctpg_data[i][-1] = row
+
+    def _process_all_data(self):
+        """모든 데이터를 처리합니다."""
+        if self.drop_zero_factors is None:
+            self.drop_zero_factors = self.get_drop_zero_factors()
+
+        for i, col in enumerate(self.ui.ctpg_arry.T):
+            if i in self.drop_zero_factors:
+                self.ui.ctpg_data[i] = col[col != 0]
+            else:
+                self.ui.ctpg_data[i] = col
+
+    def get_drop_zero_factors(self):
+        """0값 제거 요소 인덱스를 반환합니다.
+        Returns:
+            0값 제거 요소 인덱스 튜플
+        """
+        if self.is_min:
+            drop_zero_factors = (
+                self.fi('이동평균5'), self.fi('이동평균10'), self.fi('이동평균20'), self.fi('이동평균60'), self.fi('이동평균120'),
+                self.fi('최고현재가'), self.fi('최저현재가'), self.fi('최고분봉고가'), self.fi('최저분봉저가'), self.fi('체결강도평균'),
+                self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('최고분당매수수량'), self.fi('최고분당매도수량'),
+                self.fi('누적분당매수수량'), self.fi('누적분당매도수량'), self.fi('분당거래대금평균'),
+                self.fi('ADXR'), self.fi('ATR'), self.fi('BBU'), self.fi('BBM'), self.fi('BBL'), self.fi('DIM'),
+                self.fi('DIP'), self.fi('OBV'), self.fi('SAR')
+            )
+        else:
+            drop_zero_factors = (
+                self.fi('이동평균60'), self.fi('이동평균150'), self.fi('이동평균300'), self.fi('이동평균600'),
+                self.fi('이동평균1200'), self.fi('최고현재가'), self.fi('최저현재가'), self.fi('체결강도평균'),
+                self.fi('최고체결강도'), self.fi('최저체결강도'), self.fi('최고초당매수수량'), self.fi('최고초당매도수량'),
+                self.fi('누적초당매수수량'), self.fi('누적초당매도수량'), self.fi('초당거래대금평균')
+            )
+        return drop_zero_factors
+
+    def get_optimized_min_max(self, fidx_list):
+        """최적화된 최소/최대값을 계산합니다.
+        Args:
+            fidx_list: 요소 인덱스 리스트
+        """
+        fidx_tuple = fidx_list if isinstance(fidx_list, tuple) else (fidx_list,)
+        if self.same_code and self.same_time and fidx_tuple in self.cached_min_max:
+            self._incremental_min_max_update(fidx_tuple)
+        else:
+            self._full_min_max_calculation(fidx_tuple)
+
+    def _incremental_min_max_update(self, fidx_tuple):
+        """증분 최소/최대값 업데이트를 수행합니다.
+        Args:
+            fidx_tuple: 요소 인덱스 튜플
+        """
+        cached_ymax, cached_ymin = self.cached_min_max[fidx_tuple]
+        new_values = []
+        for fidx in fidx_tuple:
+            if fidx in self.ui.ctpg_data and len(self.ui.ctpg_data[fidx]) > 0:
+                new_values.append(self.ui.ctpg_data[fidx][-1])
+
+        if new_values:
+            new_max = max(new_values)
+            new_min = min(new_values)
+            self.ymax = max(cached_ymax, new_max)
+            self.ymin = min(cached_ymin, new_min)
+            self.cached_min_max[fidx_tuple] = (self.ymax, self.ymin)
+        else:
+            self.ymax, self.ymin = cached_ymax, cached_ymin
+
+    def _full_min_max_calculation(self, fidx_tuple):
+        """전체 최소/최대값 계산을 수행합니다.
+        Args:
+            fidx_tuple: 요소 인덱스 튜플
+        """
+        all_values = []
+        for fidx in fidx_tuple:
+            if fidx in self.ui.ctpg_data and len(self.ui.ctpg_data[fidx]) > 0:
+                all_values.extend(self.ui.ctpg_data[fidx])
+
+        if all_values:
+            self.ymax = max(all_values)
+            self.ymin = min(all_values)
+            self.cached_min_max[fidx_tuple] = (self.ymax, self.ymin)
+        else:
+            self.ymax, self.ymin = 0, 0
+            self.cached_min_max[fidx_tuple] = (0, 0)
 
     def draw_buy_or_sell_point(self, i):
         """매수/매도 지점을 그립니다.
