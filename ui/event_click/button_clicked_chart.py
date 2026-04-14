@@ -8,6 +8,10 @@ from utility.settings.setting_base import indi_base, indicator
 
 @error_decorator
 def indicator_setting_basic(ui):
+    """보조지표 기본 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     k = list(indi_base.values())
     for i, linedit in enumerate(ui.factor_linedit_list):
         linedit.setText(str(k[i]))
@@ -15,6 +19,10 @@ def indicator_setting_basic(ui):
 
 @error_decorator
 def indicator_setting_load(ui):
+    """보조지표 설정을 데이터베이스에서 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM back')
     k_list = df['보조지표설정'][0]
     k_list = k_list.split(';')
@@ -24,6 +32,10 @@ def indicator_setting_load(ui):
 
 @error_decorator
 def indicator_setting_save(ui):
+    """보조지표 설정을 데이터베이스에 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     k_list = []
     for linedit in ui.factor_linedit_list:
         k_list.append(linedit.text())
@@ -36,6 +48,12 @@ def indicator_setting_save(ui):
 
 @error_decorator
 def get_indicator_detail(ui):
+    """보조지표 상세 설정을 가져옵니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    Returns:
+        보조지표 설정 리스트
+    """
     k_list = None
     if not ui.dict_set['타임프레임']:
         if ui.ft_checkBoxxxxx_44.isChecked():

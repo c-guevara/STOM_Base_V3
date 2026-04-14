@@ -20,13 +20,22 @@ from ui.create_widget.set_text import optistandard, optitext, train_period, vali
 
 
 class SetStrategyTab:
+    """전략 탭 설정 클래스입니다.
+    매수/매도 전략 및 최적화 탭을 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """전략 탭 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     @error_decorator
     def set(self):
+        """전략 탭을 설정합니다."""
         self.ui.ss_textEditttt_01 = self.wc.setTextEdit(self.ui.st_tab, vscroll=True, filter_=True, font=qfont14)
         self.ui.ss_textEditttt_02 = self.wc.setTextEdit(self.ui.st_tab, vscroll=True, filter_=True, font=qfont14)
         self.ui.ss_textEditttt_03 = self.wc.setTextEdit(self.ui.st_tab, vscroll=True, visible=False, filter_=True, font=qfont14)

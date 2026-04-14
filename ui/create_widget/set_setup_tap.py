@@ -8,13 +8,22 @@ from ui.event_click.button_clicked_etc import lvbutton_clicked_01
 
 
 class SetSetupTap:
+    """설정 탭 설정 클래스입니다.
+    일반설정과 주문설정 탭을 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """설정 탭 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     @error_decorator
     def set(self):
+        """설정 탭을 설정합니다."""
         self.ui.set_tapWidgett_01 = QTabWidget(self.ui.sj_tab)
 
         self.ui.ssd_tab = QWidget()

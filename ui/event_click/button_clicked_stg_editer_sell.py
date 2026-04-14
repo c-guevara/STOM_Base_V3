@@ -12,6 +12,10 @@ from ui.create_widget.set_text import famous_saying, sell_signal, sell_signal_fu
 
 @error_decorator
 def sell_stg_load(ui):
+    """매도 전략을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svjs_comboBoxx_01.currentText()
         if strategy_name == '':
@@ -33,6 +37,10 @@ def sell_stg_load(ui):
 
 @error_decorator
 def sell_stg_save(ui):
+    """매도 전략을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     strategy_name = ui.svjs_lineEditt_01.text()
     strategy = ui.ss_textEditttt_02.toPlainText()
     strategy = get_fix_strategy(ui, strategy, '매도')
@@ -58,6 +66,10 @@ def sell_stg_save(ui):
 
 @error_decorator
 def sell_factor(ui):
+    """매도 팩터를 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.ss_textEditttt_02.clear()
     ui.ss_textEditttt_02.append(sell_text if ui.dict_set['타임프레임'] else sell_text)
     ui.svjs_pushButon_04.setStyleSheet(style_bc_st)
@@ -65,6 +77,10 @@ def sell_factor(ui):
 
 @error_decorator
 def sell_stg_start(ui):
+    """매도 전략 연산을 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     strategy = ui.ss_textEditttt_02.toPlainText()
     if strategy == '':
         QMessageBox.critical(ui, '오류 알림', '매도전략의 코드가 공백 상태입니다.\n')
@@ -81,12 +97,20 @@ def sell_stg_start(ui):
 
 @error_decorator
 def sell_signal_insert(ui):
+    """매도 시그널을 삽입합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     signal = sell_signal if ui.market_gubun < 6 else sell_signal_future
     ui.ss_textEditttt_02.append(signal)
 
 
 @error_decorator
 def sell_stg_stop(ui):
+    """매도 전략 연산을 중지합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.wdzservQ.put(('strategy', '매도전략중지'))
     ui.svjs_pushButon_14.setStyleSheet(style_bc_dk)
     ui.svjs_pushButon_04.setStyleSheet(style_bc_st)

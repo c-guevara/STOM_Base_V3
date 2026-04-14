@@ -12,6 +12,11 @@ from ui.event_click.button_clicked_show_dialog import show_dialog_graph, show_di
 
 @error_decorator
 def key_press_event(_ui, event):
+    """키 누름 이벤트를 처리합니다.
+    Args:
+        _ui: UI 클래스 인스턴스
+        event: 키 이벤트
+    """
     if event.key() in (Qt.Key_Return, Qt.Key_Enter):
         if _ui.dialog_scheduler.focusWidget() == _ui.sd_dpushButtonn_01:
             return

@@ -9,6 +9,10 @@ from ui.event_click.button_clicked_chart import get_indicator_detail
 
 @error_decorator
 def return_press_01(ui):
+    """차트 다이얼로그에서 엔터키 누름 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.dialog_chart.focusWidget() in (ui.ct_lineEdittttt_04, ui.ct_lineEdittttt_05, ui.ct_pushButtonnn_01):
         searchdate = ui.ct_dateEdittttt_01.date().toString('yyyyMMdd')
         linetext   = ui.ct_lineEdittttt_03.text()
@@ -48,6 +52,10 @@ def return_press_01(ui):
 
 @error_decorator
 def return_press_02(ui):
+    """비밀번호 다이얼로그에서 엔터키 누름 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if '비밀번호가 변경되었습니다' in ui.pa_labelllllll_01.text():
         ui.dialog_pass.close()
     else:

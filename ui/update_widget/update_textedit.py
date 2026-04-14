@@ -10,13 +10,25 @@ from ui.create_widget.set_style import color_fg_rt, color_fg_dk, color_fg_bt, co
 
 
 class UpdateTextedit:
+    """텍스트 에디터 업데이트 클래스입니다.
+    로그 텍스트 에디터를 업데이트하고 데이터베이스 관리를 수행합니다.
+    """
     def __init__(self, ui):
+        """텍스트 에디터 업데이트를 초기화합니다.
+        Args:
+            ui: UI 클래스 인스턴스
+        """
         self.ui        = ui
         self.data_save = False
         set_builtin_print(self.ui.windowQ)
 
     @error_decorator
     def update_texedit(self, data):
+        """텍스트 에디터를 업데이트합니다.
+        수신된 데이터를 기반으로 로그 텍스트 에디터에 내용을 추가합니다.
+        Args:
+            data: 데이터 (데이터 타입, 내용)
+        """
         if data[0] == ui_num['종목명데이터']:
             self.ui.dict_name.update(data[1])
             self.ui.dict_code.update(data[2])
@@ -143,6 +155,10 @@ class UpdateTextedit:
                         self._auto_database_control(3)
 
     def _auto_database_control(self, gubun):
+        """데이터베이스 자동 관리를 수행합니다.
+        Args:
+            gubun: 구분 (1: DB관리 시작, 2: 일자DB 분리, 3: 백테DB 추가)
+        """
         if gubun == 1:
             self.ui.auto_mode = True
             if self.ui.dict_set['알림소리']:
@@ -165,6 +181,11 @@ class UpdateTextedit:
             self._shut_down_check()
 
     def _shut_down_check(self, force=False):
+        """시스템 종료 여부를 확인합니다.
+        설정에 따라 프로그램 또는 컴퓨터를 종료합니다.
+        Args:
+            force: 강제 종료 여부
+        """
         from utility.static_method.static import str_hms
         if self.ui.dict_set['백테스케쥴실행'] and now().weekday() == self.ui.dict_set['백테스케쥴요일']:
             if self.ui.dict_set['알림소리']:

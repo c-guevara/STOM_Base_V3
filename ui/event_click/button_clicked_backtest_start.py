@@ -21,6 +21,10 @@ from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backe
 
 @error_decorator
 def bebutton_clicked_01(ui):
+    """백테스트 엔진 시작 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.back_engining:
         QMessageBox.critical(ui.dialog_backengine, '오류 알림', '백테엔진 구동 중...\n')
         return
@@ -40,6 +44,10 @@ def bebutton_clicked_01(ui):
 
 @error_decorator
 def backtest_engine_kill(ui):
+    """백테스트 엔진을 종료합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.shared_info and 'shm_name' in ui.shared_info[0].keys():
         if ui.dialog_backengine.isVisible():
             ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>공유메모리 삭제 중 ...</font>'))
@@ -96,6 +104,10 @@ def backtest_engine_kill(ui):
 
 @error_decorator
 def sdbutton_clicked_02(ui):
+    """백테스트 스케줄러 시작 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if backtest_process_alive(ui):
         QMessageBox.critical(ui.dialog_scheduler, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
@@ -486,6 +498,11 @@ def sdbutton_clicked_02(ui):
 
 @error_decorator
 def stop_scheduler(ui, gubun=False):
+    """백테스트 스케줄러를 중지합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun: 구분
+    """
     from ui.etcetera.etc import auto_back_schedule
     ui.back_scount = 0
     ui.back_schedul = False
@@ -498,6 +515,10 @@ def stop_scheduler(ui, gubun=False):
 
 @error_decorator
 def sdbutton_clicked_03(ui):
+    """백테스트 스케줄러 중지 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ssbutton_clicked_06(ui)
     for progressBar in ui.list_progressBarrr:
         progressBar.setValue(0)
@@ -505,6 +526,10 @@ def sdbutton_clicked_03(ui):
 
 @error_decorator
 def sdbutton_clicked_04(ui):
+    """백테스트 스케줄러 로드 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('전략디비', 'SELECT * FROM schedule').set_index('index')
     if len(df) > 0:
         if ui.sd_scheckBoxxxx_01.isChecked():
@@ -520,6 +545,10 @@ def sdbutton_clicked_04(ui):
 
 @error_decorator
 def sdbutton_clicked_05(ui):
+    """백테스트 스케줄러 저장 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     schedule_name = ui.sd_dlineEditttt_01.text()
     if schedule_name == '':
         QMessageBox.critical(ui.dialog_scheduler, '오류 알림', '스케쥴 이름이 공백 상태입니다.\n')

@@ -10,6 +10,10 @@ from utility.static_method.static import text_not_in_special_characters, error_d
 
 @error_decorator
 def gavars_load(ui):
+    """GA 변수 범위를 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.sva_comboBoxxx_01.currentText()
         if strategy_name == '':
@@ -30,6 +34,10 @@ def gavars_load(ui):
 
 @error_decorator
 def gavars_save(ui):
+    """GA 변수 범위를 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     strategy_name = ui.sva_lineEdittt_01.text()
     strategy = ui.ss_textEditttt_06.toPlainText()
     if strategy_name == '':
@@ -52,6 +60,10 @@ def gavars_save(ui):
 
 @error_decorator
 def condbuy_load(ui):
+    """조건 최적화 매수 전략을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svo_comboBoxxx_01.currentText()
         if strategy_name == '':
@@ -72,6 +84,10 @@ def condbuy_load(ui):
 
 @error_decorator
 def condbuy_save(ui):
+    """조건 최적화 매수 전략을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     strategy_name = ui.svo_lineEdittt_01.text()
     strategy = ui.ss_textEditttt_07.toPlainText()
     if strategy_name == '':
@@ -94,6 +110,10 @@ def condbuy_save(ui):
 
 @error_decorator
 def condsell_load(ui):
+    """조건 최적화 매도 전략을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svo_comboBoxxx_02.currentText()
         if strategy_name == '':
@@ -114,6 +134,10 @@ def condsell_load(ui):
 
 @error_decorator
 def condsell_save(ui):
+    """조건 최적화 매도 전략을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     strategy_name = ui.svo_lineEdittt_02.text()
     strategy = ui.ss_textEditttt_08.toPlainText()
     if strategy_name == '':

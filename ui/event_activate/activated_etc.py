@@ -7,6 +7,10 @@ from utility.static_method.static import error_decorator
 
 @error_decorator
 def dactivated_01(ui):
+    """테이블 콤보박스 활성화 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         table_name = ui.focusWidget().currentText()
         if ui.focusWidget() in (ui.ss_comboBoxxxx_01, ui.ss_comboBoxxxx_02, ui.ss_comboBoxxxx_03):
@@ -22,12 +26,20 @@ def dactivated_01(ui):
 
 @error_decorator
 def dactivated_02(ui):
+    """설정 이름 콤보박스 활성화 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     name = ui.sj_set_comBoxx_01.currentText()
     ui.sj_set_liEditt_01.setText(name)
 
 
 @error_decorator
 def dactivated_03(ui):
+    """주문 종목 콤보박스 활성화 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ui.od_comboBoxxxxx_02.clear()
     if 'KRW' in name or '해외선물' in ui.dict_set['거래소']:

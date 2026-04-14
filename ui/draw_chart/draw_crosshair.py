@@ -7,11 +7,24 @@ from ui.create_widget.set_style import color_cs_hr, color_fg_bt, color_bg_bt, co
 
 
 class CrossHair:
+    """십자선 클래스입니다.
+    차트 위에 십자선을 표시합니다.
+    """
     def __init__(self, ui):
+        """십자선을 초기화합니다.
+        Args:
+            ui: UI 객체
+        """
         self.ui = ui
 
     def crosshair(self, real, is_min, pg01, pg02, pg03, pg04, pg05, pg06, pg07=None, pg08=None,
                   pg09=None, pg10=None, pg11=None, pg12=None, pg13=None):
+        """십자선을 설정합니다.
+        Args:
+            real: 실시간 여부
+            is_min: 분봉 여부
+            pg01-pg13: 플롯 위젯
+        """
         def setInfiniteLine(angle=None):
             if angle is None:
                 vhline = pg.InfiniteLine()

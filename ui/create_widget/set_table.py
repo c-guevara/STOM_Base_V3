@@ -11,13 +11,22 @@ from utility.settings.setting_base import columns_tt, columns_td, columns_tj, co
 
 
 class SetTable:
+    """테이블 위젯 설정 클래스입니다.
+    거래 내역, 집계, 라이브 데이터 등을 표시하는 테이블 위젯을 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """테이블 위젯 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     @error_decorator
     def set(self):
+        """테이블 위젯을 설정합니다."""
         self.ui.tt_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_tt, 1)
         self.ui.td_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_td, 13, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
         self.ui.tj_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_tj, 1)

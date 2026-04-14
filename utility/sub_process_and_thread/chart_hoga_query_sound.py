@@ -18,10 +18,17 @@ from utility.settings.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_BACK
 
 
 class ChartHogaQuerySound:
+    """차트 호가 쿼리 및 사운드 클래스입니다.
+    호가 데이터를 처리하고 알림 소리를 재생합니다.
+    """
     def __init__(self, qlist, dict_set, market_infos):
-        """
+        """차트 호가 쿼리 및 사운드를 초기화합니다.
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
+        Args:
+            qlist: 큐 리스트
+            dict_set: 설정 딕셔너리
+            market_infos: 시장 정보
         """
         self.windowQ      = qlist[0]
         self.soundQ       = qlist[1]
@@ -60,6 +67,8 @@ class ChartHogaQuerySound:
         self._main_loop()
 
     def _update_dict_name(self):
+        """종목명 딕셔너리를 업데이트합니다.
+        """
         con = sqlite3.connect(DB_CODE_INFO)
         for table in code_info_tables:
             df = pd.read_sql(f'SELECT * FROM {table}', con).set_index('index')
@@ -67,17 +76,23 @@ class ChartHogaQuerySound:
         con.close()
 
     def _set_dict_findex(self):
+        """팩터 인덱스 딕셔너리를 설정합니다.
+        """
         self.is_tick = self.dict_set['타임프레임']
         factor_list  = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex = {factor: i for i, factor in enumerate(factor_list)}
 
     def __del__(self):
+        """소멸자입니다. 데이터베이스 연결을 닫습니다.
+        """
         self.con1.close()
         self.con2.close()
         self.con3.close()
         self.con4.close()
 
     def _main_loop(self):
+        """메인 루프를 실행합니다.
+        """
         while True:
             try:
                 if not self.hogaQ.empty():
@@ -155,6 +170,8 @@ class ChartHogaQuerySound:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
     def _init_hoga(self):
+        """호가 딕셔너리를 초기화합니다.
+        """
         self.dict_hj = {
             '종목명': '', '현재가': 0., '등락율': 0., '시가총액': 0, 'UVI': 0., '시가': 0., '고가': 0., '저가': 0.
         }
@@ -170,6 +187,10 @@ class ChartHogaQuerySound:
         self.hoga_name = ''
 
     def _update_hoga_jongmok(self, data):
+        """호가 종목 정보를 업데이트합니다.
+        Args:
+            data: 호가 데이터
+        """
         종목명, 현재가, 등락율, 시가총액, UVI, 시가, 고가, 저가 = data
         if self.hoga_name != 종목명:
             self._init_hoga()
@@ -181,6 +202,10 @@ class ChartHogaQuerySound:
         }
 
     def _update_chegeol_count(self, data):
+        """체결 수를 업데이트합니다.
+        Args:
+            data: 체결 데이터
+        """
         v, ch = data
         if self.market_gubun < 4 or self.market_gubun in (6, 7, 8):
             if v > 0:
@@ -216,12 +241,20 @@ class ChartHogaQuerySound:
         self.dict_hc['체결강도'] = [hch, ch] + self.dict_hc['체결강도'][1:10] + [lch]
 
     def _update_hoga_jalryang(self, data):
+        """호가 잔량을 업데이트합니다.
+        Args:
+            data: 호가 데이터
+        """
         jr = [data[1]] + list(data[13:23]) + [data[2]]
         hg = [self.dict_hj['고가']] + list(data[3:13]) + [self.dict_hj['저가']]
         self.dict_hg['잔량'] = jr
         self.dict_hg['호가'] = hg
 
     def _update_hoga_for_chart(self, data):
+        """차트용 호가 정보를 업데이트합니다.
+        Args:
+            data: 호가 데이터
+        """
         cmd, code, name, index = data
         searchdate = index[:8]
         index = int(index)
@@ -309,6 +342,10 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['호가잔량'], df_hg))
 
     def _settings_change(self, data):
+        """설정을 변경합니다.
+        Args:
+            data: 설정 데이터
+        """
         self.con1.close()
         os.remove(data[2])
         shutil.copy(data[1], data[2])
@@ -316,6 +353,12 @@ class ChartHogaQuerySound:
         self.cur1 = self.con1.cursor()
 
     def _execute_query(self, data, con, cur):
+        """SQL 쿼리를 실행합니다.
+        Args:
+            data: 쿼리 데이터
+            con: 데이터베이스 연결
+            cur: 커서
+        """
         if len(data) == 2:
             cur.execute(data[1])
             con.commit()
@@ -326,10 +369,19 @@ class ChartHogaQuerySound:
             data[1].to_sql(data[2], con, if_exists=data[3], chunksize=2000)
 
     def _dataframe_to_sql(self, data, con):
+        """데이터프레임을 SQL로 저장합니다.
+        Args:
+            data: 데이터
+            con: 데이터베이스 연결
+        """
         if len(data) == 4:
             data[1].to_sql(data[2], con, if_exists=data[3], chunksize=2000)
 
     def _backtest_query(self, data):
+        """백테스트 쿼리를 실행합니다.
+        Args:
+            data: 쿼리 데이터
+        """
         con = sqlite3.connect(DB_BACKTEST)
         cur = con.cursor()
         cur.execute(data[1])
@@ -337,6 +389,10 @@ class ChartHogaQuerySound:
         con.close()
 
     def _db_back_day_delete(self, data):
+        """백테스트 DB의 지정일자 데이터를 삭제합니다.
+        Args:
+            data: 데이터
+        """
         BACK_FILE = self.market_info['백테디비'][self.is_tick]
         con = sqlite3.connect(BACK_FILE)
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
@@ -355,6 +411,10 @@ class ChartHogaQuerySound:
         con.close()
 
     def _db_day_day_delete(self, data):
+        """일자DB의 지정일자 데이터를 삭제합니다.
+        Args:
+            data: 데이터
+        """
         file_name = f"{self.market_info['일자디비경로'][self.is_tick]}_{data[1]}.db"
         if os.path.isfile(file_name):
             os.remove(file_name)
@@ -363,6 +423,10 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '지정한 일자의 일자DB가 존재하지 않습니다.'))
 
     def _db_day_time_delete(self, data):
+        """일자DB의 지정시간 이후 데이터를 삭제합니다.
+        Args:
+            data: 데이터
+        """
         first_name = f"{self.market_info['일자디비경로'][self.is_tick].split('/')[2]}_"
         file_list = os.listdir(DB_PATH)
         file_list = [x for x in file_list if first_name in x and '.db' in x and 'back' not in x]
@@ -399,6 +463,10 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '일자DB가 존재하지 않습니다.'))
 
     def _db_now_time_delete(self, data):
+        """당일DB의 지정시간 이후 데이터를 삭제합니다.
+        Args:
+            data: 데이터
+        """
         DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
@@ -437,6 +505,10 @@ class ChartHogaQuerySound:
         con.close()
 
     def _db_now_time_change(self, data):
+        """당일DB의 체결시간을 조정합니다.
+        Args:
+            data: 데이터
+        """
         DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
@@ -460,6 +532,10 @@ class ChartHogaQuerySound:
         con.close()
 
     def _db_back_create(self, data):
+        """백테스트 DB를 생성합니다.
+        Args:
+            data: 데이터
+        """
         BACK_FILE = self.market_info['백테디비'][self.is_tick]
         first_name = f"{self.market_info['일자디비경로'][self.is_tick].split('/')[2]}_"
         file_list = os.listdir(DB_PATH)
@@ -495,6 +571,10 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '일자DB가 존재하지 않습니다.'))
 
     def _db_back_area_add(self, data):
+        """백테스트 DB에 영역 데이터를 추가합니다.
+        Args:
+            data: 데이터
+        """
         BACK_FILE = self.market_info['백테디비'][self.is_tick]
         first_name = f"{self.market_info['일자디비경로'][self.is_tick].split('/')[2]}_"
         file_list = os.listdir(DB_PATH)
@@ -526,6 +606,8 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '일자DB가 존재하지 않습니다.'))
 
     def _db_back_add(self):
+        """백테스트 DB에 당일DB 데이터를 추가합니다.
+        """
         DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
@@ -569,6 +651,8 @@ class ChartHogaQuerySound:
                     self.windowQ.put((ui_num['DB관리'], f'당일DB {DB_FILE} 삭제 완료'))
 
     def _db_now_day_divide(self):
+        """당일DB 데이터를 일자별로 분리합니다.
+        """
         DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
@@ -598,6 +682,10 @@ class ChartHogaQuerySound:
 
     @staticmethod
     def _graph_comparison(backdetail_list):
+        """그래프 비교를 수행합니다.
+        Args:
+            backdetail_list: 백테스트 상세 리스트
+        """
         from matplotlib import pyplot as plt, font_manager
         plt.rcParams['figure.max_open_warning'] = 0
         plt.rcParams['font.family'] = font_manager.FontProperties(fname='C:/Windows/Fonts/malgun.ttf').get_name()
@@ -623,6 +711,10 @@ class ChartHogaQuerySound:
         plt.show()
 
     def _update_chart(self, data):
+        """차트를 업데이트합니다.
+        Args:
+            data: 차트 데이터
+        """
         if len(data) == 7:
             code, w_unit, searchdate, starttime, endtime, k = data
             detail, buytimes, cf1, cf2 = None, None, None, None
@@ -850,6 +942,10 @@ class ChartHogaQuerySound:
 
     @thread_decorator
     def _text_to_speak(self, data):
+        """텍스트를 음성으로 변환합니다.
+        Args:
+            data: 음성으로 변환할 텍스트
+        """
         with self.tts_lock:
             self.text2speak.say(data)
             self.text2speak.runAndWait()

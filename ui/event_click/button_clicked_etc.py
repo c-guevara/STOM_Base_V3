@@ -13,6 +13,10 @@ from utility.static_method.static import qtest_qwait, strf_time, error_decorator
 
 # noinspection PyUnusedLocal
 def opbutton_clicked_01(ui):
+    """Optuna 서버를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     RunOptunaServer()
     qtest_qwait(3)
     webbrowser.open_new('http://localhost:8080/')
@@ -20,6 +24,10 @@ def opbutton_clicked_01(ui):
 
 @error_decorator
 def cpbutton_clicked_01(ui):
+    """백테스트 상세기록을 그래프로 비교합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     backdetail_list = []
     for i, checkbox in enumerate(ui.backcheckbox_list):
         if checkbox.isChecked():
@@ -33,6 +41,11 @@ def cpbutton_clicked_01(ui):
 
 @error_decorator
 def ttbutton_clicked_01(ui, cmd):
+    """집계 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        cmd: 명령어
+    """
     if '집계' in cmd:
         table = ui.market_info['손익디비']
         df = ui.dbreader.read_sql('거래디비', f'SELECT * FROM {table}')
@@ -90,6 +103,10 @@ def ttbutton_clicked_01(ui, cmd):
 
 @error_decorator
 def change_back_sdate(ui):
+    """백테스트 스케줄러 시작일자를 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.sd_scheckBoxxxx_01.isChecked():
         gubun = ui.list_sdateEdittttt.index(ui.dialog_scheduler.focusWidget())
         date = ui.list_sdateEdittttt[gubun].date().toString('yyyyMMdd')
@@ -100,6 +117,10 @@ def change_back_sdate(ui):
 
 @error_decorator
 def change_back_edate(ui):
+    """백테스트 스케줄러 종료일자를 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.sd_scheckBoxxxx_01.isChecked():
         gubun = ui.list_edateEdittttt.index(ui.dialog_scheduler.focusWidget())
         date = ui.list_edateEdittttt[gubun].date().toString('yyyyMMdd')
@@ -110,6 +131,10 @@ def change_back_edate(ui):
 
 @error_decorator
 def stbutton_clicked_01(ui):
+    """최적화 기준값 제한을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM back').set_index('index')
     std_text = df['최적화기준값제한'][0].split(';')
     ui.st_lineEditttt_01.setText(std_text[0])
@@ -130,6 +155,10 @@ def stbutton_clicked_01(ui):
 
 @error_decorator
 def stbutton_clicked_02(ui):
+    """최적화 기준값 제한을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     std_text1 = ui.st_lineEditttt_01.text()
     std_text2 = ui.st_lineEditttt_02.text()
     std_text3 = ui.st_lineEditttt_03.text()
@@ -159,11 +188,19 @@ def stbutton_clicked_02(ui):
 
 @error_decorator
 def lvbutton_clicked_01(ui):
+    """레버리지 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.dialog_leverage.show() if not ui.dialog_leverage.isVisible() else ui.dialog_leverage.close()
 
 
 @error_decorator
 def lvbutton_clicked_02(ui):
+    """레버리지 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
     if len(df) > 0:
         ui.lv_checkBoxxxx_01.setChecked(True) if df['바이낸스선물고정레버리지'][0] else ui.lv_checkBoxxxx_01.setChecked(False)
@@ -194,6 +231,10 @@ def lvbutton_clicked_02(ui):
 
 @error_decorator
 def lvbutton_clicked_03(ui):
+    """레버리지 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     lv0 = 1 if ui.lv_checkBoxxxx_01.isChecked() else 0
     lv1 = ui.lv_lineEditttt_01.text()
     lv2 = ui.lv_lineEditttt_02.text()
@@ -238,6 +279,11 @@ def lvbutton_clicked_03(ui):
 
 @error_decorator
 def lvcheck_changed_01(ui, state):
+    """레버리지 체크박스 상태 변경을 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        state: 체크 상태
+    """
     if ui.dialog_leverage.focusWidget().__class__ != QPushButton and state == Qt.Checked:
         for widget in ui.lv_checkbox_listt:
             if widget != ui.dialog_leverage.focusWidget() and widget.isChecked():
@@ -246,6 +292,11 @@ def lvcheck_changed_01(ui, state):
 
 @error_decorator
 def hg_button_clicked_01(ui, gubun):
+    """호가 이전/다음 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun: 구분 (이전/다음)
+    """
     if not ui.dialog_hoga.isVisible(): return
     index = ui.hg_labellllllll_01.text()
     if index == '': return
@@ -257,6 +308,11 @@ def hg_button_clicked_01(ui, gubun):
 
 @error_decorator
 def hg_button_clicked_02(ui, gubun):
+    """호가 매수/매도 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun: 구분 (매수/매도)
+    """
     if not ui.dialog_hoga.isVisible(): return
     cindex = ui.hg_labellllllll_01.text()
     if cindex == '': return

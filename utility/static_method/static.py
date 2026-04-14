@@ -4,6 +4,11 @@ import datetime
 
 
 def set_builtin_print(q):
+    """내장 print 함수를 설정합니다.
+    UI 큐를 통해 로그를 출력합니다.
+    Args:
+        q: UI 큐
+    """
     import inspect
     import builtins
     from utility.settings.setting_base import ui_num
@@ -46,10 +51,28 @@ def set_builtin_print(q):
 
 
 def get_ema_list(is_tick):
+    """EMA 윈도우 리스트를 반환합니다.
+    Args:
+        is_tick: 틱 데이터 여부
+    Returns:
+        EMA 윈도우 리스트
+    """
     return (60, 150, 300, 600, 1200) if is_tick else (5, 10, 20, 60, 120)
 
 
 def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None, cf2=None):
+    """롤링 데이터를 추가합니다.
+    Args:
+        df: 데이터프레임
+        round_unit: 반올림 단위
+        angle_cf_list: 각도 계수 리스트
+        is_tick: 틱 데이터 여부
+        avg_list: 평균 리스트
+        cf1: 계수1
+        cf2: 계수2
+    Returns:
+        배열
+    """
     import numpy as np
 
     for window in get_ema_list(is_tick):
@@ -102,6 +125,12 @@ def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None,
 
 
 def error_decorator(func):
+    """에러 처리 데코레이터입니다.
+    Args:
+        func: 데코레이터를 적용할 함수
+    Returns:
+        래퍼 함수
+    """
     from traceback import format_exc
 
     def wrapper(*args, **kwargs):
@@ -114,6 +143,12 @@ def error_decorator(func):
 
 
 def thread_decorator(func):
+    """스레드 데코레이터입니다.
+    Args:
+        func: 데코레이터를 적용할 함수
+    Returns:
+        래퍼 함수
+    """
     from threading import Thread
 
     def wrapper(*args):
@@ -122,6 +157,12 @@ def thread_decorator(func):
 
 
 def get_profile_text(pr):
+    """프로파일 텍스트를 가져옵니다.
+    Args:
+        pr: 프로파일 객체
+    Returns:
+        프로파일 텍스트
+    """
     import io
     import pstats
     output = io.StringIO()
@@ -134,6 +175,12 @@ def get_profile_text(pr):
 
 
 def get_logger(name):
+    """로그거를 생성합니다.
+    Args:
+        name: 로거 이름
+    Returns:
+        설정된 로거 인스턴스
+    """
     import sys
     from loguru import logger
     logger.remove()
@@ -150,6 +197,10 @@ def get_logger(name):
 
 
 def summer_time():
+    """서머타임을 계산합니다.
+    Returns:
+        서머타임 초
+    """
     import pytz
     now_utc_ = datetime.datetime.now(pytz.utc)
     now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
@@ -159,23 +210,45 @@ def summer_time():
 
 
 def get_time_gap():
+    """시간 차이를 계산합니다.
+    Returns:
+        시간 차이 초
+    """
     time_gap = int(summer_time() - 50400)
     return time_gap
 
 
 def now():
+    """현재 시간을 반환합니다.
+    Returns:
+        현재 시간
+    """
     return datetime.datetime.now()
 
 
 def now_utc():
+    """UTC 현재 시간을 반환합니다.
+    Returns:
+        UTC 현재 시간
+    """
     return timedelta_sec(-32400)
 
 
 def now_cme():
+    """CME 현재 시간을 반환합니다.
+    Returns:
+        CME 현재 시간
+    """
     return timedelta_sec(get_time_gap())
 
 
 def str_ymdhmsf(std_time=None):
+    """연월일시분초밀리초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        연월일시분초밀리초 문자열
+    """
     if std_time is not None:
         return strf_time('%Y%m%d%H%M%S%f', std_time)
     else:
@@ -183,6 +256,12 @@ def str_ymdhmsf(std_time=None):
 
 
 def str_ymdhms(std_time=None):
+    """연월일시분초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        연월일시분초 문자열
+    """
     if std_time is not None:
         return strf_time('%Y%m%d%H%M%S', std_time)
     else:
@@ -190,6 +269,12 @@ def str_ymdhms(std_time=None):
 
 
 def str_ymdhm(std_time=None):
+    """연월일시분 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        연월일시분 문자열
+    """
     if std_time is not None:
         return strf_time('%Y%m%d%H%M', std_time)
     else:
@@ -197,6 +282,12 @@ def str_ymdhm(std_time=None):
 
 
 def str_ymdhms_ios(std_time=None):
+    """iOS 형식 연월일시분초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        iOS 형식 연월일시분초 문자열
+    """
     if std_time is not None:
         return strf_time('%Y-%m-%d %H:%M:%S', std_time)
     else:
@@ -204,6 +295,12 @@ def str_ymdhms_ios(std_time=None):
 
 
 def str_ymdhm_ios(std_time=None):
+    """iOS 형식 연월일시분 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        iOS 형식 연월일시분 문자열
+    """
     if std_time is not None:
         return strf_time('%Y-%m-%d %H:%M', std_time)
     else:
@@ -211,6 +308,12 @@ def str_ymdhm_ios(std_time=None):
 
 
 def str_ymd_ios(std_time=None):
+    """iOS 형식 연월일 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        iOS 형식 연월일 문자열
+    """
     if std_time is not None:
         return strf_time('%Y-%m-%d', std_time)
     else:
@@ -218,6 +321,12 @@ def str_ymd_ios(std_time=None):
 
 
 def str_hms_ios(std_time=None):
+    """iOS 형식 시분초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        iOS 형식 시분초 문자열
+    """
     if std_time is not None:
         return strf_time('%H:%M:%S', std_time)
     else:
@@ -225,6 +334,12 @@ def str_hms_ios(std_time=None):
 
 
 def str_hm_ios(std_time=None):
+    """iOS 형식 시분 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        iOS 형식 시분 문자열
+    """
     if std_time is not None:
         return strf_time('%H:%M', std_time)
     else:
@@ -232,10 +347,22 @@ def str_hm_ios(std_time=None):
 
 
 def str_ymdhms_utc(time_):
+    """UTC 연월일시분초 문자열을 반환합니다.
+    Args:
+        time_: 시간
+    Returns:
+        UTC 연월일시분초 문자열
+    """
     return str_ymdhms(from_timestamp(int(time_ / 1000 - 32400)))
 
 
 def str_ymd(std_time=None):
+    """연월일 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        연월일 문자열
+    """
     if std_time is not None:
         return strf_time('%Y%m%d', std_time)
     else:
@@ -243,6 +370,12 @@ def str_ymd(std_time=None):
 
 
 def str_hmsf(std_time=None):
+    """시분초밀리초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        시분초밀리초 문자열
+    """
     if std_time is not None:
         return strf_time('%H%M%S%f', std_time)
     else:
@@ -250,6 +383,12 @@ def str_hmsf(std_time=None):
 
 
 def float_hmsf(std_time=None):
+    """시분초밀리초 실수를 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        시분초밀리초 실수
+    """
     if std_time is not None:
         return float(strf_time('%H%M%S.%f', std_time))
     else:
@@ -257,6 +396,12 @@ def float_hmsf(std_time=None):
 
 
 def str_hms(std_time=None):
+    """시분초 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        시분초 문자열
+    """
     if std_time is not None:
         return strf_time('%H%M%S', std_time)
     else:
@@ -264,6 +409,12 @@ def str_hms(std_time=None):
 
 
 def str_hms_cme_from_str(std_hms=None):
+    """CME 시분초 문자열을 반환합니다.
+    Args:
+        std_hms: 표준 시분초
+    Returns:
+        CME 시분초 문자열
+    """
     if std_hms is not None:
         std_time = timedelta_sec(get_time_gap(), dt_hms(std_hms))
     else:
@@ -272,57 +423,132 @@ def str_hms_cme_from_str(std_hms=None):
 
 
 def str_hm(std_time):
+    """시분 문자열을 반환합니다.
+    Args:
+        std_time: 표준 시간
+    Returns:
+        시분 문자열
+    """
     return strf_time('%H%M', std_time)
 
 
 def dt_ymdhms_ios(str_time):
+    """iOS 형식 연월일시분초를 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     return datetime.datetime.fromisoformat(str_time)
 
 
 def dt_ymdhms(str_time):
+    """연월일시분초를 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     str_time = f'{str_time[:4]}-{str_time[4:6]}-{str_time[6:8]} {str_time[8:10]}:{str_time[10:12]}:{str_time[12:14]}'
     return datetime.datetime.fromisoformat(str_time)
 
 
 def dt_ymdhm(str_time):
+    """연월일시분을 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     str_time = f'{str_time[:4]}-{str_time[4:6]}-{str_time[6:8]} {str_time[8:10]}:{str_time[10:12]}'
     return datetime.datetime.fromisoformat(str_time)
 
 
 def dt_ymd(str_time):
+    """연월일을 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     str_time = f'{str_time[:4]}-{str_time[4:6]}-{str_time[6:8]}'
     return datetime.datetime.fromisoformat(str_time)
 
 
 def dt_hms(str_time):
+    """시분초를 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     if len(str_time) < 6: str_time = str_time.zfill(6)
     str_time = f'2000-01-01 {str_time[:2]}:{str_time[2:4]}:{str_time[4:6]}'
     return datetime.datetime.fromisoformat(str_time)
 
 
 def dt_hm(str_time):
+    """시분을 datetime으로 변환합니다.
+    Args:
+        str_time: 시간 문자열
+    Returns:
+        datetime 객체
+    """
     if len(str_time) < 4: str_time = str_time.zfill(4)
     str_time = f'2000-01-01 {str_time[:2]}:{str_time[2:4]}'
     return datetime.datetime.fromisoformat(str_time)
 
 
 def strf_time(timetype, std_time=None):
+    """시간 포맷 문자열을 반환합니다.
+    Args:
+        timetype: 시간 형식
+        std_time: 표준 시간
+    Returns:
+        포맷된 시간 문자열
+    """
     return now().strftime(timetype) if std_time is None else std_time.strftime(timetype)
 
 
 def from_timestamp(time_):
+    """타임스탬프를 datetime으로 변환합니다.
+    Args:
+        time_: 타임스탬프
+    Returns:
+        datetime 객체
+    """
     return datetime.datetime.fromtimestamp(time_)
 
 
 def timedelta_sec(second, std_time=None):
+    """초 단위 timedelta를 반환합니다.
+    Args:
+        second: 초
+        std_time: 표준 시간
+    Returns:
+        datetime 객체
+    """
     return now() + datetime.timedelta(seconds=float(second)) if std_time is None else std_time + datetime.timedelta(seconds=float(second))
 
 
 def timedelta_day(day, std_time=None):
+    """일 단위 timedelta를 반환합니다.
+    Args:
+        day: 일
+        std_time: 표준 시간
+    Returns:
+        datetime 객체
+    """
     return now() + datetime.timedelta(days=float(day)) if std_time is None else std_time + datetime.timedelta(days=float(day))
 
 
 def get_inthms(market_gubun):
+    """시장 구분에 따른 시분초 정수를 반환합니다.
+    Args:
+        market_gubun: 시장 구분
+    Returns:
+        시분초 정수
+    """
     if market_gubun < 4 or market_gubun in (6, 7):
         return int(str_hms())
     elif market_gubun in (4, 8):
@@ -332,6 +558,12 @@ def get_inthms(market_gubun):
 
 
 def get_str_ymdhms(market_gubun):
+    """시장 구분에 따른 연월일시분초 문자열을 반환합니다.
+    Args:
+        market_gubun: 시장 구분
+    Returns:
+        연월일시분초 문자열
+    """
     if market_gubun < 4 or market_gubun in (6, 7):
         return str_ymdhms()
     elif market_gubun in (4, 8):
@@ -341,6 +573,12 @@ def get_str_ymdhms(market_gubun):
 
 
 def get_str_ymdhmsf(market_gubun):
+    """시장 구분에 따른 연월일시분초밀리초 문자열을 반환합니다.
+    Args:
+        market_gubun: 시장 구분
+    Returns:
+        연월일시분초밀리초 문자열
+    """
     if market_gubun < 4 or market_gubun in (6, 7):
         return str_ymdhmsf()
     elif market_gubun in (4, 8):
@@ -350,6 +588,12 @@ def get_str_ymdhmsf(market_gubun):
 
 
 def threading_timer(sec, func, args=None):
+    """스레드 타이머를 설정합니다.
+    Args:
+        sec: 초
+        func: 실행할 함수
+        args: 함수 인자
+    """
     from threading import Timer
     if args is None:
         Timer(float(sec), func).start()
@@ -358,6 +602,12 @@ def threading_timer(sec, func, args=None):
 
 
 def win_proc_alive(name):
+    """윈도우 프로세스가 살아있는지 확인합니다.
+    Args:
+        name: 프로세스 이름
+    Returns:
+        프로세스 생존 여부
+    """
     import psutil
     alive = False
     for proc in psutil.process_iter():
@@ -367,6 +617,8 @@ def win_proc_alive(name):
 
 
 def opstarter_kill():
+    """opstarter 프로세스를 종료합니다.
+    """
     import subprocess
     if win_proc_alive('opstarter'):
         subprocess.run('C:/Windows/System32/taskkill /f /im opstarter.exe',
@@ -381,12 +633,23 @@ def opstarter_kill():
 
 
 def pickle_write(file, data):
+    """데이터를 피클 파일로 저장합니다.
+    Args:
+        file: 파일 이름
+        data: 저장할 데이터
+    """
     import _pickle
     with open(f'{file}.pkl', "wb") as f:
         _pickle.dump(data, f, protocol=-1)
 
 
 def pickle_read(file):
+    """피클 파일에서 데이터를 읽습니다.
+    Args:
+        file: 파일 이름
+    Returns:
+        읽은 데이터
+    """
     import os
     import _pickle
     data = None
@@ -397,12 +660,23 @@ def pickle_read(file):
 
 
 def qtest_qwait(sec):
+    """Qt 테스트 대기 시간을 설정합니다.
+    Args:
+        sec: 초
+    """
     from PyQt5.QtTest import QTest
     # noinspection PyArgumentList
     QTest.qWait(int(sec * 1000))
 
 
 def change_format(text, float_point=2):
+    """텍스트 포맷을 변경합니다.
+    Args:
+        text: 텍스트
+        float_point: 소수점 자리수
+    Returns:
+        포맷된 텍스트
+    """
     text = str(text)
     try:
         format_data = f'{int(text):,}'
@@ -412,12 +686,25 @@ def change_format(text, float_point=2):
 
 
 def floor_down(float_, decimal_point):
+    """소수점 아래로 내림합니다.
+    Args:
+        float_: 실수
+        decimal_point: 소수점
+    Returns:
+        내림된 실수
+    """
     float_ = int(float_ * (1 / decimal_point))
     float_ = float_ * decimal_point
     return float_
 
 
 def comma2int(t):
+    """콤마가 포함된 문자열을 정수로 변환합니다.
+    Args:
+        t: 문자열
+    Returns:
+        정수
+    """
     if '.' in t: t = t.split('.')[0]
     if ':' in t: t = t.replace(':', '')
     if ' ' in t: t = t.replace(' ', '')
@@ -426,12 +713,20 @@ def comma2int(t):
 
 
 def comma2float(t):
+    """콤마가 포함된 문자열을 실수로 변환합니다.
+    Args:
+        t: 문자열
+    Returns:
+        실수
+    """
     if ' ' in t: t = t.replace(' ', '')
     if ',' in t: t = t.replace(',', '')
     return float(t)
 
 
 def write_key():
+    """암호화 키를 레지스트리에 저장합니다.
+    """
     import winreg as reg
     from cryptography.fernet import Fernet
     key = str(Fernet.generate_key(), 'utf-8')
@@ -443,6 +738,10 @@ def write_key():
 
 
 def read_key():
+    """레지스트리에서 암호화 키를 읽습니다.
+    Returns:
+        암호화 키
+    """
     import winreg as reg
     openkey = reg.OpenKey(reg.HKEY_LOCAL_MACHINE, r'SOFTWARE\WOW6432Node\STOM\EN_KEY', 0, reg.KEY_ALL_ACCESS)
     key, _ = reg.QueryValueEx(openkey, 'EN_KEY')
@@ -451,18 +750,38 @@ def read_key():
 
 
 def en_text(key, text):
+    """텍스트를 암호화합니다.
+    Args:
+        key: 암호화 키
+        text: 암호화할 텍스트
+    Returns:
+        암호화된 텍스트
+    """
     from cryptography.fernet import Fernet
     fernet = Fernet(bytes(key, 'utf-8'))
     return str(fernet.encrypt(bytes(text, 'utf-8')), 'utf-8')
 
 
 def de_text(key, text):
+    """텍스트를 복호화합니다.
+    Args:
+        key: 암호화 키
+        text: 복호화할 텍스트
+    Returns:
+        복호화된 텍스트
+    """
     from cryptography.fernet import Fernet
     fernet = Fernet(bytes(key, 'utf-8'))
     return str(fernet.decrypt(bytes(text, 'utf-8')), 'utf-8')
 
 
 def factorial(x):
+    """팩토리얼을 계산합니다.
+    Args:
+        x: 숫자
+    Returns:
+        팩토리얼 값
+    """
     if x <= 1: return 1
     result  = 1
     current = 2
@@ -473,6 +792,12 @@ def factorial(x):
 
 
 def text_not_in_special_characters(t):
+    """특수 문자가 포함되지 않았는지 확인합니다.
+    Args:
+        t: 텍스트
+    Returns:
+        특수 문자 포함 여부
+    """
     import re
     t = t.replace(' ', '')
     if t == re.findall(r'\w+', t)[0]:
@@ -481,6 +806,10 @@ def text_not_in_special_characters(t):
 
 
 def cme_normal_open():
+    """CME 정규장 오픈 여부를 확인합니다.
+    Returns:
+        정규장 오픈 여부
+    """
     import exchange_calendars as ec
     str_day  = str_ymd(now_cme())
     today    = dt_ymdhms_ios(f'{str_day} 17:00:00')
@@ -500,6 +829,12 @@ _UPBIT_HOGA_VALS = (0.0001, 0.001, 0.01, 0.1, 1, 5, 10, 50, 100, 500, 1000)
 
 
 def get_hogaunit_coin(price):
+    """코인 호가 단위를 반환합니다.
+    Args:
+        price: 가격
+    Returns:
+        호가 단위
+    """
     idx = bisect.bisect_right(_UPBIT_HOGA_KEYS, price)
     return _UPBIT_HOGA_VALS[idx]
 
@@ -509,11 +844,24 @@ _HOGA_NEW_VALS = (1, 5, 10, 50, 100, 500, 1000)
 
 
 def get_hogaunit_stock(price):
+    """주식 호가 단위를 반환합니다.
+    Args:
+        price: 가격
+    Returns:
+        호가 단위
+    """
     idx = bisect.bisect_right(_HOGA_NEW_KEYS, price)
     return _HOGA_NEW_VALS[idx]
 
 
 def get_profit_stock(bg, cg):
+    """주식 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -524,6 +872,13 @@ def get_profit_stock(bg, cg):
 
 
 def get_profit_stock_os(bg, cg):
+    """해외 주식 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -534,6 +889,13 @@ def get_profit_stock_os(bg, cg):
 
 
 def get_profit_future_long(bg, cg):
+    """선물 롱 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -544,6 +906,13 @@ def get_profit_future_long(bg, cg):
 
 
 def get_profit_future_short(bg, cg):
+    """선물 숏 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -554,6 +923,13 @@ def get_profit_future_short(bg, cg):
 
 
 def get_profit_future_os_long(bg, cg):
+    """해외 선물 롱 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -564,6 +940,13 @@ def get_profit_future_os_long(bg, cg):
 
 
 def get_profit_future_os_short(bg, cg):
+    """해외 선물 숏 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
@@ -574,6 +957,13 @@ def get_profit_future_os_short(bg, cg):
 
 
 def get_profit_coin(bg, cg):
+    """코인 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     bfee = bg * 0.0005
     sfee = cg * 0.0005
     pg = round(cg - bfee - sfee, 4)
@@ -583,6 +973,15 @@ def get_profit_coin(bg, cg):
 
 
 def get_profit_coin_future_long(bg, cg, market1, market2):
+    """코인 선물 롱 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+        market1: 시장1
+        market2: 시장2
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     bfee = bg * (0.0004 if market1 else 0.0002)
     sfee = (cg - bfee) * (0.0004 if market2 else 0.0002)
     pg = round(cg - bfee - sfee, 4)
@@ -592,6 +991,15 @@ def get_profit_coin_future_long(bg, cg, market1, market2):
 
 
 def get_profit_coin_future_short(bg, cg, market1, market2):
+    """코인 선물 숏 수익을 계산합니다.
+    Args:
+        bg: 매수 금액
+        cg: 매도 금액
+        market1: 시장1
+        market2: 시장2
+    Returns:
+        (수익금, 수익금액, 수익률)
+    """
     bfee = bg * (0.0004 if market1 else 0.0002)
     sfee = (cg - bfee) * (0.0004 if market2 else 0.0002)
     pg = round(bg + bg - cg - bfee - sfee, 4)
@@ -601,6 +1009,12 @@ def get_profit_coin_future_short(bg, cg, market1, market2):
 
 
 def get_vi_price(std_price):
+    """VI 가격을 계산합니다.
+    Args:
+        std_price: 기준 가격
+    Returns:
+        (상단 VI, 하단 VI, 호가 단위)
+    """
     uvi = int(std_price * 1.1)
     x = get_hogaunit_stock(uvi)
     if uvi % x != 0:
@@ -613,6 +1027,12 @@ def get_vi_price(std_price):
 
 
 def get_limit_price(predayclose):
+    """상한가 하한가를 계산합니다.
+    Args:
+        predayclose: 전일 종가
+    Returns:
+        (상한가, 하한가)
+    """
     uplimitprice = int(predayclose * 1.30)
     x = get_hogaunit_stock(uplimitprice)
     if uplimitprice % x != 0:
@@ -625,6 +1045,16 @@ def get_limit_price(predayclose):
 
 
 def get_indicator(mc, mh, ml, mv, k):
+    """지표를 계산합니다.
+    Args:
+        mc: 현재가
+        mh: 고가
+        ml: 저가
+        mv: 거래량
+        k: 파라미터 리스트
+    Returns:
+        지표 리스트
+    """
     from talib import stream
     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, OBV, PPO, \
         ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = \

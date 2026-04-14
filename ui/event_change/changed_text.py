@@ -5,6 +5,10 @@ from utility.settings.setting_base import columns_jg, columns_jgf, columns_jgcf
 
 @error_decorator
 def text_changed_01(ui):
+    """시작일 라인에딧 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_scheduler.focusWidget() not in ui.list_slineEdittttt:
         return
     if ui.sd_scheckBoxxxx_01.isChecked():
@@ -17,6 +21,10 @@ def text_changed_01(ui):
 
 @error_decorator
 def text_changed_02(ui):
+    """종료일 라인에딧 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_scheduler.focusWidget() not in ui.list_elineEdittttt:
         return
     if ui.sd_scheckBoxxxx_01.isChecked():
@@ -29,6 +37,10 @@ def text_changed_02(ui):
 
 @error_decorator
 def text_changed_03(ui):
+    """배팅금액 라인에딧 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_scheduler.focusWidget() not in ui.list_blineEdittttt:
         return
     if ui.sd_scheckBoxxxx_01.isChecked():
@@ -41,6 +53,10 @@ def text_changed_03(ui):
 
 @error_decorator
 def text_changed_04(ui):
+    """추가매수 라인에딧 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_scheduler.focusWidget() not in ui.list_alineEdittttt:
         return
     if ui.sd_scheckBoxxxx_01.isChecked():
@@ -54,6 +70,10 @@ def text_changed_04(ui):
 
 @error_decorator
 def text_changed_05(ui):
+    """주문 종목 테이블 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     name = ui.hj_tableWidgett_01.item(0, 0).text()
     if name:
         try:

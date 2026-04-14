@@ -13,6 +13,12 @@ from utility.static_method.static import comma2int, comma2float, now, str_ymd, n
 
 @error_decorator
 def cell_clicked_01(ui, row, col):
+    """테이블 셀 클릭 시 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.focusWidget().item(row, 0)
     if item is None:
         return
@@ -37,6 +43,12 @@ def cell_clicked_01(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_02(ui, row, col):
+    """시장가 매도를 실행합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.jg_tableWidgettt.item(row, 0)
     if item is None:
         return
@@ -61,6 +73,12 @@ def cell_clicked_02(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_03(ui, row, col):
+    """날짜별 테이블 셀 클릭 시 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     searchdate = ''
     if ui.focusWidget() == ui.ds_tableWidgetttt:
         searchdate = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
@@ -82,6 +100,12 @@ def cell_clicked_03(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_04(ui, row, col):
+    """날짜별 거래 그래프를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.focusWidget().item(row, 0)
     if item is None:
         return
@@ -106,6 +130,12 @@ def cell_clicked_04(ui, row, col):
 # noinspection PyUnusedLocal,PyUnresolvedReferences
 @error_decorator
 def cell_clicked_05(ui, row, col):
+    """백테스트 결과 차트를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     tableWidget = None
     if ui.focusWidget() == ui.ss_tableWidget_01 or ui.focusWidget().parentWidget() == ui.ss_tableWidget_01:
         tableWidget = ui.ss_tableWidget_01
@@ -149,6 +179,12 @@ def cell_clicked_05(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_06(ui, row, col):
+    """차트 테이블 셀 클릭 시 차트를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.ct_tableWidgett_01.item(row, 0)
     if item is None:
         return
@@ -175,6 +211,12 @@ def cell_clicked_06(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_07(ui, row, col):
+    """웹페이지를 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.dialog_info.focusWidget().item(row, 3)
     if item is None:
         return
@@ -184,6 +226,12 @@ def cell_clicked_07(ui, row, col):
 
 @error_decorator
 def cell_clicked_08(ui, row, col):
+    """데이터베이스 항목을 삭제합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     if ui.dialog_db.focusWidget() == ui.db_tableWidgett_01:
         item = ui.db_tableWidgett_01.item(row, col)
         if item is None:
@@ -244,6 +292,12 @@ def cell_clicked_08(ui, row, col):
 
 @error_decorator
 def cell_clicked_09(ui, row, col):
+    """호가 테이블 셀 클릭 시 주문 가격을 설정합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     item = ui.hg_tableWidgett_01.item(row, col)
     if item is not None:
         text = item.text()
@@ -258,6 +312,12 @@ def cell_clicked_09(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_10(ui, row, col):
+    """전체 거래 그래프를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        row: 행 인덱스
+        col: 열 인덱스
+    """
     table_name = ui.market_info['거래디비']
     df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name}")
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')

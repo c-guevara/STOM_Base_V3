@@ -566,6 +566,14 @@ def group_animation_05(ui):
 
 # noinspection PyUnboundLocalVariable
 def group_animation_06(ui, pushButton1, pushButton2, pushButton3, pushButton4=None):
+    """버튼 그룹 애니메이션 06을 실행합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        pushButton1: 첫 번째 푸시 버튼
+        pushButton2: 두 번째 푸시 버튼
+        pushButton3: 세 번째 푸시 버튼
+        pushButton4: 네 번째 푸시 버튼 (선택)
+    """
     # 위젯들의 좌측 상단으로 지오메트리 저장
     current_geo_btn01 = QRect(1350, 0, 0, 0)
     current_geo_btn02 = QRect(1350, 0, 0, 0)
@@ -623,6 +631,16 @@ def group_animation_06(ui, pushButton1, pushButton2, pushButton3, pushButton4=No
 
 
 def group_animation_07(ui, pushButton1, pushButton2, pushButton3, pushButton4, pushButton5, pushButton6):
+    """버튼 그룹 애니메이션 07을 실행합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        pushButton1: 첫 번째 푸시 버튼
+        pushButton2: 두 번째 푸시 버튼
+        pushButton3: 세 번째 푸시 버튼
+        pushButton4: 네 번째 푸시 버튼
+        pushButton5: 다섯 번째 푸시 버튼
+        pushButton6: 여섯 번째 푸시 버튼
+    """
     # 위젯들의 좌측 상단으로 지오메트리 저장
     current_geo_btn01 = QRect(1350, 0, 0, 0)
     current_geo_btn02 = QRect(1350, 0, 0, 0)
@@ -693,6 +711,10 @@ def group_animation_07(ui, pushButton1, pushButton2, pushButton3, pushButton4, p
 
 @error_decorator
 def opti_test_editer(ui):
+    """최적화 테스트 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_01(ui)
     group_animation_07(ui, ui.svc_pushButton_15, ui.svc_pushButton_16, ui.svc_pushButton_17, ui.svc_pushButton_30, ui.svc_pushButton_31, ui.svc_pushButton_32)
 
@@ -749,6 +771,10 @@ def opti_test_editer(ui):
 
 @error_decorator
 def rwf_test_editer(ui):
+    """전진분석 테스트 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_01(ui)
     group_animation_07(ui, ui.svc_pushButton_18, ui.svc_pushButton_19, ui.svc_pushButton_20, ui.svc_pushButton_33, ui.svc_pushButton_34, ui.svc_pushButton_35)
 
@@ -806,6 +832,10 @@ def rwf_test_editer(ui):
 
 @error_decorator
 def opti_ga_editer(ui):
+    """유전알고리즘 최적화 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_02(ui)
     group_animation_06(ui, ui.sva_pushButton_01, ui.sva_pushButton_02, ui.sva_pushButton_03)
 
@@ -862,6 +892,10 @@ def opti_ga_editer(ui):
 
 @error_decorator
 def opti_vars_editer(ui):
+    """최적화 변수 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_03(ui)
     group_animation_06(ui, ui.svc_pushButton_21, ui.svc_pushButton_22, ui.svc_pushButton_23)
 
@@ -936,6 +970,10 @@ def opti_vars_editer(ui):
 
 @error_decorator
 def opti_editer(ui):
+    """최적화 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_01(ui)
     group_animation_07(ui, ui.svc_pushButton_06, ui.svc_pushButton_07, ui.svc_pushButton_08, ui.svc_pushButton_27, ui.svc_pushButton_28, ui.svc_pushButton_29)
 
@@ -992,6 +1030,10 @@ def opti_editer(ui):
 
 @error_decorator
 def opti_gavars_editer(ui):
+    """최적화 GA 변수 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_04(ui)
     group_animation_06(ui, ui.svc_pushButton_24, ui.svc_pushButton_25, ui.svc_pushButton_26)
 
@@ -1055,6 +1097,10 @@ def opti_gavars_editer(ui):
 
 @error_decorator
 def change_pre_button_edit(ui):
+    """이전 버튼의 색상을 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.svj_pushButton_01.isVisible():
         ui.svj_pushButton_09.setStyleSheet(style_bc_bd)
     elif ui.svc_pushButton_32.isVisible():
@@ -1075,6 +1121,10 @@ def change_pre_button_edit(ui):
 
 @error_decorator
 def backtest_log(ui):
+    """백테스트 로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     change_pre_button_edit(ui)
 
     ui.ss_textEditttt_01.setVisible(False)
@@ -1108,6 +1158,10 @@ def backtest_log(ui):
 
 @error_decorator
 def backtest_detail(ui):
+    """백테스트 상세 정보를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     change_pre_button_edit(ui)
 
     ui.ss_textEditttt_01.setVisible(False)
@@ -1141,6 +1195,10 @@ def backtest_detail(ui):
 
 @error_decorator
 def stg_editer(ui):
+    """전략 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_05(ui)
     group_animation_06(ui, ui.svj_pushButton_01, ui.svj_pushButton_02, ui.svj_pushButton_03, ui.svj_pushButton_04)
 
@@ -1196,6 +1254,10 @@ def stg_editer(ui):
 
 @error_decorator
 def opti_cond_editer(ui):
+    """조건 최적화 에디터를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     group_animation_06(ui, ui.svo_pushButton_05, ui.svo_pushButton_06, ui.svo_pushButton_07)
 
     ui.ss_textEditttt_01.setVisible(False)
@@ -1265,6 +1327,10 @@ def opti_cond_editer(ui):
 
 @error_decorator
 def backtest_start(ui):
+    """백테스트를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1325,6 +1391,10 @@ def backtest_start(ui):
 
 @error_decorator
 def backfinder_start(ui):
+    """백파인더를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1379,6 +1449,10 @@ def backfinder_start(ui):
 
 @error_decorator
 def backfinder_sample(ui):
+    """백파인더 샘플을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ss_textEditttt_01.isVisible():
         ui.ss_textEditttt_01.clear()
         ui.ss_textEditttt_02.clear()
@@ -1387,6 +1461,11 @@ def backfinder_sample(ui):
 
 @error_decorator
 def opti_start(ui, back_name):
+    """최적화를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        back_name: 백테스트 이름
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1544,6 +1623,11 @@ def opti_start(ui, back_name):
 
 @error_decorator
 def opti_rwft_start(ui, back_name):
+    """전진분석 최적화를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        back_name: 백테스트 이름
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1657,6 +1741,11 @@ def opti_rwft_start(ui, back_name):
 
 @error_decorator
 def opti_ga_start(ui, back_name):
+    """유전알고리즘 최적화를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        back_name: 백테스트 이름
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1737,6 +1826,11 @@ def opti_ga_start(ui, back_name):
 
 @error_decorator
 def opti_cond_start(ui, back_name):
+    """조건 최적화를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        back_name: 백테스트 이름
+    """
     from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
     if backtest_process_alive(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
@@ -1820,6 +1914,10 @@ def opti_cond_start(ui, back_name):
 
 @error_decorator
 def optivars_to_gavars(ui):
+    """최적화 변수를 GA 변수로 변환합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     opti_vars_text = ui.ss_textEditttt_05.toPlainText()
     if opti_vars_text:
         ga_vars_text = get_optivars_to_gavars(ui, opti_vars_text)
@@ -1831,6 +1929,10 @@ def optivars_to_gavars(ui):
 
 @error_decorator
 def gavars_to_optivars(ui):
+    """GA 변수를 최적화 변수로 변환합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ga_vars_text = ui.ss_textEditttt_06.toPlainText()
     if ga_vars_text:
         opti_vars_text = get_gavars_to_optivars(ui, ga_vars_text)
@@ -1842,6 +1944,10 @@ def gavars_to_optivars(ui):
 
 @error_decorator
 def stg_vars_change(ui):
+    """전략 변수를 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     buystg = ui.ss_textEditttt_01.toPlainText()
     sellstg = ui.ss_textEditttt_02.toPlainText()
     buystg_str, sellstg_str = get_stgtxt_to_varstxt(ui, buystg, sellstg)
@@ -1853,6 +1959,10 @@ def stg_vars_change(ui):
 
 @error_decorator
 def stgvars_key_sort(ui):
+    """전략 변수 키를 정렬합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     optivars = ui.ss_textEditttt_05.toPlainText()
     gavars = ui.ss_textEditttt_06.toPlainText()
     optivars_str, gavars_str = get_stgtxt_sort2(optivars, gavars)
@@ -1864,6 +1974,10 @@ def stgvars_key_sort(ui):
 
 @error_decorator
 def optivars_key_sort(ui):
+    """최적화 변수 키를 정렬합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     buystg = ui.ss_textEditttt_03.toPlainText()
     sellstg = ui.ss_textEditttt_04.toPlainText()
     buystg_str, sellstg_str = get_stgtxt_sort(buystg, sellstg)
@@ -1875,11 +1989,19 @@ def optivars_key_sort(ui):
 
 @error_decorator
 def change_svj_button_color(ui):
+    """버튼 색상을 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     for button in ui.editer_list:
         button.setStyleSheet(style_bc_dk if ui.focusWidget() == button else style_bc_bs)
 
 
 @error_decorator
 def change_version_button_color(ui):
+    """버전 버튼 색상을 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     for button in ui.load_list:
         button.setStyleSheet(style_bc_dk if ui.focusWidget() == button else style_bc_st)

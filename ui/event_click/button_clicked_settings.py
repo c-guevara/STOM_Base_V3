@@ -14,6 +14,10 @@ from utility.static_method.static import de_text, en_text, qtest_qwait, error_de
 
 @error_decorator
 def setting_load_01(ui):
+    """기본 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
     ui.sj_main_comBox_01.setCurrentText(df['거래소'][0])
     ui.sj_main_cheBox_01.setChecked(True) if df['모의투자'][0] else ui.sj_main_cheBox_01.setChecked(False)
@@ -27,6 +31,10 @@ def setting_load_01(ui):
 
 @error_decorator
 def setting_load_02(ui):
+    """계정 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM account').set_index('index')
     no = int(ui.sj_main_comBox_01.currentText()[-2:])
     access_key = df['access_key'][no]
@@ -40,6 +48,10 @@ def setting_load_02(ui):
 
 @error_decorator
 def setting_load_03(ui):
+    """텔레그램 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM telegram').set_index('index')
     no = int(ui.sj_main_comBox_01.currentText()[4:])
     bot_token = df['bot_token'][no]
@@ -53,6 +65,10 @@ def setting_load_03(ui):
 
 @error_decorator
 def setting_load_04(ui):
+    """전략 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df   = ui.dbreader.read_sql('설정디비', 'SELECT * FROM strategy').set_index('index')
     dfb  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_buy").set_index('index')
     dfs  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_sell").set_index('index')
@@ -106,6 +122,10 @@ def setting_load_04(ui):
 
 @error_decorator
 def setting_load_05(ui):
+    """백테스트 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM back').set_index('index')
 
     ui.sj_back_cheBox_01.setChecked(True) if df['블랙리스트추가'][0] else ui.sj_back_cheBox_01.setChecked(False)
@@ -148,6 +168,10 @@ def setting_load_05(ui):
 
 @error_decorator
 def setting_load_06(ui):
+    """기타 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM etc').set_index('index')
 
     ui.sj_etc_comBoxx_01.setCurrentText(df['테마'][0])
@@ -163,6 +187,10 @@ def setting_load_06(ui):
 
 @error_decorator
 def setting_save_01(ui):
+    """기본 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     거래소 = ui.sj_main_comBox_01.currentText()
     모의투자 = 1 if ui.sj_main_cheBox_01.isChecked() else 0
     데이터저장 = 1 if ui.sj_main_cheBox_02.isChecked() else 0
@@ -208,6 +236,10 @@ def setting_save_01(ui):
 
 @error_decorator
 def setting_save_02(ui):
+    """계정 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     access_key = ui.sj_accc_liEdit_01.text()
     secret_key = ui.sj_accc_liEdit_02.text()
 
@@ -230,6 +262,10 @@ def setting_save_02(ui):
 
 @error_decorator
 def setting_save_03(ui):
+    """텔레그램 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     bot_token = ui.sj_tele_liEdit_01.text()
     chatingid = ui.sj_tele_liEdit_02.text()
 
@@ -253,6 +289,10 @@ def setting_save_03(ui):
 
 @error_decorator
 def setting_save_04(ui):
+    """전략 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     잔고청산 = 1 if ui.sj_strgy_ckBox_01.isChecked() else 0
     프로세스종료 = 1 if ui.sj_strgy_ckBox_02.isChecked() else 0
     컴퓨터종료 = 1 if ui.sj_strgy_ckBox_03.isChecked() else 0
@@ -302,6 +342,10 @@ def setting_save_04(ui):
 
 @error_decorator
 def setting_save_05(ui):
+    """백테스트 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     블랙리스트추가 = 1 if ui.sj_back_cheBox_01.isChecked() else 0
     백테일괄로딩 = 1 if ui.sj_back_cheBox_02.isChecked() else 0
     # 백테분할로딩 = 1 if ui.sj_back_cheBox_03.isChecked() else 0
@@ -360,6 +404,10 @@ def setting_save_05(ui):
 
 @error_decorator
 def setting_save_06(ui):
+    """기타 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     테마 = ui.sj_etc_comBoxx_01.currentText()
     저해상도 = 1 if ui.sj_etc_checBox_02.isChecked() else 0
     창위치기억 = 1 if ui.sj_etc_checBox_03.isChecked() else 0
@@ -389,6 +437,10 @@ def setting_save_06(ui):
 
 @error_decorator
 def setting_acc_view(ui):
+    """계정 텍스트 표시/숨김을 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.sj_etc_pButton_01.text() == '계정 텍스트 보기':
         ui.pa_lineEditttt_01.clear()
         ui.dialog_pass.show() if not ui.dialog_pass.isVisible() else ui.dialog_pass.close()
@@ -405,6 +457,10 @@ def setting_acc_view(ui):
 
 @error_decorator
 def setting_order_load_01(ui):
+    """매수 주문 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM buyorder').set_index('index')
 
     ui.ss_buyy_checkBox_01.setChecked(True) if df['매수주문유형'][0] == '시장가' else ui.ss_buyy_checkBox_01.setChecked(False)
@@ -476,6 +532,10 @@ def setting_order_load_01(ui):
 
 @error_decorator
 def setting_order_load_02(ui):
+    """매도 주문 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM sellorder').set_index('index')
 
     ui.ss_sell_checkBox_01.setChecked(True) if df['매도주문유형'][0] == '시장가' else ui.ss_sell_checkBox_01.setChecked(False)
@@ -523,6 +583,10 @@ def setting_order_load_02(ui):
 
 @error_decorator
 def setting_order_save_01(ui):
+    """매수 주문 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     매수주문유형 = ''
     if ui.ss_buyy_checkBox_01.isChecked(): 매수주문유형 = '시장가'
     if ui.ss_buyy_checkBox_02.isChecked(): 매수주문유형 = '지정가'
@@ -655,6 +719,10 @@ def setting_order_save_01(ui):
 
 @error_decorator
 def setting_order_save_02(ui):
+    """매도 주문 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     매도주문유형 = ''
     if ui.ss_sell_checkBox_01.isChecked(): 매도주문유형 = '시장가'
     if ui.ss_sell_checkBox_02.isChecked(): 매도주문유형 = '지정가'
@@ -755,11 +823,19 @@ def setting_order_save_02(ui):
 
 
 def setting_all_load(ui):
+    """모든 설정을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     load_setting_file(ui)
 
 
 @error_decorator
 def setting_all_app(ui):
+    """모든 설정을 적용합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.sj_set_comBoxx_01.currentText()
     if name == '':
         QMessageBox.critical(ui, '오류 알림', '설정이름이 선택되지 않았습니다.\n')
@@ -796,6 +872,10 @@ def setting_all_app(ui):
 
 @error_decorator
 def setting_all_del(ui):
+    """설정 파일을 삭제합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.sj_set_comBoxx_01.currentText()
     if name == '':
         QMessageBox.critical(ui, '오류 알림', '설정이름이 선택되지 않았습니다.\n')
@@ -809,6 +889,10 @@ def setting_all_del(ui):
 
 @error_decorator
 def setting_all_save(ui):
+    """모든 설정을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.sj_set_liEditt_01.text()
     if name == '':
         QMessageBox.critical(ui, '오류 알림', '설정이름이 입력되지 않았습니다.\n')
@@ -823,11 +907,19 @@ def setting_all_save(ui):
 
 @error_decorator
 def setting_passticks(ui):
+    """패스틱스 설정 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.dialog_setsj.show() if not ui.dialog_setsj.isVisible() else ui.dialog_setsj.close()
 
 
 @error_decorator
 def load_setting_file(ui):
+    """설정 파일 목록을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.sj_set_comBoxx_01.clear()
     file_list = os.listdir(DB_PATH)
     file_list = [x for x in file_list if 'setting_' in x]

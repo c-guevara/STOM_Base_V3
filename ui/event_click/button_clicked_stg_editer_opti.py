@@ -12,6 +12,10 @@ from utility.static_method.static import text_not_in_special_characters, error_d
 
 @error_decorator
 def opti_buy_load(ui):
+    """최적화 매수 전략을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svc_comboBoxxx_01.currentText()
         if strategy_name == '':
@@ -32,6 +36,10 @@ def opti_buy_load(ui):
 
 @error_decorator
 def opti_buy_save(ui):
+    """최적화 매수 전략을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ss_textEditttt_03.isVisible():
         strategy_name = ui.svc_lineEdittt_01.text()
         strategy = ui.ss_textEditttt_03.toPlainText()
@@ -61,6 +69,10 @@ def opti_buy_save(ui):
 
 @error_decorator
 def opti_vars_load(ui):
+    """최적화 변수 범위를 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svc_comboBoxxx_02.currentText()
         if strategy_name == '':
@@ -81,6 +93,10 @@ def opti_vars_load(ui):
 
 @error_decorator
 def opti_vars_save(ui):
+    """최적화 변수 범위를 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ss_textEditttt_05.isVisible():
         strategy_name = ui.svc_lineEdittt_02.text()
         strategy = ui.ss_textEditttt_05.toPlainText()
@@ -104,6 +120,10 @@ def opti_vars_save(ui):
 
 @error_decorator
 def opti_sell_load(ui):
+    """최적화 매도 전략을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if QApplication.keyboardModifiers() & Qt.ControlModifier:
         strategy_name = ui.svc_comboBoxxx_08.currentText()
         if strategy_name == '':
@@ -124,6 +144,10 @@ def opti_sell_load(ui):
 
 @error_decorator
 def opti_sell_save(ui):
+    """최적화 매도 전략을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ss_textEditttt_04.isVisible():
         strategy_name = ui.svc_lineEdittt_03.text()
         strategy = ui.ss_textEditttt_04.toPlainText()
@@ -149,6 +173,10 @@ def opti_sell_save(ui):
 
 @error_decorator
 def opti_sample(ui):
+    """최적화 샘플을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ss_textEditttt_01.isVisible():
         ui.ss_textEditttt_01.clear()
         ui.ss_textEditttt_01.append(example_stg_buy if ui.market_gubun < 6 else example_stg_buy_future)
@@ -202,6 +230,10 @@ def opti_sample(ui):
 
 @error_decorator
 def opti_to_buy_save(ui):
+    """최적화 매수 전략을 매수 전략으로 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_01.currentText()
     opti = ui.svc_comboBoxxx_02.currentText() if not ui.sva_pushButton_01.isVisible() else ui.sva_comboBoxxx_01.currentText()
@@ -239,6 +271,10 @@ def opti_to_buy_save(ui):
 
 @error_decorator
 def opti_to_sell_save(ui):
+    """최적화 매도 전략을 매도 전략으로 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_08.currentText()
     opti = ui.svc_comboBoxxx_02.currentText() if not ui.sva_pushButton_01.isVisible() else ui.sva_comboBoxxx_01.currentText()
@@ -276,11 +312,19 @@ def opti_to_sell_save(ui):
 
 @error_decorator
 def show_opti_std(ui):
+    """최적화 기준 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.dialog_std.show() if not ui.dialog_std.isVisible() else ui.dialog_std.close()
 
 
 @error_decorator
 def show_opti_optuna(ui):
+    """옵튜나 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_optuna.isVisible():
         if not ui.optuna_window_open:
             ui.op_lineEditttt_01.setText(ui.dict_set['옵튜나고정변수'])

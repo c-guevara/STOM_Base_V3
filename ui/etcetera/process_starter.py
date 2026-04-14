@@ -6,6 +6,11 @@ from utility.static_method.static import now, now_utc, now_cme, str_ymdhms_ios, 
 
 @error_decorator
 def process_starter(ui):
+    """프로세스 스타터를 실행합니다.
+    자동 백테스트 스케줄러, 자동 실행 등을 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     inthms = int(str_hms())
 
     if ui.dict_set['백테스케쥴실행'] and not ui.backtest_engine and now().weekday() == ui.dict_set['백테스케쥴요일']:
@@ -22,6 +27,10 @@ def process_starter(ui):
 
 @error_decorator
 def _update_window_title(ui):
+    """윈도우 제목을 업데이트합니다.
+    Args:
+        ui: UI 객체
+    """
     market_text = ui.dict_set['거래소']
     data_type = '1초스냅샷' if ui.dict_set['타임프레임'] else '1분봉'
     trade_type = '모의' if ui.dict_set['모의투자'] else '실전'

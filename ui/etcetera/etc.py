@@ -17,7 +17,6 @@ from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdh
 @error_decorator
 def update_image(ui, data):
     """이미지를 업데이트합니다.
-    
     Args:
         ui: UI 객체
         data: 이미지 데이터 튜플
@@ -37,7 +36,6 @@ def update_image(ui, data):
 @thread_decorator
 def update_cpuper(ui):
     """CPU 사용률을 업데이트합니다.
-    
     Args:
         ui: UI 객체
     """
@@ -47,7 +45,6 @@ def update_cpuper(ui):
 @error_decorator
 def auto_back_schedule(ui, gubun):
     """자동 백테스트 스케줄러를 실행합니다.
-    
     Args:
         ui: UI 객체
         gubun (int): 구분 번호 (1: 시작, 2: 스케줄러 표시)
@@ -80,6 +77,10 @@ def auto_back_schedule(ui, gubun):
 
 @error_decorator
 def update_dictset(ui):
+    """설정 딕셔너리를 업데이트합니다.
+    Args:
+        ui: UI 객체
+    """
     update_market_gubun(ui)
 
     if receiver_process_alive(ui):
@@ -105,6 +106,10 @@ def update_dictset(ui):
 
 @error_decorator
 def update_market_gubun(ui):
+    """시장 구분을 업데이트합니다.
+    Args:
+        ui: UI 객체
+    """
     from utility.settings.setting_market import DICT_MARKET_GUBUN, DICT_MARKET_INFO
     ui.market_gubun = DICT_MARKET_GUBUN[ui.dict_set['거래소']]
     ui.market_info  = DICT_MARKET_INFO[ui.market_gubun]
@@ -115,6 +120,10 @@ def update_market_gubun(ui):
 
 @error_decorator
 def chart_clear(ui):
+    """차트 데이터를 초기화합니다.
+    Args:
+        ui: UI 객체
+    """
     ui.ctpg_code    = None
     ui.ctpg_cline   = None
     ui.ctpg_hline   = None
@@ -129,6 +138,10 @@ def chart_clear(ui):
 
 @error_decorator
 def calendar_clicked(ui):
+    """캘린더 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+    """
     table_name = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
     df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
@@ -152,6 +165,11 @@ def calendar_clicked(ui):
 
 @error_decorator
 def stom_live_screenshot(ui, cmd):
+    """STOM 라이브 스크린샷을 찍습니다.
+    Args:
+        ui: UI 객체
+        cmd: 명령어
+    """
     prev_main_btn = ui.main_btn
     mnbutton_c_clicked_01(ui, 5)
     qtest_qwait(1)
@@ -179,6 +197,10 @@ def stom_live_screenshot(ui, cmd):
 
 @error_decorator
 def chart_screenshot(ui):
+    """차트 스크린샷을 찍습니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_chart.isVisible():
         file_name = f'./_log/chart_{str_ymdhmsf()}.png'
         screen = QApplication.primaryScreen()
@@ -191,6 +213,10 @@ def chart_screenshot(ui):
 
 @error_decorator
 def chart_screenshot2(ui):
+    """차트 스크린샷을 찍습니다 (다이얼로그 기준).
+    Args:
+        ui: UI 객체
+    """
     if ui.dialog_chart.isVisible():
         file_name = f'./_log/chart_{str_ymdhmsf()}.png'
         screen = QApplication.primaryScreen()
@@ -203,6 +229,10 @@ def chart_screenshot2(ui):
 
 @error_decorator
 def manual_save_and_exit(ui):
+    """수동으로 저장하고 종료합니다.
+    Args:
+        ui: UI 객체
+    """
     buttonReply = QMessageBox.question(
         ui, '수동종료', '현재까지의 데이터를 저장하고 수동종료합니다.\n계속 하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -213,10 +243,18 @@ def manual_save_and_exit(ui):
 
 
 def stom_public_use_limit(ui):
+    """STOM 퍼블릭 사용 제한을 표시합니다.
+    Args:
+        ui: UI 객체
+    """
     QMessageBox.critical(ui, 'STOM PUBLIC', '현재의 권한으로 사용할 수 없는 기능입니다.\n구독문의: https://cafe.naver.com/stom')
 
 
 def strategy_setting_label_change(ui):
+    """전략 설정 라벨을 변경합니다.
+    Args:
+        ui: UI 객체
+    """
     if ui.market_gubun < 4 or ui.market_gubun == 5:
         ui.sj_strgy_label_02.setText(
             '종목당투자금                          백만원                  ▣  전략중지 및 잔고청산   |')

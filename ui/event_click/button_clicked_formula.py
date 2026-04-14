@@ -10,6 +10,10 @@ from utility.static_method.static import qtest_qwait, error_decorator
 
 @error_decorator
 def formula_activated(ui):
+    """수식을 활성화합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     dict_style = {
         1: '1:실선',
         2: '2:대시선',
@@ -45,6 +49,10 @@ def formula_activated(ui):
 
 @error_decorator
 def formula_button_clicked(ui):
+    """수식 버튼 클릭 이벤트를 처리합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     button_text = ui.dialog_formula.focusWidget().text()
 
     if button_text == '불러오기':

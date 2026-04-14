@@ -1,4 +1,8 @@
 
+"""전략 버튼 텍스트 상수 모듈입니다.
+전략 버튼별 코드 텍스트와 이름을 정의합니다.
+"""
+
 dict_stg_button = {
     1: "# 특정종목만 매수\nelif not (종목코드 in ('005930', 'NQU25', 'ETHKRW', 'BTCUSDT')):\n    매수 = False",
     2: '# 현재가가 구간평균가 보다 높은 조건\nelif not (현재가 > (최고현재가(30) + 최저현재가(30)) / 2):\n    매수 = False',
@@ -82,12 +86,12 @@ dict_stg_button = {
     67: '# VI가격 아래 5호가 미만\nelif not (현재가 < VI가격 - VI호가단위 * 5):\n    매수 = False',
     68: '# VI가격 아래 5호가 미만\nelif not (현재가 < VI가격 - VI호가단위 * 5):\n    매수 = False',
     69: '# 전일 총거래대금보다 높아졌을때\nelif not (거래대금증감 > 50):\n    매수 = False',
-    70: '',
+    70: '사용자버튼설정',
 
-    71: '',
-    72: '',
-    73: '',
-    74: '',
+    71: '사용자버튼설정',
+    72: '사용자버튼설정',
+    73: '사용자버튼설정',
+    74: '사용자버튼설정',
     75: '# 시가총액은 억단위값이며 3000억 이상만 매수할 수도 있고 1500, 3000, 그이상 이렇게 3단계로 구분하여 전략을 최적화할수도 있습니다.',
 
     76: '# 매도 전략용 팩터: 매수전략에서는 사용할 수 없습니다.',
@@ -136,7 +140,7 @@ dict_stg_button = {
     112: "# STOCHFK가 20보다 크고 상승 추세\nself.indicator['STOCHF_fastk_period'] = 5\nself.indicator['STOCHF_fastd_period'] = 3\nself.indicator['STOCHF_fastd_matype'] = 0\nelif not (STOCHFK > 20 and STOCHFK > STOCHFK_N(30)):\n    매수 = False\n# STOCHFK가 80보다 작고 하락 추세\nelif STOCHFK < 80 and STOCHFK < STOCHFK_N(30):\n    매도 = True",
     113: "# STOCHFD가 20보다 크고 상승 추세\nelif not (STOCHFD > 20 and STOCHFD > STOCHFD_N(30)):\n    매수 = False\n# STOCHFD가 80보다 작고 하락 추세\nelif STOCHFD < 80 and STOCHFD < STOCHFD_N(30):\n    매도 = True",
     114: "# WILLR이 -20보다 크고 상승 추세\nself.indicator['WILLR_timeperiod'] = 14\nelif not (WILLR > -20 and WILLR > WILLR_N(30)):\n    매수 = False\n# WILLR이 -80보다 작고 하락 추세\nelif WILLR < -80 and WILLR < WILLR_N(30):\n    매도 = True",
-    115: "# 미사용 중",
+    115: "사용자버튼설정",
 
     116: '# 매수 및 매도 타점용 팩터: 모두 틱수 또는 분봉수 하나만 넣어서 호출이 가능하며\n# 틱수만 넣어서 호출할 경우 다른 값은 모두 기본값으로 지정됩니다.\n# 변수 각각의 기본값은 해당 버튼을 누르면 표시됩니다.\n# Ctrl + 마우스클릭으로 모든 버튼의 이름 및 설정값을 변경할 수 있습니다.\n# 전략탭 매수, 매도 전략 저장 아래의 버튼도 변경할 수 있습니다.',
     117: '# 현재가가 이평60에서 30틱(분) 동안 표쥰편차 0.5 미만인 횟수가 10회 이상 : boolean\n이평지지(60, 30, 0.5, 10)',
@@ -371,12 +375,12 @@ dict_stg_name = {
     67: 'VI가격',
     68: 'VI호가단위',
     69: '거래대금증감',
-    70: '',
+    70: '사용자버튼설정',
 
-    71: '',
-    72: '',
-    73: '',
-    74: '',
+    71: '사용자버튼설정',
+    72: '사용자버튼설정',
+    73: '사용자버튼설정',
+    74: '사용자버튼설정',
     75: '시가총액',
 
     76: '매도 전용 팩터',

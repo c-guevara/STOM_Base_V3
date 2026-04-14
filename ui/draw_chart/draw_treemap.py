@@ -5,7 +5,14 @@ from utility.static_method.static import error_decorator, set_builtin_print
 
 
 class DrawTremap:
+    """트리맵 그리기 클래스입니다.
+    업종별/테마별 등락율 트리맵을 그립니다.
+    """
     def __init__(self, ui):
+        """트리맵 그리기를 초기화합니다.
+        Args:
+            ui: UI 객체
+        """
         self.ui      = ui
         self.tm_ax1  = None
         self.tm_ax2  = None
@@ -20,6 +27,10 @@ class DrawTremap:
 
     @error_decorator
     def draw_treemap(self, data):
+        """트리맵을 그립니다.
+        Args:
+            data: 트리맵 데이터 튜플
+        """
         import squarify
 
         if not self.ui.dialog_tree.isVisible():

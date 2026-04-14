@@ -9,11 +9,19 @@ from ui.create_widget.set_text_stg_button import dict_stg_button, dict_stg_name
 
 @error_decorator
 def strategy_custom_button_show(ui):
+    """전략 커스텀 버튼 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.dialog_strategy.show() if not ui.dialog_strategy.isVisible() else ui.dialog_strategy.close()
 
 
 @error_decorator
 def strategy_custom_dialog_show(ui):
+    """전략 커스텀 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if (ui.stg_btn_number <= 205 and not ui.dialog_stg_input1.isVisible()) or \
             (ui.stg_btn_number > 205 and not ui.dialog_stg_input2.isVisible()):
         if ui.stg_btn_number <= 205:
@@ -45,6 +53,11 @@ def strategy_custom_dialog_show(ui):
 
 @error_decorator
 def button_clicked_strategy(ui, cmd):
+    """전략 버튼을 클릭합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        cmd: 버튼 명령 번호
+    """
     if ui.main_btn != 2:
         QMessageBox.critical(ui.dialog_strategy, '오류 알림', '전략버튼은 전략탭에서만 사용할 수 있습니다.')
         return
@@ -82,6 +95,10 @@ def button_clicked_strategy(ui, cmd):
 
 @error_decorator
 def button_clicked_strategy_delete(ui):
+    """전략 버튼을 삭제합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.proc_chqs.is_alive():
         query = f"DELETE FROM custombutton WHERE `index` = {ui.stg_btn_number}"
         ui.queryQ.put(('전략디비', query))
@@ -102,6 +119,10 @@ def button_clicked_strategy_delete(ui):
 
 @error_decorator
 def button_clicked_strategy_save(ui):
+    """전략 버튼을 저장합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.stg_btn_number <= 205:
         stg_name = ui.stginput_lineeditt1.text()
         stg_text = ui.stginput_textEditt1.toPlainText()

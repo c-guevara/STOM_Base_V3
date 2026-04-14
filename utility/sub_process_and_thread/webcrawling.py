@@ -17,12 +17,17 @@ from utility.static_method.static import str_ymdhm, str_ymd_ios, dt_ymdhms_ios, 
 
 
 class WebCrawling(QThread):
+    """웹 크롤링 클래스입니다.
+    웹에서 데이터를 수집합니다.
+    """
     signal = pyqtSignal(tuple)
 
     def __init__(self, qlist):
-        """
+        """웹 크롤링을 초기화합니다.
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
+        Args:
+            qlist: 큐 리스트
         """
         super().__init__()
         self.webcQ       = qlist[6]
@@ -44,6 +49,8 @@ class WebCrawling(QThread):
         self.thread_join = 0
 
     def run(self):
+        """웹 크롤링을 실행합니다.
+        """
         self._crawling_homtap_data()
         hometap_crawling_time = timedelta_sec(30)
         while True:
@@ -62,6 +69,10 @@ class WebCrawling(QThread):
             time.sleep(0.01)
 
     def _crawling(self, data):
+        """크롤링을 수행합니다.
+        Args:
+            data: 크롤링 데이터
+        """
         cmd, data = data
         if cmd == '기업정보':
             self._gugy_crawling(data)
@@ -82,6 +93,8 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _get_image(self):
+        """이미지를 가져옵니다.
+        """
         try:
             if self.imagelist1 is None:
                 url   = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=image&ssc=tab.image.all&query=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&oquery=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&tqi=iAM7jwqVN8VsslwnmiossssstI4-416434'
@@ -105,6 +118,10 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _gugy_crawling(self, code):
+        """기업 개요를 크롤링합니다.
+        Args:
+            code: 종목 코드
+        """
         try:
             url  = f'{self.base_url}/item/coinfo.naver?code={code}'
             resp = self.session.get(url, headers=self.headers)
@@ -121,6 +138,10 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _gugs_crawling(self, code):
+        """기업 공시를 크롤링합니다.
+        Args:
+            code: 종목 코드
+        """
         try:
             date_list, jbjg_list, gygs_list, link_list = [], [], [], []
             for i in (1, 2):
@@ -146,6 +167,10 @@ class WebCrawling(QThread):
     # noinspection PyUnresolvedReferences
     @thread_decorator
     def _jmns_crawling(self, code):
+        """종목 뉴스를 크롤링합니다.
+        Args:
+            code: 종목 코드
+        """
         try:
             data_list = []
             for i in (1, 2):
@@ -176,6 +201,10 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _jmjp_crawling(self, code):
+        """기업 재무정보를 크롤링합니다.
+        Args:
+            code: 종목 코드
+        """
         try:
             url      = f'{self.base_url}/item/main.naver?code={code}'
             resp     = self.session.get(url, headers=self.headers)
@@ -208,6 +237,8 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _ujtm_crawling(self):
+        """업종/테마 트리맵을 크롤링합니다.
+        """
         try:
             url        = f'{self.base_url}/sise/sise_group.naver?type=upjong'
             resp       = self.session.get(url, headers=self.headers)
@@ -251,6 +282,11 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def _ujtm_crawling_detail(self, url, gubun):
+        """업종/테마 상세정보를 크롤링합니다.
+        Args:
+            url: URL
+            gubun: 구분
+        """
         try:
             resp      = self.session.get(url, headers=self.headers)
             soup      = BeautifulSoup(resp.text, 'html.parser')
@@ -270,7 +306,8 @@ class WebCrawling(QThread):
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     def _crawling_homtap_data(self):
-        """모든 데이터 수집 (한국주식+암호화폐)"""
+        """모든 데이터를 수집합니다 (한국주식+암호화폐).
+        """
         search_time = now()
         weekday = search_time.weekday()
         before_open = int(str_hms(search_time)) < 90000
@@ -311,7 +348,13 @@ class WebCrawling(QThread):
     # noinspection PyUnresolvedReferences
     @thread_decorator
     def get_korean_stocks(self, search_today, search_time, name, symbol):
-        """한국주식 데이터 수집 (네이버)"""
+        """한국주식 데이터를 수집합니다 (네이버).
+        Args:
+            search_today: 검색 일자
+            search_time: 검색 시간
+            name: 이름
+            symbol: 심볼
+        """
         try:
             existing_data = self.dict_data.get(name)
             if existing_data is not None:
@@ -399,6 +442,8 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def get_market_indicator(self):
+        """시장 지표를 가져옵니다.
+        """
         try:
             symbols = {
                 '환율': f'{self.base_url}/marketindex/exchangeDailyQuote.naver?marketindexCd=FX_USDKRW&page=',
@@ -475,7 +520,8 @@ class WebCrawling(QThread):
 
     @thread_decorator
     def get_crypto_data(self):
-        """암호화폐 데이터 수집 (1분봉 전체)"""
+        """암호화폐 데이터를 수집합니다 (1분봉 전체).
+        """
         try:
             symbols = {
                 'BTC/USDT': 'BTCUSDT',

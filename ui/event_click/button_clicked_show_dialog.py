@@ -18,12 +18,18 @@ from ui.etcetera.process_alive import coinkimp_process_alive, strategy_process_a
 
 
 class QuietPage(QWebEnginePage):
+    """자바스크립트 콘솔 메시지를 무시하는 웹엔진 페이지 클래스입니다."""
     def javaScriptConsoleMessage(self, level, p_str, p_int, p_str_1):
         pass
 
 
 @error_decorator
 def show_dialog_graph(ui, df):
+    """그래프 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        df: 데이터프레임
+    """
     if not ui.dialog_graph.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_graph, duration=250)
         ui.dialog_graph.show()
@@ -60,6 +66,15 @@ def show_dialog_graph(ui, df):
 
 @error_decorator
 def show_dialog(ui, code, name, tickcount, searchdate, col):
+    """다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        code: 코드
+        name: 이름
+        tickcount: 틱 카운트
+        searchdate: 검색 일자
+        col: 컬럼 인덱스
+    """
     if col == 0:
         if ui.market_gubun < 4:
             show_dialog_web(ui, True, code)
@@ -91,6 +106,12 @@ def show_dialog(ui, code, name, tickcount, searchdate, col):
 
 @error_decorator
 def show_dialog_web(ui, _show, code):
+    """웹 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        _show: 표시 여부
+        code: 코드
+    """
     if ui.webEngineView is None:
         webengineview_set(ui)
     if _show and not ui.dialog_web.isVisible():
@@ -107,6 +128,10 @@ def show_dialog_web(ui, _show, code):
 
 @error_decorator
 def webengineview_set(ui):
+    """웹엔진 뷰를 설정합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.webEngineView = QWebEngineView()
     p = QuietPage(ui.webEngineView)
     ui.webEngineView.setPage(p)
@@ -117,6 +142,12 @@ def webengineview_set(ui):
 
 @error_decorator
 def show_dialog_hoga(ui, _show, code):
+    """호가 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        _show: 표시 여부
+        code: 코드
+    """
     if _show and not ui.dialog_hoga.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_hoga, duration=250)
         ui.dialog_hoga.show()
@@ -132,6 +163,18 @@ def show_dialog_hoga(ui, _show, code):
 @error_decorator
 def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime=None, endtime=None,
                       detail=None, buytimes=None):
+    """차트 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        real: 실시간 여부
+        code: 코드
+        tickcount: 틱 카운트
+        searchdate: 검색 일자
+        starttime: 시작 시간
+        endtime: 종료 시간
+        detail: 상세 정보
+        buytimes: 매수 시간
+    """
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
     if ui.proc_chqs.is_alive():
@@ -156,6 +199,10 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
 
 @error_decorator
 def dialog_chart_show(ui):
+    """차트 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.ct_pushButtonnn_05.setText('CHART III')
     chart_count_change(ui)
 
@@ -182,6 +229,10 @@ def dialog_chart_show(ui):
 
 @error_decorator
 def show_qsize(ui):
+    """큐 사이즈 표시를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.showQsize:
         ui.qs_pushButton.setStyleSheet(style_bc_st)
         ui.showQsize = True
@@ -192,6 +243,10 @@ def show_qsize(ui):
 
 @error_decorator
 def show_dialog_formula(ui):
+    """수식 관리자 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_formula.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_formula, duration=250)
         ui.dialog_formula.show()
@@ -201,6 +256,10 @@ def show_dialog_formula(ui):
 
 @error_decorator
 def show_dialog_factor(ui):
+    """팩터 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_factor.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_factor, duration=250)
         ui.dialog_factor.show()
@@ -210,6 +269,10 @@ def show_dialog_factor(ui):
 
 @error_decorator
 def show_chart(ui):
+    """차트 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
     else:
@@ -218,6 +281,10 @@ def show_chart(ui):
 
 @error_decorator
 def show_hoga(ui):
+    """호가 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_hoga.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_hoga, duration=250)
         ui.dialog_hoga.setFixedSize(572, 355)
@@ -240,6 +307,10 @@ def show_hoga(ui):
 
 @error_decorator
 def show_giup(ui):
+    """기업정보 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.webEngineView is None:
         webengineview_set(ui)
     if not ui.dialog_web.isVisible():
@@ -258,6 +329,10 @@ def show_giup(ui):
 
 @error_decorator
 def show_treemap(ui):
+    """트리맵 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_tree.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_tree, duration=250)
         ui.dialog_tree.show()
@@ -268,6 +343,10 @@ def show_treemap(ui):
 
 @error_decorator
 def show_db(ui):
+    """데이터베이스 관리 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_db.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_db, duration=250)
         ui.dialog_db.show()
@@ -326,6 +405,10 @@ def show_db(ui):
 
 @error_decorator
 def show_backscheduler(ui):
+    """백테스트 스케줄러 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_scheduler.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_scheduler, duration=250)
         ui.dialog_scheduler.show()
@@ -335,6 +418,10 @@ def show_backscheduler(ui):
 
 @error_decorator
 def show_kimp(ui):
+    """김프 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_kimp.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_kimp, duration=250)
         ui.dialog_kimp.show()
@@ -349,6 +436,10 @@ def show_kimp(ui):
 
 @error_decorator
 def show_order(ui):
+    """주문 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_order.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_order, duration=250)
         ui.dialog_order.show()
@@ -374,12 +465,21 @@ def show_order(ui):
 
 @error_decorator
 def put_hoga_code(ui, code):
+    """호가 코드를 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        code: 코드
+    """
     if receiver_process_alive(ui):
         ui.receivQ.put(('호가종목코드', code))
 
 
 @error_decorator
 def chart_moneytop_list(ui):
+    """차트 거래대금 순위 목록을 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
     starttime  = ui.ct_lineEdittttt_01.text()
     endtime    = ui.ct_lineEdittttt_02.text()
@@ -429,6 +529,10 @@ def chart_moneytop_list(ui):
 
 @error_decorator
 def chart_size_change(ui):
+    """차트 크기를 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.ct_pushButtonnn_06.text() == '확장':
         if ui.ct_pushButtonnn_05.text() == 'CHART I':
             width = 1528

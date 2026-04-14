@@ -12,10 +12,16 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 
 class TelegramBot(QThread):
+    """텔레그램 봇 클래스입니다.
+    텔레그램 봇을 통해 메시지를 주고받습니다.
+    """
     def __init__(self, qlist, dict_set):
-        """
+        """텔레그램 봇을 초기화합니다.
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
+        Args:
+            qlist: 큐 리스트
+            dict_set: 설정 딕셔너리
         """
         super().__init__()
         self.windowQ       = qlist[0]
@@ -32,6 +38,8 @@ class TelegramBot(QThread):
         self.running       = False
 
     def run(self):
+        """텔레그램 봇을 실행합니다.
+        """
         self.message_queue = asyncio.Queue()
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
@@ -65,6 +73,8 @@ class TelegramBot(QThread):
         self.loop.run_forever()
 
     async def start_bot(self):
+        """봇을 시작합니다.
+        """
         try:
             await self.application.initialize()
             await self.application.start()
@@ -92,11 +102,20 @@ class TelegramBot(QThread):
             self.running = False
 
     async def setup_application(self, application):
+        """애플리케이션을 설정합니다.
+        Args:
+            application: 애플리케이션
+        """
         korea_timezone = pytz.timezone('Asia/Seoul')
         application.bot_data['timezone'] = korea_timezone
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """메시지를 처리합니다.
+        Args:
+            update: 업데이트
+            context: 컨텍스트
+        """
         cmd = update.message.text
         cmd = cmd.replace('\n', '')
         if cmd == '전략중지':
@@ -108,6 +127,8 @@ class TelegramBot(QThread):
             self.traderQ.put(cmd)
 
     def moniter_queue(self):
+        """큐를 모니터링합니다.
+        """
         while True:
             data = self.teleQ.get()
             if self.running or data.__class__ == tuple:
@@ -118,6 +139,8 @@ class TelegramBot(QThread):
                 self.windowQ.put((ui_num['시스템로그'], '텔레그램봇 토큰 및 아이디가 설정되지 않아 메세지를 보낼 수 없습니다'))
 
     async def process_messages(self):
+        """메시지를 처리합니다.
+        """
         while True:
             data = await self.message_queue.get()
             if data.__class__ == str:

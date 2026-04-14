@@ -6,7 +6,11 @@ from PyQt5.QtWidgets import QSplashScreen, QApplication, QVBoxLayout, QLabel, QP
 
 
 class StomSplashScreen(QSplashScreen):
+    """STOM 스플래시 스크린 클래스입니다.
+    애플리케이션 시작 시 로딩 화면을 표시합니다.
+    """
     def __init__(self):
+        """스플래시 스크린을 초기화합니다."""
         super().__init__()
 
         self.setFixedSize(500, 300)
@@ -31,6 +35,10 @@ class StomSplashScreen(QSplashScreen):
         self.setup_ui()
 
     def showEvent(self, event):
+        """표시 이벤트를 처리합니다.
+        Args:
+            event: 이벤트
+        """
         super().showEvent(event)
         self.center_on_screen()
 
@@ -38,6 +46,7 @@ class StomSplashScreen(QSplashScreen):
         self.fade_in_timer.start(30)
 
     def update_fade_in(self):
+        """페이드인 애니메이션을 업데이트합니다."""
         current_opacity = self.windowOpacity()
         if current_opacity < 1.0:
             self.setWindowOpacity(min(current_opacity + 0.1, 1.0))
@@ -45,6 +54,7 @@ class StomSplashScreen(QSplashScreen):
             self.fade_in_timer.stop()
 
     def center_on_screen(self):
+        """스크린 중앙에 스플래시 스크린을 배치합니다."""
         # noinspection PyUnresolvedReferences
         screen = QApplication.desktop().screenGeometry()
         self.move(
@@ -53,6 +63,7 @@ class StomSplashScreen(QSplashScreen):
         )
 
     def setup_ui(self):
+        """UI를 설정합니다."""
         main_layout = QVBoxLayout()
         main_layout.setSpacing(25)
         main_layout.setContentsMargins(30, 30, 30, 30)
@@ -171,6 +182,11 @@ class StomSplashScreen(QSplashScreen):
         self.setLayout(final_layout)
 
     def show_progress(self, message, progress=None):
+        """진행률을 표시합니다.
+        Args:
+            message: 상태 메시지
+            progress: 진행률 값
+        """
         self.status_label.setText(message)
         if progress is not None:
             current_value = self.progress_bar.value()
@@ -220,6 +236,7 @@ class StomSplashScreen(QSplashScreen):
         QApplication.processEvents()
 
     def finish_splash(self):
+        """스플래시 스크린을 종료합니다."""
         self.fade_in_timer.stop()
 
         self.status_label.setText("System Ready ✓")
@@ -248,11 +265,13 @@ class StomSplashScreen(QSplashScreen):
         QTimer.singleShot(1000, self.start_fade_out)
 
     def start_fade_out(self):
+        """페이드아웃 애니메이션을 시작합니다."""
         self.fade_out_timer = QTimer()
         self.fade_out_timer.timeout.connect(self.update_fade_out)
         self.fade_out_timer.start(30)
 
     def update_fade_out(self):
+        """페이드아웃 애니메이션을 업데이트합니다."""
         current_opacity = self.windowOpacity()
         if current_opacity > 0.0:
             self.setWindowOpacity(max(current_opacity - 0.05, 0.0))

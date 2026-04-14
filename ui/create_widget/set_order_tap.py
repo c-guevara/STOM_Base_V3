@@ -5,13 +5,22 @@ from ui.event_click.button_clicked_settings import *
 
 
 class SetOrderTap:
+    """주문 탭 설정 클래스입니다.
+    매수/매도 주문 설정 탭을 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """주문 탭 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     @error_decorator
     def set(self):
+        """주문 탭을 설정합니다."""
         self.ui.ss_od_groupBoxxx_01 = self.wc.setQGroupBox(' 매수주문 설정', self.ui.sod_tab)
         self.ui.ss_od_groupBoxxx_02 = self.wc.setQGroupBox(' 매도주문 설정', self.ui.sod_tab)
 

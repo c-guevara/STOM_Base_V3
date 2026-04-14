@@ -8,6 +8,10 @@ from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
 
 @error_decorator
 def ssbutton_clicked_01(ui):
+    """백테스트 기록 테이블 목록을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_01.clear()
     for table in df['name'].to_list()[::-1]:
@@ -23,6 +27,10 @@ def ssbutton_clicked_01(ui):
 
 @error_decorator
 def ssbutton_clicked_02(ui):
+    """최적화 기록 테이블 목록을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_02.clear()
     for table in df['name'].to_list()[::-1]:
@@ -40,6 +48,10 @@ def ssbutton_clicked_02(ui):
 
 @error_decorator
 def ssbutton_clicked_03(ui):
+    """전진분석 기록 테이블 목록을 로드합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_03.clear()
     for table in df['name'].to_list()[::-1]:
@@ -57,6 +69,10 @@ def ssbutton_clicked_03(ui):
 
 @error_decorator
 def ssbutton_clicked_04(ui):
+    """선택된 백테스트 그래프를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     comboBox = None
     if ui.focusWidget() == ui.ss_pushButtonn_02:
         comboBox = ui.ss_comboBoxxxx_01
@@ -82,6 +98,10 @@ def ssbutton_clicked_04(ui):
 
 @error_decorator
 def ssbutton_clicked_05(ui):
+    """백테스트 비교 다이얼로그를 토글합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.dialog_comp.isVisible():
         ui.dialog_comp.show()
 
@@ -105,6 +125,10 @@ def ssbutton_clicked_05(ui):
 
 @error_decorator
 def ssbutton_clicked_06(ui):
+    """백테스트를 중지합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     buttonReply = QMessageBox.question(
         ui, '백테스트 중지', '진행중인 백테스트를 중지합니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No

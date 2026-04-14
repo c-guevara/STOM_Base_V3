@@ -11,12 +11,28 @@ from utility.static_method.static import change_format, comma2int, comma2float, 
 
 
 class NumericItem(QTableWidgetItem):
+    """숫자 정렬을 위한 테이블 위젯 아이템 클래스입니다.
+    UserRole 데이터를 기반으로 정렬합니다.
+    """
     def __lt__(self, other):
+        """비교 연산을 수행합니다.
+        Args:
+            other: 비교할 다른 아이템
+        Returns:
+            비교 결과
+        """
         return self.data(Qt.UserRole) < other.data(Qt.UserRole)
 
 
 class UpdateTablewidget:
+    """테이블 위젯 업데이트 클래스입니다.
+    다양한 데이터를 테이블 위젯에 표시합니다.
+    """
     def __init__(self, ui):
+        """테이블 위젯 업데이트를 초기화합니다.
+        Args:
+            ui: UI 클래스 인스턴스
+        """
         self.ui = ui
 
         self.dict_table = {
@@ -150,6 +166,11 @@ class UpdateTablewidget:
     # noinspection PyUnresolvedReferences
     @error_decorator
     def update_tablewidget(self, data):
+        """테이블 위젯을 업데이트합니다.
+        수신된 데이터를 기반으로 테이블 위젯에 내용을 표시합니다.
+        Args:
+            data: 데이터 (구분, 데이터프레임, 추가정보)
+        """
         if len(data) == 2:
             gubun, df = data
         else:
@@ -432,6 +453,14 @@ class UpdateTablewidget:
                     header.resizeSection(i, column_width)
 
     def tablewidget_change(self, gubun, tableWidget, columns_cnt, columns_list):
+        """테이블 위젯 컬럼을 변경합니다.
+        컬럼 수가 변경된 경우 컬럼을 재설정합니다.
+        Args:
+            gubun: 구분
+            tableWidget: 테이블 위젯
+            columns_cnt: 컬럼 수
+            columns_list: 컬럼 리스트
+        """
         if tableWidget.columnCount() != columns_cnt:
             tableWidget.setColumnCount(columns_cnt)
             tableWidget.setHorizontalHeaderLabels(columns_list)
@@ -478,6 +507,11 @@ class UpdateTablewidget:
                     tableWidget.setColumnWidth(11, 90)
 
     def update_hogainfo_for_chart(self, ymdhms):
+        """차트용 호가 정보를 업데이트합니다.
+        차트에서 선택된 시점의 호가 정보를 표시합니다.
+        Args:
+            ymdhms: 연월일시분초
+        """
         def fi(fname):
             return self.ui.dict_findex[fname]
 

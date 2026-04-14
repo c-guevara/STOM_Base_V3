@@ -1,3 +1,6 @@
+"""기본 설정 모듈입니다.
+경로, UI 번호, 컬럼 정의 등 기본 설정을 포함합니다.
+"""
 
 ICON_PATH         = './ui/_icon'
 GRAPH_PATH        = './backtest/_graph'

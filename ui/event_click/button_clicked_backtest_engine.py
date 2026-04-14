@@ -16,6 +16,10 @@ from utility.static_method.static import thread_decorator, str_hms, dt_hms, time
 
 @error_decorator
 def backengine_show(ui):
+    """백테스트 엔진 다이얼로그를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     table_list = []
     con = sqlite3.connect(ui.market_info['백테디비'][ui.dict_set['타임프레임']])
     try:
@@ -50,6 +54,10 @@ def backengine_show(ui):
 # noinspection PyUnresolvedReferences
 @thread_decorator
 def backengine_start(ui):
+    """백테스트 엔진을 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
     ui.back_engining = True
     ui.startday   = int(ui.be_dateEdittttt_01.date().toString('yyyyMMdd'))
@@ -208,6 +216,14 @@ def backengine_start(ui):
 
 @error_decorator
 def back_code_test1(ui, stg, testQ):
+    """전략 코드를 테스트합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        stg: 전략 코드
+        testQ: 테스트 큐
+    Returns:
+        테스트 결과
+    """
     while not testQ.empty():
         testQ.get()
 
@@ -226,6 +242,15 @@ def back_code_test1(ui, stg, testQ):
 
 @error_decorator
 def back_code_test2(ui, vars_code, testQ, ga):
+    """범위 코드를 테스트합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        vars_code: 변수 코드
+        testQ: 테스트 큐
+        ga: GA 최적화 여부
+    Returns:
+        테스트 결과
+    """
     while not testQ.empty():
         testQ.get()
     thread = BackCodeTest(testQ, ui.windowQ, None, None, vars_code, ga)
@@ -236,6 +261,15 @@ def back_code_test2(ui, vars_code, testQ, ga):
 
 @error_decorator
 def back_code_test3(ui, gubun, conds_code, testQ):
+    """조건 코드를 테스트합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun: 구분 (매수/매도)
+        conds_code: 조건 코드
+        testQ: 테스트 큐
+    Returns:
+        테스트 결과
+    """
     while not testQ.empty():
         testQ.get()
     conds_code = conds_code.split('\n')
@@ -252,6 +286,14 @@ def back_code_test3(ui, gubun, conds_code, testQ):
 
 @error_decorator
 def formula_code_test(ui, stg, testQ):
+    """수식 코드를 테스트합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        stg: 전략 코드
+        testQ: 테스트 큐
+    Returns:
+        테스트 결과
+    """
     while not testQ.empty():
         testQ.get()
 
@@ -270,6 +312,14 @@ def formula_code_test(ui, stg, testQ):
 
 @error_decorator
 def get_code_test_result(ui, gubun, testQ):
+    """코드 테스트 결과를 가져옵니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun: 구분
+        testQ: 테스트 큐
+    Returns:
+        테스트 성공 여부
+    """
     data = testQ.get()
     if data == '전략테스트오류':
         ui.windowQ.put((ui_num['시스템로그'], f'{gubun}에 오류가 있어 저장하지 못하였습니다.'))
@@ -280,6 +330,10 @@ def get_code_test_result(ui, gubun, testQ):
 
 @error_decorator
 def clear_backtestQ(ui):
+    """백테스트 큐를 비웁니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if not ui.backQ.empty():
         while not ui.backQ.empty():
             ui.backQ.get()
@@ -290,6 +344,12 @@ def clear_backtestQ(ui):
 
 @error_decorator
 def backtest_process_kill(ui, coin, enginekill):
+    """백테스트 프로세스를 중지합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        coin: 코인 여부
+        enginekill: 엔진 중지 여부
+    """
     if not ui.backtest_engine:
         QMessageBox.critical(ui, '오류 알림', '백테스트 엔진이 미실행중입니다.\n')
         return

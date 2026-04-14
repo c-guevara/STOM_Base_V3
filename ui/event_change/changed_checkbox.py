@@ -8,6 +8,11 @@ from ui.etcetera.process_alive import trader_process_alive
 
 @error_decorator
 def checkbox_changed_01(ui, state):
+    """모의투자 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked and trader_process_alive(ui):
         ui.sj_main_cheBox_01.nextCheckState()
         QMessageBox.critical(ui, '오류 알림', '트레이더 실행 중에는 모의모드를 해제할 수 없습니다.\n')
@@ -15,6 +20,11 @@ def checkbox_changed_01(ui, state):
 
 @error_decorator
 def checkbox_changed_02(ui, state):
+    """팩터 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked:
         if ui.dialog_factor.focusWidget() == ui.ft_checkBoxxxxx_01:
             ui.ft_checkBoxxxxx_01.nextCheckState()
@@ -23,6 +33,11 @@ def checkbox_changed_02(ui, state):
 
 @error_decorator
 def checkbox_changed_03(ui, state):
+    """일괄/분할 로딩 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         for widget in ui.sj_ilbunback_listtt:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -31,6 +46,11 @@ def checkbox_changed_03(ui, state):
 
 @error_decorator
 def checkbox_changed_04(ui, state):
+    """백테스트로그 기록 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         if not ui.sj_back_cheBox_13.isChecked():
             ui.sj_back_cheBox_13.nextCheckState()
@@ -38,6 +58,11 @@ def checkbox_changed_04(ui, state):
 
 @error_decorator
 def checkbox_changed_05(ui, state):
+    """그래프 저장 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked:
         if ui.sj_back_cheBox_12.isChecked():
             ui.sj_back_cheBox_12.nextCheckState()
@@ -45,6 +70,11 @@ def checkbox_changed_05(ui, state):
 
 @error_decorator
 def checkbox_changed_06(ui, state):
+    """백테스트 스케줄러 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     gubun = ui.list_checkBoxxxxxx.index(ui.dialog_scheduler.focusWidget())
     if state == Qt.Checked:
         for item in ('백테스트',
@@ -71,6 +101,11 @@ def checkbox_changed_06(ui, state):
 
 @error_decorator
 def checkbox_changed_07(ui, state):
+    """일전 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
             if ui.sj_back_cheBox_16.isChecked():
@@ -82,6 +117,11 @@ def checkbox_changed_07(ui, state):
 
 @error_decorator
 def checkbox_changed_08(ui, state):
+    """고정 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
             if ui.sj_back_cheBox_15.isChecked():
@@ -94,12 +134,22 @@ def checkbox_changed_08(ui, state):
 # noinspection PyUnusedLocal
 @error_decorator
 def checkbox_changed_09(ui, state):
+    """차트 코드 초기화 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     ui.ctpg_code = None
 
 
 # noinspection PyUnresolvedReferences
 @error_decorator
 def sbcheckbox_changed_01(ui, state):
+    """매수 주문유형 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         if ui.market_gubun in (1, 2, 3, 6, 7):
             for widget in ui.sodb_checkbox_list1:
@@ -133,6 +183,11 @@ def sbcheckbox_changed_01(ui, state):
 
 @error_decorator
 def sbcheckbox_changed_02(ui, state):
+    """분할매수방법 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         for widget in ui.sodb_checkbox_list2:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -142,6 +197,11 @@ def sbcheckbox_changed_02(ui, state):
 # noinspection PyUnresolvedReferences
 @error_decorator
 def sscheckbox_changed_01(ui, state):
+    """매도 주문유형 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         if ui.market_gubun in (1, 2, 3, 5, 6, 7):
             for widget in ui.sods_checkbox_list1:
@@ -175,6 +235,11 @@ def sscheckbox_changed_01(ui, state):
 
 @error_decorator
 def sscheckbox_changed_02(ui, state):
+    """분할매도방법 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         for widget in ui.sods_checkbox_list2:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -183,6 +248,11 @@ def sscheckbox_changed_02(ui, state):
 
 @error_decorator
 def setting_stock_weight_cotrol_changed(ui, state):
+    """비중조절 체크박스 변경 이벤트를 처리합니다.
+    Args:
+        ui: UI 객체
+        state: 체크 상태
+    """
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
             for widget in ui.ss_bj_check_button_list:

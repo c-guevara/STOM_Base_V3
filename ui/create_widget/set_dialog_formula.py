@@ -7,13 +7,22 @@ from ui.event_click.button_clicked_formula import formula_button_clicked, formul
 
 
 class SetDialogFormula:
+    """수식 관리자 다이얼로그 설정 클래스입니다.
+    사용자 수식을 관리하는 다이얼로그를 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """수식 관리자 다이얼로그 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     @error_decorator
     def set(self):
+        """수식 관리자 다이얼로그를 설정합니다."""
         self.ui.dialog_formula = self.wc.setDialog('STOM FORMULA', parent=self.ui.dialog_chart)
         self.ui.dialog_formula.geometry().center()
 
@@ -97,6 +106,10 @@ class SetDialogFormula:
         self.ui.dialog_formula.resizeEvent = self.on_formula_dialog_resize
 
     def on_formula_dialog_resize(self, event):
+        """수식 다이얼로그 크기 조정 이벤트를 처리합니다.
+        Args:
+            event: 리사이즈 이벤트
+        """
         dialog_width = self.ui.dialog_formula.width()
         right_group_width = dialog_width - 175
         self.ui.fm_groupBoxxxxx_01.setGeometry(5, 5, dialog_width - 10, 85)

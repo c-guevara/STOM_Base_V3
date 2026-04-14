@@ -10,6 +10,12 @@ DB_PATH = '../../_database'
 
 
 def get_logger(name):
+    """로그거를 생성합니다.
+    Args:
+        name: 로거 이름
+    Returns:
+        설정된 로거 인스턴스
+    """
     logger.remove()
     logger.add(
         sys.stderr,
@@ -24,6 +30,11 @@ def get_logger(name):
 
 
 def Updater(gubun, file_list_):
+    """데이터베이스 중복 데이터를 제거합니다.
+    Args:
+        gubun: 구분
+        file_list_: 파일 리스트
+    """
     llogger = get_logger('DBDistinct')
     llogger.info(f'[{gubun}] 데이터베이스 중복 확인 시작')
     last = len(file_list_)

@@ -5,6 +5,10 @@ from utility.static_method.static import error_decorator
 
 @error_decorator
 def extend_window(ui):
+    """전략탭 창을 확장/축소합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.main_btn != 2:
         QMessageBox.critical(ui, '오류 알림', '전략탭 확장기능은 전략탭에서만 사용할 수 있습니다.')
         return

@@ -5,12 +5,20 @@ from ui.create_widget.set_widget import error_decorator
 
 
 class SetIcon:
+    """아이콘 설정 클래스입니다.
+    UI에 사용되는 다양한 아이콘을 설정합니다.
+    """
     def __init__(self, ui_class):
+        """아이콘 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+        """
         self.ui = ui_class
         self.set()
 
     @error_decorator
     def set(self):
+        """아이콘을 설정합니다."""
         self.ui.icon_main    = QIcon(f'{ICON_PATH}/python.png')
         self.ui.icon_home    = QIcon(f'{ICON_PATH}/home.png')
         self.ui.icon_stock   = QIcon(f'{ICON_PATH}/trade.png')

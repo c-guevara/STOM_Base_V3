@@ -6,6 +6,10 @@ from utility.static_method.static import comma2float, now, error_decorator
 
 @error_decorator
 def odbutton_clicked_01(ui):
+    """매수 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -19,6 +23,10 @@ def odbutton_clicked_01(ui):
 
 @error_decorator
 def odbutton_clicked_02(ui):
+    """매도 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -32,6 +40,10 @@ def odbutton_clicked_02(ui):
 
 @error_decorator
 def odbutton_clicked_03(ui):
+    """롱 매수 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -45,6 +57,10 @@ def odbutton_clicked_03(ui):
 
 @error_decorator
 def odbutton_clicked_04(ui):
+    """롱 매도 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -58,6 +74,10 @@ def odbutton_clicked_04(ui):
 
 @error_decorator
 def odbutton_clicked_05(ui):
+    """숏 매도 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -71,6 +91,10 @@ def odbutton_clicked_05(ui):
 
 @error_decorator
 def odbutton_clicked_06(ui):
+    """숏 매수 주문을 전송합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     ordertype = ui.od_comboBoxxxxx_02.currentText()
     op = ui.od_lineEdittttt_01.text()
@@ -84,6 +108,10 @@ def odbutton_clicked_06(ui):
 
 @error_decorator
 def odbutton_clicked_07(ui):
+    """매수 주문을 취소합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     if name == '':
         QMessageBox.critical(ui.dialog_order, '오류 알림', '종목명을 선택하십시오.\n종목명은 관심종목 테이블의 리스트입니다.\n')
@@ -98,6 +126,10 @@ def odbutton_clicked_07(ui):
 
 @error_decorator
 def odbutton_clicked_08(ui):
+    """매도 주문을 취소합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     name = ui.od_comboBoxxxxx_01.currentText()
     if name == '':
         QMessageBox.critical(ui.dialog_order, '오류 알림', '종목명을 선택하십시오.\n종목명은 관심종목 테이블의 리스트입니다.\n')

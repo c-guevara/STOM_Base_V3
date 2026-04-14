@@ -12,14 +12,21 @@ from ui.event_change.changed_text import text_changed_01, text_changed_02, text_
 
 
 class SetDialogBack:
+    """백테스트 다이얼로그 설정 클래스입니다.
+    백테스트 엔진과 스케줄러 다이얼로그를 설정합니다.
+    """
     def __init__(self, ui_class, wc):
+        """백테스트 다이얼로그 설정을 초기화합니다.
+        Args:
+            ui_class: UI 클래스
+            wc: 위젯 생성자
+        """
         self.ui = ui_class
         self.wc = wc
         self.set()
 
     def _create_widget_list(self, count, prefix, widget_type, parent, **kwargs):
         """위젯 리스트를 동적으로 생성하는 헬퍼 메서드
-
         Args:
             count: 생성할 위젯 개수
             prefix: 위젯명 접두사 (예: 'sd_gcomboBoxxxx')
@@ -50,6 +57,7 @@ class SetDialogBack:
 
     @error_decorator
     def set(self):
+        """백테스트 다이얼로그를 설정합니다."""
         self.ui.dialog_backengine = self.wc.setDialog('STOM BACKTEST ENGINE')
         self.ui.dialog_backengine.geometry().center()
 

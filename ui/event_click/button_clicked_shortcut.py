@@ -12,6 +12,11 @@ from ui.etcetera.process_alive import strategy_process_alive, trader_process_ali
 
 @error_decorator
 def mnbutton_c_clicked_01(ui, index):
+    """메인 탭을 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        index: 탭 인덱스
+    """
     if ui.extend_window:
         QMessageBox.critical(ui, '오류 알림', '전략탭 확장 상태에서는 탭을 변경할 수 없습니다.')
         return
@@ -43,6 +48,10 @@ def mnbutton_c_clicked_01(ui, index):
 
 @error_decorator
 def mnbutton_c_clicked_02(ui):
+    """테이블 표시를 전환합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.main_btn == 1:
         if not ui.calendarWidgetttt.isVisible():
             boolean1 = False
@@ -60,6 +69,11 @@ def mnbutton_c_clicked_02(ui):
 
 @error_decorator
 def mnbutton_c_clicked_03(ui, auto=False):
+    """매매 시스템을 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        auto: 자동 시작 여부
+    """
     if auto:
         buttonReply = QMessageBox.Yes
     else:
@@ -105,6 +119,10 @@ def mnbutton_c_clicked_03(ui, auto=False):
 
 @error_decorator
 def mnbutton_c_clicked_04(ui):
+    """창 크기를 변경합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     if ui.geometry().width() > 1000:
         ui.setFixedSize(726, 384)
         ui.zo_pushButton.setStyleSheet(style_bc_st)
@@ -115,6 +133,10 @@ def mnbutton_c_clicked_04(ui):
 
 @error_decorator
 def mnbutton_c_clicked_05(ui):
+    """백테 그래프 및 기록 DB를 삭제합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     buttonReply = QMessageBox.warning(
         ui, '백테기록삭제', '백테 그래프 및 기록 DB가 삭제됩니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -134,6 +156,10 @@ def mnbutton_c_clicked_05(ui):
 
 @error_decorator
 def mnbutton_c_clicked_06(ui):
+    """계정 설정을 초기화합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     buttonReply = QMessageBox.warning(
         ui, '계정 설정 초기화', '계정 설정 항목이 모두 초기화됩니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -167,6 +193,10 @@ def mnbutton_c_clicked_06(ui):
 
 @thread_decorator
 def trade_process_start(ui):
+    """거래 프로세스를 시작합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     target = ui.market_info['프로세스'][0]
     ui.proc_receiver = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
     ui.proc_receiver.start()

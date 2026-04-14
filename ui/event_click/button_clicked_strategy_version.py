@@ -14,6 +14,10 @@ SVM = StrategyVersionManager('stock', 'basic', 'buy', 'dummy')
 
 
 def visible_false(ui):
+    """모든 텍스트 에디터를 숨깁니다.
+    Args:
+        ui: UI 클래스 인스턴스
+    """
     ui.ss_textEditttt_01.setVisible(False)
     ui.ss_textEditttt_02.setVisible(False)
     ui.ss_textEditttt_03.setVisible(False)
@@ -27,6 +31,11 @@ def visible_false(ui):
 
 
 def comboBox_reload(comboBox1, comboBox2):
+    """콤보박스를 다시 로드합니다.
+    Args:
+        comboBox1: 첫 번째 콤보박스
+        comboBox2: 두 번째 콤보박스
+    """
     global SVM
     version_list = SVM.get_versions()
     comboBox1.clear()
@@ -38,6 +47,14 @@ def comboBox_reload(comboBox1, comboBox2):
 
 
 def get_widget(ui, gubun1, gubun2):
+    """위젯을 가져옵니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun1: 첫 번째 구분 (basic, opti, cond)
+        gubun2: 두 번째 구분 (buy, sell, vars, gavars)
+    Returns:
+        텍스트에디터1, 텍스트에디터2, 콤보박스1, 콤보박스2
+    """
     if gubun1 == 'basic':
         if gubun2 == 'buy':
             textEdit1 = getattr(ui, 'ss_textEditttt_01')
@@ -65,6 +82,13 @@ def get_widget(ui, gubun1, gubun2):
 
 @error_decorator
 def strategy_version(ui, gubun1, gubun2, strategy_name):
+    """전략 버전 관리를 표시합니다.
+    Args:
+        ui: UI 클래스 인스턴스
+        gubun1: 첫 번째 구분 (basic, opti, cond)
+        gubun2: 두 번째 구분 (buy, sell, vars, gavars)
+        strategy_name: 전략 이름
+    """
     not_visible_widjet1 = getattr(ui, 'svc_pushButton_21')
     not_visible_widjet2 = getattr(ui, 'svc_pushButton_24')
     not_visible_widjet3 = getattr(ui, 'ss_pushButtonn_08')
