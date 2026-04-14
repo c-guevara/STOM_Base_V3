@@ -55,7 +55,7 @@ class FutureReceiver(BaseReceiver):
             if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
                 return
             dt = int(f"{self.str_today}{int_hms}")
-            code = body['symbol']
+            code = body['futcode']
             hoga_seprice = [
                 float(body['offerho1']), float(body['offerho2']), float(body['offerho3']),
                 float(body['offerho4']), float(body['offerho5'])
@@ -83,7 +83,7 @@ class FutureReceiver(BaseReceiver):
             if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
                 return
             dt = int(f"{self.str_today}{int_hms}")
-            code  = body['symbol']
+            code  = body['futcode']
             c     = float(body['price'])
             o     = float(body['open'])
             h     = float(body['high'])
