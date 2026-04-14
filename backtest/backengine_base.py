@@ -12,7 +12,8 @@ from utility.settings.setting_base import indicator, ui_num, BACK_TEMP, DB_STRAT
 from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
     set_builtin_print, get_profile_text
 from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
-    get_back_load_code_query_batch, get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
+    get_back_load_code_query_batch, get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, \
+    get_sell_conds_future
 
 
 class BackEngineBase(StgGlobalsFunc):
