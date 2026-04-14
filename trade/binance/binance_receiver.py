@@ -10,7 +10,19 @@ from utility.static_method.static import now, now_utc, str_ymd, error_decorator,
 
 
 class BinanceReceiver(BaseReceiver):
+    """바이낸스 데이터 수신 클래스입니다.
+    
+    BaseReceiver를 상속받아 바이낸스 시장 데이터를 수신합니다.
+    """
+    
     def __init__(self, qlist, dict_set, market_info):
+        """수신기를 초기화합니다.
+        
+        Args:
+            qlist (list): 큐 리스트
+            dict_set (dict): 설정 딕셔너리
+            market_info (list): 마켓 정보 리스트
+        """
         super().__init__(qlist, dict_set, market_info)
 
         app = QApplication(sys.argv)

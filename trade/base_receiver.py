@@ -9,15 +9,24 @@ from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_
 
 
 class MonitorReceivQ(QThread):
-    """리시버큐 모니터 클래스"""
+    """리시버 큐를 모니터링하는 스레드 클래스입니다.
+    
+    수신 큐에서 데이터를 읽어와 시그널로 전송합니다.
+    """
     signal1 = pyqtSignal(tuple)
     signal2 = pyqtSignal(str)
 
     def __init__(self, receivQ):
+        """모니터를 초기화합니다.
+        
+        Args:
+            receivQ (multiprocessing.Queue): 수신 큐
+        """
         super().__init__()
         self.receivQ = receivQ
 
     def run(self):
+        """큐 모니터링 루프를 실행합니다."""
         while True:
             data = self.receivQ.get()
             if data.__class__ == tuple:
@@ -27,7 +36,20 @@ class MonitorReceivQ(QThread):
 
 
 class BaseReceiver:
+    """실시간 데이터를 수신하고 처리하는 기본 클래스입니다.
+    
+    다양한 큐를 통해 다른 모듈과 통신하며,
+    시장 데이터(체결, 호가)를 처리합니다.
+    """
+    
     def __init__(self, qlist, dict_set, market_infos):
+        """리시버를 초기화합니다.
+        
+        Args:
+            qlist (list): 큐 리스트 [windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ]
+            dict_set (dict): 설정 딕셔너리
+            market_infos (list): 마켓 정보 리스트 [마켓구분, 마켓정보]
+        """
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
@@ -108,6 +130,7 @@ class BaseReceiver:
         set_builtin_print(self.windowQ)
 
     def _save_code_info_and_noti(self):
+        """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
         """종목명 정보 조회 및 저장 후 리시버 시작 알림"""
         dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
         dict_code = {name: code for code, name in dict_name.items()}
@@ -121,6 +144,13 @@ class BaseReceiver:
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
 
     def _check_vi(self, code, c, o):
+        """체결 수신 시 VI가격 업데이트를 확인합니다.
+        
+        Args:
+            code (str): 종목 코드
+            c (int): 현재가
+            o (int): 시작가
+        """
         """체결 수신 시 VI가격 업데이트 확인"""
         vipr = self.dict_vipr.get(code)
         if vipr is None:
@@ -129,16 +159,35 @@ class BaseReceiver:
             self._update_vi_price(code, c)
 
     def _insert_vi_price(self, code, o):
+        """시작가 기준 첫 VI가격을 계산합니다.
+        
+        Args:
+            code (str): 종목 코드
+            o (int): 시작가
+        """
         """시작가 기준 첫 VI가격 계산"""
         uvi, dvi, vi_hgunit = get_vi_price(o)
         self.dict_vipr[code] = [True, timedelta_sec(-3600), uvi, dvi, vi_hgunit]
 
     def _update_vi(self, gubun, code, name):
+        """VI발동 데이터를 수신합니다.
+        
+        Args:
+            gubun (str): 구분
+            code (str): 종목 코드
+            name (str or int): 가격 또는 종목명
+        """
         """VI발동 데이터 수신"""
         if gubun == '1' and (code not in self.dict_vipr or (self.dict_vipr[code][0] and now() > self.dict_vipr[code][1])):
             self._update_vi_price(code, name)
 
     def _update_vi_price(self, code, key):
+        """VI발동 및 해제 시 VI딕셔너리를 업데이트합니다.
+        
+        Args:
+            code (str): 종목 코드
+            key (str or int): 가격 또는 종목명
+        """
         """VI발동 및 해제 시 VI딕셔너리 업데이트"""
         if key.__class__ == str:
             if code in self.dict_vipr:
@@ -151,6 +200,23 @@ class BaseReceiver:
             self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
 
     def _update_tick_data(self, dt, code, c, o, h, low, per, dm, v=None, cg=None, tbids=None, tasks=None, ch=None):
+        """실시간 체결 데이터를 처리합니다 (바이낸스선물 제외).
+        
+        Args:
+            dt (datetime): 데이터 시간
+            code (str): 종목 코드
+            c (int): 현재가
+            o (int): 시작가
+            h (int): 고가
+            low (int): 저가
+            per (float): 등락율
+            dm (int): 당일거래대금
+            v (float, optional): 거래량
+            cg (str, optional): 체결구분
+            tbids (float, optional): 총 매수수량
+            tasks (float, optional): 총 매도수량
+            ch (float, optional): 체결강도
+        """
         """실시간 체결 데이터 처리, 바이낸스선물을 제외한 거래소용"""
         if self.market_gubun < 4:
             self._check_vi(code, c, o)
@@ -219,6 +285,15 @@ class BaseReceiver:
         self._update_hoga_window_tick(dt, code, bids_, asks_, c, per, o, h, low, ch)
 
     def _update_tick_data_coin_future(self, dt, code, c, v, m):
+        """실시간 체결 데이터를 처리합니다 (바이낸스선물용).
+        
+        Args:
+            dt (datetime): 데이터 시간
+            code (str): 종목 코드
+            c (float): 현재가
+            v (float): 거래량
+            m (bool): 매수여부
+        """
         """실시간 체결 데이터 처리, 바이낸스선물용"""
         if not self.is_tick and code in self.tuple_jango:
             pre_dt = self.dict_jgdt.get(code)
@@ -278,6 +353,14 @@ class BaseReceiver:
             self.dict_dlhp[code] = [dt_, round((h / low - 1) * 100, 2)]
 
     def _update_money_factor(self, code, c, buy_money, sell_money):
+        """매수/매도 금액 관련 데이터를 업데이트합니다.
+        
+        Args:
+            code (str): 종목 코드
+            c (int): 현재가
+            buy_money (int): 매수 금액
+            sell_money (int): 매도 금액
+        """
         """매수/매도금액 관련 데이터 처리"""
         if code not in self.dict_money:
             """초당(분당)매수금액, 초당(분당)매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격
@@ -325,6 +408,20 @@ class BaseReceiver:
                 money_arr[7] = c
 
     def _update_hoga_window_tick(self, dt, code, bids_, asks_, c, per, o, h, low, ch):
+        """호가창 틱 데이터를 업데이트합니다.
+        
+        Args:
+            dt (datetime): 데이터 시간
+            code (str): 종목 코드
+            bids_ (float): 매수 수량
+            asks_ (float): 매도 수량
+            c (int): 현재가
+            per (float): 등락율
+            o (int): 시작가
+            h (int): 고가
+            low (int): 저가
+            ch (float): 체결강도
+        """
         """호가창용 데이터 처리"""
         if self.hoga_code == code:
             bids, asks = self.list_hgdt[2:4]
@@ -340,6 +437,22 @@ class BaseReceiver:
 
     def _update_hoga_data(self, dt, code, hoga_seprice, hoga_buprice, hoga_samount, hoga_bamount, hoga_tamount,
                           receivetime):
+        """호가 데이터를 업데이트합니다.
+        
+        Args:
+            dt (datetime): 데이터 시간
+            code (str): 종목 코드
+            hoga_seprice (list): 매도호가
+            hoga_buprice (list): 매수호가
+            hoga_samount (list): 매도수량
+            hoga_bamount (list): 매수수량
+            hoga_tamount (int): 총 거래량
+            hoga_srem (list): 매도잔량
+            hoga_brem (list): 매수잔량
+            hoga_trem (int): 총 잔량
+            hoga_sprice (int): 매도총잔량
+            hoga_bprice (int): 매수총잔량
+        """
         """실시간 호가 데이터 처리"""
         send = False
         dt_min = int(str(dt)[:12])
@@ -396,6 +509,18 @@ class BaseReceiver:
         self._update_hoga_window_rem(dt, code, hoga_tamount, hoga_seprice, hoga_buprice, hoga_samount, hoga_bamount)
 
     def _correction_hoga_data(self, curr_price, hoga_seprice, hoga_samount, hoga_buprice, hoga_bamount):
+        """호가 데이터를 보정합니다.
+        
+        Args:
+            curr_price (int): 현재가
+            hoga_seprice (list): 매도호가
+            hoga_samount (list): 매도수량
+            hoga_buprice (list): 매수호가
+            hoga_bamount (list): 매수수량
+            
+        Returns:
+            tuple: 보정된 호가 데이터
+        """
         """최신 현재가 기준 호가 및 잔량 보정"""
         if len(hoga_seprice) == 10:
             if hoga_seprice[0] < curr_price:
@@ -452,6 +577,24 @@ class BaseReceiver:
 
     def _get_send_data(self, code, code_data, code_dtdm, money_arr, hoga_samount, hoga_bamount,
                        hoga_seprice, hoga_buprice, hoga_tamount, dt, dt_min):
+        """전송할 데이터를 생성합니다.
+        
+        Args:
+            code (str): 종목 코드
+            code_data (list): 종목 데이터
+            code_dtdm (list): 일자별 데이터
+            money_arr (list): 금액 데이터
+            hoga_samount (list): 매도수량
+            hoga_bamount (list): 매수수량
+            hoga_srem (list): 매도잔량
+            hoga_brem (list): 매수잔량
+            hoga_trem (int): 총 잔량
+            hoga_sprice (int): 매도총잔량
+            hoga_bprice (int): 매수총잔량
+            
+        Returns:
+            tuple: 전송할 데이터
+        """
         """전략연산으로 보낼 데이터 추출"""
         c, _, h, low, _, dm, _, bids, asks = code_data[:9]
         tm   = dm - code_dtdm[1]
@@ -481,6 +624,11 @@ class BaseReceiver:
             self.int_logt = dt_min
 
     def _update_money_top(self, dt_std):
+        """거래대금 순위를 업데이트합니다.
+        
+        Args:
+            dt_std (int): 표준 시간
+        """
         """거래대금순위 저장"""
         if self.int_mtdt is None:
             self.int_mtdt = dt_std
@@ -501,7 +649,7 @@ class BaseReceiver:
             )
 
     def _money_top_search(self):
-        """거래대금순위 집계"""
+        """거래대금 순위 종목을 검색합니다."""
         if self.dict_daym:
             list_mtop = [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]]
             insert_set = set(list_mtop) - set(self.list_gsjm)
@@ -514,6 +662,11 @@ class BaseReceiver:
                     self._delete_gsjm_list(code)
 
     def _insert_gsjm_list(self, code):
+        """거래대금 순위 리스트에 종목을 추가합니다.
+        
+        Args:
+            code (str): 종목 코드
+        """
         """거래대금순위 진입 종목코드 처리"""
         if code not in self.list_gsjm:
             self.list_gsjm.append(code)
@@ -521,6 +674,11 @@ class BaseReceiver:
                 self.traderQ.put(('관심진입', code))
 
     def _delete_gsjm_list(self, code):
+        """거래대금 순위 리스트에서 종목을 삭제합니다.
+        
+        Args:
+            code (str): 종목 코드
+        """
         """거래대금순위 이탈 종목코드 처리"""
         if code in self.list_gsjm:
             self.list_gsjm.remove(code)
@@ -528,6 +686,7 @@ class BaseReceiver:
                 self.traderQ.put(('관심이탈', code))
 
     def _receiver_process_kill(self):
+        """리시버 프로세스를 종료합니다."""
         """프로세스 종료 명령 처리"""
         self.dict_bool['프로세스종료'] = True
         self._websocket_kill()
@@ -536,12 +695,17 @@ class BaseReceiver:
         threading_timer(180, self.receivQ.put, '프로세스종료')
 
     def _websocket_kill(self):
-        """웹소켓 스레드 종료"""
+        """웹소켓 연결을 종료합니다."""
         if self.ws_thread:
             self.ws_thread.stop()
             self.ws_thread.terminate()
 
     def _update_tuple(self, data):
+        """튜플 데이터를 업데이트합니다.
+        
+        Args:
+            data (tuple): 업데이트할 데이터
+        """
         """리시버큐로 들어온 듀플 데이터 처리"""
         gubun, data = data
         if gubun == '잔고목록':
@@ -558,7 +722,11 @@ class BaseReceiver:
             self.dict_set = data
 
     def _sys_exit(self, data):
-        """프로세스 종료 명령 실행"""
+        """시스템을 종료합니다.
+        
+        Args:
+            data (tuple): 종료 데이터
+        """
         import sys
         from utility.static_method.static import qtest_qwait
         self._websocket_kill()
@@ -576,7 +744,7 @@ class BaseReceiver:
         sys.exit()
 
     def _save_moneytop(self):
-        """거래대금순위 데이터 저장"""
+        """거래대금 순위 데이터를 저장합니다."""
         codes = set()
         if self.dict_mtop:
             mtop_list = list(self.dict_mtop.values())
@@ -599,7 +767,7 @@ class BaseReceiver:
             self.stgQ.put(('데이터저장', codes))
 
     def _scheduler(self):
-        """1초에 한번 실행되는 스케쥴러"""
+        """스케줄러를 실행합니다."""
         self._money_top_search()
 
         inthms = get_inthms(self.market_gubun)

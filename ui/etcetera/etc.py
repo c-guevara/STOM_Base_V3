@@ -16,6 +16,12 @@ from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdh
 
 @error_decorator
 def update_image(ui, data):
+    """이미지를 업데이트합니다.
+    
+    Args:
+        ui: UI 객체
+        data: 이미지 데이터 튜플
+    """
     ui.image_label1.clear()
     qpix = QPixmap()
     qpix.loadFromData(data[1])
@@ -30,11 +36,22 @@ def update_image(ui, data):
 
 @thread_decorator
 def update_cpuper(ui):
+    """CPU 사용률을 업데이트합니다.
+    
+    Args:
+        ui: UI 객체
+    """
     ui.cpu_per = int(psutil.cpu_percent(interval=1))
 
 
 @error_decorator
 def auto_back_schedule(ui, gubun):
+    """자동 백테스트 스케줄러를 실행합니다.
+    
+    Args:
+        ui: UI 객체
+        gubun (int): 구분 번호 (1: 시작, 2: 스케줄러 표시)
+    """
     if gubun == 1:
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:

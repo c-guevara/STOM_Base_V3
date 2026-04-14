@@ -16,7 +16,27 @@ from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_s
 
 
 class BackEngineBase(StgGlobalsFunc):
+    """백테스트 엔진의 기본 클래스입니다.
+    
+    주문 관리 시스템(OMS)이 적용되지 않은 백테스트 엔진으로,
+    데이터 로드, 전략 실행, 기본 매수/매도 로직을 처리합니다.
+    """
+    
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
+        """백테스트 엔진을 초기화합니다.
+        
+        Args:
+            gubun (int): 엔진 구분 번호
+            shared_cnt (multiprocessing.Value): 공유 카운터
+            lock (multiprocessing.Lock): 공유 락
+            wq (multiprocessing.Queue): 윈도우 큐
+            tq (multiprocessing.Queue): 트레이더 큐
+            bq (multiprocessing.Queue): 백테스트 큐
+            beq_list (list): 백테스트 엔진 큐 리스트
+            bstq_list (list): 백테스트 전략 큐 리스트
+            dict_set (dict): 설정 딕셔너리
+            profile (bool): 프로파일링 여부. 기본값은 False입니다.
+        """
         super().__init__()
         self.gubun           = gubun
         self.shared_cnt      = shared_cnt
@@ -96,6 +116,11 @@ class BackEngineBase(StgGlobalsFunc):
         self._main_loop()
 
     def _update_sub_vars(self):
+        """하위 변수들을 업데이트합니다.
+        
+        마켓 구분, 시장 정보, OMS 적용 여부, 호가 잔량 범위 등
+        백테스트에 필요한 변수들을 설정에서 가져와 업데이트합니다.
+        """
         from utility.settings.setting_market import DICT_MARKET_GUBUN, DICT_MARKET_INFO
 
         self.market_gubun  = DICT_MARKET_GUBUN[self.dict_set['거래소']]
@@ -140,6 +165,11 @@ class BackEngineBase(StgGlobalsFunc):
         self._set_passticks_and_blacklist()
 
     def _set_passticks_and_blacklist(self):
+        """패스틱스 조건과 블랙리스트를 설정합니다.
+        
+        데이터베이스에서 패스틱스 전략을 읽어 컴파일하고,
+        블랙리스트를 설정합니다.
+        """
         def compile_condition(x):
             if self.is_tick:
                 return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
@@ -166,6 +196,11 @@ class BackEngineBase(StgGlobalsFunc):
             self.black_list = blacklist.split(';')
 
     def _main_loop(self):
+        """백테스트 엔진의 메인 루프입니다.
+        
+        큐에서 데이터를 받아 백테스트 유형에 따라 적절한 처리를 수행합니다.
+        지원하는 백테스트 유형: 최적화, 전진분석, GA최적화, 조건최적화, 백테스트, 백파인더.
+        """
         while True:
             data = self.beq.get()
             try:
@@ -333,6 +368,14 @@ class BackEngineBase(StgGlobalsFunc):
                     self.wq.put((ui_num['시스템로그'], format_exc()))
 
     def _data_load(self, data):
+        """백테스트 데이터를 로드합니다.
+        
+        데이터베이스에서 종목 데이터를 읽어와 롤링 데이터를 추가하고,
+        공유 메모리 또는 파일에 저장합니다.
+        
+        Args:
+            data (tuple): 로드에 필요한 데이터 튜플
+        """
         def load(days):
             try:
                 df = pd.read_sql(get_back_load_code_query(self.is_tick, code, days, starttime, endtime), con)
@@ -419,6 +462,14 @@ class BackEngineBase(StgGlobalsFunc):
         self.set_globals_func()
 
     def _check_avg_list(self, avg_list):
+        """평균값 틱수 목록을 검증합니다.
+        
+        백테 엔진 구동 시 포함되지 않은 평균값 틱수가 있으면
+        백테스트를 중지합니다.
+        
+        Args:
+            avg_list (list): 평균값 틱수 목록
+        """
         not_in_list = [x for x in avg_list if x not in self.avg_list]
         if len(not_in_list) > 0 and self.gubun == 0:
             self.wq.put((ui_num['백테스트'], '백테엔진 구동 시 포함되지 않은 평균값 틱수를 사용하여 중지되었습니다.'))
@@ -426,6 +477,11 @@ class BackEngineBase(StgGlobalsFunc):
             self._back_stop()
 
     def _check_day_and_time(self):
+        """날짜와 시간 범위를 확인하고 설정합니다.
+        
+        이전 데이터 로딩과 현재 설정이 동일한지 확인하고,
+        틱/분봉에 따른 단위를 설정합니다.
+        """
         self.same_days = self.startday_ == self.startday and self.endday_ == self.endday
         self.same_time = self.starttime_ == self.starttime and self.endtime_ == self.endtime
 
@@ -437,6 +493,11 @@ class BackEngineBase(StgGlobalsFunc):
             self.hour = 2400
 
     def _back_stop(self, gubun=0):
+        """백테스트를 중지합니다.
+        
+        Args:
+            gubun (int): 중지 구분. 0:일반, 1:사용자요청, 2:완료알림, 3:오류. 기본값은 0입니다.
+        """
         self.back_type = None
         if gubun in (0, 1):
             if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 중지 중 ...'))
@@ -446,6 +507,11 @@ class BackEngineBase(StgGlobalsFunc):
             if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 전략연산 오류, 자동 중지 중 ...'))
 
     def _init_trade_info(self):
+        """거래 정보를 초기화합니다.
+        
+        백테스트에 필요한 거래 관련 변수들을 초기화하고,
+        OMS 적용 여부에 따라 적절한 구조로 설정합니다.
+        """
         self.high_low = []
         self.tick_count = 0
         self.dict_cond_indexn = {}
@@ -476,6 +542,11 @@ class BackEngineBase(StgGlobalsFunc):
 
     # noinspection PyUnresolvedReferences
     def _get_array_data(self):
+        """공유 메모리 또는 파일에서 배열 데이터를 가져옵니다.
+        
+        Returns:
+            str or None: 종목 코드. 데이터가 없으면 None을 반환합니다.
+        """
         shared_info = None
         with self.shared_lock:
             shared_cnt = self.shared_cnt.value
@@ -522,6 +593,10 @@ class BackEngineBase(StgGlobalsFunc):
         return code
 
     def _update_formula_data(self):
+        """사용자 수식 데이터를 업데이트합니다.
+        
+        데이터베이스에서 수식을 읽어 컴파일하고 전역 함수를 설정합니다.
+        """
         total_cnt = self.base_cnt + 5 + self.add_cnt * len(self.avg_list)
         self.fm_list, _, self.fm_tcnt = get_formula_data(False, total_cnt)
         if self.fm_list:
@@ -530,6 +605,11 @@ class BackEngineBase(StgGlobalsFunc):
             self.set_globals_func()
 
     def _back_test(self):
+        """백테스트를 실행합니다.
+        
+        데이터를 순회하며 전략을 실행하고 매수/매도 시그널을 처리합니다.
+        프로파일링이 활성화된 경우 성능 측정을 수행합니다.
+        """
         if self.gubun == 0 and self.profile:
             import cProfile
             self.pr = cProfile.Profile()
@@ -609,6 +689,11 @@ class BackEngineBase(StgGlobalsFunc):
             self.wq.put((ui_num['시스템로그'], get_profile_text(self.pr)))
 
     def Buy(self, buy_long=False):
+        """매수 주문을 실행합니다.
+        
+        Args:
+            buy_long (bool): 롱 포지션 여부. 기본값은 False입니다.
+        """
         self._get_buy_count()
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
@@ -637,6 +722,11 @@ class BackEngineBase(StgGlobalsFunc):
                 })
 
     def _get_buy_count(self):
+        """매수 수량을 계산합니다.
+        
+        비중 조절 설정에 따라 배팅 금액을 조절하고,
+        현재가에 따른 주문 수량을 계산합니다.
+        """
         현재가, 저가대비고가등락율 = self.info_for_order[:-2]
         if self.set_weight[0] == 0:
             betting = self.betting
@@ -665,6 +755,20 @@ class BackEngineBase(StgGlobalsFunc):
         self.curr_trade_info['주문수량'] = self._set_buy_count(betting, 현재가, 0, 100)
 
     def _get_hold_info(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
+        """보유 정보를 계산합니다.
+        
+        Args:
+            보유수량 (int): 보유 수량
+            매수가 (float): 매수 가격
+            현재가 (float): 현재 가격
+            최고수익률 (float): 최고 수익률
+            최저수익률 (float): 최저 수익률
+            매수틱번호 (int): 매수 틱 번호
+            매수시간 (datetime): 매수 시간
+            
+        Returns:
+            tuple: (포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간)
+        """
         포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
         if 수익률 > 최고수익률:   self.curr_trade_info['최고수익률'] = 최고수익률 = 수익률
         elif 수익률 < 최저수익률: self.curr_trade_info['최저수익률'] = 최저수익률 = 수익률
@@ -675,6 +779,11 @@ class BackEngineBase(StgGlobalsFunc):
         return 포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간
 
     def Sell(self, sell_long=False):
+        """매도 주문을 실행합니다.
+        
+        Args:
+            sell_long (bool): 롱 포지션 매도 여부. 기본값은 False입니다.
+        """
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
             if self.market_gubun in (1, 3) or sell_long:
@@ -690,6 +799,10 @@ class BackEngineBase(StgGlobalsFunc):
                 self._calculation_eyun()
 
     def _last_sell(self):
+        """마지막 틱에서 매도를 처리합니다.
+        
+        일일 마지막 틱에서 보유 중인 포지션을 청산합니다.
+        """
         호가데이터 = self.arry_code[self.indexn, self.hoga_sidex:self.hoga_eidex]
         매도호가배열 = 호가데이터[:5][::-1]
         매수호가배열 = 호가데이터[5:10]

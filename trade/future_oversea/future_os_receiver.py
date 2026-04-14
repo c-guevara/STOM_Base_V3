@@ -8,7 +8,19 @@ from utility.static_method.static import now, error_decorator
 
 
 class FutureOsReceiver(BaseReceiver):
+    """해외 선물 데이터 수신 클래스입니다.
+    
+    BaseReceiver를 상속받아 해외 선물 시장 데이터를 수신합니다.
+    """
+    
     def __init__(self, qlist, dict_set, market_infos):
+        """수신기를 초기화합니다.
+        
+        Args:
+            qlist (list): 큐 리스트
+            dict_set (dict): 설정 딕셔너리
+            market_infos (list): 마켓 정보 리스트
+        """
         super().__init__(qlist, dict_set, market_infos)
 
         app = QApplication(sys.argv)
@@ -63,7 +75,7 @@ class FutureOsReceiver(BaseReceiver):
                 float(body['bidho4']), float(body['bidho5'])
             ]
             hoga_samount = [
-                int(body['offerrem1']), int(body['offerrem2']), float(body['offerrem3']),
+                int(body['offerrem1']), int(body['offerrem2']), int(body['offerrem3']),
                 int(body['offerrem4']), int(body['offerrem5'])
             ]
             hoga_bamount = [

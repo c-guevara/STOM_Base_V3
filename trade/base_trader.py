@@ -9,18 +9,28 @@ from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelt
 
 
 class MonitorTraderQ(QThread):
-    """트레이더큐 모니터 클래스"""
+    """트레이더 큐를 모니터링하는 스레드 클래스입니다.
+    
+    트레이더 큐에서 데이터를 읽어와 시그널로 전송합니다.
+    """
     signal1 = pyqtSignal(tuple)
     signal2 = pyqtSignal(tuple)
     signal3 = pyqtSignal(tuple)
     signal4 = pyqtSignal(str)
 
     def __init__(self, traderQ, market_gubun):
+        """모니터를 초기화합니다.
+        
+        Args:
+            traderQ (multiprocessing.Queue): 트레이더 큐
+            market_gubun (int): 마켓 구분
+        """
         super().__init__()
         self.traderQ = traderQ
         self.market_gubun = market_gubun
 
     def run(self):
+        """큐 모니터링 루프를 실행합니다."""
         while True:
             data = self.traderQ.get()
             if data.__class__ == tuple:
@@ -36,7 +46,20 @@ class MonitorTraderQ(QThread):
 
 
 class BaseTrader:
+    """주문 실행 및 관리를 담당하는 기본 클래스입니다.
+    
+    체결 목록, 잔고 목록, 거래 목록을 관리하며,
+    주문 생성, 취소, 정정 기능을 제공합니다.
+    """
+    
     def __init__(self, qlist, dict_set, market_infos):
+        """트레이더를 초기화합니다.
+        
+        Args:
+            qlist (list): 큐 리스트 [windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ]
+            dict_set (dict): 설정 딕셔너리
+            market_infos (list): 마켓 정보 리스트 [마켓구분, 마켓정보]
+        """
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
@@ -109,6 +132,11 @@ class BaseTrader:
         set_builtin_print(self.windowQ)
 
     def _get_yesugm_for_paper_trading(self):
+        """모의투자용 예수금을 조회합니다.
+        
+        Returns:
+            int: 예수금
+        """
         """모의투자용 예수금 조회"""
         from utility.settings.setting_base import DB_TRADELIST
         con = sqlite3.connect(DB_TRADELIST)
@@ -121,6 +149,11 @@ class BaseTrader:
         return yesugm
 
     def _set_yesugm_and_noti(self, yesugm):
+        """예수금 관련 데이터를 처리하고 시작 알림을 보냅니다.
+        
+        Args:
+            yesugm (int): 예수금
+        """
         """예수금 관련 데이터 처리 및 시작 알림"""
         총매입금액 = sum([v['매입금액'] for v in self.dict_jg.values()]) if self.dict_jg else 0
         self.dict_intg['예수금'] = int(yesugm - 총매입금액)
@@ -131,10 +164,21 @@ class BaseTrader:
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 시작"))
 
     def get_jgcs_time(self):
+        """잔고청산 시간을 계산합니다.
+        
+        전략종료시간 기준 2분전으로 계산합니다.
+        
+        Returns:
+            int: 잔고청산 시간 (HHMMSS)
+        """
         """전략종료시간 기준 2분전으로 잔고청산 시간 계산"""
         return int(str_hms(timedelta_sec(-120, dt_hms(str(self.dict_set['전략종료시간'])))))
 
     def _load_database(self):
+        """체결 및 거래목록 데이터를 수집합니다.
+        
+        데이터베이스에서 당일 체결 및 거래 목록을 읽어옵니다.
+        """
         """체결 및 거래목록 데이터 수집"""
         from utility.settings.setting_base import DB_TRADELIST
         con = sqlite3.connect(DB_TRADELIST)
@@ -157,6 +201,10 @@ class BaseTrader:
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 데이터베이스 불러오기 완료"))
 
     def _scheduler1(self):
+        """스케줄러 1을 실행합니다.
+        
+        잔고청산 시간에 잔고를 청산합니다.
+        """
         """0.5초에 한번 실행되는 스케쥴러"""
         data = ('잔고목록', self.dict_jg.copy())
         if self.market_gubun in (1, 2, 4):
@@ -166,6 +214,10 @@ class BaseTrader:
             self.stgQ.put(data)
 
     def _scheduler2(self):
+        """스케줄러 2를 실행합니다.
+        
+        주문 시간을 제어합니다.
+        """
         """1초에 한번 실행되는 스케쥴러"""
         inthms = get_inthms(self.market_gubun)
         if self.is_tick and inthms < self.dict_set['전략종료시간']:
@@ -178,6 +230,11 @@ class BaseTrader:
 
     @error_decorator
     def _check_order(self, data):
+        """주문 무결성을 확인합니다.
+        
+        Args:
+            data (tuple): 주문 데이터
+        """
         """현물용 주문 무결성 확인"""
         if len(data) == 7:
             주문구분, 종목코드, 종목명, 주문가격, 주문수량, 시그널시간, 잔고청산 = data
@@ -247,6 +304,11 @@ class BaseTrader:
 
     @error_decorator
     def _check_order_future(self, data):
+        """선물 주문 무결성을 확인합니다.
+        
+        Args:
+            data (tuple): 주문 데이터
+        """
         """선물용 주문 무결성 확인"""
         if len(data) == 7:
             주문구분, 종목코드, 종목명, 주문가격, 주문수량, 시그널시간, 잔고청산 = data
@@ -336,6 +398,20 @@ class BaseTrader:
             self.stgQ.put(data)
 
     def _create_order(self, 주문구분, 종목코드, 종목명, 주문가격, 주문수량, 원주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형):
+        """실제 주문을 생성합니다.
+        
+        Args:
+            주문구분 (str): 주문 구분
+            종목코드 (str): 종목 코드
+            종목명 (str): 종목명
+            주문가격 (int): 주문 가격
+            주문수량 (int): 주문 수량
+            원주문번호 (str): 원주문 번호
+            시그널시간 (datetime): 시그널 시간
+            잔고청산 (bool): 잔고청산 여부
+            정정횟수 (int): 정정 횟수
+            수동주문유형 (str): 수동주문 유형
+        """
         """주문 생성"""
         if self.market_gubun < 6:
             if 주문구분 == '매수' and 정정횟수 == 0:
@@ -538,6 +614,12 @@ class BaseTrader:
                 self._modify_order(code, gubun, 정정가격)
 
     def _cancel_order(self, 종목코드, 주문구분):
+        """주문을 취소합니다.
+        
+        Args:
+            종목코드 (str): 종목 코드
+            주문구분 (str): 주문 구분
+        """
         """주문 취소 처리"""
         종목명 = self.dict_info[종목코드]['종목명']
         last_value = self._get_chejan_last_value(종목명, 주문구분)
@@ -555,6 +637,13 @@ class BaseTrader:
                     )
 
     def _modify_order(self, 종목코드, 주문구분, 정정가격):
+        """주문을 정정합니다.
+        
+        Args:
+            종목코드 (str): 종목 코드
+            주문구분 (str): 주문 구분
+            정정가격 (int): 정정 가격
+        """
         """주문 정정 처리"""
         종목명 = self.dict_info[종목코드]['종목명']
         last_value = self._get_chejan_last_value(종목명, 주문구분)
@@ -612,6 +701,11 @@ class BaseTrader:
             self._sys_exit()
 
     def _jango_cheongsan(self, gubun):
+        """잔고를 청산합니다.
+        
+        Args:
+            gubun (str): 구분
+        """
         """잔고청산 주문 처리"""
         for 주문구분 in self.dict_order:
             for 종목코드 in self.dict_order[주문구분]:
@@ -641,6 +735,7 @@ class BaseTrader:
         self.dict_bool['잔고청산'] = True
 
     def _sys_exit(self):
+        """시스템을 종료합니다."""
         """프로세스 종료 명령 실행"""
         import sys
         from utility.static_method.static import qtest_qwait

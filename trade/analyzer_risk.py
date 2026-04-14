@@ -95,7 +95,18 @@ except:
 
 
 class AnalyzerRisk:
+    """리스크 분석을 수행하는 클래스입니다.
+    
+    RSI, 변동성 등 리스크 관련 지표를 계산합니다.
+    """
+    
     def __init__(self, market_type: str, columns: list):
+        """리스크 분석기를 초기화합니다.
+        
+        Args:
+            market_type (str): 마켓 타입 ('stock', 'coin', 'future')
+            columns (list): 컬럼 리스트
+        """
         """market_type: 'stock', 'coin', 'future'"""
         self.market_type = market_type
         self.columns = columns

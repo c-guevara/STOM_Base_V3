@@ -8,6 +8,11 @@ from utility.settings.setting_base import DB_CODE_INFO, code_info_tables
 
 @error_decorator
 def load_database(ui):
+    """데이터베이스를 로드합니다.
+    
+    Args:
+        ui: UI 객체
+    """
     con = sqlite3.connect(DB_CODE_INFO)
     for table in code_info_tables:
         df = pd.read_sql(f'SELECT * FROM {table}', con).set_index('index')

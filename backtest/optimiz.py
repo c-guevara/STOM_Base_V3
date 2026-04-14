@@ -18,7 +18,27 @@ from backtest.back_static import send_result, plot_show, get_moneytop_query, get
 
 
 class Total:
+    """최적화를 실행하는 클래스입니다.
+    
+    Optuna를 사용하여 파라미터 최적화를 수행합니다.
+    """
+    
     def __init__(self, wq, sq, tq, teleQ, mq, lq, bstq_list, backname, market_gubun, market_info, dict_set):
+        """최적화 엔진을 초기화합니다.
+        
+        Args:
+            wq (multiprocessing.Queue): 윈도우 큐
+            sq (multiprocessing.Queue): 전략 큐
+            tq (multiprocessing.Queue): 트레이더 큐
+            teleQ (multiprocessing.Queue): 텔레그램 큐
+            mq (multiprocessing.Queue): 메시지 큐
+            lq (multiprocessing.Queue): 로그 큐
+            bstq_list (list): 백테스트 전략 큐 리스트
+            backname (str): 백테스트 이름
+            market_gubun (int): 마켓 구분
+            market_info (dict): 마켓 정보
+            dict_set (dict): 설정 딕셔너리
+        """
         self.wq           = wq
         self.sq           = sq
         self.tq           = tq
@@ -70,6 +90,10 @@ class Total:
         self._main_loop()
 
     def _main_loop(self):
+        """최적화 메인 루프를 실행합니다.
+        
+        백테스트 결과를 수집하고 최적화를 수행합니다.
+        """
         sc  = 0
         bc  = 0
         st  = {}

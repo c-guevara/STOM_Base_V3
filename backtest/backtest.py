@@ -13,9 +13,41 @@ from backtest.back_static import plot_show, get_moneytop_query, get_result_dataf
 
 
 class BackTest:
+    """백테스트를 실행하는 클래스입니다.
+    
+    전략을 컴파일하고 데이터를 로드하여 백테스트를 실행합니다.
+    """
+    
     def __init__(self, sc, wq, sq, tq, lq, teleQ, beq_list, bstq_list, backname, dict_set, market_infos, betting,
                  avgtime, startday, endday, starttime, endtime, buystg_name, sellstg_name, back_count, blacklist,
                  schedul, back_club):
+        """백테스트를 초기화합니다.
+        
+        Args:
+            sc (multiprocessing.Value): 공유 카운터
+            wq (multiprocessing.Queue): 윈도우 큐
+            sq (multiprocessing.Queue): 전략 큐
+            tq (multiprocessing.Queue): 트레이더 큐
+            lq (multiprocessing.Queue): 로그 큐
+            teleQ (multiprocessing.Queue): 텔레그램 큐
+            beq_list (list): 백테스트 엔진 큐 리스트
+            bstq_list (list): 백테스트 전략 큐 리스트
+            backname (str): 백테스트 이름
+            dict_set (dict): 설정 딕셔너리
+            market_infos (list): 마켓 정보 리스트
+            betting (float): 배팅 금액
+            avgtime (int): 평균 시간
+            startday (int): 시작 일자
+            endday (int): 종료 일자
+            starttime (int): 시작 시간
+            endtime (int): 종료 시간
+            buystg_name (str): 매수 전략 이름
+            sellstg_name (str): 매도 전략 이름
+            back_count (int): 백테스트 카운트
+            blacklist (list): 블랙리스트
+            schedul (bool): 스케줄 여부
+            back_club (str): 백테스트 클럽
+        """
         self.shared_cnt   = sc
         self.wq           = wq
         self.sq           = sq
@@ -64,6 +96,10 @@ class BackTest:
 
     # noinspection PyUnresolvedReferences
     def _start(self):
+        """백테스트를 시작합니다.
+        
+        데이터를 로드하고 전략을 컴파일한 후 백테스트를 실행합니다.
+        """
         con   = sqlite3.connect(self.market_info['백테디비'][self.is_tick])
         query = get_moneytop_query(self.is_tick, self.startday, self.endday, self.starttime, self.endtime)
         df_mt = pd.read_sql(query, con)

@@ -10,7 +10,19 @@ from utility.static_method.static import now, timedelta_sec, get_profit_coin_fut
 
 
 class BinanceTrader(BaseTrader):
+    """바이낸스 트레이더 클래스입니다.
+    
+    BaseTrader를 상속받아 바이낸스 시장 주문을 실행합니다.
+    """
+    
     def __init__(self, qlist, dict_set, market_infos):
+        """트레이더를 초기화합니다.
+        
+        Args:
+            qlist (list): 큐 리스트
+            dict_set (dict): 설정 딕셔너리
+            market_infos (list): 마켓 정보 리스트
+        """
         super().__init__(qlist, dict_set, market_infos)
 
         app = QApplication(sys.argv)

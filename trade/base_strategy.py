@@ -16,7 +16,21 @@ from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema
 
 
 class BaseStrategy(StgGlobalsFunc):
+    """실시간 전략 연산을 담당하는 기본 클래스입니다.
+    
+    매수/매도 전략을 컴파일하고, 보조지표를 설정하며,
+    실시간 데이터를 기반으로 전략을 실행합니다.
+    """
+    
     def __init__(self, gubun, qlist, dict_set, market_info):
+        """전략 엔진을 초기화합니다.
+        
+        Args:
+            gubun (int): 전략 구분 번호
+            qlist (list): 큐 리스트 [windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ]
+            dict_set (dict): 설정 딕셔너리
+            market_info (list): 마켓 정보 리스트 [마켓구분, 마켓정보]
+        """
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
@@ -114,6 +128,10 @@ class BaseStrategy(StgGlobalsFunc):
         self._main_loop()
 
     def _set_formula_data(self):
+        """수식 관리자 데이터를 처리합니다.
+        
+        데이터베이스에서 수식을 읽어 컴파일합니다.
+        """
         """수식관리자 데이터 처리"""
         self.fm_list, dict_fm, self.fm_tcnt = get_formula_data(False, self.data_cnt)
         self.windowQ.put((ui_num['사용자수식'], deepcopy(self.fm_list), dict_fm, self.fm_tcnt))
@@ -122,6 +140,10 @@ class BaseStrategy(StgGlobalsFunc):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
     def _set_strategy_and_blacklist(self):
+        """전략 및 블랙리스트 데이터를 처리합니다.
+        
+        데이터베이스에서 매수/매도 전략과 블랙리스트를 읽어 설정합니다.
+        """
         """전략 및 블랙리스트 데이터 처리"""
         first_name               = self.market_info['전략구분']
         table_name_stg_buy       = f"{first_name}_buy"
@@ -181,6 +203,14 @@ class BaseStrategy(StgGlobalsFunc):
         self.indi_settings = list(self.indicator.values())
 
     def get_buy_indi_stg(self, buytxt):
+        """매수 지표 전략을 가져옵니다.
+        
+        Args:
+            buytxt (str): 매수 전략 텍스트
+            
+        Returns:
+            str: 매수 지표 전략
+        """
         """매수전략, 보조지표 설정 분리"""
         lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
         buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
@@ -1344,6 +1374,11 @@ class BaseStrategy(StgGlobalsFunc):
             ]
 
     def Buy(self, buy_long=False):
+        """매수 주문을 실행합니다.
+        
+        Args:
+            buy_long (bool): 롱 포지션 여부. 기본값은 False입니다.
+        """
         """매수시그널 처리"""
         취소시그널, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_buy
         if 취소시그널:
@@ -1410,6 +1445,11 @@ class BaseStrategy(StgGlobalsFunc):
         return 매수수량
 
     def Sell(self, sell_long=False):
+        """매도 주문을 실행합니다.
+        
+        Args:
+            sell_long (bool): 롱 포지션 매도 여부. 기본값은 False입니다.
+        """
         """매도시그널 처리"""
         취소시그널, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_sell
         if 취소시그널:

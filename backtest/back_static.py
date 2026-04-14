@@ -8,6 +8,7 @@ from utility.static_method.static import thread_decorator
 
 @thread_decorator
 def RunOptunaServer():
+    """Optuna 대시보드 서버를 실행합니다."""
     from optuna_dashboard import run_server
     from utility.settings.setting_base import DB_OPTUNA
     try:
@@ -17,6 +18,14 @@ def RunOptunaServer():
 
 
 def get_trade_info(gubun):
+    """거래 정보 딕셔너리를 반환합니다.
+    
+    Args:
+        gubun (int): 구분 (1: 기본, 2: OMS, 기타: 일일)
+        
+    Returns:
+        dict: 거래 정보 딕셔너리
+    """
     from utility.static_method.static import dt_ymd
     buy_time = dt_ymd('20000101')
     if gubun == 1:
@@ -69,6 +78,18 @@ def get_trade_info(gubun):
 
 
 def get_back_load_code_query(is_tick, code, days, starttime, endtime):
+    """백테스트 데이터 로드 쿼리를 생성합니다.
+    
+    Args:
+        is_tick (bool): 틱 데이터 여부
+        code (str): 종목 코드
+        days (list): 일자 리스트
+        starttime (int): 시작 시간
+        endtime (int): 종료 시간
+        
+    Returns:
+        str: SQL 쿼리
+    """
     conditions = []
     for day in days:
         if is_tick:
@@ -84,6 +105,18 @@ def get_back_load_code_query(is_tick, code, days, starttime, endtime):
 
 
 def get_moneytop_query(is_tick, startday, endday, starttime, endtime):
+    """거래대금 순위 쿼리를 생성합니다.
+    
+    Args:
+        is_tick (bool): 틱 데이터 여부
+        startday (int): 시작 일자
+        endday (int): 종료 일자
+        starttime (int): 시작 시간
+        endtime (int): 종료 시간
+        
+    Returns:
+        str: SQL 쿼리
+    """
     if is_tick:
         sindex = startday * 1000000 + starttime
         eindex = endday * 1000000 + endtime
@@ -95,6 +128,16 @@ def get_moneytop_query(is_tick, startday, endday, starttime, endtime):
 
 
 def get_buy_stg(buytxt, gubun, wq):
+    """매수 전략을 컴파일합니다.
+    
+    Args:
+        buytxt (str): 매수 전략 텍스트
+        gubun (int): 구분
+        wq (multiprocessing.Queue): 윈도우 큐
+        
+    Returns:
+        tuple: (매수 전략, 지표 전략)
+    """
     lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
     buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
     indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
