@@ -402,19 +402,12 @@ def qtest_qwait(sec):
     QTest.qWait(int(sec * 1000))
 
 
-def change_format(text, dotdowndel=False, dotdown4=False, dotdown8=False):
+def change_format(text, float_point=2):
     text = str(text)
     try:
         format_data = f'{int(text):,}'
     except:
-        if dotdowndel:
-            format_data = f'{float(text):,.0f}'
-        elif dotdown4:
-            format_data = f'{float(text):,.4f}'
-        elif dotdown8:
-            format_data = f'{float(text):,.8f}'
-        else:
-            format_data = f'{float(text):,.2f}'
+        format_data = f'{float(text):,.{float_point}f}'
     return format_data
 
 

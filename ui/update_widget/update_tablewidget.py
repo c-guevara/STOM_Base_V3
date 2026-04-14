@@ -199,53 +199,65 @@ class UpdateTablewidget:
 
                 if column in self.columns_time:
                     cgtime = str(value)
-                    if column == '체결시간': cgtime = f'{cgtime[8:10]}:{cgtime[10:12]}:{cgtime[12:14]}'
+                    if column == '체결시간':
+                        cgtime = f'{cgtime[8:10]}:{cgtime[10:12]}:{cgtime[12:14]}'
                     item = QTableWidgetItem(cgtime)
 
                 elif column in self.columns_day:
                     day = value
-                    if '.' not in day: day = day[:4] + '.' + day[4:6] + '.' + day[6:]
+                    if '.' not in day:
+                        day = f'{day[:4]}.{day[4:6]}.{day[6:]}'
                     item = QTableWidgetItem(day)
 
                 elif self.ui.market_gubun in (5, 9) and gubun in self.uinums_dot4 and column in self.columns_dot4:
-                    item = QTableWidgetItem(change_format(value, dotdown4=True))
+                    item = QTableWidgetItem(change_format(value, 4))
 
                 elif column in self.columns_str or (self.ui.database_chart and column == '체결수량'):
                     item = QTableWidgetItem(str(value))
 
                 elif '량' in column and gubun in self.uinums_dot8:
                     if self.ui.market_gubun in (5, 9):
-                        item = QTableWidgetItem(change_format(value, dotdown8=True))
+                        item = QTableWidgetItem(change_format(value, 8))
                     else:
-                        item = QTableWidgetItem(change_format(value, dotdowndel=True))
+                        item = QTableWidgetItem(change_format(value, 0))
 
                 elif (gubun == ui_num['잔고목록'] and column in self.columns_price1) or \
                         (gubun == ui_num['체결목록'] and column in self.columns_price2) or \
                         (gubun == ui_num['호가종목'] and column in self.columns_price3) or \
                         (gubun == ui_num['호가잔량'] and column == '호가'):
-                    if self.ui.market_gubun in (5, 9):
-                        item = NumericItem(change_format(value, dotdown8=True))
+                    if self.ui.market_gubun < 4:
+                        item = QTableWidgetItem(change_format(value, 0))
+                    elif self.ui.market_gubun in (5, 9):
+                        item = QTableWidgetItem(change_format(value, 8))
                     else:
-                        item = NumericItem(change_format(value))
+                        item = QTableWidgetItem(change_format(value))
 
                 elif gubun in self.uinums_numeric:
                     value = str(value)
                     if column in self.columns_numeric:
                         item = NumericItem(change_format(value))
-                    elif (gubun == ui_num['상세기록'] and column in self.columns_price4) or column == '바이낸스(달러)':
-                        item = NumericItem(change_format(value, dotdown8=True))
+                    elif gubun == ui_num['상세기록'] and column in self.columns_price4:
+                        if self.ui.market_gubun < 4:
+                            item = NumericItem(change_format(value, 0))
+                        elif self.ui.market_gubun in (5, 9):
+                            item = NumericItem(change_format(value, 8))
+                        else:
+                            item = NumericItem(change_format(value))
+                    elif column == '바이낸스(달러)':
+                        item = NumericItem(change_format(value, 8))
                     elif column == '업비트(원)':
-                        item = NumericItem(change_format(value, dotdown4=True))
+                        item = NumericItem(change_format(value, 4))
                     elif column == '매도조건':
                         item = QTableWidgetItem(value)
                     else:
-                        item = NumericItem(change_format(value, dotdowndel=True))
+                        item = NumericItem(change_format(value, 0))
+
                     if column != '매도조건':
                         value = float(value)
                         item.setData(Qt.UserRole, value)
 
                 elif column not in self.columns_notdotx:
-                    item = QTableWidgetItem(change_format(value, dotdowndel=True))
+                    item = QTableWidgetItem(change_format(value, 0))
                 else:
                     item = QTableWidgetItem(change_format(value))
 

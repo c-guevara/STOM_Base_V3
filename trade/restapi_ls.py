@@ -8,8 +8,8 @@ import websockets
 from traceback import format_exc
 from trade.restapi_lsdata import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
+from utility.static_method.static import now
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import now, timedelta_sec
 
 
 class LsRestAPI:
@@ -466,7 +466,7 @@ class LsWebSocketReceiver(QThread):
             await self._disconnect()
 
     async def _connect(self):
-        self.websocket = await websockets.connect(LsRestData.웹소켓주소, ping_timeout=60, ping_interval=60)
+        self.websocket = await websockets.connect(LsRestData.웹소켓주소, ping_interval=60)
         self.connected = True
 
     async def _receive_message(self):
@@ -477,53 +477,35 @@ class LsWebSocketReceiver(QThread):
                 self.signal.emit(data)
 
     async def _real_reg(self):
-        운영등록완료 = False if self.gubun != '해외선물' else True
-        체결등록완료 = False
-        호가등록완료 = False
-        등록완료번호 = 0
-        등록할총개수 = len(self.symbols)
-        다음등록시간 = now()
-
         while not self.connected:
             await asyncio.sleep(0.1)
 
-        while self.connected:
-            if not 운영등록완료:
-                data = self._get_send_data('장운영정보', '실시간시세등록', '0')
-                await self.websocket.send(json.dumps(data))
-                다음등록시간 = timedelta_sec(2)
-                운영등록완료 = True
+        data = self._get_send_data('장운영정보', '실시간시세등록', '0')
+        await self.websocket.send(json.dumps(data))
+        await asyncio.sleep(0.02)
 
-            elif not 체결등록완료:
-                if now() > 다음등록시간:
-                    gubun = f'{self.gubun}체결'
-                    for code in self.symbols[등록완료번호:등록완료번호 + 100]:
-                        data = self._get_send_data(gubun, '실시간시세등록', code)
-                        await self.websocket.send(json.dumps(data))
+        last = len(self.symbols)
+        gubun = f'{self.gubun}체결'
+        for i, code in enumerate(self.symbols):
+            data = self._get_send_data(gubun, '실시간시세등록', code)
+            await self.websocket.send(json.dumps(data))
+            await asyncio.sleep(0.02)
 
-                    다음등록시간 = timedelta_sec(2)
-                    등록완료번호 = 등록완료번호 + 100
-                    self.windowQ.put(
-                        (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{min(등록완료번호, 등록할총개수)}/{등록할총개수}]')
-                    )
-                    if 등록완료번호 >= 등록할총개수:
-                        체결등록완료 = True
-                        등록완료번호 = 0
+            if i % 100 == 0:
+                self.windowQ.put(
+                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
+                )
 
-            elif not 호가등록완료:
-                if now() > 다음등록시간:
-                    gubun = f'{self.gubun}호가'
-                    for code in self.symbols[등록완료번호:등록완료번호 + 100]:
-                        data = self._get_send_data(gubun, '실시간시세등록', code)
-                        await self.websocket.send(json.dumps(data))
+        gubun = f'{self.gubun}호가'
+        for i, code in enumerate(self.symbols):
+            data = self._get_send_data(gubun, '실시간시세등록', code)
+            await self.websocket.send(json.dumps(data))
+            await asyncio.sleep(0.02)
 
-                    다음등록시간 = timedelta_sec(2)
-                    등록완료번호 = 등록완료번호 + 100
-                    self.windowQ.put(
-                        (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{min(등록완료번호, 등록할총개수)}/{등록할총개수}]')
-                    )
-                    if 등록완료번호 >= 등록할총개수:
-                        break
+            if i % 100 == 0:
+                self.windowQ.put(
+                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
+                )
 
     def _get_send_data(self, gubun: str, tr_type: str, code: str):
         if '국내주식' in gubun:
@@ -586,7 +568,7 @@ class LsWebSocketTrader(QThread):
             await self._disconnect()
 
     async def _connect(self):
-        self.websocket = await websockets.connect(LsRestData.웹소켓주소, ping_timeout=60, ping_interval=60)
+        self.websocket = await websockets.connect(LsRestData.웹소켓주소, ping_interval=60)
         self.connected = True
         for gubun in LsRestData.주문거래코드:
             if self.gubun in gubun:
