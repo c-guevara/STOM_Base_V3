@@ -19,9 +19,12 @@ def set_builtin_print(q):
                 caller_function = caller_frame.f_code.co_name
                 excluded_paths  = ['site-packages', 'numba', 'numpy', 'pandas', 'talib']
                 is_excluded     = any(path in caller_filename for path in excluded_paths)
+                is_wrapper_call = caller_function == 'wrapper' and 'static.py' in caller_filename
                 if not is_excluded and caller_function != '<module>':
                     is_direct_print = True
                 elif '__main__' in caller_filename:
+                    is_direct_print = True
+                elif is_wrapper_call:
                     is_direct_print = True
 
             if not is_direct_print:
