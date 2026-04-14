@@ -632,11 +632,8 @@ class BackEngineBase(StgGlobalsFunc):
                 self._back_stop(1)
                 return
 
-            if self.market_gubun < 9:
-                self.code = code
-                self.name = self.dict_info.get(self.code, {}).get('종목명', self.code)
-            else:
-                self.code = self.name = code
+            self.code = code
+            self.name = self.dict_info.get(self.code, {}).get('종목명', self.code)
 
             if self.is_oms:
                 if self.dict_set['매수금지블랙리스트'] and self.name in self.black_list and self.back_type != '백파인더':
