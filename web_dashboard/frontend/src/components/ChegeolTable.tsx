@@ -28,7 +28,7 @@ export default function ChegeolTable({ items }: Props) {
               {items.map((item) => (
                 <TableRow key={item.index}>
                   <TableCell className="font-medium text-xs md:text-sm">{item.종목명}</TableCell>
-                  <TableCell className="text-xs md:text-sm">{item.주문구분}</TableCell>
+                  <TableCell className={`text-xs md:text-sm ${['매수', 'BUY_LONG', 'SELL_SHORT'].includes(item.주문구분) ? 'text-red-600' : ['매도', 'SELL_LONG', 'BUY_SHORT'].includes(item.주문구분) ? 'text-blue-600' : ''}`}>{item.주문구분}</TableCell>
                   <TableCell className="text-xs md:text-sm">{item.체결가.toLocaleString()}</TableCell>
                   <TableCell className="text-xs md:text-sm">{item.체결수량}</TableCell>
                   <TableCell className="text-xs md:text-sm hidden sm:table-cell">{item.체결시간}</TableCell>

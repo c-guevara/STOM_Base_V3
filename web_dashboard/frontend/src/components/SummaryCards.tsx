@@ -42,8 +42,8 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   const cards = [
     { title: '일자 시간', value: { date: formattedDate, time: formattedTime }, color: 'text-gray-600', icon: Clock, isDateTime: true },
     { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 },
-    { title: '총 매입금액', value: Math.floor(totalTrade.총매수금액).toLocaleString() + currency, color: 'text-blue-600', icon: Wallet },
-    { title: '총 매도금액', value: Math.floor(totalTrade.총매도금액).toLocaleString() + currency, color: 'text-purple-600', icon: DollarSign },
+    { title: '총 매입금액', value: Math.floor(totalTrade.총매수금액).toLocaleString(), currency: currency, color: 'text-red-600', icon: Wallet, isCurrency: true },
+    { title: '총 매도금액', value: Math.floor(totalTrade.총매도금액).toLocaleString(), currency: currency, color: 'text-blue-600', icon: DollarSign, isCurrency: true },
     { title: '총 수익금', value: (totalTrade.수익금합계 >= 0 ? '+' : '') + Math.floor(totalTrade.수익금합계).toLocaleString() + currency, color: totalTrade.수익금합계 >= 0 ? 'text-red-600' : 'text-blue-600', icon: TrendingUp },
     { title: '총 수익률', value: (totalTrade.수익률 >= 0 ? '+' : '') + totalTrade.수익률.toFixed(2) + '%', color: totalTrade.수익률 >= 0 ? 'text-red-600' : 'text-blue-600', icon: TrendingUp }
   ]
@@ -63,6 +63,11 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-left text-gray-600">{(card.value as { date: string; time: string }).date}</span>
                   <span className="text-lg font-bold text-right text-gray-600">{(card.value as { date: string; time: string }).time}</span>
+                </div>
+              ) : card.isCurrency ? (
+                <div className="text-lg font-bold text-right">
+                  <span className={card.color}>{card.value as string}</span>
+                  <span className="text-gray-600">{card.currency}</span>
                 </div>
               ) : (
                 <div className={`text-lg font-bold text-right ${card.color}`}>
