@@ -499,7 +499,7 @@ class BaseTrader:
             self.jgcs_time = self.get_jgcs_time()
         elif gubun == '종목정보':
             if self.market_gubun in (1, 2, 4):
-                self.dict_sgbn, self.dict_info = data
+                self.dict_info, self.dict_sgbn = data
             elif self.market_gubun in (6, 7):
                 self.dict_info, self.dict_expc = data
             else:

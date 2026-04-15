@@ -50,8 +50,8 @@ class StockReceiver(BaseReceiver):
         """종목 정보를 조회합니다."""
         self.dict_info, self.codes = self.ls.get_code_info_stock(self.market_gubun-1)
         if self.market_gubun < 3:
-            self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.codes)}
-            self.traderQ.put(('종목정보', (self.dict_sgbn, self.dict_info)))
+            self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.dict_info)}
+            self.traderQ.put(('종목정보', (self.dict_info, self.dict_sgbn)))
             for q in self.stgQs:
                 q.put(('종목정보', self.dict_info))
         else:

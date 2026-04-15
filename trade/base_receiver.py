@@ -410,7 +410,8 @@ class BaseReceiver:
             if asks_ > 0: asks += asks_
             self.list_hgdt[2:4] = bids, asks
             if dt > self.list_hgdt[0]:
-                self.hogaQ.put((code, c, per, 0, -1, o, h, low))
+                name = self.dict_info[code]['종목명']
+                self.hogaQ.put((name, c, per, 0, -1, o, h, low))
                 if asks > 0: self.hogaQ.put((-asks, ch))
                 if bids > 0: self.hogaQ.put((bids, ch))
                 self.list_hgdt[0] = dt

@@ -827,7 +827,7 @@ def database_check():
                     idx_ask2 = list(df.columns).index('매도호가2')
                     if '전일비' in df.columns or '당일매수금액' not in df.columns or idx_ask2 != idx_ask1 + 1:
                         con.close()
-                        return False, '일자DB의 칼럼이 일치하지 않습니다.\nupdate_db_20260420.bat 파일을 실행하여 DB를 업데이트하십시오.'
+                        return False, '일자DB의 칼럼이 일치하지 않습니다.\nupdate_db_20260420.bat 파일을 실행하여 DB를 업데이트하십시오.\n'
                 con.close()
 
             file_list_ = [x for x in file_list if file_name in x and '.db' in x and 'back' in x]
@@ -835,6 +835,8 @@ def database_check():
                 con = sqlite3.connect(f'{DB_PATH}/{file_list_[0]}')
                 df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                 table_list = df['name'].to_list()
+                if 'moneytop' in table_list:
+                    table_list.remove('moneytop')
                 for table in code_info_tables:
                     if table in table_list:
                         table_list.remove(table)

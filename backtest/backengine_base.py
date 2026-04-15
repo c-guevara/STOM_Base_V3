@@ -916,7 +916,7 @@ class BackEngineBase(StgGlobalsFunc):
 
         self._update_highlow(현재가)
 
-        if self.dict_condition:
+        if self.is_tick and self.dict_condition:
             if 종목코드 not in self.dict_cond_indexn:
                 self.dict_cond_indexn[종목코드] = {}
             for k, v in self.dict_condition.items():
@@ -963,6 +963,12 @@ class BackEngineBase(StgGlobalsFunc):
                     if vturn == 0 and self.tick_count < self.vars[0]:
                         continue
 
+                    if not self.is_tick and self.dict_condition:
+                        if 종목코드 not in self.dict_cond_indexn:
+                            self.dict_cond_indexn[종목코드] = {}
+                        for k, v in self.dict_condition.items():
+                            exec(v)
+
                     self.info_for_order = 현재가, 저가대비고가등락율, vturn, vkey
                     self.curr_trade_info = self.trade_info[vturn][vkey]
                     보유중, 매수가, _, _, 보유수량, 최고수익률, 최저수익률, 매수틱번호, 매수시간 = self.curr_trade_info.values()
@@ -994,6 +1000,12 @@ class BackEngineBase(StgGlobalsFunc):
                     elif self.tick_count < self.avgtime:
                         return
 
+                    if not self.is_tick and self.dict_condition:
+                        if 종목코드 not in self.dict_cond_indexn:
+                            self.dict_cond_indexn[종목코드] = {}
+                        for k, v in self.dict_condition.items():
+                            exec(v)
+
                     self.info_for_order = 현재가, 저가대비고가등락율, vturn, vkey
                     self.curr_trade_info = self.trade_info[vturn][vkey]
                     보유중, 매수가, _, _, 보유수량, 최고수익률, 최저수익률, 매수틱번호, 매수시간 = self.curr_trade_info.values()
@@ -1024,6 +1036,12 @@ class BackEngineBase(StgGlobalsFunc):
             else:
                 if self.tick_count < self.avgtime:
                     return
+
+            if not self.is_tick and self.dict_condition:
+                if 종목코드 not in self.dict_cond_indexn:
+                    self.dict_cond_indexn[종목코드] = {}
+                for k, v in self.dict_condition.items():
+                    exec(v)
 
             self.info_for_order = 현재가, 저가대비고가등락율, vturn, vkey
             self.curr_trade_info = self.trade_info[vturn][vkey]

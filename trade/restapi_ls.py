@@ -129,8 +129,8 @@ class LsRestAPI:
                     '채권' in name or '우선주' in name or '워런트' in name or '(ADR)' in name:
                 continue
             keysymbols.append(data['keysymbol'])
-            dict_data[data['symbol']] = {
-                '종목명': data['korname'],
+            dict_data[code] = {
+                '종목명': name,
                 '거래소코드': data['exchcd'],
                 '상장주식수': int(data['share'])
             }

@@ -124,12 +124,12 @@ def get_back_load_code_query_batch(is_tick, code_list, days, starttime, endtime)
             eindex = day * 10000 + int(endtime / 100)
         conditions.append(f"(`index` >= {sindex} AND `index` <= {eindex})")
     where_clause = " OR ".join(conditions)
-    
+
     subqueries = []
     for code in code_list:
         subquery = f"SELECT '{code}' as code, * FROM '{code}' WHERE {where_clause}"
         subqueries.append(subquery)
-    
+
     query = " UNION ALL ".join(subqueries)
     return query
 

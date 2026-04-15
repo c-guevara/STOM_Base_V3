@@ -584,7 +584,7 @@ class BackEngineBaseOms(BackEngineBase):
 
         self._update_highlow(현재가)
 
-        if self.dict_condition:
+        if self.is_tick and self.dict_condition:
             if 종목코드 not in self.dict_cond_indexn:
                 self.dict_cond_indexn[종목코드] = {}
             for k, v in self.dict_condition.items():
@@ -630,6 +630,12 @@ class BackEngineBaseOms(BackEngineBase):
                     self.vars[vturn] = self.vars_list[vturn][0][vkey]
                     if vturn == 0 and self.tick_count < self.vars[0]:
                         continue
+
+                    if not self.is_tick and self.dict_condition:
+                        if 종목코드 not in self.dict_cond_indexn:
+                            self.dict_cond_indexn[종목코드] = {}
+                        for k, v in self.dict_condition.items():
+                            exec(v)
 
                     self.curr_day_info = self.day_info[vturn][vkey]
                     self.curr_trade_info = self.trade_info[vturn][vkey]
@@ -681,6 +687,12 @@ class BackEngineBaseOms(BackEngineBase):
                                 continue
                     elif self.tick_count < self.avgtime:
                         return
+
+                    if not self.is_tick and self.dict_condition:
+                        if 종목코드 not in self.dict_cond_indexn:
+                            self.dict_cond_indexn[종목코드] = {}
+                        for k, v in self.dict_condition.items():
+                            exec(v)
 
                     self.curr_day_info = self.day_info[vturn][vkey]
                     self.curr_trade_info = self.trade_info[vturn][vkey]
@@ -738,6 +750,12 @@ class BackEngineBaseOms(BackEngineBase):
             else:
                 if self.tick_count < self.avgtime:
                     return
+
+            if not self.is_tick and self.dict_condition:
+                if 종목코드 not in self.dict_cond_indexn:
+                    self.dict_cond_indexn[종목코드] = {}
+                for k, v in self.dict_condition.items():
+                    exec(v)
 
             self.curr_day_info = self.day_info[vturn][vkey]
             self.curr_trade_info = self.trade_info[vturn][vkey]
