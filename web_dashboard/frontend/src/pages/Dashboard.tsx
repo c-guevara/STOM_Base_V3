@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { MarketType } from '../types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
@@ -7,7 +7,7 @@ import JangoTable from '../components/JangoTable'
 import ChegeolTable from '../components/ChegeolTable'
 import TradeTable from '../components/TradeTable'
 import AlertPanel from '../components/AlertPanel'
-import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon as MoonIcon, Plane, Bitcoin, CandlestickChart, Sun } from 'lucide-react'
+import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon as MoonIcon, Plane, Bitcoin, CandlestickChart, Sun, Menu } from 'lucide-react'
 
 const MARKETS: MarketType[] = ['stock', 'stock_etf', 'stock_etn', 'stock_usa', 'future', 'future_nt', 'future_os', 'coin', 'coin_future']
 const MARKET_NAMES: Record<MarketType, string> = {
@@ -25,7 +25,20 @@ const MARKET_NAMES: Record<MarketType, string> = {
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false)
   const { data } = useWebSocket(selectedMarket)
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
+
+  // 드롭다운 외부 클릭 시 닫기
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsMarketDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // 아이콘을 컴포넌트 내부에 정의하여 UMD 전역 변수 참조 에러 해결
   const MARKET_ICONS: Record<MarketType, React.ReactNode> = useMemo(() => ({
@@ -60,6 +73,32 @@ export default function Dashboard() {
         <div className="flex flex-row items-center justify-between gap-2">
           <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
           <div className="flex items-center gap-4">
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsMarketDropdownOpen(!isMarketDropdownOpen)}
+                className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                aria-label="거래소 선택"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              {isMarketDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                  {MARKETS.map((market) => (
+                    <button
+                      key={market}
+                      onClick={() => {
+                        setSelectedMarket(market)
+                        setIsMarketDropdownOpen(false)
+                      }}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${selectedMarket === market ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
+                    >
+                      {MARKET_ICONS[market]}
+                      <span className="text-sm">{MARKET_NAMES[market]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
@@ -70,19 +109,6 @@ export default function Dashboard() {
           </div>
         </div>
         <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
-          <TabsList className="grid w-full grid-cols-3 gap-2 h-auto">
-            {MARKETS.map((market) => (
-              <TabsTrigger
-                key={market}
-                value={market}
-                className="flex flex-col items-center gap-0.5 py-2 px-1 text-[10px]"
-              >
-                {MARKET_ICONS[market]}
-                <span>{MARKET_NAMES[market]}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
           {MARKETS.map((market) => (
             <TabsContent key={market} value={market} className="space-y-3">
               {data && (
