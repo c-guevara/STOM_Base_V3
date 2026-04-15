@@ -129,9 +129,9 @@ export function useWebSocket(market: MarketType) {
   }, [market, disconnect])
 
   useEffect(() => {
-    // Strict Mode 대응: 이미 연결 중이거나 연결 진행 중이면 스킵
-    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
-      console.log(`[WebSocket] Already connected/connecting to ${market}, skipping`)
+    // market이 변경된 경우 무조건 새로운 연결 시도
+    if (wsRef.current?.readyState === WebSocket.OPEN && currentMarketRef.current === market) {
+      console.log(`[WebSocket] Already connected to ${market}, skipping`)
       return
     }
 
