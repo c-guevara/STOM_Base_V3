@@ -40,10 +40,10 @@ class WebSocketManager:
                     except Exception as e:
                         print(f"Data transmission error: {e}")
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(3)
             except Exception as e:
                 print(f"Broadcast error: {e}")
-                await asyncio.sleep(1)
+                await asyncio.sleep(3)
 
     def check_alerts(self, jangolist: List[dict]) -> List[dict]:
         alerts = []
