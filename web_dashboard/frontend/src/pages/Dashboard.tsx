@@ -23,19 +23,17 @@ const MARKET_NAMES: Record<MarketType, string> = {
   coin_future: '코인선물'
 }
 
-const getMarketIcon = (market: MarketType) => {
-  const icons: Record<MarketType, React.ReactNode> = {
-    stock: <TrendingUp className="w-4 h-4" />,
-    stock_etf: <BarChart3 className="w-4 h-4" />,
-    stock_etn: <LineChart className="w-4 h-4" />,
-    stock_usa: <Globe className="w-4 h-4" />,
-    future: <Zap className="w-4 h-4" />,
-    future_nt: <MoonIcon className="w-4 h-4" />,
-    future_os: <Plane className="w-4 h-4" />,
-    coin: <Bitcoin className="w-4 h-4" />,
-    coin_future: <CandlestickChart className="w-4 h-4" />
-  }
-  return icons[market]
+// 아이콘을 컴포넌트 외부에 상수로 정의하여 리렌더링 방지
+const MARKET_ICONS: Record<MarketType, React.ReactNode> = {
+  stock: <TrendingUp className="w-4 h-4" />,
+  stock_etf: <BarChart3 className="w-4 h-4" />,
+  stock_etn: <LineChart className="w-4 h-4" />,
+  stock_usa: <Globe className="w-4 h-4" />,
+  future: <Zap className="w-4 h-4" />,
+  future_nt: <MoonIcon className="w-4 h-4" />,
+  future_os: <Plane className="w-4 h-4" />,
+  coin: <Bitcoin className="w-4 h-4" />,
+  coin_future: <CandlestickChart className="w-4 h-4" />
 }
 
 export default function Dashboard() {
@@ -83,7 +81,7 @@ export default function Dashboard() {
                 value={market}
                 className="flex flex-col items-center gap-1 py-3 px-2 text-xs"
               >
-                {getMarketIcon(market)}
+                {MARKET_ICONS[market]}
                 <span>{MARKET_NAMES[market]}</span>
               </TabsTrigger>
             ))}
