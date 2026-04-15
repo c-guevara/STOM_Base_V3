@@ -22,23 +22,23 @@ const MARKET_NAMES: Record<MarketType, string> = {
   coin_future: '코인선물'
 }
 
-// 아이콘을 컴포넌트 외부에 상수로 정의하여 리렌더링 방지
-const MARKET_ICONS: Record<MarketType, React.ReactNode> = {
-  stock: <TrendingUp className="w-4 h-4" />,
-  stock_etf: <BarChart3 className="w-4 h-4" />,
-  stock_etn: <LineChart className="w-4 h-4" />,
-  stock_usa: <Globe className="w-4 h-4" />,
-  future: <Zap className="w-4 h-4" />,
-  future_nt: <MoonIcon className="w-4 h-4" />,
-  future_os: <Plane className="w-4 h-4" />,
-  coin: <Bitcoin className="w-4 h-4" />,
-  coin_future: <CandlestickChart className="w-4 h-4" />
-}
-
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
   const [isDarkMode, setIsDarkMode] = useState(true)
   const { data } = useWebSocket(selectedMarket)
+
+  // 아이콘을 컴포넌트 내부에 정의하여 UMD 전역 변수 참조 에러 해결
+  const MARKET_ICONS: Record<MarketType, React.ReactNode> = useMemo(() => ({
+    stock: <TrendingUp className="w-4 h-4" />,
+    stock_etf: <BarChart3 className="w-4 h-4" />,
+    stock_etn: <LineChart className="w-4 h-4" />,
+    stock_usa: <Globe className="w-4 h-4" />,
+    future: <Zap className="w-4 h-4" />,
+    future_nt: <MoonIcon className="w-4 h-4" />,
+    future_os: <Plane className="w-4 h-4" />,
+    coin: <Bitcoin className="w-4 h-4" />,
+    coin_future: <CandlestickChart className="w-4 h-4" />
+  }), [])
 
   // 다크 모드 토글 시 HTML 태그에 dark 클래스 추가/제거
   useEffect(() => {
