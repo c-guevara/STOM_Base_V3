@@ -90,6 +90,7 @@ export default function Dashboard() {
                       onClick={() => {
                         setSelectedMarket(market)
                         setIsMarketDropdownOpen(false)
+                        window.location.reload()
                       }}
                       className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${selectedMarket === market ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
                     >
