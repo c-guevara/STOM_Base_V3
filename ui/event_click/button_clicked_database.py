@@ -158,7 +158,7 @@ def dbbutton_clicked_10(ui):
         ui: UI 클래스 인스턴스
     """
     buttonReply = QMessageBox.warning(
-        ui.dialog_db, f"{ui.market_info['마켓이름']} 거래기록 삭제', '체결목록, 잔고목록, 거래목록, 일별목록이 모두 삭제됩니다.\n계속하시겠습니까?\n",
+        ui.dialog_db, f"{ui.market_info['마켓이름']} 거래기록 삭제", "체결목록, 잔고목록, 거래목록, 일별목록이 모두 삭제됩니다.\n계속하시겠습니까?\n",
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:

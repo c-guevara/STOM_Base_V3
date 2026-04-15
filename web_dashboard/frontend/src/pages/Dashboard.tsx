@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { MarketType } from '../types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
