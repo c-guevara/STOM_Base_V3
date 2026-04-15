@@ -1,8 +1,8 @@
-from fastapi import WebSocket
+
 import asyncio
-import json
-from typing import Dict, List
 import pandas as pd
+from typing import Dict, List
+from fastapi import WebSocket
 from database import DatabaseManager
 
 
@@ -10,15 +10,15 @@ class WebSocketManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.db = DatabaseManager()
-    
+
     async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
         self.active_connections[client_id] = websocket
-    
+
     def disconnect(self, client_id: str):
         if client_id in self.active_connections:
             del self.active_connections[client_id]
-    
+
     async def broadcast_data(self, market: str = "stock"):
         while True:
             try:
@@ -29,22 +29,22 @@ class WebSocketManager:
                     "totaltradelist": self.db.get_totaltradelist(market),
                     "timestamp": pd.Timestamp.now().isoformat()
                 }
-                
+
                 alerts = self.check_alerts(data["jangolist"])
                 if alerts:
                     data["alerts"] = alerts
-                
+
                 for connection in self.active_connections.values():
                     try:
                         await connection.send_json(data)
                     except Exception as e:
                         print(f"Data transmission error: {e}")
-                
+
                 await asyncio.sleep(1)
             except Exception as e:
                 print(f"Broadcast error: {e}")
                 await asyncio.sleep(1)
-    
+
     def check_alerts(self, jangolist: List[dict]) -> List[dict]:
         alerts = []
         for item in jangolist:

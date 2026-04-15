@@ -51,6 +51,7 @@ class ImportProgressHook:
             'ui.update_widget.update_textedit',
             'ui.etcetera.process_alive',
             'ui.update_widget.update_tablewidget',
+            'web_dashboard.dashboard_starter',
 
             'ui.etcetera.etc',
             'ui.update_widget.update_progressbar',

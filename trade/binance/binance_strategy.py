@@ -18,13 +18,6 @@ class BinanceStrategy(BaseStrategy):
         """
         super().__init__(gubun, qlist, dict_set, market_info)
 
-    def _update_globals_func(self, dict_add_func):
-        """전역 함수를 업데이트합니다.
-        Args:
-            dict_add_func (dict): 추가할 전역 함수 딕셔너리
-        """
-        globals().update(dict_add_func)
-
     def _get_hogaunit(self, 종목코드):
         """호가 단위를 반환합니다.
         Args:

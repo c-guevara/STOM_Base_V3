@@ -245,6 +245,7 @@ def load_settings():
             '매도손절수익금청산': df_so['매도손절수익금청산'][0],
             '매도손절수익금':    df_so['매도손절수익금'][0],
 
+            '웹대시보드': True,
             '백테엔진프로파일링': False
         }
     except fernet.InvalidToken:

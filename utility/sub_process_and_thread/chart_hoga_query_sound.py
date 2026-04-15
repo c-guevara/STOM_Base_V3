@@ -891,23 +891,23 @@ class ChartHogaQuerySound:
 
                     cgidx, cgtime = get_cgidx_and_cgtime(cgtime)
                     if self.market_gubun < 6:
-                        if df['주문구분코드'][index] == '매수':
+                        if df['주문구분'][index] == '매수':
                             buy_index.append(cgtime)
                             arry[cgidx, -2] = df['체결가'][index]
-                        elif df['주문구분코드'][index] == '매도':
+                        elif df['주문구분'][index] == '매도':
                             sell_index.append(cgtime)
                             arry[cgidx, -1] = df['체결가'][index]
                     else:
-                        if df['주문구분코드'][index] == 'BUY_LONG':
+                        if df['주문구분'][index] == 'BUY_LONG':
                             buy_index.append(cgtime)
                             arry[cgidx, -4] = df['체결가'][index]
-                        elif df['주문구분코드'][index] == 'SELL_LONG':
+                        elif df['주문구분'][index] == 'SELL_LONG':
                             sell_index.append(cgtime)
                             arry[cgidx, -3] = df['체결가'][index]
-                        elif df['주문구분코드'][index] == 'SELL_SHORT':
+                        elif df['주문구분'][index] == 'SELL_SHORT':
                             buy_index.append(cgtime)
                             arry[cgidx, -2] = df['체결가'][index]
-                        elif df['주문구분코드'][index] == 'BUY_SHORT':
+                        elif df['주문구분'][index] == 'BUY_SHORT':
                             sell_index.append(cgtime)
                             arry[cgidx, -1] =  df['체결가'][index]
         else:

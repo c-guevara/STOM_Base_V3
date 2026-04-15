@@ -36,4 +36,3 @@ pillow==12.1.0
 pyttsx3==2.99
 pyzmq==27.1.0
 squarify==0.4.4
-openai==1.54.0

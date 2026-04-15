@@ -497,6 +497,13 @@ class BackEngineBase(StgGlobalsFunc):
 
         self.set_globals_func()
 
+    def _update_globals_func(self, dict_add_func):
+        """전역 함수를 업데이트합니다.
+        Args:
+            dict_add_func: 추가할 전역 함수 딕셔너리
+        """
+        globals().update(dict_add_func)
+
     def _check_avg_list(self, avg_list):
         """평균값 틱수 목록을 검증합니다.
         백테 엔진 구동 시 포함되지 않은 평균값 틱수가 있으면

@@ -31,10 +31,10 @@ if '%errorlevel%' NEQ '0' (
 
     echo.
     echo [2/3] Installing from requirements64.txt...
-    if exist requirements64.txt (
-        python -m pip install -r requirements64.txt
+    if exist requirements.txt (
+        python -m pip install -r requirements.txt
     ) else (
-        echo ERROR: requirements64.txt file not found!
+        echo ERROR: requirements.txt file not found!
         pause
         exit /b 1
     )

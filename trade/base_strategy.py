@@ -161,6 +161,13 @@ class BaseStrategy(StgGlobalsFunc):
 
         self.set_globals_func()
 
+    def _update_globals_func(self, dict_add_func):
+        """전역 함수를 업데이트합니다.
+        Args:
+            dict_add_func (dict): 추가할 전역 함수 딕셔너리
+        """
+        globals().update(dict_add_func)
+
     def _set_strategy(self, dfs, dfos, dfb, dfob):
         """전략을 설정합니다.
         Args:
@@ -1183,7 +1190,6 @@ class BaseStrategy(StgGlobalsFunc):
                     포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
                         최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now(), 0, 0, 0
 
-                소숫점자리수 = self.dict_info[종목코드]['소숫점자리수']
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
                 BBT  = not self.dict_set['매수금지시간'] or \
@@ -1202,7 +1208,7 @@ class BaseStrategy(StgGlobalsFunc):
                 G    = NISS and self.dict_set['매도취소매수시그널'] and not NIBS
 
                 if BBT and BLK and (A or B or (C and D) or (C and E) or D or E or F or G):
-                    self.info_for_buy = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+                    self.info_for_buy = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                     if A or B or (C and (D or E)) or F or G:
                         BUY_LONG, SELL_SHORT = True, True
@@ -1266,7 +1272,7 @@ class BaseStrategy(StgGlobalsFunc):
                     강제청산 = H or J or K or L or M or N or P or Q or R or S
                     전량매도 = A or B or 강제청산
                     self.info_for_sell = \
-                        F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+                        F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                     SELL_LONG, BUY_SHORT = False, False
                     if A or B or (C and D) or (C and E) or F or G:
@@ -1405,7 +1411,7 @@ class BaseStrategy(StgGlobalsFunc):
         if 취소시그널:
             주문수량 = 0
         else:
-            주문수량 = self._set_buy_count(분할매수횟수, 매수가, 현재가, 저가대비고가등락율)
+            주문수량 = self._get_buy_count(분할매수횟수, 매수가, 현재가, 저가대비고가등락율)
 
         if self.market_gubun < 6:
             signal_gubun = '매수'

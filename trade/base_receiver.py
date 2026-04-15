@@ -619,8 +619,9 @@ class BaseReceiver:
         """
         if self.hoga_code == code and dt > self.list_hgdt[1]:
             self.list_hgdt[1] = dt
+            name = self.dict_info[code]['종목명']
             self.hogaQ.put(
-                [code] + hoga_tamount + hoga_seprice[:5][::-1] + hoga_buprice[:5] + 
+                [name] + hoga_tamount + hoga_seprice[:5][::-1] + hoga_buprice[:5] +
                 hoga_samount[:5][::-1] + hoga_bamount[:5]
             )
 

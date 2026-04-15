@@ -8,8 +8,15 @@ from utility.static_method.static import timedelta_sec, dt_ymdhms, dt_ymdhm
 class BackEngineBaseOms(BackEngineBase):
     """주문 관리 시스템(OMS)이 적용된 백테스트 엔진 기본 클래스입니다.
     BackEngineBase를 상속받아 주문 분할, 취소, 정정 등
-    실제 거래와 유사한 주문 관리 기능을 제공합니다.
+    실제 거래와 같은 주문 관리 기능을 제공합니다.
     """
+    def _update_globals_func(self, dict_add_func):
+        """전역 함수를 업데이트합니다.
+        Args:
+            dict_add_func: 추가할 전역 함수 딕셔너리
+        """
+        globals().update(dict_add_func)
+
     def _get_hold_info(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
         """보유 정보를 계산합니다 (OMS 버전).
         Args:
