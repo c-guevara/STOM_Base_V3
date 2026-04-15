@@ -37,7 +37,19 @@ function TradeTable({ items }: Props) {
                     {(() => {
                       if (!item.체결시간) return '-'
                       try {
-                        const date = new Date(item.체결시간)
+                        let date: Date
+                        // YYYYMMDDHHMMSS 형식인 경우
+                        if (item.체결시간.length === 14 && /^\d+$/.test(item.체결시간)) {
+                          const year = item.체결시간.substring(0, 4)
+                          const month = item.체결시간.substring(4, 6)
+                          const day = item.체결시간.substring(6, 8)
+                          const hour = item.체결시간.substring(8, 10)
+                          const minute = item.체결시간.substring(10, 12)
+                          const second = item.체결시간.substring(12, 14)
+                          date = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`)
+                        } else {
+                          date = new Date(item.체결시간)
+                        }
                         if (isNaN(date.getTime())) return '-'
                         return date.toLocaleTimeString('ko-KR', {
                           hour: '2-digit',
