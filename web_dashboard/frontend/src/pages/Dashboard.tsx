@@ -87,7 +87,7 @@ export default function Dashboard() {
             <TabsContent key={market} value={market} className="space-y-4 md:space-y-6">
               {data && (
                 <>
-                  <SummaryCards totalTrade={data.totaltradelist} />
+                  <SummaryCards totalTrade={data.totaltradelist} market={market} />
                   <AlertPanel alerts={data.alerts || []} />
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     <JangoTable items={jangoItems} />
