@@ -71,7 +71,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-slate-900 dark:to-gray-950 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-row items-center justify-between gap-2">
-          <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">STOM 대시보드 - {MARKET_NAMES[selectedMarket]}</h1>
           <div className="flex items-center gap-4">
             <div className="relative" ref={dropdownRef}>
               <button

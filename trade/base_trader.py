@@ -1287,11 +1287,11 @@ class BaseTrader:
         self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
 
         if 포지션 is None:
-            data = [[종목명, 포지션, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간]]
-            columns = columns_tdf
-        else:
             data = [[종목명, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간]]
             columns = columns_td
+        else:
+            data = [[종목명, 포지션, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간]]
+            columns = columns_tdf
         df = pd.DataFrame(data, columns=columns, index=[index])
         self.queryQ.put(('거래디비', df, self.market_info['거래디비'], 'append'))
 
@@ -1368,7 +1368,7 @@ class BaseTrader:
         self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
 
         df = pd.DataFrame(
-            [[종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호]],
+            [[종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호]],
             columns=columns_cj,
             index=[index]
         )
