@@ -28,7 +28,6 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
 
   // 연월일 시간 포맷팅
   const formattedTimestamp = timestamp ? new Date(timestamp).toLocaleString('ko-KR', {
-    year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
