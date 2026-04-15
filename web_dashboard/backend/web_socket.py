@@ -9,6 +9,7 @@ from database import DatabaseManager
 class WebSocketManager:
     def __init__(self):
         self.active_connections: Dict[str, Dict[str, WebSocket]] = {}  # {market: {client_id: websocket}}
+        self.active_tasks: Dict[str, bool] = {}  # {market: task_running}
         self.db = DatabaseManager()
 
     async def connect(self, websocket: WebSocket, client_id: str, market: str):
@@ -17,11 +18,17 @@ class WebSocketManager:
             self.active_connections[market] = {}
         self.active_connections[market][client_id] = websocket
 
+        # 해당 거래소의 태스크가 실행 중이 아니면 시작
+        if market not in self.active_tasks or not self.active_tasks[market]:
+            self.active_tasks[market] = True
+            asyncio.create_task(self.broadcast_data(market))
+
     def disconnect(self, client_id: str, market: str):
         if market in self.active_connections and client_id in self.active_connections[market]:
             del self.active_connections[market][client_id]
             if not self.active_connections[market]:
                 del self.active_connections[market]
+                self.active_tasks[market] = False  # 연결이 없으면 태스크 중단
 
     async def broadcast_data(self, market: str = "stock"):
         while True:
