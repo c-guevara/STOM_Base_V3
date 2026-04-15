@@ -122,8 +122,8 @@ class BaseTrader:
         self.order_time = now()
         self.jgcs_time  = self.get_jgcs_time()
 
-        self._load_database()
         set_builtin_print(self.windowQ)
+        self._load_database()
 
     def _get_yesugm_for_paper_trading(self):
         """모의투스용 예수금을 반환합니다.
@@ -166,8 +166,8 @@ class BaseTrader:
         con = sqlite3.connect(DB_TRADELIST)
         df_cj = pd.read_sql(f"SELECT * FROM {self.market_info['체결디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
         df_td = pd.read_sql(f"SELECT * FROM {self.market_info['거래디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
-        df_cj.set_index('index')
-        df_td.set_index('index')
+        df_cj.set_index('index', inplace=True)
+        df_td.set_index('index', inplace=True)
         if len(df_cj) > 0:
             self.dict_cj = df_cj.to_dict('index')
             self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
@@ -508,7 +508,7 @@ class BaseTrader:
             if self.market_gubun == 9:
                 self._set_position()
 
-    def _update_Jango(self, data):
+    def _update_jango(self, data):
         """잔고를 업데이트합니다.
         Args:
             data: 데이터
@@ -1540,13 +1540,6 @@ class BaseTrader:
 
     def _set_leverage(self, data):
         """레버리지를 설정합니다.
-        Args:
-            data: 데이터
-        """
-        pass
-
-    def _update_jango(self, data):
-        """잔고를 업데이트합니다.
         Args:
             data: 데이터
         """

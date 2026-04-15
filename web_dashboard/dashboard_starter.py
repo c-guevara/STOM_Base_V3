@@ -4,6 +4,8 @@ import threading
 import subprocess
 from PyQt5.QtCore import QObject, pyqtSignal
 
+from utility.static_method.static import qtest_qwait
+
 
 class DashboardStarter(QObject):
     log_received = pyqtSignal(str)
@@ -50,6 +52,7 @@ class DashboardStarter(QObject):
             daemon=True
         ).start()
 
+        qtest_qwait(2)
         frontend_dir = os.path.join("web_dashboard", "frontend")
         self.frontend_process = subprocess.Popen(
             ["node", "node_modules/vite/bin/vite.js", "--host", "0.0.0.0"],
