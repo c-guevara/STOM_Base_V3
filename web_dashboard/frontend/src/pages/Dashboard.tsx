@@ -70,9 +70,9 @@ export default function Dashboard() {
   }, [isDarkMode])
 
   // useMemo로 items 데이터 캐싱 - 실제 데이터 변경 시에만 새로운 참조 생성
-  const jangoItems = useMemo(() => data?.jangolist ?? [], [data])
-  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data])
-  const tradeItems = useMemo(() => data?.tradelist ?? [], [data])
+  const jangoItems = useMemo(() => data?.jangolist ?? [], [data, selectedMarket])
+  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data, selectedMarket])
+  const tradeItems = useMemo(() => data?.tradelist ?? [], [data, selectedMarket])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 p-4 md:p-6 relative overflow-hidden">
