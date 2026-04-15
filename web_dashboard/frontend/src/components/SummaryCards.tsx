@@ -35,7 +35,7 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
     minute: '2-digit',
     second: '2-digit',
     hour12: false
-  }).replace(/\//g, '.') : ''
+  }).replace(/\./g, '').replace(/\//g, '') : ''
 
   const cards = [
     { title: '일자 시간', value: formattedTimestamp, color: 'text-gray-600', icon: Clock },
