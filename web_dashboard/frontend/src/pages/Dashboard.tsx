@@ -22,10 +22,18 @@ const MARKET_NAMES: Record<MarketType, string> = {
 }
 
 export default function Dashboard() {
-  const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
+  const [selectedMarket, setSelectedMarket] = useState<MarketType>(() => {
+    const saved = localStorage.getItem('selectedMarket')
+    return (saved as MarketType) || 'stock'
+  })
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false)
   const { data } = useWebSocket(selectedMarket)
+
+  // selectedMarket이 변경되면 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem('selectedMarket', selectedMarket)
+  }, [selectedMarket])
   const dropdownRef = React.useRef<HTMLDivElement>(null)
 
   // 드롭다운 외부 클릭 시 닫기
@@ -90,7 +98,6 @@ export default function Dashboard() {
                       onClick={() => {
                         setSelectedMarket(market)
                         setIsMarketDropdownOpen(false)
-                        window.location.reload()
                       }}
                       className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${selectedMarket === market ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
                     >
