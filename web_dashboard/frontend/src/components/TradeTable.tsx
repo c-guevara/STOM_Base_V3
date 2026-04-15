@@ -19,8 +19,6 @@ function TradeTable({ items }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-xs md:text-sm">종목명</TableHead>
-                <TableHead className="text-xs md:text-sm">매수금액</TableHead>
-                <TableHead className="text-xs md:text-sm">매도금액</TableHead>
                 <TableHead className="text-xs md:text-sm">수익률</TableHead>
                 <TableHead className="text-xs md:text-sm">수익금</TableHead>
                 <TableHead className="text-xs md:text-sm hidden sm:table-cell">체결시간</TableHead>
@@ -30,8 +28,6 @@ function TradeTable({ items }: Props) {
               {items.map((item) => (
                 <TableRow key={`${item.종목명}-${item.체결시간}`}>
                   <TableCell className="font-medium text-xs md:text-sm">{item.종목명}</TableCell>
-                  <TableCell className="text-xs md:text-sm">{item.매수금액.toLocaleString()}</TableCell>
-                  <TableCell className="text-xs md:text-sm">{item.매도금액.toLocaleString()}</TableCell>
                   <TableCell className={`text-xs md:text-sm ${item.수익률 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {item.수익률.toFixed(2)}%
                   </TableCell>
