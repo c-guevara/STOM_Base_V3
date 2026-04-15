@@ -42,8 +42,8 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
     { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 },
     { title: '총 매입금액', value: Math.floor(totalTrade.총매수금액).toLocaleString() + currency, color: 'text-blue-600', icon: Wallet },
     { title: '총 매도금액', value: Math.floor(totalTrade.총매도금액).toLocaleString() + currency, color: 'text-purple-600', icon: DollarSign },
-    { title: '총 수익금', value: Math.floor(totalTrade.수익금합계).toLocaleString() + currency, color: totalTrade.수익금합계 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp },
-    { title: '총 수익률', value: totalTrade.수익률.toFixed(2) + '%', color: totalTrade.수익률 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp }
+    { title: '총 수익금', value: Math.floor(totalTrade.수익금합계).toLocaleString() + currency, color: totalTrade.수익금합계 >= 0 ? 'text-red-600' : 'text-blue-600', icon: TrendingUp },
+    { title: '총 수익률', value: totalTrade.수익률.toFixed(2) + '%', color: totalTrade.수익률 >= 0 ? 'text-red-600' : 'text-blue-600', icon: TrendingUp }
   ]
 
   return (

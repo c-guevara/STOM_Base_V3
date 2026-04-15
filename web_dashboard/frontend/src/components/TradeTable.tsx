@@ -27,10 +27,10 @@ function TradeTable({ items }: Props) {
               {items.map((item) => (
                 <TableRow key={`${item.종목명}-${item.체결시간}`}>
                   <TableCell className="font-medium text-xs md:text-sm">{item.종목명}</TableCell>
-                  <TableCell className={`text-xs md:text-sm ${item.수익률 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <TableCell className={`text-xs md:text-sm ${item.수익률 >= 0 ? 'text-red-600' : 'text-blue-600'}`}>
                     {item.수익률.toFixed(2)}%
                   </TableCell>
-                  <TableCell className={`text-xs md:text-sm ${item.수익금 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <TableCell className={`text-xs md:text-sm ${item.수익금 >= 0 ? 'text-red-600' : 'text-blue-600'}`}>
                     {item.수익금.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-xs md:text-sm">
