@@ -3,7 +3,6 @@ import os
 import threading
 import subprocess
 from PyQt5.QtCore import QObject, pyqtSignal
-
 from utility.static_method.static import qtest_qwait
 
 

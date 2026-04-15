@@ -98,13 +98,15 @@ class BaseTrader:
             self.dict_order = {
                 '매수': {},
                 '매도': {},
+                '시드부족': {}
             }
         else:
             self.dict_order = {
                 'BUY_LONG': {},
                 'SELL_LONG': {},
                 'SELL_SHORT': {},
-                'BUY_SHORT': {}
+                'BUY_SHORT': {},
+                '시드부족': {}
             }
 
         self.ls         = None

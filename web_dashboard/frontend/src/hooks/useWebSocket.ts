@@ -7,6 +7,7 @@ const MAX_RECONNECT_ATTEMPTS = 5
 
 export function useWebSocket(market: MarketType) {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [connected, setConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectAttemptsRef = useRef(0)
@@ -20,15 +21,8 @@ export function useWebSocket(market: MarketType) {
   const connect = useCallback(() => {
     if (!isMountedRef.current || connectingRef.current) return
 
-    // 이미 연결 중이면 스킵
-    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
-      console.log(`[WebSocket] Skip connect, already connected/connecting`)
-      return
-    }
-
     connectingRef.current = true
 
-    // currentMarketRef에서 최신 마켓값 읽기 (클로저 문제 해결)
     const currentMarket = currentMarketRef.current
     const wsUrl = `${WS_URL}/ws/${currentMarket}`
     console.log(`[WebSocket] Connecting to: ${wsUrl}`)
@@ -49,21 +43,23 @@ export function useWebSocket(market: MarketType) {
       try {
         const message = JSON.parse(event.data) as DashboardData
 
-        // 데이터 변경 감지: 실제 데이터가 변경되었을 때만 업데이트
+        // 데이터 변경 감지: 실제 데이터가 변경되었을 때만 업데이트 (timestamp 제외)
         const lastData = lastDataRef.current
         if (lastData) {
           const jangoChanged = JSON.stringify(lastData.jangolist) !== JSON.stringify(message.jangolist)
           const chegeolChanged = JSON.stringify(lastData.chegeollist) !== JSON.stringify(message.chegeollist)
           const tradeChanged = JSON.stringify(lastData.tradelist) !== JSON.stringify(message.tradelist)
           const totalTradeChanged = JSON.stringify(lastData.totaltradelist) !== JSON.stringify(message.totaltradelist)
+          const alertsChanged = JSON.stringify(lastData.alerts) !== JSON.stringify(message.alerts)
 
-          if (!jangoChanged && !chegeolChanged && !tradeChanged && !totalTradeChanged) {
+          if (!jangoChanged && !chegeolChanged && !tradeChanged && !totalTradeChanged && !alertsChanged) {
             return  // 데이터가 변경되지 않으면 업데이트 스킵
           }
         }
 
         setData(message)
         lastDataRef.current = message
+        setIsLoading(false)
       } catch (e) {
         console.error('[WebSocket] Failed to parse message:', e)
       }
@@ -86,11 +82,10 @@ export function useWebSocket(market: MarketType) {
         return
       }
 
-      // 자동 재연결 - 최신 마켓값으로 재연결
+      // 자동 재연결
       if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
         reconnectAttemptsRef.current++
-        const latestMarket = currentMarketRef.current
-        console.log(`[WebSocket] Reconnecting to ${latestMarket} in ${RECONNECT_DELAY}ms (attempt ${reconnectAttemptsRef.current})`)
+        console.log(`[WebSocket] Reconnecting to ${currentMarket} in ${RECONNECT_DELAY}ms (attempt ${reconnectAttemptsRef.current})`)
         reconnectTimeoutRef.current = setTimeout(() => {
           connect()
         }, RECONNECT_DELAY)
@@ -112,45 +107,47 @@ export function useWebSocket(market: MarketType) {
     }
   }, [])
 
-  // 현재 마켓 추적
+  // 마켓 변경 시 연결 재설정
   useEffect(() => {
     const previousMarket = currentMarketRef.current
+    const marketChanged = previousMarket !== market
+
     currentMarketRef.current = market
     reconnectAttemptsRef.current = 0
     setData(null)  // 마켓 변경 시 데이터 리셋
     lastDataRef.current = null
 
-    // 거래소가 변경된 경우 기존 연결 강제 종료
-    if (previousMarket !== market && wsRef.current) {
+    // 이미 연결 중이면 스킵
+    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
+      if (!marketChanged || currentMarketRef.current !== market) {
+        console.log(`[WebSocket] Already connected/connecting to ${market}, skipping`)
+        return
+      }
+    }
+
+    // 마켓이 변경된 경우 기존 연결 강제 종료
+    if (marketChanged && wsRef.current) {
       console.log(`[WebSocket] Market changed from ${previousMarket} to ${market}, disconnecting old connection`)
       disconnect(true)
       connectingRef.current = false
-    }
-  }, [market, disconnect])
-
-  useEffect(() => {
-    // market이 변경된 경우 무조건 새로운 연결 시도
-    if (wsRef.current?.readyState === WebSocket.OPEN && currentMarketRef.current === market) {
-      console.log(`[WebSocket] Already connected to ${market}, skipping`)
-      return
     }
 
     isMountedRef.current = true
     isIntentionalCloseRef.current = false
 
-    // Strict Mode 대응: setTimeout으로 cleanup 완료 후 연결
+    // 기존 연결 종료 후 대기 후 새 연결 시도
     const timeout = setTimeout(() => {
       if (isMountedRef.current && !connectingRef.current) {
         connect()
       }
-    }, 0)
+    }, marketChanged ? 100 : 0)
 
     return () => {
       isMountedRef.current = false
       clearTimeout(timeout)
       disconnect(true)  // 의도적인 종료
     }
-  }, [market, connect, disconnect])  // market 변경 시 재연결
+  }, [market, connect, disconnect])
 
-  return { data, connected }
+  return { data, isLoading, connected }
 }

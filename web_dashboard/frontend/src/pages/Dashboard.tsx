@@ -28,7 +28,7 @@ export default function Dashboard() {
   })
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false)
-  const { data } = useWebSocket(selectedMarket)
+  const { data, isLoading } = useWebSocket(selectedMarket)
 
   // selectedMarket이 변경되면 localStorage에 저장
   useEffect(() => {
@@ -118,14 +118,29 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="space-y-3">
-          {data && (
+          {data && (data.jangolist || data.chegeollist || data.tradelist || data.totaltradelist) ? (
             <>
+              {isLoading && (
+                <div className="flex items-center justify-center py-2">
+                  <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">데이터 업데이트 중...</p>
+                  </div>
+                </div>
+              )}
               <SummaryCards totalTrade={data.totaltradelist} market={selectedMarket} timestamp={data.timestamp} />
               <AlertPanel alerts={data.alerts || []} />
               <JangoTable items={jangoItems} />
               <ChegeolTable items={chegeolItems} />
               <TradeTable items={tradeItems} />
             </>
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">데이터 로딩 중...</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
