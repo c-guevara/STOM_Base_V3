@@ -57,7 +57,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-slate-900 dark:to-gray-950 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-row items-center justify-between gap-2">
           <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
           <div className="flex items-center gap-4">
             <button
@@ -87,7 +87,7 @@ export default function Dashboard() {
             <TabsContent key={market} value={market} className="space-y-4 md:space-y-6">
               {data && (
                 <>
-                  <SummaryCards totalTrade={data.totaltradelist} market={market} />
+                  <SummaryCards totalTrade={data.totaltradelist} market={market} timestamp={data.timestamp} />
                   <AlertPanel alerts={data.alerts || []} />
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     <JangoTable items={jangoItems} />

@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { TotalTrade, MarketType } from '../types'
-import { Wallet, TrendingUp, DollarSign, BarChart3 } from 'lucide-react'
+import { Wallet, TrendingUp, DollarSign, BarChart3, Clock } from 'lucide-react'
 
 interface Props {
   totalTrade: TotalTrade | null
   market: MarketType
+  timestamp?: string
 }
 
-export default function SummaryCards({ totalTrade, market }: Props) {
+export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   if (!totalTrade) return null
 
   // 거래소별 금액 단위 결정
@@ -25,8 +26,19 @@ export default function SummaryCards({ totalTrade, market }: Props) {
 
   const currency = currencyUnits[market]
 
+  // 연월일 시간 포맷팅
+  const formattedTimestamp = timestamp ? new Date(timestamp).toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/\//g, '.') : ''
+
   const cards = [
-    { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 },
+    { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3, timestamp: formattedTimestamp },
     { title: '총 매입금액', value: Math.floor(totalTrade.총매수금액).toLocaleString() + currency, color: 'text-blue-600', icon: Wallet },
     { title: '총 매도금액', value: Math.floor(totalTrade.총매도금액).toLocaleString() + currency, color: 'text-purple-600', icon: DollarSign },
     { title: '총 수익금', value: Math.floor(totalTrade.수익금합계).toLocaleString() + currency, color: totalTrade.수익금합계 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp },
@@ -44,6 +56,12 @@ export default function SummaryCards({ totalTrade, market }: Props) {
               <Icon className="w-4 h-4 text-gray-400" />
             </CardHeader>
             <CardContent className="p-3 md:p-6 pt-0">
+              {card.timestamp && (
+                <div className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {card.timestamp}
+                </div>
+              )}
               <div className={`text-lg md:text-2xl font-bold text-right ${card.color}`}>
                 {card.value}
               </div>
