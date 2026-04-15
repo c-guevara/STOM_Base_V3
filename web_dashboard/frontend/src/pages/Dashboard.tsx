@@ -65,12 +65,12 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-lg bg-white/50 dark:bg-gray-900/30 backdrop-blur-sm border border-gray-200 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+              className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
               aria-label="다크 모드 토글"
             >
-              {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <MoonIcon className="w-5 h-5 text-gray-600" />}
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
             </button>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 h-10 flex items-center">
               {connected ? '● 연결됨' : '○ 연결 안됨'}
             </div>
           </div>
