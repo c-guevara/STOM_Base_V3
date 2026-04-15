@@ -41,11 +41,6 @@ class WebSocketManager:
                     "timestamp": pd.Timestamp.now().isoformat()
                 }
 
-                # 데이터가 비어있으면 전송하지 않음
-                if not data["jangolist"] and not data["chegeollist"] and not data["tradelist"] and not data["totaltradelist"]:
-                    await asyncio.sleep(3)
-                    continue
-
                 alerts = self.check_alerts(data["jangolist"])
                 if alerts:
                     data["alerts"] = alerts
