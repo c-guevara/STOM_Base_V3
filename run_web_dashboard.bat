@@ -21,5 +21,5 @@ start "Web Dashboard Frontend" cmd /k "cd web_dashboard\frontend && npm run dev"
 echo.
 echo Both servers started.
 echo Backend: http://localhost:8000
-echo Frontend: http://localhost:5173
+echo Frontend: http://localhost:3000
 pause

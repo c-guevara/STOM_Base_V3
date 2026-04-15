@@ -1,7 +1,8 @@
+
+import uuid
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from websocket import WebSocketManager
-import uuid
+from web_socket import WebSocketManager
 
 
 app = FastAPI(title="STOM Trading Dashboard API")

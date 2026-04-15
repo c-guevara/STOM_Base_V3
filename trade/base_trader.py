@@ -869,12 +869,6 @@ class BaseTrader:
                 self.dict_intg['예수금'] += 매입금액 + 수익금
                 self.dict_intg['추정예수금'] += 매입금액 + 수익금
 
-            if self.dict_jg:
-                df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            else:
-                df_jg = pd.DataFrame(columns=columns_jg)
-            self.queryQ.put(('거래디비', df_jg, self.market_info['거래디비'], 'replace'))
-
             if self.dict_set['알림소리']:
                 self.soundQ.put(f'{종목명} {체결수량}주를 {주문구분[:2]}하였습니다')
 
@@ -1050,12 +1044,6 @@ class BaseTrader:
                 self.dict_intg['예수금'] += 위탁증거금 + 수익금
                 self.dict_intg['추정예수금'] += 위탁증거금 + 수익금
 
-            if self.dict_jg:
-                df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            else:
-                df_jg = pd.DataFrame(columns=columns_jgf)
-            self.queryQ.put(('거래디비', df_jg, 'f_jangolist', 'replace'))
-
             if self.dict_set['알림소리']:
                 self.soundQ.put(f'{종목명} {체결수량}주를 {주문구분}하였습니다')
 
@@ -1222,12 +1210,6 @@ class BaseTrader:
                 else:
                     self.dict_intg['예수금'] += 매입금액 + 수익금
                     self.dict_intg['추정예수금'] += 매입금액 + 수익금
-
-            if self.dict_jg:
-                df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            else:
-                df_jg = pd.DataFrame(columns=columns_jgcf)
-            self.queryQ.put(('거래디비', df_jg, self.market_info['잔고디비'], 'replace'))
 
             if self.dict_set['알림소리']:
                 text = ''
@@ -1442,12 +1424,13 @@ class BaseTrader:
             else:
                 self.stgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
+        columns = columns_jg if self.market_gubun < 6 else columns_jgf if self.market_gubun < 8 else columns_jgcf
         if self.dict_jg:
             df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
         else:
-            df_jg = pd.DataFrame(columns=columns_jg)
-
+            df_jg = pd.DataFrame(columns=columns)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
+        self.queryQ.put(('거래디비', df_jg, self.market_info['거래디비'], 'replace'))
         self.windowQ.put((ui_num['잔고목록'], df_jg))
         self.windowQ.put((ui_num['잔고평가'], df_tj))
 
