@@ -1,18 +1,27 @@
 @echo off
-echo 웹대시보드 라이브러리 설치 시작...
+chcp 65001 > nul
+echo Installing web dashboard libraries...
 echo.
 
-echo 백엔드 Python 라이브러리 설치 중...
+echo Installing backend Python libraries...
 cd web_dashboard\backend
 python -m pip install -r requirements.txt
 cd ..\..
 
 echo.
-echo 프론트엔드 Node.js 라이브러리 설치 중...
-cd web_dashboard\frontend
-npm install
-cd ..\..
+echo Checking npm installation...
+where npm >nul 2>nul
+if %errorlevel% neq 0 (
+    echo ERROR: npm is not installed or not in PATH.
+    echo Please install Node.js from https://nodejs.org/
+    echo.
+) else (
+    echo Installing frontend Node.js libraries...
+    cd web_dashboard\frontend
+    npm install
+    cd ..\..
+)
 
 echo.
-echo 모든 라이브러리 설치 완료!
+echo All libraries installed successfully!
 pause

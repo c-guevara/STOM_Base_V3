@@ -1,15 +1,25 @@
 @echo off
-echo 웹대시보드 서버 시작...
+chcp 65001 > nul
+echo Starting web dashboard servers...
 echo.
 
-echo 백엔드 서버 시작 (별도 창)...
+echo Checking npm installation...
+where npm >nul 2>nul
+if %errorlevel% neq 0 (
+    echo ERROR: npm is not installed or not in PATH.
+    echo Please install Node.js from https://nodejs.org/
+    pause
+    exit /b
+)
+
+echo Starting backend server (separate window)...
 start "Web Dashboard Backend" cmd /k "cd web_dashboard\backend && python main.py"
 
-echo 프론트엔드 서버 시작 (별도 창)...
+echo Starting frontend server (separate window)...
 start "Web Dashboard Frontend" cmd /k "cd web_dashboard\frontend && npm run dev"
 
 echo.
-echo 두 서버가 시작되었습니다.
-echo 백엔드: http://localhost:8000
-echo 프론트엔드: http://localhost:5173
+echo Both servers started.
+echo Backend: http://localhost:8000
+echo Frontend: http://localhost:5173
 pause
