@@ -21,7 +21,7 @@ export default function SummaryCards({ totalTrade }: Props) {
       {cards.map((card) => {
         const Icon = card.icon
         return (
-          <Card key={card.title} className="rounded-xl border border-border/40 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-lg hover:shadow-xl transition-all duration-200">
+          <Card key={card.title} className="rounded-xl border border-border/40 bg-card shadow-lg">
             <CardHeader className="pb-2 p-3 md:p-6 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-xs md:text-sm font-medium text-gray-600">{card.title}</CardTitle>
               <Icon className="w-4 h-4 text-gray-400" />
