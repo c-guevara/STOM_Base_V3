@@ -8,6 +8,7 @@ import ChegeolTable from '../components/ChegeolTable'
 import TradeTable from '../components/TradeTable'
 import ProfitChart from '../components/ProfitChart'
 import AlertPanel from '../components/AlertPanel'
+import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon, Plane, Bitcoin, CandlestickChart } from 'lucide-react'
 
 const MARKETS: MarketType[] = ['stock', 'stock_etf', 'stock_etn', 'stock_usa', 'future', 'future_nt', 'future_os', 'coin', 'coin_future']
 const MARKET_NAMES: Record<MarketType, string> = {
@@ -22,6 +23,21 @@ const MARKET_NAMES: Record<MarketType, string> = {
   coin_future: '코인선물'
 }
 
+const getMarketIcon = (market: MarketType) => {
+  const icons: Record<MarketType, React.ReactNode> = {
+    stock: <TrendingUp className="w-4 h-4" />,
+    stock_etf: <BarChart3 className="w-4 h-4" />,
+    stock_etn: <LineChart className="w-4 h-4" />,
+    stock_usa: <Globe className="w-4 h-4" />,
+    future: <Zap className="w-4 h-4" />,
+    future_nt: <Moon className="w-4 h-4" />,
+    future_os: <Plane className="w-4 h-4" />,
+    coin: <Bitcoin className="w-4 h-4" />,
+    coin_future: <CandlestickChart className="w-4 h-4" />
+  }
+  return icons[market]
+}
+
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
   const { data, connected } = useWebSocket(selectedMarket)
@@ -32,7 +48,7 @@ export default function Dashboard() {
   const tradeItems = useMemo(() => data?.tradelist ?? [], [data?.tradelist])
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-slate-900 dark:to-gray-950 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
@@ -41,15 +57,15 @@ export default function Dashboard() {
           </div>
         </div>
         <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 h-auto">
+          <TabsList className="grid w-full grid-cols-3 gap-2 h-auto">
             {MARKETS.map((market) => (
-              <TabsTrigger 
-                key={market} 
+              <TabsTrigger
+                key={market}
                 value={market}
-                className="text-xs sm:text-sm py-2 px-1 md:px-3"
+                className="flex flex-col items-center gap-1 py-3 px-2 text-xs"
               >
-                <span className="hidden md:inline">{MARKET_NAMES[market]}</span>
-                <span className="md:hidden">{market.split('_')[0]}</span>
+                {getMarketIcon(market)}
+                <span>{MARKET_NAMES[market]}</span>
               </TabsTrigger>
             ))}
           </TabsList>
