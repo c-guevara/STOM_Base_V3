@@ -34,12 +34,21 @@ function TradeTable({ items }: Props) {
                     {item.수익금.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-xs md:text-sm">
-                    {item.체결시간 ? new Date(item.체결시간).toLocaleTimeString('ko-KR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: false
-                    }) : '-'}
+                    {(() => {
+                      if (!item.체결시간) return '-'
+                      try {
+                        const date = new Date(item.체결시간)
+                        if (isNaN(date.getTime())) return '-'
+                        return date.toLocaleTimeString('ko-KR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: false
+                        })
+                      } catch {
+                        return '-'
+                      }
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}
