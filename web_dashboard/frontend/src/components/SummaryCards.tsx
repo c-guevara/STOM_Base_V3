@@ -61,12 +61,12 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
             <CardContent className="p-3 pt-0">
               {card.isDateTime ? (
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-left text-gray-600">{card.value.date}</span>
-                  <span className="text-lg font-bold text-right text-gray-600">{card.value.time}</span>
+                  <span className="text-lg font-bold text-left text-gray-600">{(card.value as { date: string; time: string }).date}</span>
+                  <span className="text-lg font-bold text-right text-gray-600">{(card.value as { date: string; time: string }).time}</span>
                 </div>
               ) : (
                 <div className={`text-lg font-bold text-right ${card.color}`}>
-                  {card.value}
+                  {card.value as string}
                 </div>
               )}
             </CardContent>
