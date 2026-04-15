@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { MarketType } from '../types'
-import { Tabs, TabsContent } from '../components/ui/tabs'
 import SummaryCards from '../components/SummaryCards'
 import JangoTable from '../components/JangoTable'
 import ChegeolTable from '../components/ChegeolTable'
@@ -63,9 +62,9 @@ export default function Dashboard() {
   }, [isDarkMode])
 
   // useMemo로 items 데이터 캐싱 - 실제 데이터 변경 시에만 새로운 참조 생성
-  const jangoItems = useMemo(() => data?.jangolist ?? [], [data?.jangolist])
-  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data?.chegeollist])
-  const tradeItems = useMemo(() => data?.tradelist ?? [], [data?.tradelist])
+  const jangoItems = useMemo(() => data?.jangolist ?? [], [data])
+  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data])
+  const tradeItems = useMemo(() => data?.tradelist ?? [], [data])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 p-4 md:p-6 relative overflow-hidden">
@@ -110,21 +109,17 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-        <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
-          {MARKETS.map((market) => (
-            <TabsContent key={market} value={market} className="space-y-3">
-              {data && (
-                <>
-                  <SummaryCards totalTrade={data.totaltradelist} market={market} timestamp={data.timestamp} />
-                  <AlertPanel alerts={data.alerts || []} />
-                  <JangoTable items={jangoItems} />
-                  <ChegeolTable items={chegeolItems} />
-                  <TradeTable items={tradeItems} />
-                </>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
+        <div className="space-y-3">
+          {data && (
+            <>
+              <SummaryCards totalTrade={data.totaltradelist} market={selectedMarket} timestamp={data.timestamp} />
+              <AlertPanel alerts={data.alerts || []} />
+              <JangoTable items={jangoItems} />
+              <ChegeolTable items={chegeolItems} />
+              <TradeTable items={tradeItems} />
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
