@@ -1,11 +1,11 @@
 
 import sqlite3
 import pandas as pd
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from utility.settings.setting_base import ui_num, columns_cj, columns_jg, columns_td, columns_tdf, columns_jgf, \
     columns_jgcf
-from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, error_decorator, \
-    set_builtin_print, get_inthms, get_str_ymdhms, get_str_ymdhmsf
+from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, get_inthms, get_str_ymdhms, \
+    get_str_ymdhmsf
 
 
 class MonitorTraderQ(QThread):
@@ -124,7 +124,6 @@ class BaseTrader:
         self.jgcs_time  = self.get_jgcs_time()
 
         self._load_database()
-        set_builtin_print(self.windowQ)
 
     def _get_yesugm_for_paper_trading(self):
         """모의투스용 예수금을 반환합니다.
@@ -206,7 +205,6 @@ class BaseTrader:
 
         self._update_totaljango()
 
-    @error_decorator
     def _check_order(self, data):
         """주문을 확인합니다.
         Args:
@@ -279,7 +277,6 @@ class BaseTrader:
                     if self.dict_set['매수취소매도시그널'] and 매수주문중: self._cancel_order(종목코드, 주문구분)
                 self._put_order_complete(f'{주문구분}취소', 종목코드)
 
-    @error_decorator
     def _check_order_future(self, data):
         """선물 주문을 확인합니다.
         Args:
@@ -694,16 +691,7 @@ class BaseTrader:
         Args:
             data: 데이터
         """
-        if data == '체결목록':
-            df_cj = pd.DataFrame.from_dict(self.dict_cj, orient='index')
-            self.teleQ.put(df_cj if len(df_cj) > 0 else f"현재는 {self.market_info['마켓이름']} 체결목록이 없습니다.")
-        elif data == '거래목록':
-            df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
-            self.teleQ.put(df_td if len(df_td) > 0 else f"현재는 {self.market_info['마켓이름']} 거래목록이 없습니다.")
-        elif data == '잔고평가':
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            self.teleQ.put(df_jg if len(df_jg) > 0 else f"현재는 {self.market_info['마켓이름']} 잔고목록이 없습니다.")
-        elif data == '잔고청산':
+        if data == '잔고청산':
             self._jango_cheongsan('수동')
         elif data == '프로세스종료':
             self._sys_exit()
@@ -766,7 +754,6 @@ class BaseTrader:
                 index = str(int(index) + 1)
         return index
 
-    @error_decorator
     def _update_chejan_data(self, 주문구분, 체결구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 체결시간, 주문번호):
         """체결 데이터를 업데이트합니다.
         Args:
@@ -910,7 +897,6 @@ class BaseTrader:
         self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
         self.receivQ.put(('주문목록', self._get_order_code_list()))
 
-    @error_decorator
     def _update_chejan_data_future(self, 체결구분, 종목코드, 체결수량, 체결가격, 체결시간, 주문번호):
         """선물 체결 데이터를 업데이트합니다.
         Args:
@@ -941,9 +927,9 @@ class BaseTrader:
                     매수가 = round((직전매수가 * 직전보유수량 + 체결가격 * 체결수량) / 보유수량, self.dict_info[종목코드]['소숫점자리수'] + 1)
                     보유금액 = 매입금액 + (체결가격 - 매수가) * self.dict_info[종목코드]['틱가치'] * 보유수량
                     if 'LONG' in 주문구분:
-                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액, 종목코드)
                     else:
-                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액, 종목코드)
 
                     self.dict_jg[종목코드].update({
                         '매수가': 매수가,
@@ -960,10 +946,10 @@ class BaseTrader:
                     매입금액 = 보유금액 = self.dict_info[종목코드]['위탁증거금'] * 체결수량
                     if 'LONG' in 주문구분:
                         포지션 = 'LONG'
-                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액, 종목코드)
                     else:
                         포지션 = 'SHORT'
-                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액, 종목코드)
 
                     self.dict_jg[종목코드] = {
                         '종목명': 종목명,
@@ -1000,9 +986,9 @@ class BaseTrader:
                     매입금액 = self.dict_info[종목코드]['위탁증거금'] * 보유수량
                     보유금액 = 매입금액 + (체결가격 - 매수가) * self.dict_info[종목코드]['틱가치'] * 보유수량
                     if 'LONG' in 주문구분:
-                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액, 종목코드)
                     else:
-                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액)
+                        평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액, 종목코드)
 
                     self.dict_jg[종목코드].update({
                         '현재가': 체결가격,
@@ -1028,9 +1014,9 @@ class BaseTrader:
                 매입금액 = self.dict_info[종목코드]['위탁증거금'] * 체결수량
                 보유금액 = 매입금액 + (체결가격 - 매수가) * self.dict_info[종목코드]['틱가치'] * 체결수량
                 if 'LONG' in 주문구분:
-                    평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액)
+                    평가금액, 수익금, 수익률 = self._get_profit_long(매입금액, 보유금액, 종목코드)
                 else:
-                    평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액)
+                    평가금액, 수익금, 수익률 = self._get_profit_short(매입금액, 보유금액, 종목코드)
 
                 if -100 < 수익률 < 100:
                     self._update_tradelist(index, 종목명, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 체결시간, 포지션)
@@ -1086,7 +1072,6 @@ class BaseTrader:
         self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
         self.receivQ.put(('주문목록', self._get_order_code_list()))
 
-    @error_decorator
     def _update_chejan_data_coin_future(self, 주문구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 체결시간, 주문번호):
         """코인 선물 체결 데이터를 업데이트합니다.
         Args:
@@ -1338,7 +1323,7 @@ class BaseTrader:
         self.windowQ.put((ui_num['실현손익'], df_tt))
 
         if not first:
-            self.teleQ.put(df_tt)
+            QTimer.singleShot(1 * 1000, lambda: self.windowQ.put('매도완료'))
 
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
@@ -1507,7 +1492,7 @@ class BaseTrader:
         """
         return 0, 0, 0
 
-    def _get_profit_long(self, 매입금액, 보유금액):
+    def _get_profit_long(self, 매입금액, 보유금액, 종목코드=None):
         """롱 수익을 계산합니다.
         Args:
             매입금액: 매입 금액
@@ -1517,7 +1502,7 @@ class BaseTrader:
         """
         return 0, 0, 0
 
-    def _get_profit_short(self, 매입금액, 보유금액):
+    def _get_profit_short(self, 매입금액, 보유금액, 종목코드=None):
         """숏 수익을 계산합니다.
         Args:
             매입금액: 매입 금액

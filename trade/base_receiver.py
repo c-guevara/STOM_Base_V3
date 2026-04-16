@@ -5,7 +5,7 @@ import pandas as pd
 from trade.restapi_ls import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_price, threading_timer, set_builtin_print
+from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_price, threading_timer
 
 
 class MonitorReceivQ(QThread):
@@ -118,8 +118,6 @@ class BaseReceiver:
             self.tr_cd_hoga  = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}호가"]
             self.tr_cd_oper  = LsRestData.실시간거래코드['장운영정보']
             self.oper_gubun  = LsRestData.장구분[self.market_gubun]
-
-        set_builtin_print(self.windowQ)
 
     def _save_code_info_and_noti(self):
         """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
@@ -634,6 +632,33 @@ class BaseReceiver:
                 hoga_samount[:5][::-1] + hoga_bamount[:5]
             )
 
+    def _scheduler(self):
+        """스케줄러를 실행합니다."""
+        self._money_top_search()
+
+        inthms = get_inthms(self.market_gubun)
+        A = self.dict_set['전략종료시간'] < inthms < self.dict_set['전략종료시간'] + 10 and self.dict_set['프로세스종료']
+        B = self.market_close < inthms < self.market_close + 10
+        if not self.dict_bool['프로세스종료'] and (A or B):
+            self._receiver_process_kill()
+
+        if self.market_gubun not in (6, 7, 8):
+            current_gsjm = tuple(self.list_gsjm)
+            if current_gsjm != self.last_gsjm:
+                if self.market_gubun in (1, 2, 4):
+                    for q in self.stgQs:
+                        q.put(('관심목록', current_gsjm))
+                else:
+                    self.stgQ.put(('관심목록', current_gsjm))
+                self.last_gsjm = current_gsjm
+
+        if self.market_gubun == 9:
+            curr_time = now()
+            if not self.dict_set['바이낸스선물고정레버리지'] and curr_time > self.lvhp_time:
+                if self.dict_dlhp:
+                    self.traderQ.put(('저가대비고가등락율', self.dict_dlhp))
+                self.lvhp_time = timedelta_sec(300)
+
     def _money_top_search(self):
         """머니 탑을 검색합니다."""
         if self.dict_daym:
@@ -745,30 +770,3 @@ class BaseReceiver:
             self.stgQs[0].put(('데이터저장', codes))
         else:
             self.stgQ.put(('데이터저장', codes))
-
-    def _scheduler(self):
-        """스케줄러를 실행합니다."""
-        self._money_top_search()
-
-        inthms = get_inthms(self.market_gubun)
-        A = self.dict_set['전략종료시간'] < inthms < self.dict_set['전략종료시간'] + 10 and self.dict_set['프로세스종료']
-        B = self.market_close < inthms < self.market_close + 10
-        if not self.dict_bool['프로세스종료'] and (A or B):
-            self._receiver_process_kill()
-
-        if self.market_gubun not in (6, 7, 8):
-            current_gsjm = tuple(self.list_gsjm)
-            if current_gsjm != self.last_gsjm:
-                if self.market_gubun in (1, 2, 4):
-                    for q in self.stgQs:
-                        q.put(('관심목록', current_gsjm))
-                else:
-                    self.stgQ.put(('관심목록', current_gsjm))
-                self.last_gsjm = current_gsjm
-
-        if self.market_gubun == 9:
-            curr_time = now()
-            if not self.dict_set['바이낸스선물고정레버리지'] and curr_time > self.lvhp_time:
-                if self.dict_dlhp:
-                    self.traderQ.put(('저가대비고가등락율', self.dict_dlhp))
-                self.lvhp_time = timedelta_sec(300)

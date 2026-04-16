@@ -74,7 +74,6 @@ class UpbitRestAPI:
             '최유리IOC': 'ioc',
             '최유리FOK': 'fok',
         }
-        set_builtin_print(self.windowQ)
 
     def _headers(self, query=None):
         """헤더를 생성합니다.

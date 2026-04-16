@@ -182,6 +182,7 @@ def setting_load_06(ui):
     ui.sj_etc_checBox_06.setChecked(True) if df['웹대시보드'][0] else ui.sj_etc_checBox_06.setChecked(False)
     ui.sj_etc_checBox_07.setChecked(True) if df['창위치기억'][0] else ui.sj_etc_checBox_07.setChecked(False)
     ui.sj_etc_checBox_08.setChecked(True) if df['프로그램종료'][0] else ui.sj_etc_checBox_08.setChecked(False)
+    ui.sj_etc_liEditt_02.setText(str(df['웹대시보드포트번호'][0]))
     if df['시리얼키'][0]:
         ui.sj_etc_liEditt_01.setText(de_text(ui.dict_set['키'], df['시리얼키'][0]))
 
@@ -419,9 +420,11 @@ def setting_save_06(ui):
     프로그램종료 = 1 if ui.sj_etc_checBox_08.isChecked() else 0
     시리얼키_ = ui.sj_etc_liEditt_01.text()
     시리얼키 = en_text(ui.dict_set['키'], 시리얼키_)
+    웹대시보드포트번호 = int(ui.sj_etc_liEditt_02.text())
 
     if ui.proc_chqs.is_alive():
-        columns = ['테마', '저해상도', '스톰라이브', '휴무프로세스종료', '휴무컴퓨터종료', '웹대시보드', '창위치기억', '프로그램종료', '시리얼키']
+        columns = ['테마', '저해상도', '스톰라이브', '휴무프로세스종료', '휴무컴퓨터종료', '웹대시보드', '웹대시보드포트번호',
+                   '창위치기억', '프로그램종료', '시리얼키']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
         query   = f'UPDATE etc SET {set_txt}'
         localvs = locals()

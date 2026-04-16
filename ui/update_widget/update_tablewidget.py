@@ -5,9 +5,8 @@ from ui.draw_chart.draw_label_text import get_label_text
 from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
 from ui.etcetera.process_alive import receiver_process_alive
 from utility.settings.setting_base import ui_num, columns_hg, columns_hj
+from utility.static_method.static import change_format, comma2int, comma2float, dt_ymdhms
 from ui.create_widget.set_style import color_fg_bt, color_fg_dk, color_fg_bc, color_bf_bt, color_bf_dk, color_ct_hg
-from utility.static_method.static import change_format, comma2int, comma2float, dt_ymdhms, error_decorator, \
-    set_builtin_print
 
 
 class NumericItem(QTableWidgetItem):
@@ -161,10 +160,8 @@ class UpdateTablewidget:
             '등락율각도', '고저평균대비등락율', '저가대비고가등락율', '당일매수금액', '당일매도금액', '최고매수금액',
             '최고매도금액', '최고매수가격', '최고매도가격', '누적초당매수수량', '누적초당매도수량', '매도수5호가잔량합'
         ]
-        set_builtin_print(self.ui.windowQ)
 
     # noinspection PyUnresolvedReferences
-    @error_decorator
     def update_tablewidget(self, data):
         """테이블 위젯을 업데이트합니다.
         수신된 데이터를 기반으로 테이블 위젯에 내용을 표시합니다.

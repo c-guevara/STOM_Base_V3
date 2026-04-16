@@ -3,9 +3,9 @@ import re
 from ui.event_activate import activated_stg
 from ui.etcetera.etc import auto_back_schedule
 from ui.event_click.button_clicked_database import *
+from utility.static_method.static import now, qtest_qwait, now_cme
 from ui.event_click.button_clicked_stg_editer import backtest_detail
 from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
-from utility.static_method.static import now, qtest_qwait, now_cme, set_builtin_print
 from ui.create_widget.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
 
 
@@ -20,7 +20,6 @@ class UpdateTextedit:
         """
         self.ui        = ui
         self.data_save = False
-        set_builtin_print(self.ui.windowQ)
 
     @error_decorator
     def update_texedit(self, data):

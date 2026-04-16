@@ -5,8 +5,7 @@ from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
 from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
-from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, \
-    error_decorator
+from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc
 
 
 class UpbitTrader(BaseTrader):
@@ -137,7 +136,6 @@ class UpbitTrader(BaseTrader):
         self.order_time = timedelta_sec(0.2)
         self.receivQ.put(('주문목록', self._get_order_code_list()))
 
-    @error_decorator
     def _convert_order_data(self, data):
         """주문 데이터를 변환합니다.
         Args:

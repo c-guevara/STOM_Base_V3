@@ -5,8 +5,8 @@ import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.analyzer_risk import AnalyzerRisk
-from trade.manager_formula import get_formula_data
 from trade.stg_globals_func import StgGlobalsFunc
+from trade.manager_formula import get_formula_data
 from trade.analyzer_microstruc import AnalyzerMicrostructure
 from utility.settings.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY, DB_SETTING
 from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \

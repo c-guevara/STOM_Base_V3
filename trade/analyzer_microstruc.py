@@ -56,6 +56,7 @@ def _calc_analyze_price_levels(quantities: np.ndarray, multiplier: float, min_oc
 
     return result
 
+
 # noinspection PyUnresolvedReferences
 @jit(nopython=True, cache=True, fastmath=True)
 def _calc_detect_large_order_changes(quantities: np.ndarray, prices: np.ndarray, threshold: float):

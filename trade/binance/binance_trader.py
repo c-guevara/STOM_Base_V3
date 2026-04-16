@@ -6,7 +6,8 @@ from traceback import format_exc
 from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
-from utility.static_method.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, get_str_ymdhms
+from utility.static_method.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, \
+    get_str_ymdhms, error_decorator
 
 
 class BinanceTrader(BaseTrader):
@@ -186,6 +187,7 @@ class BinanceTrader(BaseTrader):
                 break
         return leverage
 
+    @error_decorator
     def _convert_order_data(self, data):
         """주문 데이터를 변환합니다.
         Args:
@@ -271,7 +273,7 @@ class BinanceTrader(BaseTrader):
         """
         return round(현재가 + 정정호가, self.dict_info[종목코드]['가격소숫점자리수'])
 
-    def _get_profit_long(self, 매입금액, 보유금액):
+    def _get_profit_long(self, 매입금액, 보유금액, 종목코드=None):
         """롱 수익을 계산합니다.
         Args:
             매입금액: 매입 금액
@@ -283,7 +285,7 @@ class BinanceTrader(BaseTrader):
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
         )
 
-    def _get_profit_short(self, 매입금액, 보유금액):
+    def _get_profit_short(self, 매입금액, 보유금액, 종목코드=None):
         """숏 수익을 계산합니다.
         Args:
             매입금액: 매입 금액

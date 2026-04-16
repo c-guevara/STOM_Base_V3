@@ -1,15 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
-import { MarketType } from '../types'
 import SummaryCards from '../components/SummaryCards'
 import JangoTable from '../components/JangoTable'
 import ChegeolTable from '../components/ChegeolTable'
 import TradeTable from '../components/TradeTable'
 import AlertPanel from '../components/AlertPanel'
-import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon as MoonIcon, Plane, Bitcoin, CandlestickChart, Sun, Menu } from 'lucide-react'
+import { Sun, Moon as MoonIcon } from 'lucide-react'
 
-const MARKETS: MarketType[] = ['stock', 'stock_etf', 'stock_etn', 'stock_usa', 'future', 'future_nt', 'future_os', 'coin', 'coin_future']
-const MARKET_NAMES: Record<MarketType, string> = {
+// 마켓코드 -> 마켓명 매핑
+const MARKET_NAMES: Record<string, string> = {
   stock: '국내주식',
   stock_etf: 'ETF',
   stock_etn: 'ETN',
@@ -21,44 +20,14 @@ const MARKET_NAMES: Record<MarketType, string> = {
   coin_future: '코인선물'
 }
 
+// 환경변수에서 마켓코드 읽기 (빌드 시점에 주입)
+const FIXED_MARKET_CODE = import.meta.env.VITE_STOM_MARKET_CODE || 'stock'
+const FIXED_MARKET_NAME = MARKET_NAMES[FIXED_MARKET_CODE] || '국내주식'
+
 export default function Dashboard() {
-  const [selectedMarket, setSelectedMarket] = useState<MarketType>(() => {
-    const saved = localStorage.getItem('selectedMarket')
-    return (saved as MarketType) || 'stock'
-  })
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false)
-  const { data, isLoading } = useWebSocket(selectedMarket)
-
-  // selectedMarket이 변경되면 localStorage에 저장
-  useEffect(() => {
-    localStorage.setItem('selectedMarket', selectedMarket)
-  }, [selectedMarket])
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
-
-  // 드롭다운 외부 클릭 시 닫기
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsMarketDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // 아이콘을 컴포넌트 내부에 정의하여 UMD 전역 변수 참조 에러 해결
-  const MARKET_ICONS: Record<MarketType, React.ReactNode> = useMemo(() => ({
-    stock: <TrendingUp className="w-4 h-4" />,
-    stock_etf: <BarChart3 className="w-4 h-4" />,
-    stock_etn: <LineChart className="w-4 h-4" />,
-    stock_usa: <Globe className="w-4 h-4" />,
-    future: <Zap className="w-4 h-4" />,
-    future_nt: <MoonIcon className="w-4 h-4" />,
-    future_os: <Plane className="w-4 h-4" />,
-    coin: <Bitcoin className="w-4 h-4" />,
-    coin_future: <CandlestickChart className="w-4 h-4" />
-  }), [])
+  // 고정된 마켓코드로 WebSocket 연결
+  const { data, isLoading } = useWebSocket(FIXED_MARKET_CODE)
 
   // 다크 모드 토글 시 HTML 태그에 dark 클래스 추가/제거
   useEffect(() => {
@@ -70,44 +39,20 @@ export default function Dashboard() {
   }, [isDarkMode])
 
   // useMemo로 items 데이터 캐싱 - 실제 데이터 변경 시에만 새로운 참조 생성
-  const jangoItems = useMemo(() => data?.jangolist ?? [], [data, selectedMarket])
-  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data, selectedMarket])
-  const tradeItems = useMemo(() => data?.tradelist ?? [], [data, selectedMarket])
+  const jangoItems = useMemo(() => data?.jangolist ?? [], [data])
+  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data])
+  const tradeItems = useMemo(() => data?.tradelist ?? [], [data])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 md:p-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">STOM BOARD ＠ {MARKET_NAMES[selectedMarket]}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              STOM BOARD ＠ {FIXED_MARKET_NAME}
+            </h1>
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsMarketDropdownOpen(!isMarketDropdownOpen)}
-                className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-gray-700 dark:to-gray-800 hover:from-blue-600 hover:to-purple-600 dark:hover:from-gray-600 dark:hover:to-gray-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                aria-label="거래소 선택"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-              {isMarketDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                  {MARKETS.map((market) => (
-                    <button
-                      key={market}
-                      onClick={() => {
-                        setSelectedMarket(market)
-                        setIsMarketDropdownOpen(false)
-                      }}
-                      className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${selectedMarket === market ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
-                    >
-                      {MARKET_ICONS[market]}
-                      <span className="text-sm">{MARKET_NAMES[market]}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-gray-700 dark:to-gray-800 hover:from-blue-600 hover:to-purple-600 dark:hover:from-gray-600 dark:hover:to-gray-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
@@ -128,7 +73,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
-              <SummaryCards totalTrade={data.totaltradelist} market={selectedMarket} timestamp={data.timestamp} />
+              <SummaryCards totalTrade={data.totaltradelist} market={FIXED_MARKET_CODE} timestamp={data.timestamp} />
               <AlertPanel alerts={data.alerts || []} />
               <JangoTable items={jangoItems} />
               <ChegeolTable items={chegeolItems} />

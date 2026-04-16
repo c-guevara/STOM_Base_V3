@@ -2,16 +2,17 @@
 import psutil
 import random
 import pandas as pd
+from io import BytesIO
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QSize, Qt
 from ui.create_widget.set_text import famous_saying
 from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtCore import QSize, Qt, QBuffer, QIODevice
 from utility.settings.setting_base import columns_dt, columns_dd, ui_num
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_backtest_engine import backengine_start, backengine_show
 from ui.event_click.button_clicked_backtest_start import backtest_engine_kill, sdbutton_clicked_04
+from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdhmsf, error_decorator
 from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
-from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdhmsf, str_ymdhms, error_decorator
 
 
 @error_decorator
@@ -164,34 +165,37 @@ def calendar_clicked(ui):
 
 
 @error_decorator
-def stom_live_screenshot(ui, cmd):
+def stom_live_screenshot(ui):
     """STOM 라이브 스크린샷을 찍습니다.
     Args:
         ui: UI 객체
-        cmd: 명령어
     """
     prev_main_btn = ui.main_btn
-    mnbutton_c_clicked_01(ui, 5)
+    mnbutton_c_clicked_01(ui, 3)
     qtest_qwait(1)
-    if '주식' in cmd:
-        mid = 'S'
+    if ui.market_gubun in (1, 2, 3):
         ui.slv_tapWidgett_01.setCurrentIndex(ui.slv_index1)
-    elif '코인' in cmd:
-        mid = 'C'
+    elif ui.market_gubun in (5, 9):
         ui.slv_tapWidgett_01.setCurrentIndex(ui.slv_index2)
-    elif '해선' in cmd:
-        mid = 'F'
-        ui.slv_tapWidgett_01.setCurrentIndex(ui.slv_index3)
     else:
-        mid = 'B'
-        ui.slv_tapWidgett_01.setCurrentIndex(ui.slv_index4)
+        ui.slv_tapWidgett_01.setCurrentIndex(ui.slv_index3)
     qtest_qwait(1)
-    file_name = f'./_log/StomLive_{mid}_{str_ymdhms()}.png'
     screen = QApplication.primaryScreen()
     # noinspection PyUnresolvedReferences
-    screenshot = screen.grabWindow(ui.winId())
-    screenshot.save(file_name, 'png')
-    ui.teleQ.put(file_name)
+    pixmap = screen.grabWindow(ui.winId())
+
+    # QBuffer를 사용하여 QPixmap을 바이트 배열로 변환
+    qbuffer = QBuffer()
+    # noinspection PyUnresolvedReferences
+    qbuffer.open(QIODevice.WriteOnly)
+    pixmap.save(qbuffer, 'PNG')
+    byte_array = qbuffer.data().data()  # QByteArray -> bytes
+    qbuffer.close()
+
+    # BytesIO로 감싸서 전송
+    buffer = BytesIO(byte_array)
+    buffer.seek(0)
+    ui.teleQ.put(buffer)
     mnbutton_c_clicked_01(ui, prev_main_btn)
 
 

@@ -3,9 +3,9 @@ import sys
 from PyQt5.QtCore import QTimer
 from trade.restapi_ls import LsRestData
 from PyQt5.QtWidgets import QApplication
+from utility.static_method.static import now
 from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from utility.static_method.static import now, error_decorator
 
 
 class StockUsaReceiver(BaseReceiver):
@@ -52,7 +52,6 @@ class StockUsaReceiver(BaseReceiver):
         self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.dict_info)}
         self.traderQ.put(('종목정보', (self.dict_info, self.dict_sgbn)))
 
-    @error_decorator
     def _convert_real_data(self, data):
         """실시간 데이터를 변환합니다.
         Args:

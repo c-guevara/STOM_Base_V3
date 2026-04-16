@@ -12,7 +12,8 @@ from trade.analyzer_microstruc import AnalyzerMicrostructure
 from utility.settings.setting_base import indicator, DB_SETTING
 from utility.settings.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
 # noinspection PyUnusedImports
-from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema_list, set_builtin_print, get_indicator
+from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema_list, set_builtin_print, \
+    get_indicator
 
 
 class BaseStrategy(StgGlobalsFunc):
@@ -286,7 +287,7 @@ class BaseStrategy(StgGlobalsFunc):
             self.jgrv_count += 1
             if self.jgrv_count == 2:
                 self.jgrv_count = 0
-                self._put_gsjm_and_delete_hilo()
+                self._put_gsjm_and_delete_profit()
         elif gubun == '관심목록':
             self.dict_gj = {k: v for k, v in self.dict_gj.items() if k in data}
         elif gubun in ('매수완료', '매수취소'):
@@ -1403,6 +1404,36 @@ class BaseStrategy(StgGlobalsFunc):
                 self._분당거래대금평균(rw, calc=True), self._등락율각도(rw, calc=True), self._당일거래대금각도(rw, calc=True)
             ]
 
+    def _update_high_low(self, 종목코드, 현재가또는분봉고가, 분봉저가=None):
+        """고저를 업데이트합니다.
+        Args:
+            종목코드: 종목 코드
+            현재가또는분봉고가: 현재가 또는 분봉 고가
+            분봉저가: 분봉 저가
+        """
+        if 분봉저가 is None:
+            high_low = self.high_low.get(종목코드)
+            if high_low:
+                if 현재가또는분봉고가 >= high_low[0]:
+                    high_low[0] = 현재가또는분봉고가
+                    high_low[1] = self.indexn
+                if 현재가또는분봉고가 <= high_low[2]:
+                    high_low[2] = 현재가또는분봉고가
+                    high_low[3] = self.indexn
+            else:
+                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 현재가또는분봉고가, self.indexn]
+        else:
+            high_low = self.high_low.get(종목코드)
+            if high_low:
+                if 현재가또는분봉고가 >= high_low[0]:
+                    high_low[0] = 현재가또는분봉고가
+                    high_low[1] = self.indexn
+                if 분봉저가 <= high_low[2]:
+                    high_low[2] = 분봉저가
+                    high_low[3] = self.indexn
+            else:
+                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
+
     def Buy(self, buy_long=False):
         """매수 주문을 실행합니다.
         Args:
@@ -1537,8 +1568,8 @@ class BaseStrategy(StgGlobalsFunc):
                 매도수량 = 보유수량
             return 매도수량
 
-    def _put_gsjm_and_delete_hilo(self):
-        """관심종목에 추가하고 고저를 삭제합니다."""
+    def _put_gsjm_and_delete_profit(self):
+        """관심종목을 푸시하고 최고최저수익률 딕셔러니를 정리합니다."""
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
             df_gj = pd.DataFrame.from_dict(self.dict_gj, orient='index')
@@ -1587,36 +1618,6 @@ class BaseStrategy(StgGlobalsFunc):
                     q.put('프로세스종료')
         else:
             self.stgQ.put('프로세스종료')
-
-    def _update_high_low(self, 종목코드, 현재가또는분봉고가, 분봉저가=None):
-        """고저를 업데이트합니다.
-        Args:
-            종목코드: 종목 코드
-            현재가또는분봉고가: 현재가 또는 분봉 고가
-            분봉저가: 분봉 저가
-        """
-        if 분봉저가 is None:
-            high_low = self.high_low.get(종목코드)
-            if high_low:
-                if 현재가또는분봉고가 >= high_low[0]:
-                    high_low[0] = 현재가또는분봉고가
-                    high_low[1] = self.indexn
-                if 현재가또는분봉고가 <= high_low[2]:
-                    high_low[2] = 현재가또는분봉고가
-                    high_low[3] = self.indexn
-            else:
-                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 현재가또는분봉고가, self.indexn]
-        else:
-            high_low = self.high_low.get(종목코드)
-            if high_low:
-                if 현재가또는분봉고가 >= high_low[0]:
-                    high_low[0] = 현재가또는분봉고가
-                    high_low[1] = self.indexn
-                if 분봉저가 <= high_low[2]:
-                    high_low[2] = 분봉저가
-                    high_low[3] = self.indexn
-            else:
-                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
     def _get_hogaunit(self, 주문가격또는종목코드):
         """호가 단위를 반환합니다.

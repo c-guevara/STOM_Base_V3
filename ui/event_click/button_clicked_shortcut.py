@@ -219,3 +219,13 @@ def trade_process_start(ui):
         p = Process(target=target, args=(0, ui.qlist, ui.dict_set, ui.market_infos))
         p.start()
         ui.proc_strategys.append(p)
+
+    if ui.dict_set['웹대시보드']:
+        from ui.ui_mainwindow import get_ip
+        from dashboard.dashboard_starter import DashboardStarter
+        port = ui.dict_set['웹대시보드포트번호']
+        ui.web_dashboard = DashboardStarter(ui.market_gubun, port)
+        ui.web_dashboard.log_received.connect(ui.web_dashboard_log)
+        ui.web_dashboard.start()
+        # noinspection HttpUrlsUsage
+        ui.teleQ.put(f'http://{get_ip()}:{port}')

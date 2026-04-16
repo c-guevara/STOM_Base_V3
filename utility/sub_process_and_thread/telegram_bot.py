@@ -1,8 +1,8 @@
 
 import pytz
 import asyncio
-import pandas as pd
 from threading import Thread
+from io import BufferedIOBase
 from traceback import format_exc
 from PyQt5.QtCore import QThread
 from telegram.request import HTTPXRequest
@@ -81,8 +81,9 @@ class TelegramBot(QThread):
             update_queue = await self.application.updater.start_polling()
 
             keyboard = [
-                ['거래목록', '잔고평가', '잔고청산', '전략중지'],
-                ['S라이브', 'F라이브', 'C라이브', 'B라이브']
+                ['잔고평가', '실현손익', '관심종목'],
+                ['잔고목록', '거래목록', '체결목록'],
+                ['잔고청산', '전략중지', '라이브']
             ]
             reply_markup = ReplyKeyboardMarkup(keyboard)
 
@@ -117,25 +118,21 @@ class TelegramBot(QThread):
             context: 컨텍스트
         """
         cmd = update.message.text
-        cmd = cmd.replace('\n', '')
         if cmd == '전략중지':
             for q in self.stgQs:
                 q.put('매수전략중지')
-        elif '라이브' in cmd:
-            self.windowQ.put(cmd)
         else:
-            self.traderQ.put(cmd)
+            self.windowQ.put(cmd)
 
     def moniter_queue(self):
         """큐를 모니터링합니다.
         """
         while True:
-            try:
-                data = self.teleQ.get()
-                if self.running or data.__class__ == tuple:
-                    self.loop.call_soon_threadsafe(self.message_queue.put_nowait, data)
-            except:
-                pass
+            data = self.teleQ.get()
+            if self.running or data.__class__ == tuple:
+                self.loop.call_soon_threadsafe(self.message_queue.put_nowait, data)
+            if data.__class__ == str and data == '스레드종료':
+                break
 
     async def process_messages(self):
         """메시지를 처리합니다.
@@ -143,15 +140,12 @@ class TelegramBot(QThread):
         while True:
             data = await self.message_queue.get()
             if data.__class__ == str:
-                if '.png' in data:
-                    await self.send_photo(data)
-                else:
-                    await self.send_message(data)
-            elif isinstance(data.__class__, pd.DataFrame):
-                await self.send_message(data.to_string())
+                await self.send_message(data)
             elif data.__class__ == tuple:
                 self.dict_set = data[1]
                 await self.restart_bot()
+            elif isinstance(data, BufferedIOBase):
+                await self.send_photo(data)
             self.message_queue.task_done()
 
     async def restart_bot(self):
@@ -194,15 +188,16 @@ class TelegramBot(QThread):
             text=text
         )
 
-    async def send_photo(self, photo_path):
+    async def send_photo(self, photo_data):
         if not self.running:
             return
-        with open(photo_path, 'rb') as photo:
-            await self.application.bot.send_photo(
-                chat_id=self.chat_id,
-                photo=photo
-            )
+        photo_data.seek(0)
+        await self.application.bot.send_photo(
+            chat_id=self.chat_id,
+            photo=photo_data
+        )
 
     def stop(self):
+        self.teleQ.put('스레드종료')
         if self.loop and self.loop.is_running():
             self.loop.stop()

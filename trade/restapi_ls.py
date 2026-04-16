@@ -21,7 +21,6 @@ class LsRestAPI:
         self.token   = None
         self.tr_cont = False
         self.tr_cont_key = ''
-        set_builtin_print(self.windowQ)
 
     def _post(self, gubun: str, cont='N', cont_key='', **kwargs):
         """요청용 데이터(url, headers, params) 생성 및 전송

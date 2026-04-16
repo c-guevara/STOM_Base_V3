@@ -12,9 +12,19 @@ echo.
 echo Checking npm installation...
 where npm >nul 2>nul
 if %errorlevel% neq 0 (
-    echo ERROR: npm is not installed or not in PATH.
-    echo Please install Node.js from https://nodejs.org/
-    echo.
+    echo Node.js not found. Installing automatically via winget...
+    winget install --id OpenJS.NodeJS -e --source winget --accept-package-agreements --accept-source-agreements
+    if %errorlevel% neq 0 (
+        echo ERROR: Automatic installation failed.
+        echo Please install Node.js manually from https://nodejs.org/
+        echo.
+    ) else (
+        echo Node.js installed successfully!
+        echo Installing frontend Node.js libraries...
+        cd dashboard\frontend
+        npm install
+        cd ..\..
+    )
 ) else (
     echo Installing frontend Node.js libraries...
     cd dashboard\frontend
