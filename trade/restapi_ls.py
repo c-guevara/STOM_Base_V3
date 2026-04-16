@@ -263,8 +263,9 @@ class LsRestAPI:
         data = self._post(tr_name, 구분='')
         dict_data = {}
         for data in data[out_block]:
+            name = data['BscGdsNm'].replace(' ', '_')
             dict_data[data['Symbol']] = {
-                '종목명': data['SymbolNm'],
+                '종목명': name,
                 '위탁증거금': int(float(data['OpngMgn'])),
                 '호가단위': float(data['UntPrc']),
                 '틱가치': float(data['MnChgAmt']),

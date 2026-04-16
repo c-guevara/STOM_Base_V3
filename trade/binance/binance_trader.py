@@ -295,6 +295,15 @@ class BinanceTrader(BaseTrader):
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
         )
 
+    def _get_hogaunit(self, 주문가격또는종목코드):
+        """호가 단위를 반환합니다.
+        Args:
+            주문가격또는종목코드: 주문 가격 또는 종목 코드
+        Returns:
+            호가 단위
+        """
+        return self.dict_info[주문가격또는종목코드]['호가단위']
+
     def _get_order_code_list(self):
         """주문 종목 코드 리스트를 반환합니다.
         Returns:

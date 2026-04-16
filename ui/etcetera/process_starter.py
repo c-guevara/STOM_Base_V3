@@ -46,9 +46,9 @@ def _update_window_title(ui):
                f'backttQ[{ui.totalQ.qsize()}]'
     else:
         text = f"{text} | {ui.dict_set['매수전략'] if ui.dict_set['매수전략'] != '' else '전략사용안함'}"
-        if '바' in market_text or '업' in market_text:
+        if ui.market_gubun in (5, 9):
             text = f"{text} | {str_ymdhms_ios(now_utc())}"
-        elif '해외' in market_text:
+        elif ui.market_gubun in (4, 8):
             text = f"{text} | {str_ymdhms_ios(now_cme())}"
         else:
             text = f"{text} | {str_ymdhms_ios()}"

@@ -4,7 +4,7 @@ echo Installing web dashboard libraries...
 echo.
 
 echo Installing backend Python libraries...
-cd web_dashboard\backend
+cd dashboard\backend
 python -m pip install -r requirements.txt
 cd ..\..
 
@@ -17,7 +17,7 @@ if %errorlevel% neq 0 (
     echo.
 ) else (
     echo Installing frontend Node.js libraries...
-    cd web_dashboard\frontend
+    cd dashboard\frontend
     npm install
     cd ..\..
 )

@@ -1,97 +1,70 @@
 
 import numpy as np
-try:
-    from numba import jit
+from numba import jit
 
-    @jit(nopython=True, cache=True, fastmath=True)
-    def _calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
-        """RSI 계산 (Numba JIT 최적화)"""
-        n = len(prices)
-        if n < period + 1:
-            return 50.0
 
-        deltas = np.zeros(n - 1, dtype=np.float64)
-        for i in range(n - 1):
-            deltas[i] = prices[i + 1] - prices[i]
+@jit(nopython=True, cache=True, fastmath=True)
+def _calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
+    """RSI 계산 (Numba JIT 최적화)"""
+    n = len(prices)
+    if n < period + 1:
+        return 50.0
 
-        gains = np.zeros(n - 1, dtype=np.float64)
-        losses = np.zeros(n - 1, dtype=np.float64)
-        for i in range(n - 1):
-            if deltas[i] > 0:
-                gains[i] = deltas[i]
-            else:
-                losses[i] = -deltas[i]
+    deltas = np.zeros(n - 1, dtype=np.float64)
+    for i in range(n - 1):
+        deltas[i] = prices[i + 1] - prices[i]
 
-        avg_gain = 0.0
-        avg_loss = 0.0
-        for i in range(n - 1 - period, n - 1):
-            avg_gain += gains[i]
-            avg_loss += losses[i]
-        avg_gain /= period
-        avg_loss /= period
-
-        if avg_loss == 0.0:
-            return 100.0
-        elif avg_gain == 0.0:
-            return 0.0
+    gains = np.zeros(n - 1, dtype=np.float64)
+    losses = np.zeros(n - 1, dtype=np.float64)
+    for i in range(n - 1):
+        if deltas[i] > 0:
+            gains[i] = deltas[i]
         else:
-            rs = avg_gain / avg_loss
-            rsi = 100.0 - (100.0 / (1.0 + rs))
-            return rsi
+            losses[i] = -deltas[i]
+
+    avg_gain = 0.0
+    avg_loss = 0.0
+    for i in range(n - 1 - period, n - 1):
+        avg_gain += gains[i]
+        avg_loss += losses[i]
+    avg_gain /= period
+    avg_loss /= period
+
+    if avg_loss == 0.0:
+        return 100.0
+    elif avg_gain == 0.0:
+        return 0.0
+    else:
+        rs = avg_gain / avg_loss
+        rsi = 100.0 - (100.0 / (1.0 + rs))
+        return rsi
 
 
-    @jit(nopython=True, cache=True, fastmath=True)
-    def _calculate_volatility(prices: np.ndarray, window: int = 20) -> float:
-        """변동성 계산 (Numba JIT 최적화)"""
-        n = len(prices)
-        if n < window:
-            return 0.0
+@jit(nopython=True, cache=True, fastmath=True)
+def _calculate_volatility(prices: np.ndarray, window: int = 20) -> float:
+    """변동성 계산 (Numba JIT 최적화)"""
+    n = len(prices)
+    if n < window:
+        return 0.0
 
-        returns = np.zeros(n - window, dtype=np.float64)
-        for i in range(n - window):
-            if prices[i + window - 1] != 0:
-                returns[i] = (prices[i + window] - prices[i + window - 1]) / prices[i + window - 1]
+    returns = np.zeros(n - window, dtype=np.float64)
+    for i in range(n - window):
+        if prices[i + window - 1] != 0:
+            returns[i] = (prices[i + window] - prices[i + window - 1]) / prices[i + window - 1]
 
-        mean_return = 0.0
-        for i in range(n - window):
-            mean_return += returns[i]
-        mean_return /= (n - window)
+    mean_return = 0.0
+    for i in range(n - window):
+        mean_return += returns[i]
+    mean_return /= (n - window)
 
-        variance = 0.0
-        for i in range(n - window):
-            diff = returns[i] - mean_return
-            variance += diff * diff
-        variance /= (n - window)
+    variance = 0.0
+    for i in range(n - window):
+        diff = returns[i] - mean_return
+        variance += diff * diff
+    variance /= (n - window)
 
-        volatility = np.sqrt(variance) * np.sqrt(252.0) * 100.0
-        return volatility
-except:
-    def _calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
-        """RSI 계산 (Fallback 버전)"""
-        deltas = np.diff(prices)
-        gains = np.where(deltas > 0, deltas, 0)
-        losses = np.where(deltas < 0, -deltas, 0)
-        avg_gain = np.mean(gains[-period:])
-        avg_loss = np.mean(losses[-period:])
-
-        if avg_loss == 0:
-            return 100.0
-        elif avg_gain == 0:
-            return 0.0
-        else:
-            rs = avg_gain / avg_loss
-            rsi = 100 - (100 / (1 + rs))
-            return rsi
-
-
-    def _calculate_volatility(prices: np.ndarray, window: int = 20) -> float:
-        """변동성 계산 (Fallback 버전)"""
-        if len(prices) < window:
-            return 0.0
-        recent_prices = prices[-window:]
-        returns = np.diff(recent_prices) / recent_prices[:-1]
-        volatility = np.std(returns) * np.sqrt(252) * 100
-        return volatility
+    volatility = np.sqrt(variance) * np.sqrt(252.0) * 100.0
+    return volatility
 
 
 class AnalyzerRisk:

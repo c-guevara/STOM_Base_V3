@@ -49,7 +49,6 @@ class FutureOsReceiver(BaseReceiver):
         """종목 정보를 조회합니다."""
         self.dict_info, self.codes = self.ls.get_code_info_future_oversea()
         self.traderQ.put(('종목정보', self.dict_info))
-        self.stgQ.put(('종목정보', self.dict_info))
 
     @error_decorator
     def _convert_real_data(self, data):

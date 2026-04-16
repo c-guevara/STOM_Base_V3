@@ -51,8 +51,6 @@ class StockUsaReceiver(BaseReceiver):
         self.dict_info, self.codes = self.ls.get_code_info_stock_usa()
         self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.dict_info)}
         self.traderQ.put(('종목정보', (self.dict_info, self.dict_sgbn)))
-        for q in self.stgQs:
-            q.put(('종목정보', self.dict_info))
 
     @error_decorator
     def _convert_real_data(self, data):

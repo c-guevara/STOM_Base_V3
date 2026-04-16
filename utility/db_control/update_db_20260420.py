@@ -30,7 +30,7 @@ list_stock_min = [
     '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목'
 ]
 
-list_coin_tick = [
+list_basic_tick = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
     '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
@@ -39,7 +39,7 @@ list_coin_tick = [
     '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목'
 ]
 
-list_coin_min = [
+list_basic_min = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
     '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
@@ -66,60 +66,64 @@ def get_logger(name):
 
 def Updater(gubun, file_list):
     def convert_dataframe(df):
-        df_result = []
-        if '초당매수수량' in df.columns:
-            df['일자'] = (df['index'].values // 1000000).astype(int)
-        else:
-            df['일자'] = (df['index'].values // 10000).astype(int)
-        day_list = df['일자'].unique()
-
-        for day in day_list:
-            df2 = df[df['일자'] == day].copy()
-            df2['저가대비고가등락율'] = (df2['고가'] / df2['저가'] - 1) * 100
-            df2['저가대비고가등락율'] = df2['저가대비고가등락율'].round(2)
-
-            if '초당매수수량' in df2.columns:
-                df2['초당매수금액'] = df2['현재가'] * df2['초당매수수량']
-                df2['초당매도금액'] = df2['현재가'] * df2['초당매도수량']
-                df2['당일매수금액'] = df2['초당매수금액'].cumsum()
-                df2['당일매도금액'] = df2['초당매도금액'].cumsum()
-
-                df2['가격별누적매수금액'] = df2.groupby('현재가')['초당매수금액'].cumsum()
-                df2['가격별누적매도금액'] = df2.groupby('현재가')['초당매도금액'].cumsum()
-
-                df2['최고매수금액'] = df2['가격별누적매수금액'].cummax()
-                df2['최고매도금액'] = df2['가격별누적매도금액'].cummax()
-
-                df2['최고매수가격'] = df2['현재가'].where(
-                    df2['가격별누적매수금액'] == df2['최고매수금액']
-                ).ffill().fillna(df2['현재가'].iloc[0])
-
-                df2['최고매도가격'] = df2['현재가'].where(
-                    df2['가격별누적매도금액'] == df2['최고매도금액']
-                ).ffill().fillna(df2['현재가'].iloc[0])
+        if '당일매수금액' not in df.columns:
+            if '초당매수수량' in df.columns:
+                df['일자'] = (df['index'].values // 1000000).astype(int)
             else:
-                df2['분당매수금액'] = df2['현재가'] * df2['분당매수수량']
-                df2['분당매도금액'] = df2['현재가'] * df2['분당매도수량']
-                df2['당일매수금액'] = df2['분당매수금액'].cumsum()
-                df2['당일매도금액'] = df2['분당매도금액'].cumsum()
+                df['일자'] = (df['index'].values // 10000).astype(int)
+            day_list = df['일자'].unique()
 
-                df2['가격별누적매수금액'] = df2.groupby('현재가')['분당매수금액'].cumsum()
-                df2['가격별누적매도금액'] = df2.groupby('현재가')['분당매도금액'].cumsum()
+            df_result = []
+            for day in day_list:
+                df2 = df[df['일자'] == day].copy()
+                df2['저가대비고가등락율'] = (df2['고가'] / df2['저가'] - 1) * 100
+                df2['저가대비고가등락율'] = df2['저가대비고가등락율'].round(2)
 
-                df2['최고매수금액'] = df2['가격별누적매수금액'].cummax()
-                df2['최고매도금액'] = df2['가격별누적매도금액'].cummax()
+                if '초당매수수량' in df2.columns:
+                    df2['초당매수금액'] = df2['현재가'] * df2['초당매수수량']
+                    df2['초당매도금액'] = df2['현재가'] * df2['초당매도수량']
+                    df2['당일매수금액'] = df2['초당매수금액'].cumsum()
+                    df2['당일매도금액'] = df2['초당매도금액'].cumsum()
 
-                df2['최고매수가격'] = df2['현재가'].where(
-                    df2['가격별누적매수금액'] == df2['최고매수금액']
-                ).ffill().fillna(df2['현재가'].iloc[0])
+                    df2['가격별누적매수금액'] = df2.groupby('현재가')['초당매수금액'].cumsum()
+                    df2['가격별누적매도금액'] = df2.groupby('현재가')['초당매도금액'].cumsum()
 
-                df2['최고매도가격'] = df2['현재가'].where(
-                    df2['가격별누적매도금액'] == df2['최고매도금액']
-                ).ffill().fillna(df2['현재가'].iloc[0])
+                    df2['최고매수금액'] = df2['가격별누적매수금액'].cummax()
+                    df2['최고매도금액'] = df2['가격별누적매도금액'].cummax()
 
-            df_result.append(df2)
+                    df2['최고매수가격'] = df2['현재가'].where(
+                        df2['가격별누적매수금액'] == df2['최고매수금액']
+                    ).ffill().fillna(df2['현재가'].iloc[0])
 
-        df3 = pd.concat(df_result)
+                    df2['최고매도가격'] = df2['현재가'].where(
+                        df2['가격별누적매도금액'] == df2['최고매도금액']
+                    ).ffill().fillna(df2['현재가'].iloc[0])
+                else:
+                    df2['분당매수금액'] = df2['현재가'] * df2['분당매수수량']
+                    df2['분당매도금액'] = df2['현재가'] * df2['분당매도수량']
+                    df2['당일매수금액'] = df2['분당매수금액'].cumsum()
+                    df2['당일매도금액'] = df2['분당매도금액'].cumsum()
+
+                    df2['가격별누적매수금액'] = df2.groupby('현재가')['분당매수금액'].cumsum()
+                    df2['가격별누적매도금액'] = df2.groupby('현재가')['분당매도금액'].cumsum()
+
+                    df2['최고매수금액'] = df2['가격별누적매수금액'].cummax()
+                    df2['최고매도금액'] = df2['가격별누적매도금액'].cummax()
+
+                    df2['최고매수가격'] = df2['현재가'].where(
+                        df2['가격별누적매수금액'] == df2['최고매수금액']
+                    ).ffill().fillna(df2['현재가'].iloc[0])
+
+                    df2['최고매도가격'] = df2['현재가'].where(
+                        df2['가격별누적매도금액'] == df2['최고매도금액']
+                    ).ffill().fillna(df2['현재가'].iloc[0])
+
+                df_result.append(df2)
+
+            df3 = pd.concat(df_result)
+        else:
+            df3 = df
+
         if 'VI해제시간' in df3.columns:
             if '초당매수수량' in df3.columns:
                 df3 = df3[list_stock_tick]
@@ -127,9 +131,10 @@ def Updater(gubun, file_list):
                 df3 = df3[list_stock_min]
         else:
             if '초당매수수량' in df3.columns:
-                df3 = df3[list_coin_tick]
+                df3 = df3[list_basic_tick]
             else:
-                df3 = df3[list_coin_min]
+                df3 = df3[list_basic_min]
+
         return df3
 
     llogger = get_logger('UpdateDatabse')

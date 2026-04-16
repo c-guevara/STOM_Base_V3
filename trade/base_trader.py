@@ -70,6 +70,7 @@ class BaseTrader:
         self.dict_set     = dict_set
         self.market_gubun = market_infos[0]
         self.market_info  = market_infos[1]
+        self.is_etfn      = self.market_gubun in (2, 3)
 
         self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
         self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록
@@ -97,16 +98,14 @@ class BaseTrader:
         if self.market_gubun < 6:
             self.dict_order = {
                 '매수': {},
-                '매도': {},
-                '시드부족': {}
+                '매도': {}
             }
         else:
             self.dict_order = {
                 'BUY_LONG': {},
                 'SELL_LONG': {},
                 'SELL_SHORT': {},
-                'BUY_SHORT': {},
-                '시드부족': {}
+                'BUY_SHORT': {}
             }
 
         self.ls         = None
@@ -159,7 +158,7 @@ class BaseTrader:
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 시작"))
 
     def get_jgcs_time(self):
-        """장마감 시간을 반환합니다.
+        """잔고청산 시간을 반환합니다.
         Returns:
             int: 잔고청산 시간 (HHMMSS)
         """
@@ -171,19 +170,19 @@ class BaseTrader:
         con = sqlite3.connect(DB_TRADELIST)
         df_cj = pd.read_sql(f"SELECT * FROM {self.market_info['체결디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
         df_td = pd.read_sql(f"SELECT * FROM {self.market_info['거래디비']} WHERE 체결시간 LIKE '{self.str_today}%'", con)
+        df_jg = pd.read_sql(f"SELECT * FROM {self.market_info['잔고디비']}", con)
         df_cj.set_index('index', inplace=True)
         df_td.set_index('index', inplace=True)
+        df_jg.set_index('index', inplace=True)
         if len(df_cj) > 0:
             self.dict_cj = df_cj.to_dict('index')
             self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
         if len(df_td) > 0:
             self.dict_td = df_td.to_dict('index')
             self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
-        if self.dict_set['모의투자']:
-            df_jg = pd.read_sql(f"SELECT * FROM {self.market_info['잔고디비']}", con).set_index('index')
-            if len(df_jg) > 0:
-                self.dict_jg = df_jg.to_dict('index')
-                self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
+        if len(df_jg) > 0:
+            self.dict_jg = df_jg.to_dict('index')
+            self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
         con.close()
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 데이터베이스 불러오기 완료"))
 
@@ -270,7 +269,8 @@ class BaseTrader:
                 self._put_order_complete(f'{주문구분}취소', 종목코드)
         else:
             if 주문수량 > 0:
-                if 잔고청산: self._put_order_complete(f'{주문구분}주문', 종목코드)
+                if 잔고청산:
+                    self._put_order_complete(f'{주문구분}주문', 종목코드)
                 self._create_order(주문구분, 종목코드, 종목명, 주문가격, 주문수량, 원주문번호, 시그널시간, 잔고청산, 0, 수동주문유형)
             else:
                 if 주문구분 == '매수':
@@ -439,14 +439,20 @@ class BaseTrader:
         else:
             체결가격, 체결수량, 미체결수량 = 주문가격, 주문수량, 0
 
-        if self.market_gubun == 9:
-            self.dict_order[주문구분][종목코드] = [
-                timedelta_sec(self.dict_set['매수취소시간초']), 0, 주문가격, self.dict_lvrg[종목코드]
-            ]
+        if self.market_gubun < 6:
+            호가단위 = self._get_hogaunit(주문가격)
         else:
-            self.dict_order[주문구분][종목코드] = [
-                timedelta_sec(self.dict_set['매수취소시간초']), 0, 주문가격
-            ]
+            호가단위 = self._get_hogaunit(종목코드)
+
+        if 주문구분 != '시드부족':
+            if self.market_gubun == 9:
+                self.dict_order[주문구분][종목코드] = [
+                    timedelta_sec(self.dict_set['매수취소시간초']), 0, 주문가격, 호가단위, self.dict_lvrg[종목코드]
+                ]
+            else:
+                self.dict_order[주문구분][종목코드] = [
+                    timedelta_sec(self.dict_set['매수취소시간초']), 0, 주문가격, 호가단위
+                ]
 
         if self.market_gubun < 6:
             self._update_chejan_data(
@@ -550,8 +556,7 @@ class BaseTrader:
             pass
 
     def _update_dict_info(self):
-        """정보 딕셔너리를 업데이트합니다.
-        """
+        """정보 딕셔너리를 업데이트합니다."""
         dummy_time = timedelta_sec(-3600)
         for code in self.dict_info.copy():
             self.dict_info[code].update({
@@ -562,7 +567,7 @@ class BaseTrader:
 
     # noinspection PyUnresolvedReferences
     def _order_time_control(self, code_=None):
-        """주문 시간을 제어합니다.
+        """주문시간 및 주문가격을 확인하여 취소 및 정정 주문을 생성합니다.
         Args:
             code_: 종목 코드
         """
@@ -751,7 +756,7 @@ class BaseTrader:
             self.ws_thread.terminate()
 
     def _get_index(self):
-        """인덱스를 반환합니다.
+        """체결목록용 인덱스를 반환합니다.
         Returns:
             인덱스
         """
@@ -776,14 +781,14 @@ class BaseTrader:
             체결시간: 체결 시간
             주문번호: 주문 번호
         """
-        if 종목코드 not in self.dict_order[주문구분]:
+        if 주문구분 != '시드부족' and 종목코드 not in self.dict_order[주문구분]:
             self.windowQ.put((ui_num['시스템로그'], '오류 알림 - 수동 주문은 기록하지 않습니다.'))
             return
 
         index = self._get_index()
         종목명 = self.dict_info[종목코드]['종목명']
 
-        if 체결구분 == '체결':
+        if 체결구분 == '체결' and 주문구분 != '시드부족':
             if 주문구분 == '매수':
                 if 종목코드 in self.dict_jg:
                     보유수량 = self.dict_jg[종목코드]['보유수량'] + 체결수량
@@ -923,9 +928,9 @@ class BaseTrader:
 
         index = self._get_index()
         종목명 = self.dict_info[종목코드]['종목명']
-
         주문구분, 주문가격, 주문수량, 체결된수량 = signal_data
-        if 체결구분 == '체결':
+
+        if 체결구분 == '체결' and 주문구분 != '시드부족':
             if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
                 if 종목코드 in self.dict_jg:
                     직전매수가 = self.dict_jg[종목코드]['매수가']
@@ -1095,7 +1100,7 @@ class BaseTrader:
             체결시간: 체결 시간
             주문번호: 주문 번호
         """
-        if 종목코드 not in self.dict_order[주문구분]:
+        if 주문구분 != '시드부족' and 종목코드 not in self.dict_order[주문구분]:
             self.windowQ.put((ui_num['시스템로그'], '오류 알림 - 수동 주문은 기록하지 않습니다.'))
             return
 
@@ -1380,7 +1385,7 @@ class BaseTrader:
         self.queryQ.put(('거래디비', df, self.market_info['체결디비'], 'append'))
 
     def _update_totaljango(self):
-        """전체 잔고를 업데이트합니다."""
+        """잔고평가를 업데이트합니다."""
         if self.dict_jg:
             jg_values = self.dict_jg.values()
             총평가손익 = sum([v['평가손익'] for v in jg_values])

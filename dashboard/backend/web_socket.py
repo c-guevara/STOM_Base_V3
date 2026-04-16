@@ -33,14 +33,14 @@ class WebSocketManager:
         try:
             tradelist = self.db.get_tradelist(market)
             totaltradelist = self.db.get_totaltradelist(market)
-            
+
             # 당일데이터 필터링하여 거래횟수 계산
             if totaltradelist and tradelist:
                 today = pd.Timestamp.now()
                 today_str = f"{today.year}{str(today.month).zfill(2)}{str(today.day).zfill(2)}"
                 today_trades = [trade for trade in tradelist if trade.get("체결시간") and str(trade["체결시간"])[:8] == today_str]
                 totaltradelist["거래횟수"] = len(today_trades)
-            
+
             data = {
                 "jangolist": self.db.get_jangolist(market),
                 "chegeollist": self.db.get_chegeollist(market),
@@ -73,14 +73,14 @@ class WebSocketManager:
             try:
                 tradelist = self.db.get_tradelist(market)
                 totaltradelist = self.db.get_totaltradelist(market)
-                
+
                 # 당일데이터 필터링하여 거래횟수 계산
                 if totaltradelist and tradelist:
                     today = pd.Timestamp.now()
                     today_str = f"{today.year}{str(today.month).zfill(2)}{str(today.day).zfill(2)}"
                     today_trades = [trade for trade in tradelist if trade.get("체결시간") and str(trade["체결시간"])[:8] == today_str]
                     totaltradelist["거래횟수"] = len(today_trades)
-                
+
                 data = {
                     "jangolist": self.db.get_jangolist(market),
                     "chegeollist": self.db.get_chegeollist(market),

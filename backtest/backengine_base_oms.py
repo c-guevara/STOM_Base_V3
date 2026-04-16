@@ -591,12 +591,6 @@ class BackEngineBaseOms(BackEngineBase):
 
         self._update_highlow(현재가)
 
-        if self.is_tick and self.dict_condition:
-            if 종목코드 not in self.dict_cond_indexn:
-                self.dict_cond_indexn[종목코드] = {}
-            for k, v in self.dict_condition.items():
-                exec(v)
-
         if self.fm_list:
             for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
                 self.check, self.line, self.up, self.down = None, None, None, None
@@ -638,7 +632,8 @@ class BackEngineBaseOms(BackEngineBase):
                     if vturn == 0 and self.tick_count < self.vars[0]:
                         continue
 
-                    if not self.is_tick and self.dict_condition:
+                    if self.dict_condition:
+                        self.turn_key = f'{vturn}{vturn}'
                         if 종목코드 not in self.dict_cond_indexn:
                             self.dict_cond_indexn[종목코드] = {}
                         for k, v in self.dict_condition.items():
@@ -695,7 +690,8 @@ class BackEngineBaseOms(BackEngineBase):
                     elif self.tick_count < self.avgtime:
                         return
 
-                    if not self.is_tick and self.dict_condition:
+                    if self.dict_condition:
+                        self.turn_key = f'{vturn}{vturn}'
                         if 종목코드 not in self.dict_cond_indexn:
                             self.dict_cond_indexn[종목코드] = {}
                         for k, v in self.dict_condition.items():
@@ -758,7 +754,8 @@ class BackEngineBaseOms(BackEngineBase):
                 if self.tick_count < self.avgtime:
                     return
 
-            if not self.is_tick and self.dict_condition:
+            if self.dict_condition:
+                self.turn_key = f'{vturn}{vturn}'
                 if 종목코드 not in self.dict_cond_indexn:
                     self.dict_cond_indexn[종목코드] = {}
                 for k, v in self.dict_condition.items():

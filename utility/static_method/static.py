@@ -1,6 +1,7 @@
 
 import bisect
 import datetime
+from numba import njit
 
 
 def set_builtin_print(q):
@@ -175,7 +176,7 @@ def get_profile_text(pr):
 
 
 def get_logger(name):
-    """로그거를 생성합니다.
+    """로거를 생성합니다.
     Args:
         name: 로거 이름
     Returns:
@@ -617,8 +618,7 @@ def win_proc_alive(name):
 
 
 def opstarter_kill():
-    """opstarter 프로세스를 종료합니다.
-    """
+    """opstarter, nfstarter 프로세스를 종료합니다."""
     import subprocess
     if win_proc_alive('opstarter'):
         subprocess.run('C:/Windows/System32/taskkill /f /im opstarter.exe',
@@ -725,8 +725,7 @@ def comma2float(t):
 
 
 def write_key():
-    """암호화 키를 레지스트리에 저장합니다.
-    """
+    """암호화 키를 레지스트리에 저장합니다."""
     import winreg as reg
     from cryptography.fernet import Fernet
     key = str(Fernet.generate_key(), 'utf-8')
@@ -854,23 +853,27 @@ def get_hogaunit_stock(price):
     return _HOGA_NEW_VALS[idx]
 
 
-def get_profit_stock(bg, cg):
+@njit(cache=True)
+def get_profit_stock(bg, cg, etfn=False):
     """주식 수익을 계산합니다.
     Args:
         bg: 매수 금액
         cg: 매도 금액
+        etfn: etf, etn
     Returns:
         (수익금, 수익금액, 수익률)
     """
+    fee = 0.00015 if not etfn else 0.00005
     texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
+    bfee = int(bg * fee / 10) * 10
+    sfee = int(cg * fee / 10) * 10
     pg = int(cg - texs - bfee - sfee + 0.5)
     sg = int(pg - bg + 0.5)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_stock_os(bg, cg):
     """해외 주식 수익을 계산합니다.
     Args:
@@ -879,15 +882,16 @@ def get_profit_stock_os(bg, cg):
     Returns:
         (수익금, 수익금액, 수익률)
     """
-    texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
+    texs = int(cg * 0.000008)
+    bfee = int(bg * 0.00065 / 10) * 10
+    sfee = int(cg * 0.00065 / 10) * 10
     pg = int(cg - texs - bfee - sfee + 0.5)
     sg = int(pg - bg + 0.5)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_future_long(bg, cg):
     """선물 롱 수익을 계산합니다.
     Args:
@@ -896,15 +900,14 @@ def get_profit_future_long(bg, cg):
     Returns:
         (수익금, 수익금액, 수익률)
     """
-    texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
-    pg = int(cg - texs - bfee - sfee + 0.5)
-    sg = int(pg - bg + 0.5)
+    fee = 0.00002
+    pg = round(cg - fee * 2, 1)
+    sg = round(pg - bg, 1)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_future_short(bg, cg):
     """선물 숏 수익을 계산합니다.
     Args:
@@ -913,49 +916,48 @@ def get_profit_future_short(bg, cg):
     Returns:
         (수익금, 수익금액, 수익률)
     """
-    texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
-    pg = int(cg - texs - bfee - sfee + 0.5)
-    sg = int(pg - bg + 0.5)
+    fee = 0.00002
+    pg = round(bg + bg - cg - fee * 2, 1)
+    sg = round(pg - bg, 1)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
-def get_profit_future_os_long(bg, cg):
+@njit(cache=True)
+def get_profit_future_os_long(mini, bg, cg):
     """해외 선물 롱 수익을 계산합니다.
     Args:
+        mini: 미니선물
         bg: 매수 금액
         cg: 매도 금액
     Returns:
         (수익금, 수익금액, 수익률)
     """
-    texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
-    pg = int(cg - texs - bfee - sfee + 0.5)
-    sg = int(pg - bg + 0.5)
+    fee = 2 if mini else 7.5
+    pg = round(cg - fee * 2, 1)
+    sg = round(pg - bg, 1)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
-def get_profit_future_os_short(bg, cg):
+@njit(cache=True)
+def get_profit_future_os_short(mini, bg, cg):
     """해외 선물 숏 수익을 계산합니다.
     Args:
+        mini: 미니선물
         bg: 매수 금액
         cg: 매도 금액
     Returns:
         (수익금, 수익금액, 수익률)
     """
-    texs = int(cg * 0.0018)
-    bfee = int(bg * 0.00015 / 10) * 10
-    sfee = int(cg * 0.00015 / 10) * 10
-    pg = int(cg - texs - bfee - sfee + 0.5)
-    sg = int(pg - bg + 0.5)
+    fee = 2 if mini else 7.5
+    pg = round(bg + bg - cg - fee * 2, 1)
+    sg = round(pg - bg, 1)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_coin(bg, cg):
     """코인 수익을 계산합니다.
     Args:
@@ -972,6 +974,7 @@ def get_profit_coin(bg, cg):
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_coin_future_long(bg, cg, market1, market2):
     """코인 선물 롱 수익을 계산합니다.
     Args:
@@ -990,6 +993,7 @@ def get_profit_coin_future_long(bg, cg, market1, market2):
     return pg, sg, sp
 
 
+@njit(cache=True)
 def get_profit_coin_future_short(bg, cg, market1, market2):
     """코인 선물 숏 수익을 계산합니다.
     Args:

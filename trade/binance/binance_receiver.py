@@ -66,7 +66,6 @@ class BinanceReceiver(BaseReceiver):
             }
 
         self.traderQ.put(('종목정보', self.dict_info))
-        self.stgQ.put(('종목정보', self.dict_info))
 
         datas = self.binance.futures_ticker()
         datas = [data for data in datas if re.search('USDT$', data['symbol']) is not None]

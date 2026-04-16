@@ -4,7 +4,6 @@ from backtest.optimiz import Optimize
 from backtest.backtest import BackTest
 from backtest.backfinder import BackFinder
 from PyQt5.QtWidgets import QMessageBox, QApplication
-from utility.static_method.static import error_decorator
 from backtest.optimiz_conditions import OptimizeConditions
 from ui.event_click.button_clicked_varstext_change import *
 from ui.etcetera.process_alive import backtest_process_alive

@@ -17,6 +17,7 @@ class StgGlobalsFunc:
         self.avgtime          = None
         self.back_type        = None
         self.pre_func_keys    = None
+        self.turn_key         = None
         self.mc               = None
         self.mh               = None
         self.ml               = None
@@ -370,6 +371,7 @@ class StgGlobalsFunc:
         return self._parameter_angle(self.dict_findex['당일거래대금각도'], self.dict_findex['당일거래대금'], tick, pre, self.angle_dtm_cf, calc=calc)
 
     def _경과틱수(self, 조건명):
+        조건명 = f'{조건명}{self.turn_key}'
         if self.code in self.dict_cond_indexn and \
                 조건명 in self.dict_cond_indexn[self.code] and self.dict_cond_indexn[self.code][조건명] != 0:
             return self.indexn - self.dict_cond_indexn[self.code][조건명]

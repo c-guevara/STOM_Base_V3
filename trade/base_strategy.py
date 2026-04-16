@@ -42,6 +42,7 @@ class BaseStrategy(StgGlobalsFunc):
         self.indicator       = indicator
         self.market_gubun    = market_info[0]
         self.market_info     = market_info[1]
+        self.is_etfn         = self.market_gubun in (2, 3)
 
         self.is_running      = True
         self.buystrategy     = None
@@ -69,7 +70,7 @@ class BaseStrategy(StgGlobalsFunc):
                 'BUY_SHORT': []
             }
 
-        self.dict_info       = {}
+        self.dict_name       = {}
         self.dict_buy_num    = {}
         self.dict_signal_num = {}
         self.indi_settings   = []
@@ -328,7 +329,7 @@ class BaseStrategy(StgGlobalsFunc):
             self.dict_set = data
             self._set_strategy_and_blacklist()
         elif gubun == '종목정보':
-            self.dict_info = data
+            self.dict_name = data
         elif gubun == '데이터저장':
             self._save_data(data)
 
@@ -1553,9 +1554,10 @@ class BaseStrategy(StgGlobalsFunc):
         Args:
             codes: 종목 코드들
         """
-        for code in self.dict_data.copy():
-            if code not in codes:
-                del self.dict_data[code]
+        if self.market_gubun not in (6, 7, 8):
+            for code in self.dict_data.copy():
+                if code not in codes:
+                    del self.dict_data[code]
 
         last = len(self.dict_data)
         columns_ = self.market_info['팩터목록'][self.is_tick][:self.base_cnt]
@@ -1566,8 +1568,8 @@ class BaseStrategy(StgGlobalsFunc):
             for i, code in enumerate(self.dict_data):
                 df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
                 df['index'] = df['index'].astype('int64')
-                if self.market_gubun in (6, 7):
-                    name = self.dict_info[code]['종목명']
+                if self.market_gubun in (6, 7, 8):
+                    name = self.dict_name[code]
                     df.to_sql(name, con, index=False, if_exists='append', chunksize=2000)
                 else:
                     df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)

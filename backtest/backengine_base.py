@@ -66,6 +66,7 @@ class BackEngineBase(StgGlobalsFunc):
         self.endtime_        = None
         self.same_days       = False
         self.same_time       = False
+        self.is_etfn         = False
 
         self.buystg          = None
         self.sellstg         = None
@@ -125,6 +126,7 @@ class BackEngineBase(StgGlobalsFunc):
         self.market_info   = DICT_MARKET_INFO[self.market_gubun]
 
         self.is_oms        = self.dict_set['백테주문관리적용']
+        self.is_etfn       = self.market_gubun in (2, 3)
 
         self.is_tick       = self.dict_set['타임프레임']
         self.buy_hj_limit  = self.dict_set['매수시장가잔량범위']
@@ -168,10 +170,7 @@ class BackEngineBase(StgGlobalsFunc):
         블랙리스트를 설정합니다.
         """
         def compile_condition(x):
-            if self.is_tick:
-                return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
-            else:
-                return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k+str(vturn)+str(vkey)] = self.indexn', '<string>', 'exec')
+            return compile(f"if {x}:\n    self.dict_cond_indexn[종목코드][k+self.turn_key] = self.indexn", '<string>', 'exec')
 
         table_name_stg_passticks = f"{self.market_info['전략구분']}_passticks"
         con  = sqlite3.connect(DB_STRATEGY)
@@ -923,12 +922,6 @@ class BackEngineBase(StgGlobalsFunc):
 
         self._update_highlow(현재가)
 
-        if self.is_tick and self.dict_condition:
-            if 종목코드 not in self.dict_cond_indexn:
-                self.dict_cond_indexn[종목코드] = {}
-            for k, v in self.dict_condition.items():
-                exec(v)
-
         if self.fm_list:
             for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
                 self.check, self.line, self.up, self.down = None, None, None, None
@@ -970,7 +963,8 @@ class BackEngineBase(StgGlobalsFunc):
                     if vturn == 0 and self.tick_count < self.vars[0]:
                         continue
 
-                    if not self.is_tick and self.dict_condition:
+                    if self.dict_condition:
+                        self.turn_key = f'{vturn}{vturn}'
                         if 종목코드 not in self.dict_cond_indexn:
                             self.dict_cond_indexn[종목코드] = {}
                         for k, v in self.dict_condition.items():
@@ -1007,7 +1001,8 @@ class BackEngineBase(StgGlobalsFunc):
                     elif self.tick_count < self.avgtime:
                         return
 
-                    if not self.is_tick and self.dict_condition:
+                    if self.dict_condition:
+                        self.turn_key = f'{vturn}{vturn}'
                         if 종목코드 not in self.dict_cond_indexn:
                             self.dict_cond_indexn[종목코드] = {}
                         for k, v in self.dict_condition.items():
@@ -1044,7 +1039,8 @@ class BackEngineBase(StgGlobalsFunc):
                 if self.tick_count < self.avgtime:
                     return
 
-            if not self.is_tick and self.dict_condition:
+            if self.dict_condition:
+                self.turn_key = f'{vturn}{vturn}'
                 if 종목코드 not in self.dict_cond_indexn:
                     self.dict_cond_indexn[종목코드] = {}
                 for k, v in self.dict_condition.items():

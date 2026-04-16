@@ -52,7 +52,6 @@ class FutureReceiver(BaseReceiver):
         else:
             self.dict_info, self.codes, self.dict_expc = self.ls.get_code_info_future_night()
         self.traderQ.put(('종목정보', (self.dict_info, self.dict_expc)))
-        self.stgQ.put(('종목정보', self.dict_info))
 
     @error_decorator
     def _convert_real_data(self, data):

@@ -25,7 +25,7 @@ class BinanceStrategy(BaseStrategy):
         Returns:
             float: 호가 단위
         """
-        return self.dict_info[종목코드]['호가단위']
+        return self.dict_name[종목코드]['호가단위']
 
     def _get_profit_long(self, 매입금액, 보유금액):
         """롱 수익을 계산합니다.
@@ -79,7 +79,7 @@ class BinanceStrategy(BaseStrategy):
         Returns:
             매수 수량
         """
-        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수']
+        소숫점자리수 = self.dict_name[self.code]['수량소숫점자리수']
         return round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 소숫점자리수)
 
     def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
@@ -91,7 +91,7 @@ class BinanceStrategy(BaseStrategy):
         Returns:
             매도 수량
         """
-        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수']
+        소숫점자리수 = self.dict_name[self.code]['수량소숫점자리수']
         return round(보유수량 / 보유비율 * oc_ratio, 소숫점자리수)
 
     def _get_order_price(self, 거래금액, 주문수량):
@@ -102,5 +102,5 @@ class BinanceStrategy(BaseStrategy):
         Returns:
             주문 가격
         """
-        소숫점자리수 = self.dict_info[self.code]['가격소숫점자리수']
+        소숫점자리수 = self.dict_name[self.code]['가격소숫점자리수']
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0.0

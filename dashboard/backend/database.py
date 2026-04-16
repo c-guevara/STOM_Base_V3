@@ -51,15 +51,39 @@ class DatabaseManager:
             conn.close()
 
     def get_totaltradelist(self, market: str = "stock") -> Optional[Dict[str, Any]]:
+        import datetime
         conn = sqlite3.connect(self.tradelist_db)
         table_name = f"{market}_totaltradelist"
         try:
-            df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+            # 당일 날짜 계산 (연월일 인트형)
+            today = datetime.datetime.now()
+            today_str = f"{today.year}{str(today.month).zfill(2)}{str(today.day).zfill(2)}"
+            # 당일 데이터만 필터링하여 조회
+            query = f'SELECT * FROM "{table_name}" WHERE `index` = {today_str}'
+            df = pd.read_sql(query, conn)
             if len(df) > 0:
                 return df.to_dict('records')[0]
-            return None
+            # 데이터가 없을 때 기본값 반환
+            return {
+                '거래횟수': 0,
+                '총매수금액': 0,
+                '총매도금액': 0,
+                '총수익금액': 0,
+                '총손실금액': 0,
+                '수익률': 0.0,
+                '수익금합계': 0
+            }
         except Exception as e:
             print(f"Total trade summary query error: {e}")
-            return None
+            # 에러 발생 시에도 기본값 반환
+            return {
+                '거래횟수': 0,
+                '총매수금액': 0,
+                '총매도금액': 0,
+                '총수익금액': 0,
+                '총손실금액': 0,
+                '수익률': 0.0,
+                '수익금합계': 0
+            }
         finally:
             conn.close()

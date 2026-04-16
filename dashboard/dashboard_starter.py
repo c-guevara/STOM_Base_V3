@@ -9,8 +9,11 @@ from utility.static_method.static import qtest_qwait
 class DashboardStarter(QObject):
     log_received = pyqtSignal(str)
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, market=1, frontend_port=3000):
+        super().__init__()
+        self.market = market
+        self.frontend_port = frontend_port
+        self.backend_port  = frontend_port + 5000
         self.backend_process = None
         self.frontend_process = None
 
@@ -18,7 +21,7 @@ class DashboardStarter(QObject):
         """서브프로세스 출력을 스트리밍하여 오류만 로그로 전송합니다."""
         error_keywords = ['error', 'Error', 'ERROR', 'exception', 'Exception', 'EXCEPTION', 'failed', 'Failed', 'FAILED']
         info_keywords = ['INFO', 'info']
-        
+
         for line in iter(pipe.readline, b''):
             text = line.decode('utf-8', errors='replace').strip()
             if text:
@@ -40,7 +43,7 @@ class DashboardStarter(QObject):
 
     def start(self):
         """백엔드와 프론트엔드 서버를 subprocess로 시작합니다."""
-        backend_dir = os.path.join("web_dashboard", "backend")
+        backend_dir = os.path.join("dashboard", "backend")
         self.backend_process = subprocess.Popen(
             ["python", "main.py"],
             cwd=backend_dir,
@@ -61,7 +64,7 @@ class DashboardStarter(QObject):
         ).start()
 
         qtest_qwait(2)
-        frontend_dir = os.path.join("web_dashboard", "frontend")
+        frontend_dir = os.path.join("dashboard", "frontend")
         self.frontend_process = subprocess.Popen(
             ["node", "node_modules/vite/bin/vite.js", "--host", "0.0.0.0"],
             cwd=frontend_dir,
@@ -84,15 +87,7 @@ class DashboardStarter(QObject):
     def stop(self):
         """백엔드와 프론트엔드 서버를 종료합니다."""
         if self.backend_process and self.backend_process.poll() is None:
-            self.backend_process.terminate()
-            try:
-                self.backend_process.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                self.backend_process.kill()
+            self.backend_process.kill()
 
         if self.frontend_process and self.frontend_process.poll() is None:
-            self.frontend_process.terminate()
-            try:
-                self.frontend_process.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                self.frontend_process.kill()
+            self.frontend_process.kill()

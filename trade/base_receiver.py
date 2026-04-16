@@ -67,6 +67,8 @@ class BaseReceiver:
         self.dict_dlhp: dict[str, list]        = {}
 
         self.dict_info = {}
+        self.dict_name = {}
+        self.dict_code = {}
         self.dict_expc = {}
         self.dict_sgbn = {}
         self.dict_sncd = {}
@@ -120,18 +122,22 @@ class BaseReceiver:
         set_builtin_print(self.windowQ)
 
     def _save_code_info_and_noti(self):
-        """종목 정보를 저장하고 알림을 보냅니다.
-        종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다.
-        """
-        dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
-        dict_code = {name: code for code, name in dict_name.items()}
-        self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
+        """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
+        self.dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
+        self.dict_code = {name: code for code, name in self.dict_name.items()}
+
+        self.windowQ.put((ui_num['종목명데이터'], self.dict_name, self.dict_code))
+        if self.market_gubun in (6, 7, 8):
+            self.stgQ.put(('종목정보', self.dict_name))
+
         df = pd.DataFrame.from_dict(self.dict_info, orient='index')
         self.queryQ.put(('종목디비', df, self.market_info['종목디비'], 'replace'))
 
         text = f"{self.market_info['마켓이름']} 시스템을 시작하였습니다."
         self.teleQ.put(text)
-        if self.dict_set['알림소리']: self.soundQ.put(text)
+        if self.dict_set['알림소리']:
+            self.soundQ.put(text)
+
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
 
     def _check_vi(self, code, c, o):
@@ -410,7 +416,7 @@ class BaseReceiver:
             if asks_ > 0: asks += asks_
             self.list_hgdt[2:4] = bids, asks
             if dt > self.list_hgdt[0]:
-                name = self.dict_info[code]['종목명']
+                name = self.dict_name[code]
                 self.hogaQ.put((name, c, per, 0, -1, o, h, low))
                 if asks > 0: self.hogaQ.put((-asks, ch))
                 if bids > 0: self.hogaQ.put((bids, ch))
@@ -448,12 +454,18 @@ class BaseReceiver:
                 if self.is_tick:
                     send = True
 
-            if send or (not self.is_tick and (code == self.chart_code or code in self.list_gsjm)):
+            if send or (
+                    not self.is_tick and
+                    (code == self.chart_code or self.market_gubun in (6, 7, 8) or code in self.list_gsjm)
+            ):
                 hoga_seprice, hoga_samount, hoga_buprice, hoga_bamount = self._correction_hoga_data(
                     code_data[0], hoga_seprice, hoga_samount, hoga_buprice, hoga_bamount
                 )
 
-                send_data, c, dm, logt = self._get_send_data(code, code_data, code_dtdm, money_arr, hoga_samount, hoga_bamount, hoga_seprice, hoga_buprice, hoga_tamount, dt, dt_min)
+                send_data, c, dm, logt = self._get_send_data(
+                    code, code_data, code_dtdm, money_arr, hoga_samount, hoga_bamount, hoga_seprice,
+                    hoga_buprice, hoga_tamount, dt, dt_min
+                )
 
                 if not self.is_tick:
                     send_data.append(send)
@@ -565,8 +577,8 @@ class BaseReceiver:
         hlp  = round((c / ((h + low) / 2) - 1) * 100, 2)
         lhp  = round((h / low - 1) * 100, 2)
         hjt  = sum(hoga_samount + hoga_bamount)
-        gsjm = 1 if code in self.list_gsjm else 0
-        name = self.dict_info.get(code, {}).get('종목명', code)
+        gsjm = 1 if self.market_gubun in (6, 7, 8) or code in self.list_gsjm else 0
+        name = self.dict_name[code]
         logt = now() if self.int_logt < dt_min else 0
 
         if not self.is_tick or self.market_gubun < 5:
@@ -600,10 +612,7 @@ class BaseReceiver:
         if self.int_mtdt is None:
             self.int_mtdt = dt_std
         elif self.int_mtdt < dt_std:
-            if self.market_gubun in (6, 7):
-                self.dict_mtop[self.int_mtdt] = ';'.join([v['종목명'] for v in self.dict_info.values()])
-            else:
-                self.dict_mtop[self.int_mtdt] = ';'.join(self.list_gsjm)
+            self.dict_mtop[self.int_mtdt] = ';'.join(self.list_gsjm)
             self.int_mtdt = dt_std
 
     def _update_hoga_window_rem(self, dt, code, hoga_tamount, hoga_seprice, hoga_buprice, hoga_samount, hoga_bamount):
@@ -619,7 +628,7 @@ class BaseReceiver:
         """
         if self.hoga_code == code and dt > self.list_hgdt[1]:
             self.list_hgdt[1] = dt
-            name = self.dict_info[code]['종목명']
+            name = self.dict_name[code]
             self.hogaQ.put(
                 [name] + hoga_tamount + hoga_seprice[:5][::-1] + hoga_buprice[:5] +
                 hoga_samount[:5][::-1] + hoga_bamount[:5]
@@ -632,31 +641,31 @@ class BaseReceiver:
             insert_set = set(list_mtop) - set(self.list_gsjm)
             delete_set = set(self.list_gsjm) - set(list_mtop)
             if insert_set:
-                for code in insert_set:
-                    self._insert_gsjm_list(code)
+                for codeorname in insert_set:
+                    self._insert_gsjm_list(codeorname)
             if delete_set:
-                for code in delete_set:
-                    self._delete_gsjm_list(code)
+                for codeorname in delete_set:
+                    self._delete_gsjm_list(codeorname)
 
-    def _insert_gsjm_list(self, code):
+    def _insert_gsjm_list(self, codeorname):
         """관심종목 리스트에 추가합니다.
         Args:
-            code: 종목 코드
+            codeorname: 종목코드 또는 종목명
         """
-        if code not in self.list_gsjm:
-            self.list_gsjm.append(code)
-            if self.dict_set['매도취소관심진입']:
-                self.traderQ.put(('관심진입', code))
+        if codeorname not in self.list_gsjm:
+            self.list_gsjm.append(codeorname)
+            if self.market_gubun not in (6, 7, 8) and self.dict_set['매도취소관심진입']:
+                self.traderQ.put(('관심진입', codeorname))
 
-    def _delete_gsjm_list(self, code):
+    def _delete_gsjm_list(self, codeorname):
         """관심종목 리스트에서 삭제합니다.
         Args:
-            code: 종목 코드
+            codeorname: 종목코드 또는 종목명
         """
-        if code in self.list_gsjm:
-            self.list_gsjm.remove(code)
-            if self.dict_set['매수취소관심이탈']:
-                self.traderQ.put(('관심이탈', code))
+        if codeorname in self.list_gsjm:
+            self.list_gsjm.remove(codeorname)
+            if self.market_gubun in (6, 7, 8) and self.dict_set['매수취소관심이탈']:
+                self.traderQ.put(('관심이탈', codeorname))
 
     def _receiver_process_kill(self):
         """리시버 프로세스를 종료합니다."""
@@ -699,6 +708,7 @@ class BaseReceiver:
         import sys
         from utility.static_method.static import qtest_qwait
         self._websocket_kill()
+
         if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_moneytop()
         else:
@@ -708,6 +718,7 @@ class BaseReceiver:
             else:
                 self.stgQ.put('프로세스종료')
         self.traderQ.put('프로세스종료')
+
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 종료"))
         qtest_qwait(1)
         sys.exit()
@@ -745,14 +756,15 @@ class BaseReceiver:
         if not self.dict_bool['프로세스종료'] and (A or B):
             self._receiver_process_kill()
 
-        current_gsjm = tuple(self.list_gsjm)
-        if current_gsjm != self.last_gsjm:
-            if self.market_gubun in (1, 2, 4):
-                for q in self.stgQs:
-                    q.put(('관심목록', current_gsjm))
-            else:
-                self.stgQ.put(('관심목록', current_gsjm))
-            self.last_gsjm = current_gsjm
+        if self.market_gubun not in (6, 7, 8):
+            current_gsjm = tuple(self.list_gsjm)
+            if current_gsjm != self.last_gsjm:
+                if self.market_gubun in (1, 2, 4):
+                    for q in self.stgQs:
+                        q.put(('관심목록', current_gsjm))
+                else:
+                    self.stgQ.put(('관심목록', current_gsjm))
+                self.last_gsjm = current_gsjm
 
         if self.market_gubun == 9:
             curr_time = now()

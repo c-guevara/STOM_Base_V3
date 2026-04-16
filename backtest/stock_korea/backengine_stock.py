@@ -67,5 +67,5 @@ class BackEngineStock(BackEngineBase):
             tuple: (시가총액, 평가금액, 수익금, 수익률)
         """
         시가총액 = int(self.arry_code[self.indexn, self.dict_findex['시가총액']])
-        평가금액, 수익금, 수익률 = get_profit_stock(보유수량 * 매수가, 보유수량 * 현재가)
+        평가금액, 수익금, 수익률 = get_profit_stock(보유수량 * 매수가, 보유수량 * 현재가, self.is_etfn)
         return 시가총액, 평가금액, 수익금, 수익률

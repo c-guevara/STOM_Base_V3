@@ -82,7 +82,7 @@ def text_changed_05(ui):
             col_num = columns.index('보유수량')
         except:
             order_price = float(ui.od_lineEdittttt_01.text())
-            if ui.market_gubun < 4:
+            if ui.market_gubun in (1, 2, 3, 5, 9):
                 order_count = int(ui.dict_set['투자금'] * 1_000_000 / order_price)
             else:
                 order_count = int(ui.dict_set['투자금'])

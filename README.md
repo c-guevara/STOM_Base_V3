@@ -46,6 +46,7 @@ STOM/
 ├── stom_login.bat                      # 자동 로그인 모드로 실행용 배치 파일
 ├── stom.py                             # 메인 UI 실행 파일
 ├── pip_install.bat                     # 라이브러리 설치
+├── pip_install_wd.bat                  # 웹대시보드용 라이브러리 설치
 ├── _license.txt                        # 라이선스 파일
 ├── _update.txt                         # 업데이트 목록
 │
@@ -58,7 +59,11 @@ STOM/
 │   ├── rolling_walk_forward_test.py    # 전진분석
 │   ├── backengine_base.py              # 주문관리 미적용 백테스트 엔진 베이스 클래스
 │   ├── backengine_base_oms.py          # 주문관리 적용 백테스트 엔진 베이스 클래스
+│   ├── back_code_test.py               # 전략 문법 오류 및 변수 사용 오류 확인
+│   ├── back_static.py                  # 백테스트 공통 함수
+│   ├── back_subtotal.py                # 중간 집계용 프로세스 클래스
 │   ├── _graph/                         # 백테스트 결과 그래프 저장
+│   ├── _temp/                          # 분할로딩용 임시 폴더
 │   ├── stock_korea/                    # 국내주식 백테스트 엔진
 │   ├── stock_usa/                      # 해외주식 백테스트 엔진
 │   ├── upbit/                          # 업비트 백테스트 엔진
@@ -73,6 +78,10 @@ STOM/
 │   ├── base_receiver.py                # 리시버용 베이스 클래스
 │   ├── base_strategy.py                # 전략연산용 베이스 클래스
 │   ├── base_trader.py                  # 트레이더용 베이스 클래스
+│   ├── manager_formula.py              # 수식관리자
+│   ├── restapi_binance.py              # 바이낸스선물 API 연동
+│   ├── restapi_ls.py                   # LS증권 API 연동
+│   ├── restapi_upbit.py                # 업비트 API 연동
 │   ├── stock_korea/                    # 국내주식 API 연동
 │   ├── stock_usa/                      # 해외주식 API 연동
 │   ├── upbit/                          # 업비트 API 연동
@@ -100,6 +109,17 @@ STOM/
 │   └── static_method/                  # 공통 사용 모듈
 │   └── sub_process_and_thread/         # 서브 프로세스 및 서브 스레드 모듈
 │
+├── ai_agent/                           # AI 에이전트
+│   ├── strategy/                       # AI가 생성한 전략 저장 폴더
+│   ├── working/                        # 작업 계획 저장 및 로그 기록 폴더
+│   ├── strategy.txt                    # 전략 작성 방법 및 변수 설명
+│   └── ruled.md                        # AI 에이전트 규칙용 파일
+│
+├── dashboard/                          # 웹대시보드
+│   ├── backend/                        # 백엔드
+│   ├── frontend/                       # 프론트엔드
+│   └── dashboard_starter.py            # 백엔드, 프론트엔드 실행
+│
 ├── _database/                          # 데이터베이스용 폴더
 │   ├── code_info.db                    # 거래소별 종목정보 저장용 DB
 │   ├── setting.db                      # 설정 저장용 DB
@@ -111,17 +131,6 @@ STOM/
 │
 └── _log/                               # 로그용 폴더
 ```
-
-## 기술 스택
-
-|     분야     | 라이브러리                                  |
-|:----------:|:---------------------------------------|
-| **데이터 처리** | numpy, pandas, numba, talib            |
-| **UI/시각화** | PyQt5, pyqtgraph, matplotlib, squarify |
-| **거래소 연동** | python-binance, websockets             |
-|  **최적화**   | optuna, cmaes                          |
-| **통신/알림**  | zmq, pyttsx3, python-telegram-bot      |
-|   **기타**   | cryptography, pillow,                  |
 
 ## 시스템 요구사항
 
@@ -225,20 +234,17 @@ STOM/
 ### 백테스트엔진: 엔진 설정 및 실행
 ![백테엔진창](utility/_imagefiles/27_백테엔진창.png)
 
+### 전략 버전 관리
+![전략버전관리](utility/_imagefiles/28_전략버전관리.png)
+
 ### 업종별/테마별 트리맵
-![업종별테마별트리맵](utility/_imagefiles/28_업종별테마별트리맵.png)
+![업종별테마별트리맵](utility/_imagefiles/29_업종별테마별트리맵.png)
 
 ### 백테스트 결과 그래프
-![백테결과그래프](utility/_imagefiles/29_백테결과그래프.png)
+![백테결과그래프](utility/_imagefiles/30_백테결과그래프.png)
 
 ### 백테스트 결과 부가정보
-![백테결과부가정보](utility/_imagefiles/30_백테결과부가정보.png)
+![백테결과부가정보](utility/_imagefiles/31_백테결과부가정보.png)
 
-### 텔레그램
-![텔레그램 사용자버튼](utility/_imagefiles/31_텔레그램_사용자버튼.png)
-
-### 시스템 다이어그램 I
-![시스템 구조도](utility/_imagefiles/diagram_01.png)
-
-### 시스템 다이어그램 II
-![데이터 흐름도](utility/_imagefiles/diagram_02.png)
+### 웹대시보드
+![웹대시보드](utility/_imagefiles/32_웹대시보드.png)

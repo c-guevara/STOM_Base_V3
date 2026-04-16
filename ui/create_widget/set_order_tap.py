@@ -85,8 +85,6 @@ class SetOrderTap:
         self.ui.ss_buyy_lineEdit_04 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_06)
 
         self.ui.ss_buyy_checkBox_21 = self.wc.setCheckBox('블랙리스트', self.ui.ss_od_groupBoxxx_07)
-        self.ui.ss_buyy_checkBox_22 = self.wc.setCheckBox('라운드피겨 ↑                                  호가 이내', self.ui.ss_od_groupBoxxx_07)
-        self.ui.ss_buyy_lineEdit_05 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_07)
         self.ui.ss_buyy_checkBox_23 = self.wc.setCheckBox('손절횟수                                         회 이상', self.ui.ss_od_groupBoxxx_07)
         self.ui.ss_buyy_lineEdit_06 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_07)
         self.ui.ss_buyy_checkBox_24 = self.wc.setCheckBox('거래횟수                                         회 이상', self.ui.ss_od_groupBoxxx_07)
@@ -281,19 +279,17 @@ class SetOrderTap:
 
         # 매수금지
         self.ui.ss_buyy_checkBox_21.setGeometry(10, 25, 310, 20)
-        self.ui.ss_buyy_checkBox_22.setGeometry(10, 50, 310, 20)
-        self.ui.ss_buyy_lineEdit_05.setGeometry(110, 50, 80, 20)
-        self.ui.ss_buyy_checkBox_23.setGeometry(10, 75, 310, 20)
-        self.ui.ss_buyy_lineEdit_06.setGeometry(110, 75, 80, 20)
-        self.ui.ss_buyy_checkBox_24.setGeometry(10, 100, 310, 20)
-        self.ui.ss_buyy_lineEdit_07.setGeometry(110, 100, 80, 20)
-        self.ui.ss_buyy_checkBox_25.setGeometry(10, 125, 310, 20)
-        self.ui.ss_buyy_lineEdit_08.setGeometry(110, 125, 80, 20)
-        self.ui.ss_buyy_lineEdit_09.setGeometry(210, 125, 80, 20)
-        self.ui.ss_buyy_checkBox_26.setGeometry(10, 150, 310, 20)
-        self.ui.ss_buyy_lineEdit_10.setGeometry(110, 150, 80, 20)
-        self.ui.ss_buyy_checkBox_27.setGeometry(10, 175, 310, 20)
-        self.ui.ss_buyy_lineEdit_11.setGeometry(110, 175, 80, 20)
+        self.ui.ss_buyy_checkBox_23.setGeometry(10, 50, 310, 20)
+        self.ui.ss_buyy_lineEdit_06.setGeometry(110, 50, 80, 20)
+        self.ui.ss_buyy_checkBox_24.setGeometry(10, 75, 310, 20)
+        self.ui.ss_buyy_lineEdit_07.setGeometry(110, 75, 80, 20)
+        self.ui.ss_buyy_checkBox_25.setGeometry(10, 100, 310, 20)
+        self.ui.ss_buyy_lineEdit_08.setGeometry(110, 100, 80, 20)
+        self.ui.ss_buyy_lineEdit_09.setGeometry(210, 100, 80, 20)
+        self.ui.ss_buyy_checkBox_26.setGeometry(10, 125, 310, 20)
+        self.ui.ss_buyy_lineEdit_10.setGeometry(110, 125, 80, 20)
+        self.ui.ss_buyy_checkBox_27.setGeometry(10, 150, 310, 20)
+        self.ui.ss_buyy_lineEdit_11.setGeometry(110, 150, 80, 20)
 
         # 매수정정
         self.ui.ss_buyy_labellll_06.setGeometry(10, 25, 310, 20)
@@ -369,11 +365,11 @@ class SetOrderTap:
         # 매도금지
         self.ui.ss_sell_checkBox_20.setGeometry(10, 25, 310, 20)
         self.ui.ss_sell_lineEdit_05.setGeometry(110, 25, 80, 20)
-        self.ui.ss_sell_checkBox_22.setGeometry(10, 75, 310, 20)
-        self.ui.ss_sell_lineEdit_07.setGeometry(110, 75, 80, 20)
-        self.ui.ss_sell_lineEdit_08.setGeometry(210, 75, 80, 20)
-        self.ui.ss_sell_checkBox_23.setGeometry(10, 100, 310, 20)
-        self.ui.ss_sell_lineEdit_09.setGeometry(110, 100, 80, 20)
+        self.ui.ss_sell_checkBox_22.setGeometry(10, 50, 310, 20)
+        self.ui.ss_sell_lineEdit_07.setGeometry(110, 50, 80, 20)
+        self.ui.ss_sell_lineEdit_08.setGeometry(210, 50, 80, 20)
+        self.ui.ss_sell_checkBox_23.setGeometry(10, 75, 310, 20)
+        self.ui.ss_sell_lineEdit_09.setGeometry(110, 75, 80, 20)
 
         # 매도정정
         self.ui.ss_sell_labellll_06.setGeometry(10, 25, 310, 20)

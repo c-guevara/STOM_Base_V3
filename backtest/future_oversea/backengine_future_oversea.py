@@ -66,10 +66,11 @@ class BackEngineFutureOversea(BackEngineFuture):
         """
         매입금액 = self.dict_info[self.code]['위탁증거금'] * 보유수량
         보유금액 = 매입금액 + (현재가 - 매수가) * self.dict_info[self.code]['틱가치'] * 보유수량
+        mini = self.code.startswith('M') or self.code.startswith('SIL')
         if self.curr_trade_info['보유중'] == 1:
             포지션 = 'LONG'
-            평가금액, 수익금, 수익률 = get_profit_future_os_long(매입금액, 보유금액)
+            평가금액, 수익금, 수익률 = get_profit_future_os_long(mini, 매입금액, 보유금액)
         else:
             포지션 = 'SHORT'
-            평가금액, 수익금, 수익률 = get_profit_future_os_short(매입금액, 보유금액)
+            평가금액, 수익금, 수익률 = get_profit_future_os_short(mini, 매입금액, 보유금액)
         return 포지션, 평가금액, 수익금, 수익률

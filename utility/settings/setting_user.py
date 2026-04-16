@@ -176,6 +176,7 @@ def load_settings():
             '프로그램종료':      df_e['프로그램종료'][0],
             '테마':            df_e['테마'][0],
             '팩터선택':         df_e['팩터선택'][0],
+            '웹대시보드':       df_e['웹대시보드'][0],
             '시리얼키':         de_text(EN_KEY, df_e['시리얼키'][0]) if len(df_e) > 0 and df_e['시리얼키'][0] else None,
 
             '매수주문유형':      df_bo['매수주문유형'][0],
@@ -245,7 +246,6 @@ def load_settings():
             '매도손절수익금청산': df_so['매도손절수익금청산'][0],
             '매도손절수익금':    df_so['매도손절수익금'][0],
 
-            '웹대시보드': True,
             '백테엔진프로파일링': False
         }
     except fernet.InvalidToken:

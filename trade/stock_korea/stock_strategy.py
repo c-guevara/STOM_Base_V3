@@ -36,7 +36,7 @@ class StockStrategy(BaseStrategy):
         Returns:
             수익
         """
-        return get_profit_stock(매입금액, 보유금액)
+        return get_profit_stock(매입금액, 보유금액, self.is_etfn)
 
     def _get_hold_time(self, 매수시간):
         """보유 시간을 계산합니다.

@@ -211,7 +211,7 @@ class StockTrader(BaseTrader):
         Returns:
             수익
         """
-        return get_profit_stock(매입금액, 보유금액)
+        return get_profit_stock(매입금액, 보유금액, self.is_etfn)
 
     def _get_hogaunit(self, 주문가격또는종목코드):
         """호가 단위를 반환합니다.

@@ -130,13 +130,12 @@ class TelegramBot(QThread):
         """큐를 모니터링합니다.
         """
         while True:
-            data = self.teleQ.get()
-            if self.running or data.__class__ == tuple:
-                self.loop.call_soon_threadsafe(self.message_queue.put_nowait, data)
-            elif data.__class__ in (str, pd.DataFrame):
-                if data == '스레드종료':
-                    break
-                self.windowQ.put((ui_num['시스템로그'], '텔레그램봇 토큰 및 아이디가 설정되지 않아 메세지를 보낼 수 없습니다'))
+            try:
+                data = self.teleQ.get()
+                if self.running or data.__class__ == tuple:
+                    self.loop.call_soon_threadsafe(self.message_queue.put_nowait, data)
+            except:
+                pass
 
     async def process_messages(self):
         """메시지를 처리합니다.
@@ -205,6 +204,5 @@ class TelegramBot(QThread):
             )
 
     def stop(self):
-        self.teleQ.put('스레드종료')
         if self.loop and self.loop.is_running():
             self.loop.stop()

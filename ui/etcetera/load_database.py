@@ -31,10 +31,6 @@ def load_database(ui):
                 button = getattr(ui, f'stg_pushButton_{index:03d}')
             elif index <= 211:
                 button = getattr(ui, f'svjb_pushButon_{index - 201:02d}')
-            elif index <= 219:
-                button = getattr(ui, f'svjs_pushButon_{index - 207:02d}')
-            elif index <= 225:
-                button = getattr(ui, f'cvjb_pushButon_{index - 215:02d}')
             else:
-                button = getattr(ui, f'cvjs_pushButon_{index - 221:02d}')
+                button = getattr(ui, f'svjs_pushButon_{index - 207:02d}')
             button.setText(df['버튼명'][index])
