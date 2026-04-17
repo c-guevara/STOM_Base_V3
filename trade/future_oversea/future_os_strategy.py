@@ -26,7 +26,7 @@ class FutureOsStrategy(BaseStrategy):
         Returns:
             float: 호가 단위
         """
-        return self.dict_name[종목코드]['호가단위']
+        return self.dict_info[종목코드]['호가단위']
 
     def _get_profit_long(self, 매입금액, 보유금액, 종목코드=None):
         """롱 수익을 계산합니다.
@@ -99,5 +99,5 @@ class FutureOsStrategy(BaseStrategy):
         Returns:
             주문 가격
         """
-        소숫점자리수 = self.dict_name[self.code]['소숫점자리수']
+        소숫점자리수 = self.dict_info[self.code]['소숫점자리수']
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0

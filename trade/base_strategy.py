@@ -71,7 +71,7 @@ class BaseStrategy(StgGlobalsFunc):
                 'BUY_SHORT': []
             }
 
-        self.dict_name       = {}
+        self.dict_info       = {}
         self.dict_buy_num    = {}
         self.dict_signal_num = {}
         self.indi_settings   = []
@@ -330,7 +330,7 @@ class BaseStrategy(StgGlobalsFunc):
             self.dict_set = data
             self._set_strategy_and_blacklist()
         elif gubun == '종목정보':
-            self.dict_name = data
+            self.dict_info = data
         elif gubun == '데이터저장':
             self._save_data(data)
 
@@ -1600,7 +1600,7 @@ class BaseStrategy(StgGlobalsFunc):
                 df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
                 df['index'] = df['index'].astype('int64')
                 if self.market_gubun in (6, 7, 8):
-                    name = self.dict_name[code]
+                    name = self.dict_info[code]['종목명']
                     df.to_sql(name, con, index=False, if_exists='append', chunksize=2000)
                 else:
                     df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)

@@ -67,8 +67,6 @@ class BaseReceiver:
         self.dict_dlhp: dict[str, list]        = {}
 
         self.dict_info = {}
-        self.dict_name = {}
-        self.dict_code = {}
         self.dict_expc = {}
         self.dict_sgbn = {}
         self.dict_sncd = {}
@@ -121,12 +119,12 @@ class BaseReceiver:
 
     def _save_code_info_and_noti(self):
         """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
-        self.dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
-        self.dict_code = {name: code for code, name in self.dict_name.items()}
+        dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
+        dict_code = {name: code for code, name in dict_name.items()}
 
-        self.windowQ.put((ui_num['종목명데이터'], self.dict_name, self.dict_code))
-        if self.market_gubun in (6, 7, 8):
-            self.stgQ.put(('종목정보', self.dict_name))
+        self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
+        if self.market_gubun > 5:
+            self.stgQ.put(('종목정보', self.dict_info))
 
         df = pd.DataFrame.from_dict(self.dict_info, orient='index')
         self.queryQ.put(('종목디비', df, self.market_info['종목디비'], 'replace'))
@@ -414,7 +412,7 @@ class BaseReceiver:
             if asks_ > 0: asks += asks_
             self.list_hgdt[2:4] = bids, asks
             if dt > self.list_hgdt[0]:
-                name = self.dict_name[code]
+                name = self.dict_info[code]['종목명']
                 self.hogaQ.put((name, c, per, 0, -1, o, h, low))
                 if asks > 0: self.hogaQ.put((-asks, ch))
                 if bids > 0: self.hogaQ.put((bids, ch))
@@ -576,7 +574,7 @@ class BaseReceiver:
         lhp  = round((h / low - 1) * 100, 2)
         hjt  = sum(hoga_samount + hoga_bamount)
         gsjm = 1 if self.market_gubun in (6, 7, 8) or code in self.list_gsjm else 0
-        name = self.dict_name[code]
+        name = self.dict_info[code]['종목명']
         logt = now() if self.int_logt < dt_min else 0
 
         if not self.is_tick or self.market_gubun < 5:
@@ -626,7 +624,7 @@ class BaseReceiver:
         """
         if self.hoga_code == code and dt > self.list_hgdt[1]:
             self.list_hgdt[1] = dt
-            name = self.dict_name[code]
+            name = self.dict_info[code]['종목명']
             self.hogaQ.put(
                 [name] + hoga_tamount + hoga_seprice[:5][::-1] + hoga_buprice[:5] +
                 hoga_samount[:5][::-1] + hoga_bamount[:5]
