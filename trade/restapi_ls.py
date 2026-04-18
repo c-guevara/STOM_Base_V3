@@ -583,16 +583,17 @@ class LsWebSocketReceiver(QThread):
                     (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
                 )
 
-        gubun = f'{self.gubun}VI'
-        for i, code in enumerate(self.symbols):
-            data = self._get_send_data(gubun, '실시간시세등록', code)
-            await self.websocket.send(json.dumps(data))
-            await asyncio.sleep(0.02)
+        if self.gubun == '국내주식':
+            gubun = f'{self.gubun}VI'
+            for i, code in enumerate(self.symbols):
+                data = self._get_send_data(gubun, '실시간시세등록', code)
+                await self.websocket.send(json.dumps(data))
+                await asyncio.sleep(0.02)
 
-            if i % 100 == 0 or i == last - 1:
-                self.windowQ.put(
-                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
-                )
+                if i % 100 == 0 or i == last - 1:
+                    self.windowQ.put(
+                        (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
+                    )
 
     def _get_send_data(self, gubun: str, tr_type: str, code: str):
         if '국내주식' in gubun:
