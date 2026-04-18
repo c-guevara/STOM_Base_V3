@@ -11,8 +11,6 @@
 - STOM LIVE 탭에서는 사용자들의 당일실현손익 및 백테결과를 확인할 수 있습니다.
 - 소스코드가 4만줄이 넘지만, 파이썬 기본 문법 정도만 배우면 누구나 쉽게 사용할 수 있도록 설계되었습니다.
 - 설치 및 사용방법을 포함한 STOM에 대한 모든 강의는 아래 유튜브에 공개되어 있습니다.
-
-
 - [**STOM YouTube**](https://www.youtube.com/@stomlive)
 - [**STOM Community**](https://cafe.naver.com/stom)
 
@@ -33,8 +31,6 @@
 - **무료버전 사용방법**: 설정탭 시리얼키 입력란에 STOM_PUBLIC이라고 입력 후 저장
 - 커뮤니티용 카페는 누구나 자유롭게 이용할 수 있습니다. (자유가입, 자동등업)
 - 데이터 공유용 구글드라이브 및 단톡방은 구독결재 후에 이용할 수 있습니다.
-
-
 - [**구독결재문의**](https://cafe.naver.com/stom)
 - [**비지니스문의**](mailto:youseonho@naver.com)
 
