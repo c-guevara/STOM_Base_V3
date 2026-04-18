@@ -107,6 +107,7 @@ STOM/
 │
 ├── ai_agent/                           # AI 에이전트
 │   ├── plan/                           # 작업 계획 저장 폴더
+│   ├── report/                         # 전략분석, 백태결과분석, 실매매분석 보고서 저장 폴더
 │   ├── strategy/                       # AI가 생성한 전략 저장 폴더
 │   ├── strategy.txt                    # 전략 작성 방법 및 변수 설명
 │   └── ruled.md                        # AI 에이전트 규칙용 파일
