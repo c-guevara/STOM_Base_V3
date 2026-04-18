@@ -1,10 +1,7 @@
 
 import psutil
-from multiprocessing import Process
 from ui.etcetera.etc import auto_back_schedule
-from utility.settings.setting_base import ui_num
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_03
-from utility.sub_process_and_thread.chart_hoga_query_sound import ChartHogaQuerySound
 from utility.static_method.static import now, now_utc, now_cme, str_ymdhms_ios, str_hms, thread_decorator
 
 
@@ -23,13 +20,6 @@ def process_starter(ui):
     if ui.auto_run > 0:
         ui.auto_run = 0
         mnbutton_c_clicked_03(ui, True)
-
-    if ui.subprocess_start and not ui.proc_chqs.is_alive():
-        ui.proc_chqs = Process(
-            target=ChartHogaQuerySound, args=(ui.qlist, ui.dict_set, ui.market_infos), daemon=True
-        )
-        ui.proc_chqs.start()
-        ui.windowQ.put((ui_num['시스템로그'], "차트, 호가, 쿼리, 사운드 프로세스 재구동 완료"))
 
     _update_cpuper(ui)
     _update_window_title(ui)
