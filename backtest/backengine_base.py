@@ -406,7 +406,7 @@ class BackEngineBase(StgGlobalsFunc):
                         if len(code_df) > 0:
                             arry = add_rolling_data(code_df, round_unit, angle_cf_list, self.is_tick, avg_list)
                             all_data.append({
-                                'code': code,
+                                'code': code_,
                                 'data': arry,
                                 'shape': arry.shape,
                                 'dtype': arry.dtype,
