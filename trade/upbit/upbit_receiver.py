@@ -16,12 +16,6 @@ class UpbitReceiver(BaseReceiver):
     """
 
     def __init__(self, qlist, dict_set, market_info):
-        """수신기를 초기화합니다.
-        Args:
-            qlist (list): 큐 리스트
-            dict_set (dict): 설정 딕셔너리
-            market_info (list): 마켓 정보 리스트
-        """
         super().__init__(qlist, dict_set, market_info)
 
         app = QApplication(sys.argv)

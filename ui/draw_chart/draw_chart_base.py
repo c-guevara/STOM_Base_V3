@@ -14,10 +14,6 @@ class DrawChartBase:
     """
 
     def __init__(self, ui):
-        """차트 그리기 기본 클래스를 초기화합니다.
-        Args:
-            ui: UI 객체
-        """
         self.ui         = ui
 
         self.last       = 0

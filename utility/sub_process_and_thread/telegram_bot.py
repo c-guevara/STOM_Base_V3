@@ -16,12 +16,9 @@ class TelegramBot(QThread):
     텔레그램 봇을 통해 메시지를 주고받습니다.
     """
     def __init__(self, qlist, dict_set):
-        """텔레그램 봇을 초기화합니다.
+        """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
-        Args:
-            qlist: 큐 리스트
-            dict_set: 설정 딕셔너리
         """
         super().__init__()
         self.windowQ       = qlist[0]

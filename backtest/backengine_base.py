@@ -21,19 +21,6 @@ class BackEngineBase(StgGlobalsFunc):
     데이터 로드, 전략 실행, 기본 매수/매도 로직을 처리합니다."""
 
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
-        """백테스트 엔진을 초기화합니다.
-        Args:
-            gubun: 엔진 구분 번호
-            shared_cnt: 공유 카운터
-            lock: 공유 락
-            wq: 윈도우 큐
-            tq: 트레이더 큐
-            bq: 백테스트 큐
-            beq_list: 백테스트 엔진 큐 리스트
-            bstq_list: 백테스트 전략 큐 리스트
-            dict_set: 설정 딕셔너리
-            profile: 프로파일링 여부
-        """
         super().__init__()
         self.gubun           = gubun
         self.shared_cnt      = shared_cnt

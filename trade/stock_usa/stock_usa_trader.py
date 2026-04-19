@@ -16,12 +16,6 @@ class StockUsaTrader(BaseTrader):
     """
 
     def __init__(self, qlist, dict_set, market_infos):
-        """트레이더를 초기화합니다.
-        Args:
-            qlist (list): 큐 리스트
-            dict_set (dict): 설정 딕셔너리
-            market_infos (list): 마켓 정보 리스트
-        """
         super().__init__(qlist, dict_set, market_infos)
 
         app = QApplication(sys.argv)

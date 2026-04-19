@@ -13,11 +13,6 @@ class BinanceWebSocketReceiver(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, codes, windowQ):
-        """수신기를 초기화합니다.
-        Args:
-            codes: 종목 코드 리스트
-            windowQ: 윈도우 큐
-        """
         super().__init__()
         self.codes     = codes
         self.windowQ   = windowQ
@@ -48,7 +43,7 @@ class BinanceWebSocketReceiver(QThread):
                 )
 
             self.con_trade = False
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def run_order(self):
         """주문 데이터를 수신합니다."""
@@ -63,7 +58,7 @@ class BinanceWebSocketReceiver(QThread):
                 )
 
             self.con_order = False
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def connect_trader(self):
         """거래 웹소켓에 연결합니다."""
@@ -112,12 +107,6 @@ class BinanceWebSocketTrader(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, api_key, scret_key, windowQ):
-        """트레이더를 초기화합니다.
-        Args:
-            api_key: API 키
-            scret_key: 시크릿 키
-            windowQ: 윈도우 큐
-        """
         super().__init__()
         self.api_key     = api_key
         self.scret_key   = scret_key
@@ -146,7 +135,7 @@ class BinanceWebSocketTrader(QThread):
                 )
 
             self.connected = False
-            await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def connect(self):
         """유저 웹소켓에 연결합니다."""

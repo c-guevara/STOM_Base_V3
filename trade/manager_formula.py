@@ -58,13 +58,6 @@ class ManagerFormula(StgGlobalsFunc):
     보조지표 데이터를 관리하고 업데이트합니다.
     """
     def __init__(self, fm_list, dict_set, is_tick, dict_findex):
-        """매니저를 초기화합니다.
-        Args:
-            fm_list: 포뮬러 리스트
-            dict_set: 설정 딕셔너리
-            is_tick: 틱 여부
-            dict_findex: 인덱스 딕셔너리
-        """
         super().__init__()
         self.fm_list      = fm_list
         self.dict_set     = dict_set
