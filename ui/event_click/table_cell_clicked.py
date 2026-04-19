@@ -133,8 +133,6 @@ def cell_clicked_05(ui, row, col):
     tableWidget = None
     if ui.focusWidget() == ui.ss_tableWidget_01 or ui.focusWidget().parentWidget() == ui.ss_tableWidget_01:
         tableWidget = ui.ss_tableWidget_01
-    elif ui.focusWidget() == ui.cs_tableWidget_01 or ui.focusWidget().parentWidget() == ui.cs_tableWidget_01:
-        tableWidget = ui.cs_tableWidget_01
     if tableWidget is None:
         return
 

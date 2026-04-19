@@ -34,10 +34,6 @@ def update_back_progressbar(ui):
                 ui.ss_progressBar_01.setFormat(f'%p% | 경과 시간 {left_backtime} | 남은 시간 {remain_backtime}')
                 ui.ss_progressBar_01.setValue(curr_back_count)
                 ui.ss_progressBar_01.setRange(0, total_back_count)
-            else:
-                ui.cs_progressBar_01.setFormat(f'%p% | 경과 시간 {left_backtime} | 남은 시간 {remain_backtime}')
-                ui.cs_progressBar_01.setValue(curr_back_count)
-                ui.cs_progressBar_01.setRange(0, total_back_count)
 
 
 def update_progressbar(ui):
