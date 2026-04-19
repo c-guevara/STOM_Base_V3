@@ -328,18 +328,18 @@ class BackEngineBaseOms(BackEngineBase):
             매수틱번호: 매수 틱 번호
             매수시간: 매수 시간
         Returns:
-            (포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간) 튜플
+            (시가총액또는포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간) 튜플
         """
-        포지션, 수익금, 수익률, 보유시간 = None, 0, 0, 0
+        시가총액또는포지션, 수익금, 수익률, 보유시간 = None, 0, 0, 0
         if self.curr_trade_info['보유중']:
-            포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
+            시가총액또는포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
             if 수익률 > 최고수익률:   self.curr_trade_info['최고수익률'] = 최고수익률 = 수익률
             elif 수익률 < 최저수익률: self.curr_trade_info['최저수익률'] = 최저수익률 = 수익률
             now_time = self._now()
             # noinspection PyUnresolvedReferences
             보유시간 = (now_time - 매수시간).total_seconds() if self.is_tick else int((now_time - 매수시간).total_seconds() / 60)
             self.indexb = 매수틱번호
-        return 포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간
+        return 시가총액또는포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간
 
     def _check_buy_or_sell(self, 보유중, 현재가, 매수분할횟수, 매수호가, 매도호가, 관심종목, 매수가, 주문수량, 보유수량, 매수호가단위,
                            매수주문취소시간, 매도호가단위, 매도정정횟수, 매도주문취소시간, 주문포지션, 분봉고가=None, 분봉저가=None):
@@ -510,7 +510,7 @@ class BackEngineBaseOms(BackEngineBase):
         """분할 매수 조건을 확인합니다.
         수익률에 따른 분할 매수 조건을 확인하고 매수를 실행합니다.
         Args:
-            포지션: 포지션
+            포지션: 시가총액 또는 포지션
             현재가: 현재 가격
             추가매수가: 추가 매수 가격
             수익률: 수익률
@@ -518,7 +518,7 @@ class BackEngineBaseOms(BackEngineBase):
             매수 실행 여부
         """
         분할매수기준수익률 = round((현재가 / 추가매수가 - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
-        if 포지션.__class__ == int:
+        if self.market_gubun < 6:
             if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
                 self.Buy()
                 return True
@@ -600,6 +600,7 @@ class BackEngineBaseOms(BackEngineBase):
             '매수호가': 0,
             '매수정정횟수': 0
         })
+
         self.curr_day_info['직전거래시간'] = timedelta_sec(self.dict_set['매수금지간격초'], datetimefromindex)
         if firstbuy:
             self.curr_trade_info.update({
@@ -608,6 +609,7 @@ class BackEngineBaseOms(BackEngineBase):
                 '추가매수시간': [],
                 '매수분할횟수': 0
             })
+
         text = f"{self.index};{self.curr_trade_info['추가매수가']}"
         self.curr_trade_info['추가매수시간'].append(text)
         self.curr_trade_info['매수분할횟수'] += 1

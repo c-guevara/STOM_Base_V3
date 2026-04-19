@@ -1000,9 +1000,9 @@ class BackEngineBase(StgGlobalsFunc):
             매수틱번호: 매수 틱 번호
             매수시간: 매수 시간
         Returns:
-            (포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간) 튜플
+            (시가총액또는포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간) 튜플
         """
-        포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
+        시가총액또는포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
         if 수익률 > 최고수익률:   self.curr_trade_info['최고수익률'] = 최고수익률 = 수익률
         elif 수익률 < 최저수익률: self.curr_trade_info['최저수익률'] = 최저수익률 = 수익률
         now_time = self._now()
@@ -1010,7 +1010,7 @@ class BackEngineBase(StgGlobalsFunc):
         보유시간 = (now_time - 매수시간).total_seconds() if self.is_tick else int((now_time - 매수시간).total_seconds() / 60)
         self.curr_trade_info['주문수량'] = 보유수량
         self.indexb = 매수틱번호
-        return 포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간
+        return 시가총액또는포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간
 
     def Sell(self, sell_long=False):
         """매도 주문을 실행합니다.
