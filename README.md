@@ -34,6 +34,12 @@
 - [**구독결재문의**](https://cafe.naver.com/stom)
 - [**비지니스문의**](mailto:youseonho@naver.com)
 
+## 파이썬 및 라이브러리 설치 방법
+- https://www.python.org/downloads/windows/ 에서 Python 3.13.** 64비트 버전 설치
+- pip_install.bat 파일 실행으로 라이브러리 설치
+- 웹대시보드를 사용할려면 pip_install_wd.bat 파일 실행하여 추가 라이브러리 설치
+- stom.bat 실행
+
 ## 프로젝트 구조
 
 ```
