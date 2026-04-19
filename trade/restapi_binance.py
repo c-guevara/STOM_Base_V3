@@ -71,7 +71,7 @@ class BinanceWebSocketReceiver(QThread):
         for code in self.codes:
             stream_list.append(f'{code.lower()}@aggTrade')
         client = await AsyncClient.create()
-        bsm    = BinanceSocketManager(client, max_queue_size=1000)
+        bsm    = BinanceSocketManager(client, max_queue_size=10000)
         self.wsk_trade = bsm.futures_multiplex_socket(stream_list)
         self.con_trade = True
 
@@ -81,7 +81,7 @@ class BinanceWebSocketReceiver(QThread):
         for code in self.codes:
             stream_list.append(f'{code.lower()}@depth10')
         client = await AsyncClient.create()
-        bsm    = BinanceSocketManager(client, max_queue_size=1000)
+        bsm    = BinanceSocketManager(client, max_queue_size=10000)
         self.wsk_order = bsm.futures_multiplex_socket(stream_list)
         self.con_order = True
 
@@ -151,7 +151,7 @@ class BinanceWebSocketTrader(QThread):
     async def connect(self):
         """유저 웹소켓에 연결합니다."""
         client = await AsyncClient.create(self.api_key, self.scret_key)
-        bsm    = BinanceSocketManager(client, max_queue_size=10000)
+        bsm    = BinanceSocketManager(client, max_queue_size=100000)
         self.websocket = bsm.futures_user_socket()
         self.connected = True
 
