@@ -15,7 +15,8 @@ class BackEngineBinance(BackEngineFuture):
         Returns:
             호가 단위
         """
-        return self.dict_info[종목코드]['호가단위']
+        dict_info = self.dict_info.get(종목코드)
+        return dict_info['호가단위'] if dict_info else 8
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         """매수 수량을 설정합니다.
@@ -27,7 +28,8 @@ class BackEngineBinance(BackEngineFuture):
         Returns:
             매수 수량
         """
-        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수']
+        dict_info = self.dict_info.get(self.code)
+        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수'] if dict_info else 8
         return round(betting / 현재가 * oc_ratio / 100, 소숫점자리수)
 
     def _get_order_price(self, 거래금액, 주문수량):
@@ -38,7 +40,8 @@ class BackEngineBinance(BackEngineFuture):
         Returns:
             주문 가격
         """
-        소숫점자리수 = self.dict_info[self.code]['가격소숫점자리수']
+        dict_info = self.dict_info.get(self.code)
+        소숫점자리수 = self.dict_info[self.code]['가격소숫점자리수'] if dict_info else 4
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0.0
 
     def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
