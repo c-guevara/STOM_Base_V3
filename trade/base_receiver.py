@@ -139,6 +139,9 @@ class BaseReceiver:
         Args:
             code: 종목 코드
         """
+        if code not in self.dict_info:
+            return
+
         if code in self.dict_vipr:
             self.dict_vipr[code][:2] = False, timedelta_sec(5)
         else:
