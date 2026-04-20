@@ -710,17 +710,17 @@ class ChartHogaQuerySound:
         Args:
             data: 차트 데이터
         """
-        if len(data) == 7:
+        if len(data) == 6:
             code, w_unit, searchdate, starttime, endtime, k = data
             detail, buytimes, cf1, cf2 = None, None, None, None
-        elif len(data) == 9:
-            code, w_unit, searchdate, starttime, endtime, k = data[:7]
-            if data[7].__class__ == list:
-                detail, buytimes = data[7:]
+        elif len(data) == 8:
+            code, w_unit, searchdate, starttime, endtime, k = data[:6]
+            if data[6].__class__ == list:
+                detail, buytimes = data[6:]
                 cf1, cf2 = None, None
             else:
                 detail, buytimes = None, None
-                cf1, cf2 = data[7:]
+                cf1, cf2 = data[6:]
         else:
             code, w_unit, searchdate, starttime, endtime, k, detail, buytimes, cf1, cf2 = data
 
