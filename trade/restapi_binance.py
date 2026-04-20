@@ -22,7 +22,7 @@ class BinanceWebSocketReceiver(QThread):
         self.async_client = None
         self.sock_manager = None
         self.con_trade    = False
-        self.con_order    = False
+        self.con_depth    = False
 
         self.trade_stream_list = []
         self.depth_stream_list = []
@@ -57,7 +57,7 @@ class BinanceWebSocketReceiver(QThread):
         """주문 데이터를 수신합니다."""
         while True:
             try:
-                if not self.con_order:
+                if not self.con_depth:
                     await self.connect_order()
                 await self.receive_order()
             except Exception:
@@ -65,7 +65,7 @@ class BinanceWebSocketReceiver(QThread):
                     (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 호가 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
-            self.con_order = False
+            self.con_depth = False
             await asyncio.sleep(1)
 
     async def connect_trader(self):
@@ -96,7 +96,7 @@ class BinanceWebSocketReceiver(QThread):
             self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=10000)
 
         self.wsk_depth = self.sock_manager.futures_multiplex_socket(self.depth_stream_list)
-        self.con_order = True
+        self.con_depth = True
 
     async def receive_trader(self):
         """거래 데이터를 수신합니다."""
@@ -108,14 +108,14 @@ class BinanceWebSocketReceiver(QThread):
     async def receive_order(self):
         """주문 데이터를 수신합니다."""
         async with self.wsk_depth as ws:
-            while self.con_order:
+            while self.con_depth:
                 data = await ws.recv()
                 self.signal.emit(data)
 
     def stop(self):
         """웹소켓을 종료합니다."""
         self.con_trade = False
-        self.con_order = False
+        self.con_depth = False
         if self.loop and self.loop.is_running():
             self.loop.stop()
 
