@@ -863,7 +863,7 @@ class ChartHogaQuerySound:
                 arry = np.column_stack((arry, np.zeros((arry.shape[0], 2))))
 
             indices = arry[:, 0]
-    
+
             def get_cgidx_and_cgtime(cgtime_):
                 while cgtime_ not in indices:
                     if self.is_tick:

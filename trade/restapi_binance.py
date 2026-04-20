@@ -18,13 +18,17 @@ class BinanceWebSocketReceiver(QThread):
         self.windowQ      = windowQ
         self.loop         = None
         self.wsk_trade    = None
-        self.wsk_order    = None
+        self.wsk_depth    = None
+        self.async_client = None
+        self.sock_manager = None
         self.con_trade    = False
         self.con_order    = False
-        self.client_trade = None
-        self.bsm_trade    = None
-        self.client_order = None
-        self.bsm_order    = None
+
+        self.trade_stream_list = []
+        self.depth_stream_list = []
+        for code in self.codes:
+            self.trade_stream_list.append(f'{code.lower()}@aggTrade')
+            self.depth_stream_list.append(f'{code.lower()}@depth10')
 
     def run(self):
         """웹소켓 루프를 실행합니다."""
@@ -71,47 +75,27 @@ class BinanceWebSocketReceiver(QThread):
                 await self.wsk_trade.__aexit__(None, None, None)
             except:
                 pass
-        if self.bsm_trade:
-            try:
-                await self.bsm_trade.close()
-            except:
-                pass
-        if self.client_trade:
-            try:
-                await self.client_trade.close_connection()
-            except:
-                pass
-        stream_list = []
-        for code in self.codes:
-            stream_list.append(f'{code.lower()}@aggTrade')
-        self.client_trade = await AsyncClient.create()
-        self.bsm_trade = BinanceSocketManager(self.client_trade, max_queue_size=10000)
-        self.wsk_trade = self.bsm_trade.futures_multiplex_socket(stream_list)
+
+        if self.async_client is None:
+            self.async_client = await AsyncClient.create()
+            self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=10000)
+
+        self.wsk_trade = self.sock_manager.futures_multiplex_socket(self.trade_stream_list)
         self.con_trade = True
 
     async def connect_order(self):
         """주문 웹소켓에 연결합니다."""
-        if self.wsk_order:
+        if self.wsk_depth:
             try:
-                await self.wsk_order.__aexit__(None, None, None)
+                await self.wsk_depth.__aexit__(None, None, None)
             except:
                 pass
-        if self.bsm_order:
-            try:
-                await self.bsm_order.close()
-            except:
-                pass
-        if self.client_order:
-            try:
-                await self.client_order.close_connection()
-            except:
-                pass
-        stream_list = []
-        for code in self.codes:
-            stream_list.append(f'{code.lower()}@depth10')
-        self.client_order = await AsyncClient.create()
-        self.bsm_order = BinanceSocketManager(self.client_order, max_queue_size=10000)
-        self.wsk_order = self.bsm_order.futures_multiplex_socket(stream_list)
+
+        if self.async_client is None:
+            self.async_client = await AsyncClient.create()
+            self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=10000)
+
+        self.wsk_depth = self.sock_manager.futures_multiplex_socket(self.depth_stream_list)
         self.con_order = True
 
     async def receive_trader(self):
@@ -123,7 +107,7 @@ class BinanceWebSocketReceiver(QThread):
 
     async def receive_order(self):
         """주문 데이터를 수신합니다."""
-        async with self.wsk_order as ws:
+        async with self.wsk_depth as ws:
             while self.con_order:
                 data = await ws.recv()
                 self.signal.emit(data)
@@ -133,44 +117,7 @@ class BinanceWebSocketReceiver(QThread):
         self.con_trade = False
         self.con_order = False
         if self.loop and self.loop.is_running():
-            if self.wsk_trade or self.wsk_order:
-                self.loop.call_soon_threadsafe(
-                    self.loop.create_task, self._cleanup_resources()
-                )
             self.loop.stop()
-
-    async def _cleanup_resources(self):
-        """모든 리소스를 정리합니다."""
-        if self.wsk_trade:
-            try:
-                await self.wsk_trade.__aexit__(None, None, None)
-            except:
-                pass
-        if self.bsm_trade:
-            try:
-                await self.bsm_trade.close()
-            except:
-                pass
-        if self.client_trade:
-            try:
-                await self.client_trade.close_connection()
-            except:
-                pass
-        if self.wsk_order:
-            try:
-                await self.wsk_order.__aexit__(None, None, None)
-            except:
-                pass
-        if self.bsm_order:
-            try:
-                await self.bsm_order.close()
-            except:
-                pass
-        if self.client_order:
-            try:
-                await self.client_order.close_connection()
-            except:
-                pass
 
 
 class BinanceWebSocketTrader(QThread):
@@ -187,8 +134,8 @@ class BinanceWebSocketTrader(QThread):
         self.loop        = None
         self.websocket   = None
         self.connected   = False
-        self.client      = None
-        self.bsm         = None
+        self.async_client = None
+        self.sock_manager = None
 
     def run(self):
         """웹소켓 루프를 실행합니다."""
@@ -219,19 +166,12 @@ class BinanceWebSocketTrader(QThread):
                 await self.websocket.__aexit__(None, None, None)
             except:
                 pass
-        if self.bsm:
-            try:
-                await self.bsm.close()
-            except:
-                pass
-        if self.client:
-            try:
-                await self.client.close_connection()
-            except:
-                pass
-        self.client = await AsyncClient.create(self.api_key, self.scret_key)
-        self.bsm = BinanceSocketManager(self.client, max_queue_size=100000)
-        self.websocket = self.bsm.futures_user_socket()
+
+        if self.async_client is None:
+            self.async_client = await AsyncClient.create(self.api_key, self.scret_key)
+            self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=100000)
+
+        self.websocket = self.sock_manager.futures_user_socket()
         self.connected = True
 
     async def receive_msgs(self):
@@ -245,26 +185,4 @@ class BinanceWebSocketTrader(QThread):
         """웹소켓을 종료합니다."""
         self.connected = False
         if self.loop and self.loop.is_running():
-            if self.websocket:
-                self.loop.call_soon_threadsafe(
-                    self.loop.create_task, self._cleanup_resources()
-                )
             self.loop.stop()
-
-    async def _cleanup_resources(self):
-        """모든 리소스를 정리합니다."""
-        if self.websocket:
-            try:
-                await self.websocket.__aexit__(None, None, None)
-            except:
-                pass
-        if self.bsm:
-            try:
-                await self.bsm.close()
-            except:
-                pass
-        if self.client:
-            try:
-                await self.client.close_connection()
-            except:
-                pass
