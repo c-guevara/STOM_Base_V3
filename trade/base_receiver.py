@@ -83,7 +83,6 @@ class BaseReceiver:
 
         self.lvhp_time    = now()
         self.int_logt     = 0
-        self.operation    = 0
 
         self.ls           = None
         self.token        = None
