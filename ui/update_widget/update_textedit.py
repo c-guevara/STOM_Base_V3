@@ -190,7 +190,7 @@ class UpdateTextedit:
         else:
             if self.ui.dict_set['프로그램종료']:
                 from PyQt5.QtCore import QTimer
-                QTimer.singleShot(180 * 1000, self.ui.process_kill)
+                QTimer.singleShot(60 * 1000, self.ui.process_kill)
             if self.ui.dict_set['컴퓨터종료'] or (
                 self.ui.dict_set['휴무컴퓨터종료'] and
                 (
