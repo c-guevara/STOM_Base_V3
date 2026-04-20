@@ -699,6 +699,7 @@ class BaseReceiver:
         if self.ws_thread:
             self.ws_thread.stop()
             self.ws_thread.terminate()
+            self.ws_thread = None
 
     def _update_tuple(self, data):
         """튜플을 업데이트합니다.
@@ -726,6 +727,7 @@ class BaseReceiver:
         """
         import sys
         from utility.static_method.static import qtest_qwait
+
         self._websocket_kill()
 
         if data == '프로세스종료' and self.dict_set['데이터저장']:
