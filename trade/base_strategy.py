@@ -283,8 +283,6 @@ class BaseStrategy(StgGlobalsFunc):
             if self.jgrv_count == 2:
                 self.jgrv_count = 0
                 self._put_gsjm_and_delete_profit()
-        elif gubun == '관심목록':
-            self.dict_gj = {k: v for k, v in self.dict_gj.items() if k in data}
         elif gubun in ('매수완료', '매수취소'):
             if data in self.dict_signal['매수']:
                 self.dict_signal['매수'].remove(data)
@@ -313,6 +311,8 @@ class BaseStrategy(StgGlobalsFunc):
             gubun = gubun.replace('_MANUAL', '')
             if data not in self.dict_signal[gubun]:
                 self.dict_signal[gubun].append(data)
+        elif gubun == '관심목록':
+            self.dict_gj = {k: v for k, v in self.dict_gj.items() if k in data}
         elif gubun == '매수전략':
             self._set_buy_strategy(data)
         elif gubun == '매도전략':
