@@ -104,7 +104,7 @@ class SetSetupTap:
         self.ui.sj_back_labell_01 = QLabel(' ▣  그리드 최적화 기준값 최소상승률                    %', self.ui.sj_bs_groupBox_05)
         self.ui.sj_back_labell_01.setToolTip('그리드 최적화 시 직전 대비 기준값 상승률이 설정값보다 적을 경우 종료됩니다.\n0%로 설정 시 최고기준값을 갱신하지 못하면 최적화가 종료됩니다.')
         self.ui.sj_back_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_05)
-        self.ui.sj_back_cheBox_08 = self.wc.setCheckBox('스케쥴러 자동실행 전 패턴인식 자동학습하기', self.ui.sj_bs_groupBox_05)
+        self.ui.sj_back_cheBox_08 = self.wc.setCheckBox('스케쥴러 자동실행 전 패턴&볼륨프로파일 학습하기', self.ui.sj_bs_groupBox_05)
         self.ui.sj_back_cheBox_09 = self.wc.setCheckBox('백테스트로그 기록하지 않기', self.ui.sj_bs_groupBox_05)
 
         tip_text = "시장미시구조(microstructure) 분석은 호가데이터를 기반으로\n"\
