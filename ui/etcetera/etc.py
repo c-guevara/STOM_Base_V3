@@ -39,6 +39,8 @@ def auto_back_schedule(ui, gubun):
         ui: UI 객체
         gubun (int): 구분 번호 (0: 패턴학습확인, 1: 시작, 2: 스케줄러 표시)
     """
+    from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
+
     if gubun == 0:
         from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
         ui.auto_mode = True
