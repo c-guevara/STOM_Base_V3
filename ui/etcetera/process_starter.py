@@ -16,7 +16,7 @@ def process_starter(ui):
 
     if ui.dict_set['백테스케쥴실행'] and not ui.backengine_running and now().weekday() == ui.dict_set['백테스케쥴요일']:
         if ui.int_time < ui.dict_set['백테스케쥴시간'] <= inthms:
-            if not ui.dict_set['타임프레임'] and ui.dict_set['패턴볼륨학습']:
+            if not ui.dict_set['타임프레임'] and ui.dict_set['자동학습']:
                 auto_back_schedule(ui, 0)
             else:
                 auto_back_schedule(ui, 1)

@@ -113,15 +113,15 @@ class SetSetupTap:
                    "시그널(buy, sell, hold), 신뢰도(0~1), 리스크(0~1)를 리턴합니다."
         self.ui.sj_back_cheBox_10 = self.wc.setCheckBox('1초스냅샷 전략에 시장미시구조분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
         tip_text = "리스크분석(risk_analyzer)은 체결데이터를 기반으로\n"\
-                   "RSI, 변동성, 추세, 모멘텀, 체결강도, 수량불균형, 가격위치,\n"\
+                   "RSI, 변동성, 모멘텀, 체결강도, 수량불균형, 가격위치,\n"\
                    "각도추세, 거래량추세를 분석하여 리스크점수(0~100)를 리턴합니다."
-        self.ui.sj_back_cheBox_11 = self.wc.setCheckBox('1초스냅샷 전략에 시장리스크분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
+        self.ui.sj_back_cheBox_11 = self.wc.setCheckBox('1초스냅샷 전략에 리스크분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
         tip_text = "패턴분석(pattern_analyzer)은 talib 라이브러리에 있는\n"\
                    "60여개의 패턴을 활용하여 종목별 패턴 발생과 이후 등락율을 분석하여\n"\
                    "패턴점수(+100~-100) 및 패턴신뢰도(0~1)를 리턴합니다."
         self.ui.sj_back_cheBox_12 = self.wc.setCheckBox('1분봉 전략에 패턴분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
-        tip_text = "가격대분석(volume_profile_analyzer)은 설정한 퍼센트로\n"\
-                   "분할한 가격대에서 지지, 저항, 돌파, 반등 이벤트를 분석하여\n"\
+        tip_text = "가격대분석(volume_profile_analyzer)은 설정한 가격대분할 퍼센트로\n"\
+                   "분할한 가격대에서 기준퍼센트 이상의 돌파 및 반등 이벤트를 분석하여\n"\
                    "가격대점수(+100~-100) 및 가격대신뢰도(0~1)를 리턴합니다."
         self.ui.sj_back_cheBox_13 = self.wc.setCheckBox('1분봉 전략에 가격대분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
         self.ui.sj_back_cheBox_14 = self.wc.setCheckBox('백테스트 그래프 매수시간 기준으로 표시하기', self.ui.sj_bs_groupBox_05, tip='체크해제 시 매도시간 기준으로 표시됩니다.')

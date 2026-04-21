@@ -279,31 +279,31 @@ class SetDialogEtc:
         self.ui.ptn_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, items=['5', '10', '15', '20', '25', '30'])
         self.ui.ptn_pushButton_01 = self.wc.setPushbutton('설정불러오기', parent=self.ui.dialog_pattern, click=lambda: pattern_setting_load(self.ui))
         self.ui.ptn_pushButton_02 = self.wc.setPushbutton('설정저장하기', parent=self.ui.dialog_pattern, click=lambda: pattern_setting_save(self.ui))
-        self.ui.ptn_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, click=lambda: pattern_train(self.ui))
+        self.ui.ptn_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, color=4, click=lambda: pattern_train(self.ui))
         self.ui.ptn_groupBoxxx_01 = QGroupBox('', self.ui.dialog_pattern)
         text = '''
-        ▣ 패턴학습은 TALIB 라이브러리에 있는 60여개의 패턴을 기반으로 종목별로 각 패턴이 발생한 이후에\n
+        ▣ 패턴학습은 talib 라이브러리에 있는 60여개의 패턴을 기반으로 종목별로 각 패턴이 발생한 이후에\n
         지정한 시간과 등락율 퍼센트를 기준으로 패턴별 점수를 학습합니다. 30분, 10%로 설정 시 패턴 발생 이후\n
         30분 동안의 최고등락율과 최저등락율을 구한 다음, 절대값이 큰 등락율 기준으로 패턴점수를 구합니다.\n
         최고등락율이 10% 이상이라면 100점, 최저등락율이 -10% 이하라면 -100점이 됩니다.\n
-        패턴신뢰도는 패턴 발생 횟수와 표준편차를 기반으로 계산한 0~1의 값입니다.'''
+        패턴신뢰도는 패턴 학습 횟수와 표준편차를 기반으로 계산한 0~1의 값입니다.'''
         self.ui.ptn_labellllll_02 = QLabel(text, self.ui.ptn_groupBoxxx_01)
         self.ui.ptn_textEdittt_01 = self.wc.setTextEdit(self.ui.ptn_groupBoxxx_01, vscroll=True)
 
         self.ui.dialog_volume = self.wc.setDialog('STOM VOLUME PROFILE', parent=self.ui)
         self.ui.dialog_volume.geometry().center()
         self.ui.vpf_labellllll_01 = QLabel(' 가격대분할(%)                    돌파및반등기준(%)', self.ui.dialog_volume)
-        self.ui.vpf_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_volume, items=['0.33', '0.50', '0.75', '1.00'])
-        self.ui.vpf_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_volume, items=['0.33', '0.50', '0.75', '1.00'])
+        self.ui.vpf_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_volume, items=['0.33', '0.5', '0.75', '1.0'])
+        self.ui.vpf_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_volume, items=['0.33', '0.5', '0.75', '1.0'])
         self.ui.vpf_pushButton_01 = self.wc.setPushbutton('설정불러오기', parent=self.ui.dialog_volume, click=lambda: volume_setting_load(self.ui))
         self.ui.vpf_pushButton_02 = self.wc.setPushbutton('설정저장하기', parent=self.ui.dialog_volume, click=lambda: volume_setting_save(self.ui))
-        self.ui.vpf_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_volume, click=lambda: volume_profile_train(self.ui))
+        self.ui.vpf_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_volume, color=4, click=lambda: volume_profile_train(self.ui))
         self.ui.vpf_groupBoxxx_01 = QGroupBox('', self.ui.dialog_volume)
         text = '''
-        ▣ 볼륨 프로파일 학습은 최근 30일의 데이터를 분석하여 가격대에서 돌파, 반등을 확인하여 가격대점수를\n
-        학습합니다. 가격대분할 0.5%, 돌파및반등기준 0.5%로 설정 시 종목의 최근 30일 최고, 최저가격을\n
-        0.5%단위로 분할, 각각의 가격대에서 10분이내에 돌파 및 반등을 확인하여 가격대점수를 구합니다.\n
-        돌파와 반등확률의 평균이 50%이상이면 100에 가까워지고 50%이하이면 -100에 가까워집니다.\n
+        ▣ 볼륨 프로파일 학습은 최근 30일의 데이터를 기반으로 가장 거래가 많았던 20개의 가격대에서\n
+        상하방 돌파 및 상하방 반등 이벤트를 확인하여 가격대점수를 학습합니다. 0.33%, 0.5%로 설정 시\n
+        0.33%단위로 분할한 가장 거래가 많은 20개의 가격대 마다 0.5% 이상의 돌파와 0.5% 이하의 반등을\n
+        확인하여 가격대점수를 구합니다. 이벤트의 방향이 상방이 많으면 100, 하방이 많으면 -100에 가까워집니다.\n
         가격대신뢰도는 해당 가격대에서 발생한 이벤트의 수를 기반으로 계산한 0~1의 값입니다.'''
         self.ui.vpf_labellllll_02 = QLabel(text, self.ui.vpf_groupBoxxx_01)
         self.ui.vpf_textEdittt_01 = self.wc.setTextEdit(self.ui.vpf_groupBoxxx_01, vscroll=True)
@@ -492,23 +492,23 @@ class SetDialogEtc:
             getattr(self.ui, f'set_lineEdittt_{i+1:02d}').setGeometry(x, y, xw, 25)
 
         self.ui.dialog_pattern.setFixedSize(590, 400)
-        self.ui.ptn_labellllll_01.setGeometry(5, 7, 300, 25)
+        self.ui.ptn_labellllll_01.setGeometry(5, 7, 215, 25)
         self.ui.ptn_comboBoxxx_01.setGeometry(105, 7, 50, 25)
         self.ui.ptn_comboBoxxx_02.setGeometry(220, 7, 50, 25)
         self.ui.ptn_pushButton_01.setGeometry(275, 7, 100, 25)
         self.ui.ptn_pushButton_02.setGeometry(380, 7, 100, 25)
         self.ui.ptn_pushButton_03.setGeometry(485, 7, 100, 25)
         self.ui.ptn_groupBoxxx_01.setGeometry(5, 35, 580, 360)
-        self.ui.ptn_labellllll_02.setGeometry(7, 5, 568, 140)
+        self.ui.ptn_labellllll_02.setGeometry(0, 5, 568, 140)
         self.ui.ptn_textEdittt_01.setGeometry(7, 160, 568, 195)
 
         self.ui.dialog_volume.setFixedSize(590, 400)
-        self.ui.vpf_labellllll_01.setGeometry(5, 7, 300, 25)
+        self.ui.vpf_labellllll_01.setGeometry(5, 7, 240, 25)
         self.ui.vpf_comboBoxxx_01.setGeometry(85, 7, 55, 25)
         self.ui.vpf_comboBoxxx_02.setGeometry(245, 7, 55, 25)
         self.ui.vpf_pushButton_01.setGeometry(305, 7, 90, 25)
         self.ui.vpf_pushButton_02.setGeometry(400, 7, 90, 25)
         self.ui.vpf_pushButton_03.setGeometry(495, 7, 90, 25)
         self.ui.vpf_groupBoxxx_01.setGeometry(5, 35, 580, 360)
-        self.ui.vpf_labellllll_02.setGeometry(7, 5, 568, 140)
+        self.ui.vpf_labellllll_02.setGeometry(0, 5, 568, 140)
         self.ui.vpf_textEdittt_01.setGeometry(7, 160, 568, 195)

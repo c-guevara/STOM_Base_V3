@@ -141,12 +141,12 @@ def setting_load_05(ui):
     ui.sj_back_cheBox_05.setChecked(True) if df['백테주문관리적용'][0] else ui.sj_back_cheBox_05.setChecked(False)
     ui.sj_back_cheBox_06.setChecked(True) if df['교차검증가중치'][0] else ui.sj_back_cheBox_06.setChecked(False)
     ui.sj_back_cheBox_07.setChecked(True) if df['범위자동관리'][0] else ui.sj_back_cheBox_07.setChecked(False)
-    ui.sj_back_cheBox_08.setChecked(True) if df['패턴인식학습'][0] else ui.sj_back_cheBox_08.setChecked(False)
+    ui.sj_back_cheBox_08.setChecked(True) if df['자동학습'][0] else ui.sj_back_cheBox_08.setChecked(False)
     ui.sj_back_cheBox_09.setChecked(True) if df['백테스트로그기록안함'][0] else ui.sj_back_cheBox_09.setChecked(False)
     ui.sj_back_cheBox_10.setChecked(True) if df['시장미시구조분석'][0] else ui.sj_back_cheBox_10.setChecked(False)
-    ui.sj_back_cheBox_11.setChecked(True) if df['시장리스크분석'][0] else ui.sj_back_cheBox_11.setChecked(False)
+    ui.sj_back_cheBox_11.setChecked(True) if df['리스크분석'][0] else ui.sj_back_cheBox_11.setChecked(False)
     ui.sj_back_cheBox_12.setChecked(True) if df['패턴분석'][0] else ui.sj_back_cheBox_12.setChecked(False)
-    ui.sj_back_cheBox_13.setChecked(True) if df['볼륨분석'][0] else ui.sj_back_cheBox_13.setChecked(False)
+    ui.sj_back_cheBox_13.setChecked(True) if df['가격대분석'][0] else ui.sj_back_cheBox_13.setChecked(False)
     ui.sj_back_cheBox_14.setChecked(True) if df['백테매수시간기준'][0] else ui.sj_back_cheBox_14.setChecked(False)
     ui.sj_back_liEdit_01.setText(str(df['기준값최소상승률'][0]))
     ui.sj_back_cheBox_15.setChecked(True) if df['그래프저장하지않기'][0] else ui.sj_back_cheBox_15.setChecked(False)
@@ -392,13 +392,13 @@ def setting_save_05(ui):
     백테주문관리적용 = 1 if ui.sj_back_cheBox_05.isChecked() else 0
     교차검증가중치 = 1 if ui.sj_back_cheBox_06.isChecked() else 0
     범위자동관리 = 1 if ui.sj_back_cheBox_07.isChecked() else 0
-    패턴인식학습 = 1 if ui.sj_back_cheBox_08.isChecked() else 0
+    자동학습 = 1 if ui.sj_back_cheBox_08.isChecked() else 0
     백테스트로그기록안함 = 1 if ui.sj_back_cheBox_09.isChecked() else 0
     기준값최소상승률 = ui.sj_back_liEdit_01.text()
     시장미시구조분석 = 1 if ui.sj_back_cheBox_10.isChecked() else 0
-    시장리스크분석 = 1 if ui.sj_back_cheBox_11.isChecked() else 0
+    리스크분석 = 1 if ui.sj_back_cheBox_11.isChecked() else 0
     패턴분석 = 1 if ui.sj_back_cheBox_12.isChecked() else 0
-    볼륨분석 = 1 if ui.sj_back_cheBox_13.isChecked() else 0
+    가격대분석 = 1 if ui.sj_back_cheBox_13.isChecked() else 0
     백테매수시간기준 = 1 if ui.sj_back_cheBox_14.isChecked() else 0
     그래프저장하지않기 = 1 if ui.sj_back_cheBox_15.isChecked() else 0
     그래프띄우지않기 = 1 if ui.sj_back_cheBox_16.isChecked() else 0
@@ -423,8 +423,8 @@ def setting_save_05(ui):
     else:
         백테스케쥴시간 = int(백테스케쥴시간)
         if ui.proc_chqs.is_alive():
-            columns = ['블랙리스트추가', '백테일괄로딩', '디비자동관리', '백테주문관리적용', '교차검증가중치', '범위자동관리', '패턴볼륨학습',
-                       '기준값최소상승률', '시장미시구조분석', '시장리스크분석', '패턴분석', '볼륨분석', '백테매수시간기준',
+            columns = ['블랙리스트추가', '백테일괄로딩', '디비자동관리', '백테주문관리적용', '교차검증가중치', '범위자동관리', '자동학습',
+                       '기준값최소상승률', '시장미시구조분석', '리스크분석', '패턴분석', '가격대분석', '백테매수시간기준',
                        '백테스트로그기록안함', '그래프저장하지않기', '그래프띄우지않기', '백테스케쥴실행', '백테스케쥴요일', '백테스케쥴시간',
                        '백테스케쥴명', '백테날짜고정', '백테날짜']
             set_txt = ', '.join([f'{col} = ?' for col in columns])

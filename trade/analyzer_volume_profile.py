@@ -41,7 +41,7 @@ class AnalyzerVolumeProfile:
         self.volume_database       = VolumeProfileDatabase(self.strategy_type)
         self.volume_realtime       = VolumeProfileRealtime(market_info)
 
-    def analyze_current_position(self, code: str, current_price: float) -> Dict[str, float]:
+    def analyze_current_price(self, code: str, current_price: float) -> Dict[str, float]:
         """
         실시간 볼륨 프로파일 분석 수행
         :param code: 종목코드
@@ -58,8 +58,8 @@ class AnalyzerVolumeProfile:
 
         actual_processes = min(num_processes, len(code_chunks))
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
-            args = [(i, chunk, self.backtest_db_path, self.market_info,
-                     self.price_range_pct, self.top_nodes, self.penetration_threshold)
+            args = [(i, chunk, self.backtest_db_path, self.market_info, self.price_range_pct,
+                     self.penetration_threshold, self.top_nodes)
                     for i, chunk in enumerate(code_chunks)]
             results = pool.starmap(self._train_code_chunk, args)
 
@@ -68,11 +68,11 @@ class AnalyzerVolumeProfile:
             for code, volume_scores in chunk_results.items():
                 self.volume_database.save_volume_scores(code, volume_scores)
                 total_processed += 1
-            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
+            windowQ.put((ui_num['볼륨학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
 
-        windowQ.put((ui_num['패턴학습'], "학습 데이터 저장 완료"))
-        windowQ.put((ui_num['패턴학습'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
-        windowQ.put((ui_num['패턴학습'], f"전체 종목 볼륨 프로파일 학습 완료 [{total_processed}]"))
+        windowQ.put((ui_num['볼륨학습'], "학습 데이터 저장 완료"))
+        windowQ.put((ui_num['볼륨학습'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
+        windowQ.put((ui_num['볼륨학습'], f"전체 종목 볼륨 프로파일 학습 완료 [{total_processed}]"))
 
     def get_code_list(self) -> List[str]:
         """백테 디비에서 종목코드 목록 추출"""
@@ -97,12 +97,12 @@ class AnalyzerVolumeProfile:
         return chunks
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str,
-                          market_info: dict, price_range_pct: float,
-                          top_nodes: int, penetration_threshold: float) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str, market_info: dict,
+                          price_range_pct: float, penetration_threshold: float,
+                          top_nodes: int) -> Dict[str, Dict[str, float]]:
         """종목 청크별 학습 (프로세스 내에서 실행)"""
         global window_queue
-        volume_learning = VolumeProfileLearning(market_info, price_range_pct, top_nodes, penetration_threshold)
+        volume_learning = VolumeProfileLearning(market_info, price_range_pct, penetration_threshold, top_nodes)
         all_volume_scores = {}
         last = len(code_chunk)
 
@@ -165,16 +165,16 @@ class VolumeProfileLearning:
         # 각 볼륨 노드별 돌파/반등 확률 계산
         node_scores = {}
         for node_price in volume_nodes:
-            penetration_rate, bounce_rate, sample_count = self._calculate_penetration_bounce_rate(
+            upward_strength, downward_strength, sample_count = self._calculate_penetration_bounce_rate(
                 close_price, node_price
             )
 
             if sample_count >= 10:
-                score, confidence = self._calculate_score(penetration_rate, bounce_rate, sample_count)
+                score, confidence = self._calculate_score(upward_strength, downward_strength, sample_count)
                 node_scores[node_price] = {
                     'avg_score': score,
-                    'penetration_rate': penetration_rate,
-                    'bounce_rate': bounce_rate,
+                    'upward_strength': upward_strength,
+                    'downward_strength': downward_strength,
                     'sample_count': sample_count,
                     'confidence_score': confidence
                 }
@@ -210,10 +210,12 @@ class VolumeProfileLearning:
 
     def _calculate_penetration_bounce_rate(self, close_price: np.ndarray,
                                            node_price: float) -> Tuple[float, float, int]:
-        """돌파/반등 확률 계산"""
-        penetration_count = 0
-        bounce_count      = 0
-        total_count       = 0
+        """돌파/반등 확률 계산 (상방/하방 분리)"""
+        upward_penetration = 0  # 상방 돌파
+        downward_penetration = 0  # 하방 돌파
+        bounce_up = 0  # 반등 후 상승
+        bounce_down = 0  # 반등 후 하락
+        total_count = 0
 
         threshold = node_price * self.penetration_threshold
 
@@ -226,27 +228,32 @@ class VolumeProfileLearning:
                 future_prices = close_price[i+1:i+11]
 
                 if future_prices.max() >= node_price + threshold:
-                    penetration_count += 1
+                    upward_penetration += 1
                 elif future_prices.min() <= node_price - threshold:
-                    penetration_count += 1
+                    downward_penetration += 1
                 else:
-                    bounce_count += 1
+                    # 반등 경우: 이후 10봉의 방향 확인
+                    if future_prices[-1] > future_prices[0]:
+                        bounce_up += 1
+                    else:
+                        bounce_down += 1
 
         if total_count == 0:
             return 0.0, 0.0, 0
 
-        penetration_rate = penetration_count / total_count
-        bounce_rate = bounce_count / total_count
+        # 상승 강도 = 상방 돌파 + 반등 상승
+        upward_strength = (upward_penetration + bounce_up) / total_count
+        # 하락 강도 = 하방 돌파 + 반등 하락
+        downward_strength = (downward_penetration + bounce_down) / total_count
 
-        return penetration_rate, bounce_rate, total_count
+        return upward_strength, downward_strength, total_count
 
-    def _calculate_score(self, penetration_rate: float, bounce_rate: float, sample_count: int) -> Tuple[float, float]:
+    def _calculate_score(self, upward_strength: float, downward_strength: float, sample_count: int) -> Tuple[float, float]:
         """종합 점수 및 신뢰도 계산"""
-        penetration_score = (penetration_rate - 0.5) / 0.5 * 100
-        bounce_score      = (bounce_rate - 0.5) / 0.5 * 100
-        final_score       = penetration_score * 0.6 + bounce_score * 0.4
-        final_score       = max(-100.0, min(100.0, final_score))
-        confidence_score  = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
+        # 상승 강도와 하락 강도의 차이로 점수 계산 (-100 ~ 100)
+        final_score = (upward_strength - downward_strength) * 100
+        final_score = max(-100.0, min(100.0, final_score))
+        confidence_score = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
         return final_score, confidence_score
 
 
@@ -340,8 +347,8 @@ class VolumeProfileDatabase:
                     code TEXT NOT NULL,
                     price_level REAL NOT NULL,
                     avg_score REAL NOT NULL,
-                    penetration_rate REAL NOT NULL,
-                    bounce_rate REAL NOT NULL,
+                    upward_strength REAL NOT NULL,
+                    downward_strength REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
                     last_update TEXT NOT NULL,
@@ -363,7 +370,7 @@ class VolumeProfileDatabase:
         with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT price_level, avg_score, penetration_rate, bounce_rate, sample_count, confidence_score
+                SELECT price_level, avg_score, upward_strength, downward_strength, sample_count, confidence_score
                 FROM {self.table_name}
                 WHERE code = ?
             ''', (code,))
@@ -373,8 +380,8 @@ class VolumeProfileDatabase:
             for result in results:
                 volume_scores[result[0]] = {
                     'avg_score': result[1],
-                    'penetration_rate': result[2],
-                    'bounce_rate': result[3],
+                    'upward_strength': result[2],
+                    'downward_strength': result[3],
                     'sample_count': result[4],
                     'confidence_score': result[5]
                 }
@@ -390,14 +397,14 @@ class VolumeProfileDatabase:
             for price_level, scores in volume_scores.items():
                 cursor.execute(f'''
                     INSERT OR REPLACE INTO {self.table_name} 
-                    (code, price_level, avg_score, penetration_rate, bounce_rate, sample_count, confidence_score, last_update)
+                    (code, price_level, avg_score, upward_strength, downward_strength, sample_count, confidence_score, last_update)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     code,
                     price_level,
                     scores['avg_score'],
-                    scores['penetration_rate'],
-                    scores['bounce_rate'],
+                    scores['upward_strength'],
+                    scores['downward_strength'],
                     scores['sample_count'],
                     scores['confidence_score'],
                     current_date
@@ -408,7 +415,7 @@ class VolumeProfileDatabase:
         """
         마켓번호로 패턴 설정값 불러오기
         market: 마켓번호 (1~9)
-        return: (minute, pct) 튜플, 데이터가 없으면 (30, 10) 반환
+        return: (pct1, pct2) 튜플, 데이터가 없으면 (30, 10) 반환
         """
         with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
             cursor = conn.cursor()
@@ -418,17 +425,17 @@ class VolumeProfileDatabase:
                 return result
             return 0.5, 0.5
 
-    def save_volume_setting(self, market: int, minute: int, pct: int):
+    def save_volume_setting(self, market: int, pct1: float, pct2: float):
         """
         마켓번호로 패턴 설정값 저장
         market: 마켓번호 (1~9)
-        minute: 분봉설정
-        pct: 퍼센트설정
+        pct1: 분봉설정
+        pct2: 퍼센트설정
         """
         with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
             cursor = conn.cursor()
             cursor.execute('INSERT OR REPLACE INTO volume_setting (market, pct1, pct2) VALUES (?, ?, ?)',
-                           (market, minute, pct))
+                           (market, pct1, pct2))
             conn.commit()
 
 

@@ -63,7 +63,7 @@ class UpdateTextedit:
                     qtest_qwait(2)
                     auto_back_schedule(self.ui, 0.5)
             elif data[0] == ui_num['볼륨학습']:
-                self.ui.ptn_textEdittt_01.append(text)
+                self.ui.vpf_textEdittt_01.append(text)
                 if self.ui.auto_mode and '전체 종목 볼륨 프로파일 학습 완료' in data[1]:
                     qtest_qwait(2)
                     auto_back_schedule(self.ui, 1)

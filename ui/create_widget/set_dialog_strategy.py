@@ -20,7 +20,7 @@ class SetDialogStrategy:
         self.ui.dialog_strategy.geometry().center()
 
         def color_number():
-            if idx in (66, 76, 86, 116):
+            if idx in (66, 71, 76, 86, 116):
                 return 2
             elif idx <= 30:
                 return 7
