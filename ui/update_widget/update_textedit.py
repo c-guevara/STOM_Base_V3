@@ -58,7 +58,9 @@ class UpdateTextedit:
                 self.ui.log_system_textedit.append(text)
             elif data[0] == ui_num['패턴학습']:
                 self.ui.ptn_textEdittt_01.append(text)
-
+                if self.ui.auto_mode and '전체 종목 패턴 학습 완료' in data[1]:
+                    qtest_qwait(2)
+                    auto_back_schedule(self.ui, 1)
             elif data[0] == ui_num['백테엔진']:
                 self.ui.be_textEditxxxx_01.append(text)
                 if data[1] == '백테엔진 준비 완료':
