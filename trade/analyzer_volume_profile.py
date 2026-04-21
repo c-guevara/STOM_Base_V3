@@ -107,8 +107,9 @@ class AnalyzerVolumeProfile:
         global window_queue
         volume_learning = VolumeProfileLearning(market_info, price_range_pct, top_nodes, penetration_threshold)
         all_volume_scores = {}
+        last = len(code_chunk)
 
-        for code in code_chunk:
+        for k, code in enumerate(code_chunk):
             try:
                 with sqlite3.connect(backtest_db_path) as conn:
                     cursor = conn.cursor()
@@ -123,7 +124,7 @@ class AnalyzerVolumeProfile:
                 window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 중 ... [{k+1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 패턴 프로파일 학습 실패 - {e}"))
+                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 실패 - {e}"))
 
         return all_volume_scores
 
