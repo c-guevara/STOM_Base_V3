@@ -1,6 +1,7 @@
 
 import bisect
 import datetime
+import numpy as np
 from numba import njit
 
 
@@ -74,8 +75,6 @@ def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None,
     Returns:
         배열
     """
-    import numpy as np
-
     for window in get_ema_list(is_tick):
         df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(round_unit)
 
