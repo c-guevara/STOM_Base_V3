@@ -28,8 +28,6 @@ PATTERN_FUNCTIONS = [
     'CDLTASUKIGAP', 'CDLTHRUSTING', 'CDLTRISTAR', 'CDLUNIQUE3RIVER', 'CDLUPSIDEGAP2CROWS',
     'CDLXSIDEGAP3METHODS'
 ]
-
-
 window_queue = None
 
 
@@ -237,8 +235,6 @@ class PatternRealtime:
         if all_codes:
             for code in all_codes:
                 self.pattern_scores[code] = self.pattern_database.get_all_pattern_scores(code)
-            return True
-        return False
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -247,7 +243,7 @@ class PatternRealtime:
         realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이) 칼럼순서는 self.market_info['팩터목록'][0]에 따름
         return: 패턴점수, 신뢰도
         """
-        pattern_score, reliability = 0, 0
+        pattern_score, confidence_score = 0, 0
 
         realtime_data = realtime_data[-5:]
         open_price    = realtime_data[:, self.idx_open]
@@ -263,9 +259,9 @@ class PatternRealtime:
                 learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
                 if learned_score:
                     pattern_score = learned_score['avg_score']
-                    reliability = self._calculate_reliability(learned_score)
+                    confidence_score = self._calculate_reliability(learned_score)
 
-        return pattern_score, reliability
+        return pattern_score, confidence_score
 
     def _calculate_reliability(self, score_data: Dict[str, float]) -> float:
         """
