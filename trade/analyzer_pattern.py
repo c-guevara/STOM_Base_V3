@@ -8,6 +8,23 @@ from multiprocessing import Pool
 from utility.static_method.static import now
 
 
+PATTERN_FUNCTIONS = [
+    'CDL2CROWS', 'CDL3BLACKCROWS', 'CDL3INSIDE', 'CDL3LINESTRIKE', 'CDL3OUTSIDE',
+    'CDL3STARSINSOUTH', 'CDL3WHITESOLDIERS', 'CDLABANDONEDBABY', 'CDLADVANCEBLOCK', 'CDLBELTHOLD',
+    'CDLBREAKAWAY', 'CDLCLOSINGMARUBOZU', 'CDLCONCEALBABYSWALL', 'CDLCOUNTERATTACK', 'CDLDARKCLOUDCOVER',
+    'CDLDOJI', 'CDLDOJISTAR', 'CDLDRAGONFLYDOJI', 'CDLENGULFING', 'CDLEVENINGDOJISTAR',
+    'CDLEVENINGSTAR', 'CDLGAPSIDESIDEWHITE', 'CDLGRAVESTONEDOJI', 'CDLHAMMER', 'CDLHANGINGMAN',
+    'CDLHARAMI', 'CDLHARAMICROSS', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLHIKKAKEMOD',
+    'CDLHOMINGPIGEON', 'CDLIDENTICAL3CROWS', 'CDLINNECK', 'CDLINVERTEDHAMMER', 'CDLKICKING',
+    'CDLKICKINGBYLENGTH', 'CDLLADDERBOTTOM', 'CDLLONGLEGGEDDOJI', 'CDLLONGLINE', 'CDLMARUBOZU',
+    'CDLMATCHINGLOW', 'CDLMATHOLD', 'CDLMORNINGDOJISTAR', 'CDLMORNINGSTAR', 'CDLONNECK',
+    'CDLPIERCING', 'CDLRICKSHAWMAN', 'CDLRISEFALL3METHODS', 'CDLSEPARATINGLINES', 'CDLSHOOTINGSTAR',
+    'CDLSHORTLINE', 'CDLSPINNINGTOP', 'CDLSTALLEDPATTERN', 'CDLSTICKSANDWICH', 'CDLTAKURI',
+    'CDLTASUKIGAP', 'CDLTHRUSTING', 'CDLTRISTAR', 'CDLUNIQUE3RIVER', 'CDLUPSIDEGAP2CROWS',
+    'CDLXSIDEGAP3METHODS'
+]
+
+
 class AnalyzerPattern:
     """메인 패턴 분석 통합 클래스"""
 
@@ -17,18 +34,13 @@ class AnalyzerPattern:
         :param market_info: 마켓 정보 딕셔너리 (self.market_info)
         :param db_path: 데이터베이스 파일 경로
         """
-        self.market_info = market_info
-        # 전략구분 추출
-        self.strategy_type = market_info['전략구분']
-        self.db_path = db_path
-        # 백테 디비 경로
-        self.backtest_db_path = market_info['백테디비'][0]  # 0: 분봉, 1: 틱
-        # 데이터베이스 초기화
-        self.pattern_db = PatternDatabase(self.strategy_type, db_path)
-        # 과거데이터 학습 모듈 초기화
-        self.performance_analyzer = PatternLearning(market_info, db_path)
-        # 실시간 분석 모듈 초기화
-        self.realtime_analyzer = PatternRealtime(market_info, db_path)
+        self.market_info      = market_info
+        self.db_path          = db_path
+        self.strategy_type    = market_info['전략구분']
+        self.backtest_db_path = market_info['백테디비'][0]
+        self.pattern_database = PatternDatabase(self.strategy_type, db_path)
+        self.pattern_learning = PatternLearning(market_info, db_path)
+        self.pattern_realtime = PatternRealtime(market_info, db_path)
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -37,7 +49,7 @@ class AnalyzerPattern:
         :param realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
         :return: 탐지된 패턴과 학습된 점수
         """
-        return self.realtime_analyzer.analyze_patterns(code, realtime_data)
+        return self.pattern_realtime.analyze_patterns(code, realtime_data)
 
     def get_all_pattern_scores(self, code: str) -> Dict[str, Dict[str, float]]:
         """
@@ -45,14 +57,14 @@ class AnalyzerPattern:
         :param code: 종목코드
         :return: 패턴별 점수 딕셔너리
         """
-        return self.pattern_db.get_all_pattern_scores(code)
+        return self.pattern_database.get_all_pattern_scores(code)
 
     def delete_all_pattern_scores(self, code: str):
         """
         종목의 전체 패턴 점수 삭제
         :param code: 종목코드
         """
-        self.pattern_db.delete_all_pattern_scores(code)
+        self.pattern_database.delete_all_pattern_scores(code)
 
     def train_all_codes(self, code_list: List[str] = None):
         """
@@ -65,12 +77,8 @@ class AnalyzerPattern:
         total = len(code_list)
         for i, code in enumerate(code_list):
             try:
-                # 데이터 로딩
                 historical_data = self.load_data_for_code(code)
-                
-                # 패턴 학습
-                self.performance_analyzer.train_patterns(code, historical_data)
-                
+                self.pattern_learning.train_patterns(code, historical_data)
                 print(f"[{i+1}/{total}] {code} 패턴 학습 완료")
             except Exception as e:
                 print(f"[{i+1}/{total}] {code} 패턴 학습 실패: {e}")
@@ -84,7 +92,6 @@ class AnalyzerPattern:
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE TYPE = 'table'")
             results = cursor.fetchall()
-            # 테이블명이 종목코드임
             code_list = [result[0] for result in results if result[0] != 'moneytop' and '_info' in result[0]]
             return code_list
 
@@ -98,7 +105,6 @@ class AnalyzerPattern:
             cursor = conn.cursor()
             cursor.execute(f'SELECT * FROM "{code}"')
             results = cursor.fetchall()
-            # 결과를 2차원 numpy 어레이로 변환
             data_array = np.array(results)
             return data_array
 
@@ -106,42 +112,21 @@ class AnalyzerPattern:
 class PatternLearning:
     """과거데이터 기반 패턴 점수 학습 모듈"""
 
-    # TA-Lib 전체 캔들스틱 패턴 목록
-    PATTERN_FUNCTIONS = [
-        'CDL2CROWS', 'CDL3BLACKCROWS', 'CDL3INSIDE', 'CDL3LINESTRIKE', 'CDL3OUTSIDE',
-        'CDL3STARSINSOUTH', 'CDL3WHITESOLDIERS', 'CDLABANDONEDBABY', 'CDLADVANCEBLOCK', 'CDLBELTHOLD',
-        'CDLBREAKAWAY', 'CDLCLOSINGMARUBOZU', 'CDLCONCEALBABYSWALL', 'CDLCOUNTERATTACK', 'CDLDARKCLOUDCOVER',
-        'CDLDOJI', 'CDLDOJISTAR', 'CDLDRAGONFLYDOJI', 'CDLENGULFING', 'CDLEVENINGDOJISTAR',
-        'CDLEVENINGSTAR', 'CDLGAPSIDESIDEWHITE', 'CDLGRAVESTONEDOJI', 'CDLHAMMER', 'CDLHANGINGMAN',
-        'CDLHARAMI', 'CDLHARAMICROSS', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLHIKKAKEMOD',
-        'CDLHOMINGPIGEON', 'CDLIDENTICAL3CROWS', 'CDLINNECK', 'CDLINVERTEDHAMMER', 'CDLKICKING',
-        'CDLKICKINGBYLENGTH', 'CDLLADDERBOTTOM', 'CDLLONGLEGGEDDOJI', 'CDLLONGLINE', 'CDLMARUBOZU',
-        'CDLMATCHINGLOW', 'CDLMATHOLD', 'CDLMORNINGDOJISTAR', 'CDLMORNINGSTAR', 'CDLONNECK',
-        'CDLPIERCING', 'CDLRICKSHAWMAN', 'CDLRISEFALL3METHODS', 'CDLSEPARATINGLINES', 'CDLSHOOTINGSTAR',
-        'CDLSHORTLINE', 'CDLSPINNINGTOP', 'CDLSTALLEDPATTERN', 'CDLSTICKSANDWICH', 'CDLTAKURI',
-        'CDLTASUKIGAP', 'CDLTHRUSTING', 'CDLTRISTAR', 'CDLUNIQUE3RIVER', 'CDLUPSIDEGAP2CROWS',
-        'CDLXSIDEGAP3METHODS'
-    ]
-
     def __init__(self, market_info: dict, db_path: str = './_database/pattern_analysis.db'):
         """
         초기화
         :param market_info: 마켓 정보 딕셔너리 (self.market_info)
         :param db_path: 데이터베이스 파일 경로
         """
-        self.market_info = market_info
-        # 전략구분 추출
-        self.strategy_type = market_info['전략구분']
-        # 팩터목록에서 OHLC 칼럼명 인덱스 추출
-        factor_list = market_info['팩터목록'][0]  # 0: 분봉, 1: 틱
-        self.idx_open = factor_list.index('분봉시가')
-        self.idx_high = factor_list.index('분봉고가')
-        self.idx_low = factor_list.index('분봉저가')
-        self.idx_close = factor_list.index('현재가')
-        # 논리CPU수만큼 프로세스 풀 생성
-        self.num_processes = 8
-        # 데이터베이스 초기화
-        self.pattern_db = PatternDatabase(self.strategy_type, db_path)
+        self.market_info      = market_info
+        self.strategy_type    = market_info['전략구분']
+        factor_list           = market_info['팩터목록'][0]
+        self.idx_open         = factor_list.index('분봉시가')
+        self.idx_high         = factor_list.index('분봉고가')
+        self.idx_low          = factor_list.index('분봉저가')
+        self.idx_close        = factor_list.index('현재가')
+        self.num_processes    = 8
+        self.pattern_database = PatternDatabase(self.strategy_type, db_path)
 
     def train_patterns(self, code: str, historical_data: np.ndarray):
         """
@@ -150,30 +135,23 @@ class PatternLearning:
         :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
                              칼럼순서는 self.market_info['팩터목록'][0]에 따름
         """
-        # 팩터목록에서 추출한 인덱스로 OHLC 추출
-        open_price = historical_data[:, self.idx_open]
-        high_price = historical_data[:, self.idx_high]
-        low_price = historical_data[:, self.idx_low]
-        close_price = historical_data[:, self.idx_close]
-        # 0번 칼럼은 연월일시분 데이터
-        datetime_data = historical_data[:, 0]
+        open_price     = historical_data[:, self.idx_open]
+        high_price     = historical_data[:, self.idx_high]
+        low_price      = historical_data[:, self.idx_low]
+        close_price    = historical_data[:, self.idx_close]
+        datetime_data  = historical_data[:, 0]
+        pattern_chunks = self._split_patterns(PATTERN_FUNCTIONS, self.num_processes)
 
-        # 패턴 함수 목록을 8분할
-        pattern_chunks = self._split_patterns(self.PATTERN_FUNCTIONS, self.num_processes)
-
-        # 멀티프로세싱으로 패턴 학습 병렬 처리
         with Pool(processes=self.num_processes) as pool:
             args = [(chunk, open_price, high_price, low_price, close_price, datetime_data)
                     for chunk in pattern_chunks]
             results = pool.starmap(self._train_pattern_chunk, args)
 
-        # 결과 병합
         pattern_scores = {}
         for result in results:
             pattern_scores.update(result)
 
-        # DB에 저장
-        self.pattern_db.save_pattern_scores(code, pattern_scores)
+        self.pattern_database.save_pattern_scores(code, pattern_scores)
 
     def _split_patterns(self, pattern_list: List[str], num_chunks: int) -> List[List[str]]:
         """패턴 목록을 8분할"""
@@ -192,20 +170,15 @@ class PatternLearning:
         pattern_scores = {}
 
         for pattern_name in pattern_chunk:
-            pattern_func = getattr(talib, pattern_name)
-            pattern_result = pattern_func(open_price, high_price, low_price, close_price)
-
-            # 패턴이 검출된 시점 찾기
+            pattern_func      = getattr(talib, pattern_name)
+            pattern_result    = pattern_func(open_price, high_price, low_price, close_price)
             detection_indices = np.where(pattern_result != 0)[0]
 
             scores = []
             for idx in detection_indices:
-                # 30분 후 가격 (30분봉이므로 30캔들 후)
                 if idx + 30 < len(close_price):
-                    # 연월일시분 확인 (// 10000으로 날짜 비교)
                     entry_date = int(datetime_data[idx] // 10000)
                     exit_date = int(datetime_data[idx + 30] // 10000)
-                    # 같은 날짜일 때만 점수 계산
                     if entry_date == exit_date:
                         entry_price = close_price[idx]
                         exit_max_price = close_price[idx:idx + 30].max()
@@ -214,14 +187,12 @@ class PatternLearning:
                             exit_price = exit_max_price
                         else:
                             exit_price = exit_min_price
-                        # 가격변화율 계산
+
                         price_change = (exit_price - entry_price) / entry_price * 100
-                        # 점수 계산
                         score = self._calculate_score(price_change)
                         scores.append(score)
 
-            # 점수 통계 계산
-            if len(scores) >= 10:  # 최소 10개 샘플
+            if len(scores) >= 10:
                 pattern_scores[pattern_name] = {
                     'avg_score': float(np.mean(scores)),
                     'max_score': float(np.max(scores)),
@@ -235,28 +206,11 @@ class PatternLearning:
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
         score = (price_change_percent / 10.0) * 100
-        return max(-100.0, min(100.0, score))  # 클리핑
+        return max(-100.0, min(100.0, score))
 
 
 class PatternRealtime:
     """실시간 패턴인식 및 학습된 점수 반환 모듈"""
-
-    # TA-Lib 전체 캔들스틱 패턴 목록
-    PATTERN_FUNCTIONS = [
-        'CDL2CROWS', 'CDL3BLACKCROWS', 'CDL3INSIDE', 'CDL3LINESTRIKE', 'CDL3OUTSIDE',
-        'CDL3STARSINSOUTH', 'CDL3WHITESOLDIERS', 'CDLABANDONEDBABY', 'CDLADVANCEBLOCK', 'CDLBELTHOLD',
-        'CDLBREAKAWAY', 'CDLCLOSINGMARUBOZU', 'CDLCONCEALBABYSWALL', 'CDLCOUNTERATTACK', 'CDLDARKCLOUDCOVER',
-        'CDLDOJI', 'CDLDOJISTAR', 'CDLDRAGONFLYDOJI', 'CDLENGULFING', 'CDLEVENINGDOJISTAR',
-        'CDLEVENINGSTAR', 'CDLGAPSIDESIDEWHITE', 'CDLGRAVESTONEDOJI', 'CDLHAMMER', 'CDLHANGINGMAN',
-        'CDLHARAMI', 'CDLHARAMICROSS', 'CDLHIGHWAVE', 'CDLHIKKAKE', 'CDLHIKKAKEMOD',
-        'CDLHOMINGPIGEON', 'CDLIDENTICAL3CROWS', 'CDLINNECK', 'CDLINVERTEDHAMMER', 'CDLKICKING',
-        'CDLKICKINGBYLENGTH', 'CDLLADDERBOTTOM', 'CDLLONGLEGGEDDOJI', 'CDLLONGLINE', 'CDLMARUBOZU',
-        'CDLMATCHINGLOW', 'CDLMATHOLD', 'CDLMORNINGDOJISTAR', 'CDLMORNINGSTAR', 'CDLONNECK',
-        'CDLPIERCING', 'CDLRICKSHAWMAN', 'CDLRISEFALL3METHODS', 'CDLSEPARATINGLINES', 'CDLSHOOTINGSTAR',
-        'CDLSHORTLINE', 'CDLSPINNINGTOP', 'CDLSTALLEDPATTERN', 'CDLSTICKSANDWICH', 'CDLTAKURI',
-        'CDLTASUKIGAP', 'CDLTHRUSTING', 'CDLTRISTAR', 'CDLUNIQUE3RIVER', 'CDLUPSIDEGAP2CROWS',
-        'CDLXSIDEGAP3METHODS'
-    ]
 
     def __init__(self, market_info: dict, db_path: str = './_database/pattern_analysis.db'):
         """
@@ -264,28 +218,25 @@ class PatternRealtime:
         :param market_info: 마켓 정보 딕셔너리 (self.market_info)
         :param db_path: 데이터베이스 파일 경로
         """
-        self.market_info = market_info
-        # 전략구분 추출
-        self.strategy_type = market_info['전략구분']
-        # 팩터목록에서 OHLC 칼럼명 인덱스 추출
-        factor_list = market_info['팩터목록'][0]  # 0: 분봉, 1: 틱
-        self.idx_open = factor_list.index('분봉시가')
-        self.idx_high = factor_list.index('분봉고가')
-        self.idx_low = factor_list.index('분봉저가')
-        self.idx_close = factor_list.index('현재가')
-        # 데이터베이스 초기화
-        self.pattern_db = PatternDatabase(self.strategy_type, db_path)
-        # 종목별 패턴 점수 캐시 (init에서 미리 로드)
-        self.pattern_scores = {}
+        self.market_info      = market_info
+        self.strategy_type    = market_info['전략구분']
+        factor_list           = market_info['팩터목록'][0]
+        self.idx_open         = factor_list.index('분봉시가')
+        self.idx_high         = factor_list.index('분봉고가')
+        self.idx_low          = factor_list.index('분봉저가')
+        self.idx_close        = factor_list.index('현재가')
+        self.pattern_database = PatternDatabase(self.strategy_type, db_path)
+        self.pattern_scores   = {}
         self._load_all_pattern_scores()
 
     def _load_all_pattern_scores(self):
         """
         데이터베이스에서 모든 종목의 패턴 점수를 미리 로드
         """
-        all_codes = self.pattern_db.get_all_codes()
-        for code in all_codes:
-            self.pattern_scores[code] = self.pattern_db.get_all_pattern_scores(code)
+        all_codes = self.pattern_database.get_all_codes()
+        if all_codes:
+            for code in all_codes:
+                self.pattern_scores[code] = self.pattern_database.get_all_pattern_scores(code)
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -297,20 +248,16 @@ class PatternRealtime:
         """
         pattern_score, reliability = 0, 0
 
-        # 팩터목록에서 추출한 인덱스로 OHLC 추출
-        open_price = realtime_data[:, self.idx_open]
-        high_price = realtime_data[:, self.idx_high]
-        low_price = realtime_data[:, self.idx_low]
+        open_price  = realtime_data[:, self.idx_open]
+        high_price  = realtime_data[:, self.idx_high]
+        low_price   = realtime_data[:, self.idx_low]
         close_price = realtime_data[:, self.idx_close]
 
-        # 전체 패턴 탐지
-        for pattern_name in self.PATTERN_FUNCTIONS:
+        for pattern_name in PATTERN_FUNCTIONS:
             pattern_func = getattr(talib, pattern_name)
             pattern_result = pattern_func(open_price, high_price, low_price, close_price)
 
-            # 최신 캔들에서 패턴 검출 확인
             if pattern_result[-1] != 0:
-                # 학습된 점수 조회
                 learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
                 if learned_score:
                     pattern_score = learned_score['avg_score']
@@ -324,12 +271,8 @@ class PatternRealtime:
         :param score_data: 학습된 점수 데이터
         :return: 신뢰도 (0 ~ 1)
         """
-        # 샘플수가 많을수록 신뢰도 높음
         sample_factor = min(score_data['sample_count'] / 100.0, 1.0)
-
-        # 표준편차가 작을수록 신뢰도 높음
         std_factor = max(1.0 - score_data['std_score'] / 50.0, 0.0)
-
         return (sample_factor + std_factor) / 2.0
 
 
@@ -343,8 +286,8 @@ class PatternDatabase:
         :param db_path: 데이터베이스 파일 경로
         """
         self.strategy_type = strategy_type
-        self.table_name = f'{strategy_type}_pattern_score'
-        self.db_path = db_path
+        self.db_path       = db_path
+        self.table_name    = f'{strategy_type}_pattern_score'
         self._ensure_db_directory()
         self._initialize_tables()
 
