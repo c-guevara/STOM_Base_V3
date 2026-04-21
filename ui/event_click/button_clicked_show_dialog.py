@@ -550,3 +550,13 @@ def chart_size_change(ui):
         ui.dialog_chart.setFixedSize(width, 1370 if not ui.dict_set['저해상도'] else 1010)
         ui.ct_pushButtonnn_06.setText('확장')
         ui.ct_pushButtonnn_06.setStyleSheet(style_bc_bt)
+
+
+def show_pattern_dialog(ui):
+    if not ui.dialog_pattern.isVisible():
+        if ui.dict_set['타임프레임']:
+            QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1초스냅샷 상태입니다.\n패턴학습은 1분봉 타임프레임만 지원합니다.\n')
+            return
+        ui.dialog_pattern.show()
+    else:
+        ui.dialog_pattern.close()

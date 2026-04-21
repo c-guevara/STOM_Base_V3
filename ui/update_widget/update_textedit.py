@@ -43,23 +43,21 @@ class UpdateTextedit:
                 log_ = data[1]
             text = f'[{time_}] {log_}' if '</font>' not in log_ else f'<font color=white>[{time_}]</font> {log_}'
 
-            if data[0] in (ui_num['기본로그'], ui_num['타임로그'], ui_num['시스템로그']):
+            if data[0] in (ui_num['기본로그'], ui_num['타임로그'], ui_num['시스템로그'], ui_num['패턴학습']):
                 self.ui.log.info(re.sub('(<([^>]+)>)', '', text))
-
             elif data[0] == ui_num['백테스트']:
                 if not self.ui.dict_set['백테스트로그기록안함']:
                     self.ui.log.info(re.sub('(<([^>]+)>)', '', text))
 
             if data[0] == ui_num['기본로그']:
                 self.ui.log_trade_basic_textedit.append(text)
-
             elif data[0] == ui_num['타임로그']:
                 self.ui.log_trade_error_textedit.append(text)
-
             elif data[0] == ui_num['시스템로그']:
-                ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
-                text = ansi_escape.sub('', text)
+                text = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', text)
                 self.ui.log_system_textedit.append(text)
+            elif data[0] == ui_num['패턴학습']:
+                self.ui.ptn_textEdittt_01.append(text)
 
             elif data[0] == ui_num['백테엔진']:
                 self.ui.be_textEditxxxx_01.append(text)

@@ -11,6 +11,7 @@ def set_builtin_print(q):
     Args:
         q: UI 큐
     """
+    import re
     import inspect
     import builtins
     from utility.settings.setting_base import ui_num
@@ -44,7 +45,7 @@ def set_builtin_print(q):
             message = sep.join(processed_args)
             message = message.lstrip()
             message = message.rstrip()
-
+            message = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', message)
             q.put((ui_num['시스템로그'], message))
         except Exception:
             pass
