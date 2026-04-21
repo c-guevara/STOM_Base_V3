@@ -16,6 +16,23 @@ from ui.create_widget.set_style import style_bc_bt, style_bc_bb, style_bc_st
 from ui.etcetera.process_alive import coinkimp_process_alive, strategy_process_alive, receiver_process_alive
 
 
+def chart_clear(ui):
+    """차트 데이터를 초기화합니다.
+    Args:
+        ui: UI 객체
+    """
+    ui.ctpg_code    = None
+    ui.ctpg_cline   = None
+    ui.ctpg_hline   = None
+    ui.ctpg_xticks  = None
+    ui.ctpg_arry    = None
+    ui.ctpg_legend  = {}
+    ui.ctpg_item    = {}
+    ui.ctpg_data    = {}
+    ui.ctpg_factors = []
+    ui.ctpg_labels  = []
+
+
 class QuietPage(QWebEnginePage):
     """자바스크립트 콘솔 메시지를 무시하는 웹엔진 페이지 클래스입니다."""
     def javaScriptConsoleMessage(self, level, p_str, p_int, p_str_1):
@@ -176,7 +193,6 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
     if ui.proc_chqs.is_alive():
-        from ui.etcetera.etc import chart_clear
         if real:
             chart_clear(ui)
             if receiver_process_alive(ui):
