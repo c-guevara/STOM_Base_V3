@@ -67,7 +67,8 @@ class AnalyzerPattern:
         num_processes = cpu_count()
         code_chunks = self._split_codes(code_list, num_processes)
 
-        with Pool(processes=num_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
+        actual_processes = min(num_processes, len(code_chunks))
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [(i, chunk, self.backtest_db_path, self.market_info, self.minute, self.pct)
                     for i, chunk in enumerate(code_chunks)]
             results = pool.starmap(self._train_code_chunk, args)
@@ -77,7 +78,7 @@ class AnalyzerPattern:
             for code, pattern_scores in chunk_results.items():
                 self.pattern_database.save_pattern_scores(code, pattern_scores)
                 total_processed += 1
-            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{num_processes}]"))
+            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
 
         windowQ.put((ui_num['패턴학습'], "학습 데이터 저장 완료"))
         windowQ.put((ui_num['패턴학습'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
@@ -102,6 +103,9 @@ class AnalyzerPattern:
         :param num_chunks: 분할할 청크 수 (CPU 코어 수)
         :return: 분할된 종목코드 청크 리스트
         """
+        if len(code_list) <= num_chunks:
+            return [[code] for code in code_list]
+        
         chunk_size = len(code_list) // num_chunks
         chunks = []
         for i in range(num_chunks):
