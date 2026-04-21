@@ -422,8 +422,6 @@ class BackEngineBaseOms(BackEngineBase):
             cancel = True
         elif self.dict_set['매수금지손절간격'] and now_time <= 손절매도시간:
             cancel = True
-        elif self.market_gubun in (3, 4) and self.dict_set['매수금지200원이하'] and 현재가 <= 200:
-            cancel = True
         return cancel
 
     def Buy(self, buy_long=False):
