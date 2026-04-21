@@ -10,7 +10,6 @@ from utility.static_method.static import qtest_qwait
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from trade.analyzer_pattern import pattern_setting_load, pattern_train
 from utility.settings.setting_base import columns_dt, columns_dd, ui_num
-from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
 from ui.event_click.button_clicked_backtest_engine import backengine_start, backengine_show
 from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 from ui.event_click.button_clicked_backtest_start import backtest_engine_kill, sdbutton_clicked_04, sdbutton_clicked_02
@@ -40,6 +39,8 @@ def auto_back_schedule(ui, gubun):
         ui: UI 객체
         gubun (int): 구분 번호 (0: 패턴학습확인, 1: 시작, 2: 스케줄러 표시)
     """
+    from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
+
     if gubun == 0:
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
