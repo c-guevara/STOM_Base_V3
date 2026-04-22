@@ -109,7 +109,7 @@ class LsRestAPI:
                     del dict_data[code]
 
                 if i % 100 == 0 or i == last - 1:
-                    self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
+                    self.windowQ.put((ui_num['기본로그'], f'국내주식 상장주식수 조회 중 ... [{i+1}/{last}]'))
 
                 qtest_qwait(0.05)
 
