@@ -770,7 +770,7 @@ class ChartHogaQuerySound:
                 mc = arry[:, 1]
                 mh = arry[:, self.dict_findex['분봉고가']]
                 ml = arry[:, self.dict_findex['분봉저가']]
-                mv = arry[:, self.dict_findex['거래대금']]
+                mv = arry[:, self.dict_findex['분당거래대금']]
 
                 AD = talib.AD(mh, ml, mc, mv)
                 arry[:, -28] = AD
