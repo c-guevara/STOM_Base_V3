@@ -3,12 +3,13 @@ import re
 from ui.event_activate import activated_stg
 from ui.etcetera.etc import auto_back_schedule
 from utility.settings.setting_base import ui_num
-from ui.event_click.button_clicked_database import *
 from utility.static_method.static import now, qtest_qwait, now_cme
 from ui.event_click.button_clicked_stg_editer import backtest_detail
+from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_02
 from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
 from ui.create_widget.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
+from ui.event_click.button_clicked_database import dbbutton_clicked_08, dbbutton_clicked_09
 
 
 class UpdateTextedit:
@@ -54,7 +55,9 @@ class UpdateTextedit:
 
             if gubun == ui_num['기본로그']:
                 self.ui.log_trade_basic_textedit.append(text)
-                if '전략연산 프로세스 데이터 저장 중 ...' in text:
+                if '리시버 시작' in text:
+                    mnbutton_c_clicked_01(self.ui, 1)
+                elif '전략연산 프로세스 데이터 저장 중 ...' in text:
                     self.data_save = True
                 elif '전략연산 종료' in text:
                     if self.data_save and self.ui.dict_set['디비자동관리']:
