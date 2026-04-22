@@ -46,7 +46,7 @@ class UpdateTextedit:
 
             text = f'[{time_}] {text}' if '</font>' not in text else f'<font color=white>[{time_}]</font> {text}'
 
-            if gubun in (ui_num['기본로그'], ui_num['시스템로그'], ui_num['DB관리']):
+            if gubun in (ui_num['기본로그'], ui_num['시스템로그'], ui_num['DB관리']) and 'DB업데이트완료' not in text:
                 self.ui.log.info(re.sub('(<([^>]+)>)', '', text))
 
             elif gubun == ui_num['백테스트'] and not self.ui.dict_set['백테스트로그기록안함']:
