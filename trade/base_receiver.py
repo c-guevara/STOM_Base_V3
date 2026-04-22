@@ -124,22 +124,26 @@ class BaseReceiver:
 
     def _save_code_info_and_noti(self):
         """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
-        dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
-        dict_code = {name: code for code, name in dict_name.items()}
+        if self.dict_info:
+            dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
+            dict_code = {name: code for code, name in dict_name.items()}
 
-        self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
-        if self.market_gubun > 5:
-            self.stgQ.put(('종목정보', self.dict_info))
+            self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
+            if self.market_gubun > 5:
+                self.stgQ.put(('종목정보', self.dict_info))
 
-        df = pd.DataFrame.from_dict(self.dict_info, orient='index')
-        self.queryQ.put(('종목디비', df, self.market_info['종목디비'], 'replace'))
+            df = pd.DataFrame.from_dict(self.dict_info, orient='index')
+            self.queryQ.put(('종목디비', df, self.market_info['종목디비'], 'replace'))
 
-        text = f"{self.market_info['마켓이름']} 시스템을 시작하였습니다."
-        self.teleQ.put(text)
-        if self.dict_set['알림소리']:
-            self.soundQ.put(text)
+            text = f"{self.market_info['마켓이름']} 시스템을 시작하였습니다."
+            self.teleQ.put(text)
+            if self.dict_set['알림소리']:
+                self.soundQ.put(text)
 
-        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
+        else:
+            self.windowQ.put((ui_num['시스템로그'], f"오류 알림 - 종목정보 조회 실패 매매 프로세스를 종료합니다."))
+            self._sys_exit('종목정보조회실패종료')
 
     def _update_vi(self, code):
         """정적VI 발동을 기록합니다.
