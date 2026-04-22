@@ -1,4 +1,5 @@
 
+import time
 import sqlite3
 import numpy as np
 import pandas as pd
@@ -722,7 +723,6 @@ class BaseReceiver:
             data: 데이터
         """
         import sys
-        from utility.static_method.static import qtest_qwait
 
         self._websocket_kill()
 
@@ -737,7 +737,7 @@ class BaseReceiver:
         self.traderQ.put('프로세스종료')
 
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 종료"))
-        qtest_qwait(1)
+        time.sleep(1)
         sys.exit()
 
     def _save_moneytop(self):

@@ -1,11 +1,11 @@
 
 import sqlite3
 import pandas as pd
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from PyQt5.QtCore import QThread, pyqtSignal
 from utility.settings.setting_base import ui_num, columns_cj, columns_jg, columns_td, columns_tdf, columns_jgf, \
     columns_jgcf
 from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, get_inthms, get_str_ymdhms, \
-    get_str_ymdhmsf
+    get_str_ymdhmsf, threading_timer
 
 
 class MonitorTraderQ(QThread):
@@ -1323,7 +1323,7 @@ class BaseTrader:
         self.windowQ.put((ui_num['실현손익'], df_tt))
 
         if not first:
-            QTimer.singleShot(1 * 1000, lambda: self.windowQ.put('매도완료'))
+            threading_timer(1, self.windowQ.put, '매도완료')
 
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
