@@ -25,6 +25,8 @@ class MonitorReceivQ(QThread):
             if data.__class__ == tuple:
                 self.signal1.emit(data)
             elif data.__class__ == str:
+                if data == '큐스레드종료':
+                    break
                 self.signal2.emit(data)
 
 
@@ -142,7 +144,7 @@ class BaseReceiver:
             self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
         else:
             self.windowQ.put((ui_num['시스템로그'], f"오류 알림 - 종목정보 조회 실패 매매 프로세스를 종료합니다."))
-            self._sys_exit('종목정보조회실패종료')
+            self._sys_exit('강제종료')
 
     def _update_vi(self, code):
         """정적VI 발동을 기록합니다.
@@ -734,22 +736,26 @@ class BaseReceiver:
         Args:
             data: 데이터
         """
-        import sys
-
         self._websocket_kill()
 
         if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_moneytop()
-        else:
-            if self.market_gubun in (1, 4):
-                for q in self.stgQs:
-                    q.put('프로세스종료')
-            else:
-                self.stgQ.put('프로세스종료')
-        self.traderQ.put('프로세스종료')
 
-        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 종료"))
+        if self.market_gubun in (1, 4):
+            for q in self.stgQs:
+                q.put(data)
+        else:
+            self.stgQ.put(data)
+        self.traderQ.put(data)
+
+        if data != '프로그램종료':
+            exit_text = '리시버 종료' if data == '프로세스종료' else '리시버 STOP'
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} {exit_text}"))
+
+        import sys
         qtest_qwait(1)
+        self.receivQ.put('큐스레드종료')
+        self.updater.wait()
         sys.exit()
 
     def _save_moneytop(self):

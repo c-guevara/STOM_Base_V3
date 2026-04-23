@@ -1,5 +1,4 @@
 
-import sys
 import sqlite3
 import pandas as pd
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
@@ -37,6 +36,8 @@ class MonitorTraderQ(QThread):
                 else:
                     self.signal3.emit(data)
             elif data.__class__ == str:
+                if data == '큐스레드종료':
+                    break
                 self.signal4.emit(data)
 
 
@@ -711,8 +712,8 @@ class BaseTrader:
         """
         if data == '잔고청산':
             self._jango_cheongsan('수동')
-        elif data == '프로세스종료':
-            self._sys_exit()
+        else:
+            self._sys_exit(data)
 
     def _jango_cheongsan(self, gubun):
         """잔고 청산을 수행합니다.
@@ -746,11 +747,17 @@ class BaseTrader:
             self.teleQ.put(f"현재는 {self.market_info['마켓이름']} 보유종목이 없습니다.")
         self.dict_bool['잔고청산'] = True
 
-    def _sys_exit(self):
+    def _sys_exit(self, data):
         """시스템을 종료합니다."""
         self._websocket_kill()
-        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 종료"))
+        if data != '프로그램종료':
+            exit_text = '트레이더 종료' if data == '프로세스종료' else '트레이더 STOP'
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} {exit_text}"))
+
+        import sys
         qtest_qwait(1)
+        self.traderQ.put('큐스레드종료')
+        self.updater.wait()
         sys.exit()
 
     def _websocket_kill(self):
