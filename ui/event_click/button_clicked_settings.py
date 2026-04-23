@@ -221,11 +221,11 @@ def setting_save_01(ui):
     타임프레임 = 1 if ui.sj_main_comBox_02.currentText() == '1초스냅샷' else 0
 
     if ui.trading and 이전거래소 != 거래소:
-        QMessageBox.critical(ui.dialog_chart, '오류 알림', '매매 중에는 거래소 설정을 변경할 수 없습니다.\n')
+        QMessageBox.critical(ui, '오류 알림', '매매 중에는 거래소 설정을 변경할 수 없습니다.\n')
         return
 
     if ui.trading and 이전타임프레임 != 타임프레임:
-        QMessageBox.critical(ui.dialog_chart, '오류 알림', '매매 중에는 타임프레임 설정을 변경할 수 없습니다.\n')
+        QMessageBox.critical(ui, '오류 알림', '매매 중에는 타임프레임 설정을 변경할 수 없습니다.\n')
         return
 
     프로그램비밀번호_ = ui.sj_main_liEdit_01.text()
