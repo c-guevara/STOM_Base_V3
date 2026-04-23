@@ -15,6 +15,8 @@ class DrawRealChart(DrawChartBase):
             data: 차트 데이터 튜플
         """
         self.real = True
+        self.is_min = self.ui.dict_set['타임프레임']
+
         self.code, self.ui.ctpg_arry = data[1:]
 
         if not self.ui.dialog_chart.isVisible():
