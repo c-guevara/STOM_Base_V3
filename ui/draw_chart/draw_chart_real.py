@@ -7,15 +7,14 @@ from ui.etcetera.process_alive import strategy_process_alive, receiver_process_a
 
 class DrawRealChart(DrawChartBase):
     """실시간 차트 그리기 클래스입니다.
-    실시간 데이터를 사용하여 차트를 그립니다.
-    """
+    실시간 데이터를 사용하여 차트를 그립니다."""
     def draw_real_chart(self, data):
         """실시간 차트를 그립니다.
         Args:
             data: 차트 데이터 튜플
         """
         self.real = True
-        self.is_min = self.ui.dict_set['타임프레임']
+        self.is_min = not self.ui.dict_set['타임프레임']
 
         self.code, self.ui.ctpg_arry = data[1:]
 

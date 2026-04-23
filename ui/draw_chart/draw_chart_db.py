@@ -14,7 +14,7 @@ class DrawDBChart(DrawChartBase):
             data: 차트 데이터 튜플
         """
         self.real   = False
-        self.is_min = self.ui.dict_set['타임프레임']
+        self.is_min = not self.ui.dict_set['타임프레임']
 
         chart_clear(self.ui)
         if not self.ui.dialog_chart.isVisible():
