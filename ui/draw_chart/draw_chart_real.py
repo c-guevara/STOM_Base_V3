@@ -1,13 +1,15 @@
 
 from ui.etcetera.etc import chart_clear
-from utility.static_method.static import dt_ymdhms
 from ui.draw_chart.draw_chart_base import DrawChartBase
+from utility.static_method.static import dt_ymdhms, error_decorator
 from ui.etcetera.process_alive import strategy_process_alive, receiver_process_alive
 
 
 class DrawRealChart(DrawChartBase):
     """실시간 차트 그리기 클래스입니다.
     실시간 데이터를 사용하여 차트를 그립니다."""
+
+    @error_decorator
     def draw_real_chart(self, data):
         """실시간 차트를 그립니다.
         Args:

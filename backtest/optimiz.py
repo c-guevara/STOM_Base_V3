@@ -12,7 +12,7 @@ from multiprocessing import Process, Queue
 from backtest.optimiz_3d_visualization import Visualization3D
 from backtest.back_static_numba import get_result, bootstrap_test
 from utility.static_method.strategy_version_manager import stg_save_version
-from utility.static_method.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd
+from utility.static_method.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd, error_decorator
 from utility.settings.setting_base import ui_num, DB_STRATEGY, DB_BACKTEST, columns_vc, DB_SETTING, DB_OPTUNA
 from backtest.back_static import send_result, plot_show, get_moneytop_query, get_result_dataframe, add_mdd
 
@@ -391,6 +391,7 @@ class Optimize:
             self.tq.put('백테중지')
 
     # noinspection PyUnresolvedReferences
+    @error_decorator
     def _start(self):
         """최적화를 시작합니다.
         """
