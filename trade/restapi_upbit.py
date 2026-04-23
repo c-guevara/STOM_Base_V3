@@ -281,8 +281,10 @@ class UpbitWebSocketTrader(QThread):
     """
     signal = pyqtSignal(dict)
 
-    def __init__(self, windowQ):
+    def __init__(self, access, secret, windowQ):
         super().__init__()
+        self.access    = access
+        self.secret    = secret
         self.windowQ   = windowQ
         self.loop      = None
         self.websocket = None
@@ -310,9 +312,19 @@ class UpbitWebSocketTrader(QThread):
 
             await self._disconnect()
 
+    def _headers(self):
+        """JWT 토큰을 생성합니다."""
+        payload = {
+            'access_key': self.access,
+            'nonce': str(uuid.uuid4())
+        }
+        token = jwt.encode(payload, self.secret, algorithm='HS256')
+        return {'Authorization': f'Bearer {token}'}
+
     async def _connect(self):
         """웹소켓에 연결합니다."""
-        self.websocket = await websockets.connect(self.url, ping_interval=60)
+        headers = self._headers()
+        self.websocket = await websockets.connect(self.url, ping_interval=60, additional_headers=headers)
         self.connected = True
         data = [{'ticket': str(uuid.uuid4())}, {'type': 'myOrder'}]
         await self.websocket.send(json.dumps(data))

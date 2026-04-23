@@ -29,7 +29,7 @@ class UpbitTrader(BaseTrader):
         self._get_balances()
 
         if not self.dict_set['모의투자']:
-            self.ws_thread = UpbitWebSocketTrader(self.windowQ)
+            self.ws_thread = UpbitWebSocketTrader(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
 
