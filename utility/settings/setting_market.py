@@ -2,19 +2,6 @@
 백테스트 및 트레이딩 관련 클래스와 데이터베이스 경로를 포함합니다.
 """
 
-from backtest.stock_korea.backengine_stock import BackEngineStock
-from backtest.stock_korea.backengine_stock_oms import BackEngineStockOms
-from backtest.stock_usa.backengine_stock_usa import BackEngineStockUsa
-from backtest.stock_usa.backengine_stock_usa_oms import BackEngineStockUsaOms
-from backtest.upbit.backengine_upbit import BackEngineUpbit
-from backtest.upbit.backengine_upbit_oms import BackEngineUpbitOms
-from backtest.future.backengine_future import BackEngineFuture
-from backtest.future.backengine_future_oms import BackEngineFutureOms
-from backtest.future_oversea.backengine_future_oversea import BackEngineFutureOversea
-from backtest.future_oversea.backengine_future_oversea_oms import BackEngineFutureOverseaOms
-from backtest.binance.backengine_binance import BackEngineBinance
-from backtest.binance.backengine_binance_oms import BackEngineBinanceOms
-
 from trade.stock_korea.stock_trader import StockTrader
 from trade.stock_korea.stock_receiver import StockReceiver
 from trade.stock_korea.stock_strategy import StockStrategy
@@ -33,6 +20,19 @@ from trade.future_oversea.future_os_strategy import FutureOsStrategy
 from trade.binance.binance_trader import BinanceTrader
 from trade.binance.binance_receiver import BinanceReceiver
 from trade.binance.binance_strategy import BinanceStrategy
+
+from backtest.stock_korea.backengine_stock import BackEngineStock
+from backtest.stock_korea.backengine_stock_oms import BackEngineStockOms
+from backtest.stock_usa.backengine_stock_usa import BackEngineStockUsa
+from backtest.stock_usa.backengine_stock_usa_oms import BackEngineStockUsaOms
+from backtest.upbit.backengine_upbit import BackEngineUpbit
+from backtest.upbit.backengine_upbit_oms import BackEngineUpbitOms
+from backtest.future.backengine_future import BackEngineFuture
+from backtest.future.backengine_future_oms import BackEngineFutureOms
+from backtest.future_oversea.backengine_future_oversea import BackEngineFutureOversea
+from backtest.future_oversea.backengine_future_oversea_oms import BackEngineFutureOverseaOms
+from backtest.binance.backengine_binance import BackEngineBinance
+from backtest.binance.backengine_binance_oms import BackEngineBinanceOms
 
 DB_STOCK_TICK            = './_database/stock_tick.db'
 DB_STOCK_MIN             = './_database/stock_min.db'
@@ -186,13 +186,14 @@ DICT_MARKET_GUBUN = {
 
 DICT_MARKET_INFO = {
     1: {
-        '마켓구분': 'stock',
         '마켓이름': '국내주식',
         '거래대금순위': 100,
         '반올림단위': 3,
         '시작시간': 90000,
         '종료시간': {0: 152000, 1: 100000},
         '프로세스종료시간': 153030,
+        '각도계수': {0: [5, 0.01], 1: [5, 0.01]},
+        '마켓구분': 'stock',
         '전략구분': 'stock',
         '종목디비': 'stock_info',
         '체결디비': 'stock_chegeollist',
@@ -200,22 +201,22 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_totaltradelist',
         '거래디비': 'stock_tradelist',
         '일자디비경로': {0: './_database/stock_min', 1: './_database/stock_tick'},
-        '각도계수': {0: [5, 0.01],           1: [5, 0.01]},
-        '팩터목록': {0: list_stock_min,      1: list_stock_tick},
-        '팩터개수': {0: len_list_stock_min,  1: len_list_stock_tick},
-        '당일디비': {0: DB_STOCK_MIN,        1: DB_STOCK_TICK},
-        '백테디비': {0: DB_STOCK_MIN_BACK,   1: DB_STOCK_TICK_BACK},
-        '백테엔진': {0: BackEngineStock,     1: BackEngineStockOms},
-        '프로세스': {0: StockReceiver,       1: StockTrader, 2: StockStrategy}
+        '팩터목록': {0: list_stock_min,     1: list_stock_tick},
+        '팩터개수': {0: len_list_stock_min, 1: len_list_stock_tick},
+        '당일디비': {0: DB_STOCK_MIN,       1: DB_STOCK_TICK},
+        '백테디비': {0: DB_STOCK_MIN_BACK,  1: DB_STOCK_TICK_BACK},
+        '백테엔진': {0: BackEngineStock,    1: BackEngineStockOms},
+        '프로세스': {0: StockReceiver,      1: StockTrader, 2: StockStrategy}
     },
     2: {
-        '마켓구분': 'stock',
         '마켓이름': '국내주식',
         '거래대금순위': 10,
         '반올림단위': 3,
         '시작시간': 90000,
         '종료시간': {0: 152000, 1: 100000},
         '프로세스종료시간': 153030,
+        '각도계수': {0: [5, 0.01], 1: [5, 0.01]},
+        '마켓구분': 'stock',
         '전략구분': 'stock_etf',
         '종목디비': 'stock_etf_info',
         '체결디비': 'stock_etf_chegeollist',
@@ -223,7 +224,6 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_etf_totaltradelist',
         '거래디비': 'stock_etf_tradelist',
         '일자디비경로': {0: './_database/stock_etf_min', 1: './_database/stock_etf_tick'},
-        '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
         '팩터목록': {0: list_stock_min,        1: list_stock_tick},
         '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '당일디비': {0: DB_STOCK_ETF_MIN,      1: DB_STOCK_ETF_TICK},
@@ -232,13 +232,14 @@ DICT_MARKET_INFO = {
         '프로세스': {0: StockReceiver,         1: StockTrader, 2: StockStrategy}
     },
     3: {
-        '마켓구분': 'stock',
         '마켓이름': '국내주식',
         '거래대금순위': 10,
         '반올림단위': 3,
         '시작시간': 90000,
         '종료시간': {0: 152000, 1: 100000},
         '프로세스종료시간': 153030,
+        '각도계수': {0: [5, 0.01], 1: [5, 0.01]},
+        '마켓구분': 'stock',
         '전략구분': 'stock_etn',
         '종목디비': 'stock_etn_info',
         '체결디비': 'stock_etn_chegeollist',
@@ -246,7 +247,6 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_etn_totaltradelist',
         '거래디비': 'stock_etn_tradelist',
         '일자디비경로': {0: './_database/stock_etn_min', 1: './_database/stock_etn_tick'},
-        '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
         '팩터목록': {0: list_stock_min,        1: list_stock_tick},
         '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '당일디비': {0: DB_STOCK_ETN_MIN,      1: DB_STOCK_ETN_TICK},
@@ -255,13 +255,14 @@ DICT_MARKET_INFO = {
         '프로세스': {0: StockReceiver, 1: StockTrader, 2: StockStrategy},
     },
     4: {
-        '마켓구분': 'stock',
         '마켓이름': '해외주식',
         '거래대금순위': 100,
         '반올림단위': 5,
         '시작시간': 93000,
         '종료시간': {0: 160000, 1: 103000},
         '프로세스종료시간': 160030,
+        '각도계수': {0: [5, 0.01], 1: [5, 0.01]},
+        '마켓구분': 'stock',
         '전략구분': 'stock_usa',
         '종목디비': 'stock_usa_info',
         '체결디비': 'stock_usa_chegeollist',
@@ -269,22 +270,22 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_usa_totaltradelist',
         '거래디비': 'stock_usa_tradelist',
         '일자디비경로': {0: './_database/stock_usa_min', 1: './_database/stock_usa_tick'},
-        '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
-        '팩터목록': {0: list_stock_usa_min,      1: list_stock_usa_tick},
-        '팩터개수': {0: len_list_stock_usa_min,  1: len_list_stock_usa_tick},
-        '당일디비': {0: DB_STOCK_USA_MIN,        1: DB_STOCK_USA_TICK},
-        '백테디비': {0: DB_STOCK_USA_MIN_BACK,   1: DB_STOCK_USA_TICK_BACK},
-        '백테엔진': {0: BackEngineStockUsa,      1: BackEngineStockUsaOms},
-        '프로세스': {0: StockUsaReceiver,        1: StockUsaTrader, 2: StockUsaStrategy}
+        '팩터목록': {0: list_stock_usa_min,     1: list_stock_usa_tick},
+        '팩터개수': {0: len_list_stock_usa_min, 1: len_list_stock_usa_tick},
+        '당일디비': {0: DB_STOCK_USA_MIN,       1: DB_STOCK_USA_TICK},
+        '백테디비': {0: DB_STOCK_USA_MIN_BACK,  1: DB_STOCK_USA_TICK_BACK},
+        '백테엔진': {0: BackEngineStockUsa,     1: BackEngineStockUsaOms},
+        '프로세스': {0: StockUsaReceiver,       1: StockUsaTrader, 2: StockUsaStrategy}
     },
     5: {
-        '마켓구분': 'coin',
         '마켓이름': '업비트',
         '거래대금순위': 10,
         '반올림단위': 8,
         '시작시간': 0,
         '종료시간': {0: 235000, 1: 10000},
         '프로세스종료시간': 235030,
+        '각도계수': {0: [10, 0.000_000_01], 1: [10, 0.000_000_01]},
+        '마켓구분': 'coin',
         '전략구분': 'coin',
         '종목디비': 'coin_info',
         '체결디비': 'coin_chegeollist',
@@ -292,22 +293,22 @@ DICT_MARKET_INFO = {
         '손익디비': 'coin_totaltradelist',
         '거래디비': 'coin_tradelist',
         '일자디비경로': {0: './_database/coin_min', 1: './_database/coin_tick'},
-        '각도계수': {0: [10, 0.000_000_01],  1: [10, 0.000_000_01]},
-        '팩터목록': {0: list_basic_min,      1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
-        '당일디비': {0: DB_COIN_MIN,         1: DB_COIN_TICK},
-        '백테디비': {0: DB_COIN_MIN_BACK,    1: DB_COIN_TICK_BACK},
-        '백테엔진': {0: BackEngineUpbit,     1: BackEngineUpbitOms},
-        '프로세스': {0: UpbitReceiver,       1: UpbitTrader, 2: UpbitStrategy}
+        '팩터목록': {0: list_basic_min,     1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min, 1: len_list_basic_tick},
+        '당일디비': {0: DB_COIN_MIN,        1: DB_COIN_TICK},
+        '백테디비': {0: DB_COIN_MIN_BACK,   1: DB_COIN_TICK_BACK},
+        '백테엔진': {0: BackEngineUpbit,    1: BackEngineUpbitOms},
+        '프로세스': {0: UpbitReceiver,      1: UpbitTrader, 2: UpbitStrategy}
     },
     6: {
-        '마켓구분': 'future',
         '마켓이름': '지수선물',
         '거래대금순위': 10,
         '반올림단위': 3,
         '시작시간': 84500,
         '종료시간': {0: 143500, 1: 100000},
         '프로세스종료시간': 154530,
+        '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
+        '마켓구분': 'future',
         '전략구분': 'future',
         '종목디비': 'future_info',
         '체결디비': 'future_chegeollist',
@@ -315,22 +316,22 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_totaltradelist',
         '거래디비': 'future_tradelist',
         '일자디비경로': {0: './_database/future_min', 1: './_database/future_tick'},
-        '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
-        '팩터목록': {0: list_basic_min,      1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
-        '당일디비': {0: DB_FUTURE_MIN,       1: DB_FUTURE_TICK},
-        '백테디비': {0: DB_FUTURE_MIN_BACK,  1: DB_FUTURE_TICK_BACK},
-        '백테엔진': {0: BackEngineFuture,    1: BackEngineFutureOms},
-        '프로세스': {0: FutureReceiver,      1: FutureTrader, 2: FutureStrategy},
+        '팩터목록': {0: list_basic_min,     1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min, 1: len_list_basic_tick},
+        '당일디비': {0: DB_FUTURE_MIN,      1: DB_FUTURE_TICK},
+        '백테디비': {0: DB_FUTURE_MIN_BACK, 1: DB_FUTURE_TICK_BACK},
+        '백테엔진': {0: BackEngineFuture,   1: BackEngineFutureOms},
+        '프로세스': {0: FutureReceiver,     1: FutureTrader, 2: FutureStrategy},
     },
     7: {
-        '마켓구분': 'future',
         '마켓이름': '야간선물',
         '거래대금순위': 10,
         '반올림단위': 3,
         '시작시간': 180000,
         '종료시간': {0: 60000, 1: 190000},
         '프로세스종료시간': 60030,
+        '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
+        '마켓구분': 'future',
         '전략구분': 'future_nt',
         '종목디비': 'future_nt_info',
         '체결디비': 'future_nt_chegeollist',
@@ -338,7 +339,6 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_nt_totaltradelist',
         '거래디비': 'future_nt_tradelist',
         '일자디비경로': {0: './_database/future_nt_min', 1: './_database/future_nt_tick'},
-        '각도계수': {0: [100, 0.000_000_05],   1: [100, 0.000_000_05]},
         '팩터목록': {0: list_basic_min,        1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
         '당일디비': {0: DB_FUTURE_NT_MIN,      1: DB_FUTURE_NT_TICK},
@@ -347,13 +347,14 @@ DICT_MARKET_INFO = {
         '프로세스': {0: FutureReceiver,        1: FutureTrader, 2: FutureStrategy}
     },
     8: {
-        '마켓구분': 'future',
         '마켓이름': '해외선물',
         '거래대금순위': 10,
         '반올림단위': 3,
         '시작시간': 93000,
         '종료시간': {0: 160000, 1: 103000},
         '프로세스종료시간': 160030,
+        '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
+        '마켓구분': 'future',
         '전략구분': 'future_os',
         '종목디비': 'future_os_info',
         '체결디비': 'future_os_chegeollist',
@@ -361,7 +362,6 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_os_totaltradelist',
         '거래디비': 'future_os_tradelist',
         '일자디비경로': {0: './_database/future_os_min', 1: './_database/future_os_tick'},
-        '각도계수': {0: [100, 0.000_000_05],     1: [100, 0.000_000_05]},
         '팩터목록': {0: list_basic_min,          1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
         '당일디비': {0: DB_FUTURE_OS_MIN,        1: DB_FUTURE_OS_TICK},
@@ -370,13 +370,14 @@ DICT_MARKET_INFO = {
         '프로세스': {0: FutureOsReceiver,        1: FutureOsTrader, 2: FutureOsStrategy},
     },
     9: {
-        '마켓구분': 'coin',
         '마켓이름': '바이낸스선물',
         '거래대금순위': 10,
         '반올림단위': 8,
         '시작시간': 0,
         '종료시간': {0: 235000, 1: 10000},
         '프로세스종료시간': 235030,
+        '각도계수': {0: [10, 0.000_000_01], 1: [10, 0.000_000_01]},
+        '마켓구분': 'coin',
         '전략구분': 'coin_future',
         '종목디비': 'coin_future_info',
         '체결디비': 'coin_future_chegeollist',
@@ -384,7 +385,6 @@ DICT_MARKET_INFO = {
         '손익디비': 'coin_future_totaltradelist',
         '거래디비': 'coin_future_tradelist',
         '일자디비경로': {0: './_database/coin_future_min', 1: './_database/coin_future_tick'},
-        '각도계수': {0: [10, 0.000_000_01],      1: [10, 0.000_000_01]},
         '팩터목록': {0: list_basic_min,          1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
         '당일디비': {0: DB_COIN_FUTURE_MIN,      1: DB_COIN_FUTURE_TICK},
