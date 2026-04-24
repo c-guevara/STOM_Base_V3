@@ -1,7 +1,6 @@
 """시장 설정 모듈입니다.
 백테스트 및 트레이딩 관련 클래스와 데이터베이스 경로를 포함합니다.
 """
-
 from trade.stock_korea.stock_trader import StockTrader
 from trade.stock_korea.stock_receiver import StockReceiver
 from trade.stock_korea.stock_strategy import StockStrategy
@@ -71,7 +70,7 @@ DB_COIN_FUTURE_MIN       = './_database/coin_future_min.db'
 DB_COIN_FUTURE_TICK_BACK = './_database/coin_future_tick_back.db'
 DB_COIN_FUTURE_MIN_BACK  = './_database/coin_future_min_back.db'
 
-list_basic_tick = [
+LIST_BASIC_TICK = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
     '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
@@ -83,7 +82,7 @@ list_basic_tick = [
     '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
 ]
 
-list_basic_min = [
+LIST_BASIC_MIN = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
     '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
@@ -99,7 +98,7 @@ list_basic_min = [
     'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
-list_stock_tick = [
+LIST_STOCK_TICK = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량', '시가총액',
     'VI해제시간', 'VI가격', 'VI호가단위',
     '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
@@ -112,7 +111,7 @@ list_stock_tick = [
     '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
 ]
 
-list_stock_min = [
+LIST_STOCK_MIN = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량', '시가총액',
     'VI해제시간', 'VI가격', 'VI호가단위', '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
@@ -128,7 +127,7 @@ list_stock_min = [
     'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
-list_stock_usa_tick = [
+LIST_STOCK_USA_TICK = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량', '시가총액',
     '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
@@ -140,7 +139,7 @@ list_stock_usa_tick = [
     '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
 ]
 
-list_stock_usa_min = [
+LIST_STOCK_USA_MIN = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량', '시가총액',
     '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
@@ -156,12 +155,12 @@ list_stock_usa_min = [
     'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
-len_list_stock_tick     = len(list_stock_tick)
-len_list_stock_min      = len(list_stock_min)
-len_list_basic_tick     = len(list_basic_tick)
-len_list_basic_min      = len(list_basic_min)
-len_list_stock_usa_tick = len(list_stock_usa_tick)
-len_list_stock_usa_min  = len(list_stock_usa_min)
+LEN_LIST_STOCK_TICK     = len(LIST_STOCK_TICK)
+LEN_LIST_STOCK_MIN      = len(LIST_STOCK_MIN)
+LEN_LIST_BASIC_TICK     = len(LIST_BASIC_TICK)
+LEN_LIST_BASIC_MIN      = len(LIST_BASIC_MIN)
+LEN_LIST_STOCK_USA_TICK = len(LIST_STOCK_USA_TICK)
+LEN_LIST_STOCK_USA_MIN  = len(LIST_STOCK_USA_MIN)
 
 DICT_MARKET_GUBUN = {
     '국내주식01': 1,
@@ -201,8 +200,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_totaltradelist',
         '거래디비': 'stock_tradelist',
         '일자디비경로': {0: './_database/stock_min', 1: './_database/stock_tick'},
-        '팩터목록': {0: list_stock_min,     1: list_stock_tick},
-        '팩터개수': {0: len_list_stock_min, 1: len_list_stock_tick},
+        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_MIN,       1: DB_STOCK_TICK},
         '백테디비': {0: DB_STOCK_MIN_BACK,  1: DB_STOCK_TICK_BACK},
         '백테엔진': {0: BackEngineStock,    1: BackEngineStockOms},
@@ -224,8 +223,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_etf_totaltradelist',
         '거래디비': 'stock_etf_tradelist',
         '일자디비경로': {0: './_database/stock_etf_min', 1: './_database/stock_etf_tick'},
-        '팩터목록': {0: list_stock_min,        1: list_stock_tick},
-        '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
+        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_ETF_MIN,      1: DB_STOCK_ETF_TICK},
         '백테디비': {0: DB_STOCK_ETF_MIN_BACK, 1: DB_STOCK_ETF_TICK_BACK},
         '백테엔진': {0: BackEngineStock,       1: BackEngineStockOms},
@@ -247,8 +246,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_etn_totaltradelist',
         '거래디비': 'stock_etn_tradelist',
         '일자디비경로': {0: './_database/stock_etn_min', 1: './_database/stock_etn_tick'},
-        '팩터목록': {0: list_stock_min,        1: list_stock_tick},
-        '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
+        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_ETN_MIN,      1: DB_STOCK_ETN_TICK},
         '백테디비': {0: DB_STOCK_ETN_MIN_BACK, 1: DB_STOCK_ETN_TICK_BACK},
         '백테엔진': {0: BackEngineStock,       1: BackEngineStockOms},
@@ -270,8 +269,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'stock_usa_totaltradelist',
         '거래디비': 'stock_usa_tradelist',
         '일자디비경로': {0: './_database/stock_usa_min', 1: './_database/stock_usa_tick'},
-        '팩터목록': {0: list_stock_usa_min,     1: list_stock_usa_tick},
-        '팩터개수': {0: len_list_stock_usa_min, 1: len_list_stock_usa_tick},
+        '팩터목록': {0: LIST_STOCK_USA_MIN,     1: LIST_STOCK_USA_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_USA_MIN, 1: LEN_LIST_STOCK_USA_TICK},
         '당일디비': {0: DB_STOCK_USA_MIN,       1: DB_STOCK_USA_TICK},
         '백테디비': {0: DB_STOCK_USA_MIN_BACK,  1: DB_STOCK_USA_TICK_BACK},
         '백테엔진': {0: BackEngineStockUsa,     1: BackEngineStockUsaOms},
@@ -293,8 +292,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'coin_totaltradelist',
         '거래디비': 'coin_tradelist',
         '일자디비경로': {0: './_database/coin_min', 1: './_database/coin_tick'},
-        '팩터목록': {0: list_basic_min,     1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min, 1: len_list_basic_tick},
+        '팩터목록': {0: LIST_BASIC_MIN,     1: LIST_BASIC_TICK},
+        '팩터개수': {0: LEN_LIST_BASIC_MIN, 1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_COIN_MIN,        1: DB_COIN_TICK},
         '백테디비': {0: DB_COIN_MIN_BACK,   1: DB_COIN_TICK_BACK},
         '백테엔진': {0: BackEngineUpbit,    1: BackEngineUpbitOms},
@@ -316,8 +315,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_totaltradelist',
         '거래디비': 'future_tradelist',
         '일자디비경로': {0: './_database/future_min', 1: './_database/future_tick'},
-        '팩터목록': {0: list_basic_min,     1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min, 1: len_list_basic_tick},
+        '팩터목록': {0: LIST_BASIC_MIN,     1: LIST_BASIC_TICK},
+        '팩터개수': {0: LEN_LIST_BASIC_MIN, 1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_MIN,      1: DB_FUTURE_TICK},
         '백테디비': {0: DB_FUTURE_MIN_BACK, 1: DB_FUTURE_TICK_BACK},
         '백테엔진': {0: BackEngineFuture,   1: BackEngineFutureOms},
@@ -339,8 +338,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_nt_totaltradelist',
         '거래디비': 'future_nt_tradelist',
         '일자디비경로': {0: './_database/future_nt_min', 1: './_database/future_nt_tick'},
-        '팩터목록': {0: list_basic_min,        1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
+        '팩터목록': {0: LIST_BASIC_MIN,        1: LIST_BASIC_TICK},
+        '팩터개수': {0: LEN_LIST_BASIC_MIN,    1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_NT_MIN,      1: DB_FUTURE_NT_TICK},
         '백테디비': {0: DB_FUTURE_NT_MIN_BACK, 1: DB_FUTURE_NT_TICK_BACK},
         '백테엔진': {0: BackEngineFuture,      1: BackEngineFutureOms},
@@ -362,8 +361,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'future_os_totaltradelist',
         '거래디비': 'future_os_tradelist',
         '일자디비경로': {0: './_database/future_os_min', 1: './_database/future_os_tick'},
-        '팩터목록': {0: list_basic_min,          1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
+        '팩터목록': {0: LIST_BASIC_MIN,          1: LIST_BASIC_TICK},
+        '팩터개수': {0: LEN_LIST_BASIC_MIN,      1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_OS_MIN,        1: DB_FUTURE_OS_TICK},
         '백테디비': {0: DB_FUTURE_OS_MIN_BACK,   1: DB_FUTURE_OS_TICK_BACK},
         '백테엔진': {0: BackEngineFutureOversea, 1: BackEngineFutureOverseaOms},
@@ -385,8 +384,8 @@ DICT_MARKET_INFO = {
         '손익디비': 'coin_future_totaltradelist',
         '거래디비': 'coin_future_tradelist',
         '일자디비경로': {0: './_database/coin_future_min', 1: './_database/coin_future_tick'},
-        '팩터목록': {0: list_basic_min,          1: list_basic_tick},
-        '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
+        '팩터목록': {0: LIST_BASIC_MIN,          1: LIST_BASIC_TICK},
+        '팩터개수': {0: LEN_LIST_BASIC_MIN,      1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_COIN_FUTURE_MIN,      1: DB_COIN_FUTURE_TICK},
         '백테디비': {0: DB_COIN_FUTURE_MIN_BACK, 1: DB_COIN_FUTURE_TICK_BACK},
         '백테엔진': {0: BackEngineBinance,       1: BackEngineBinanceOms},

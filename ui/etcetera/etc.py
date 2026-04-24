@@ -180,7 +180,7 @@ def calendar_clicked(ui):
         ui: UI 객체
     """
     import pandas as pd
-    from utility.settings.setting_base import columns_dt, columns_dd, ui_num
+    from utility.settings.setting_base import COLUMNS_DTT, COLUMNS_DTD, UI_NUM
 
     table_name = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
@@ -194,13 +194,13 @@ def calendar_clicked(ui):
         nbg, nsg = df1['매수금액'].sum(), df1['매도금액'].sum()
         sp = round((nsg / nbg - 1) * 100, 2)
         npg, nmg, nsig = df1[df1['수익금'] > 0]['수익금'].sum(), df1[df1['수익금'] < 0]['수익금'].sum(), df1['수익금'].sum()
-        df2 = pd.DataFrame(columns=columns_dt)
+        df2 = pd.DataFrame(columns=COLUMNS_DTT)
         df2.loc[0] = [searchday, nbg, nsg, npg, nmg, sp, nsig]
     else:
-        df1 = pd.DataFrame(columns=columns_dd)
-        df2 = pd.DataFrame(columns=columns_dt)
-    ui.update_tablewidget.update_tablewidget((ui_num['당일합계'], df2))
-    ui.update_tablewidget.update_tablewidget((ui_num['당일상세'], df1))
+        df1 = pd.DataFrame(columns=COLUMNS_DTD)
+        df2 = pd.DataFrame(columns=COLUMNS_DTT)
+    ui.update_tablewidget.update_tablewidget((UI_NUM['당일합계'], df2))
+    ui.update_tablewidget.update_tablewidget((UI_NUM['당일상세'], df1))
 
 
 def chart_screenshot(ui):

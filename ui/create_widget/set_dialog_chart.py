@@ -1,7 +1,7 @@
 
 import pyqtgraph as pg
 from ui.etcetera.etc import chart_screenshot2
-from utility.settings.setting_base import indi_base
+from utility.settings.setting_base import DICT_INDICATOR_BASE
 from utility.static_method.static import str_hms, dt_hms
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout
 from ui.event_click.table_cell_clicked import cell_clicked_06
@@ -226,7 +226,7 @@ class SetDialogChart:
 
         self.ui.ft_labellllllll_96 = QLabel('slowd_matype', self.ui.jp_groupBoxxxxx_01)
 
-        k = [str(x) for x in list(indi_base.values())]
+        k = [str(x) for x in list(DICT_INDICATOR_BASE.values())]
 
         # 35개 라인에딧 동적 생성
         self.ui.factor_linedit_list = []

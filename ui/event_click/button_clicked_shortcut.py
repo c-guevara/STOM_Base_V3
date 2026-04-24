@@ -73,7 +73,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
         auto: 자동 시작 여부
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.settings.setting_base import ui_num
+    from utility.settings.setting_base import UI_NUM
     from ui.create_widget.set_style import style_bc_st
     from ui.etcetera.process_alive import receiver_process_alive
     from utility.static_method.static import qtest_qwait, cme_normal_open, now, get_inthms
@@ -108,7 +108,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
                 holiday = True
 
             if holiday:
-                ui.windowQ.put((ui_num['기본로그'], f"거래소 {ui.market_info['마켓이름']}, 휴무 종료"))
+                ui.windowQ.put((UI_NUM['기본로그'], f"거래소 {ui.market_info['마켓이름']}, 휴무 종료"))
                 return
 
         if receiver_process_alive(ui):

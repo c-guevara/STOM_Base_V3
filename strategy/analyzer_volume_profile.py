@@ -6,7 +6,7 @@ import numpy as np
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
-from utility.settings.setting_base import ui_num
+from utility.settings.setting_base import UI_NUM
 from ui.create_widget.set_text import famous_saying
 from utility.static_method.static import thread_decorator
 
@@ -68,11 +68,11 @@ class AnalyzerVolumeProfile:
             for code, volume_scores in chunk_results.items():
                 self.volume_database.save_volume_scores(code, volume_scores)
                 total_processed += 1
-            windowQ.put((ui_num['볼륨학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
+            windowQ.put((UI_NUM['볼륨학습'], f"학습 데이터 저장 중 ... [{i + 1}/{actual_processes}]"))
 
-        windowQ.put((ui_num['볼륨학습'], "학습 데이터 저장 완료"))
-        windowQ.put((ui_num['볼륨학습'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
-        windowQ.put((ui_num['볼륨학습'], f"전체 종목 볼륨 프로파일 학습 완료 [{total_processed}]"))
+        windowQ.put((UI_NUM['볼륨학습'], "학습 데이터 저장 완료"))
+        windowQ.put((UI_NUM['볼륨학습'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
+        windowQ.put((UI_NUM['볼륨학습'], f"전체 종목 볼륨 프로파일 학습 완료 [{total_processed}]"))
 
     def get_code_list(self) -> List[str]:
         """백테 디비에서 종목코드 목록 추출"""
@@ -118,10 +118,10 @@ class AnalyzerVolumeProfile:
                 if volume_scores:
                     all_volume_scores[code] = volume_scores
                 # noinspection PyUnresolvedReferences
-                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 중 ... [{k+1}/{last}]"))
+                window_queue.put((UI_NUM['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 실패 - {e}"))
 
         return all_volume_scores
 
