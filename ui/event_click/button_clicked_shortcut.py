@@ -244,7 +244,7 @@ def trade_process_start(ui):
         [executor.submit(func) for func in proc_start_func_list]
 
     if ui.dict_set['웹대시보드']:
-        from ui.ui_mainwindow import get_ip
+        from ui.main_window import get_ip
         from dashboard.dashboard_starter import DashboardStarter
 
         port = ui.dict_set['웹대시보드포트번호']
