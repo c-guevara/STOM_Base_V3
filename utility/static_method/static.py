@@ -813,7 +813,7 @@ def get_hogaunit_stock(price):
     return _HOGA_NEW_VALS[idx]
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_stock(bg, cg, etfn=False):
     """주식 수익을 계산합니다.
     Args:
@@ -833,7 +833,7 @@ def get_profit_stock(bg, cg, etfn=False):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_stock_os(bg, cg):
     """해외 주식 수익을 계산합니다.
     Args:
@@ -851,7 +851,7 @@ def get_profit_stock_os(bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_future_long(bg, cg):
     """선물 롱 수익을 계산합니다.
     Args:
@@ -867,7 +867,7 @@ def get_profit_future_long(bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_future_short(bg, cg):
     """선물 숏 수익을 계산합니다.
     Args:
@@ -883,7 +883,7 @@ def get_profit_future_short(bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_future_os_long(mini, bg, cg):
     """해외 선물 롱 수익을 계산합니다.
     Args:
@@ -900,7 +900,7 @@ def get_profit_future_os_long(mini, bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_future_os_short(mini, bg, cg):
     """해외 선물 숏 수익을 계산합니다.
     Args:
@@ -917,7 +917,7 @@ def get_profit_future_os_short(mini, bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_coin(bg, cg):
     """코인 수익을 계산합니다.
     Args:
@@ -934,7 +934,7 @@ def get_profit_coin(bg, cg):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_coin_future_long(bg, cg, market1, market2):
     """코인 선물 롱 수익을 계산합니다.
     Args:
@@ -953,7 +953,7 @@ def get_profit_coin_future_long(bg, cg, market1, market2):
     return pg, sg, sp
 
 
-@njit(cache=True)
+@njit(cache=True, fastmath=True)
 def get_profit_coin_future_short(bg, cg, market1, market2):
     """코인 선물 숏 수익을 계산합니다.
     Args:

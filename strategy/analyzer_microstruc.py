@@ -1,11 +1,11 @@
 
 import numpy as np
-from numba import jit
+from numba import njit
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calc_analyze_price_levels(quantities: np.ndarray, multiplier: float, min_occurrences: int):
     """가격 레벨별 분석 (Numba JIT 최적화) - 튜플 대신 배열 반환"""
     n_rows, n_cols = quantities.shape
@@ -58,7 +58,7 @@ def _calc_analyze_price_levels(quantities: np.ndarray, multiplier: float, min_oc
 
 
 # noinspection PyUnresolvedReferences
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_detect_large_order_changes(quantities: np.ndarray, prices: np.ndarray, threshold: float):
     """대량 주문 변화 감지 (Numba JIT 최적화) - 배열 반환"""
     n_rows, n_cols = quantities.shape
@@ -120,7 +120,7 @@ def _calc_detect_large_order_changes(quantities: np.ndarray, prices: np.ndarray,
     return result
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_layering_confidence(levels: np.ndarray):
     """레이어링 신뢰도 계산 (Numba JIT) - levels: (N, 5) 배열"""
     n = levels.shape[0]
@@ -149,7 +149,7 @@ def _calc_layering_confidence(levels: np.ndarray):
     return confidence
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_spoofing_confidence(changes: np.ndarray):
     """스푸핑 신뢰도 계산 (Numba JIT) - changes: (N, 6) 배열"""
     n = changes.shape[0]
@@ -174,7 +174,7 @@ def _calc_spoofing_confidence(changes: np.ndarray):
     return confidence
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_detect_iceberg(qtys: np.ndarray, prices: np.ndarray, depletion_threshold: float,
                          price_stable_threshold: float, min_pattern_count: int):
     """아이스버그 주문 탐지 (Numba JIT) - 결과: (N, 6) 배열 (side_idx, level, avg_price, max_count, total_depletion, confidence)"""
@@ -254,7 +254,7 @@ def _calc_detect_iceberg(qtys: np.ndarray, prices: np.ndarray, depletion_thresho
     return results[:result_count]
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_detect_stop_hunt(prices: np.ndarray, volumes: np.ndarray, price_threshold: float, vol_threshold: float):
     """스탑로스 털기 패턴 감지 (Numba JIT) - 결과: (N, 6) 배열 (direction, price, change, vol, confidence, idx)"""
     n = len(prices)
@@ -309,7 +309,7 @@ def _calc_detect_stop_hunt(prices: np.ndarray, volumes: np.ndarray, price_thresh
     return results[:result_count]
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@njit(cache=True, fastmath=True)
 def _calc_detect_pump_dump(prices: np.ndarray, volumes: np.ndarray, price_threshold: float,
                            vol_threshold: float, window: int):
     """펌프 앤 덤프 탐지 (Numba JIT) - 결과: (N, 3) 배열 (price_change, volume_spike, confidence)"""

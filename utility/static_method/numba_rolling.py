@@ -1,9 +1,9 @@
 
 import numpy as np
-from numba import jit, prange
+from numba import njit, prange
 
 
-@jit(nopython=True, parallel=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def numba_rolling_data_tick(input_array, ema_windows, avg_windows, angle_cf1, angle_cf2, round_unit, index_arry):
     """
     틱 데이터용 배열 기반 롤링 데이터 계산
@@ -64,7 +64,7 @@ def numba_rolling_data_tick(input_array, ema_windows, avg_windows, angle_cf1, an
     return result_array
 
 
-@jit(nopython=True, parallel=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def numba_rolling_data_min(input_array, ema_windows, avg_windows, angle_cf1, angle_cf2, round_unit, index_arry):
     """
     분봉 데이터용 배열 기반 롤링 데이터 계산
