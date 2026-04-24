@@ -2,9 +2,10 @@
 import sqlite3
 import numpy as np
 import pandas as pd
+from trade.restapi_ls import LsRestData
+from utility.settings.setting_base import ui_num
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-
-from trade import LsRestData
+from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_price, qtest_qwait
 
 
 class MonitorReceivQ(QThread):
@@ -79,7 +80,6 @@ class BaseReceiver:
         self.tuple_order  = ()
         self.tuple_kosd   = ()
 
-        from utility import now
         self.lvhp_time    = now()
         self.int_logt     = 0
 
@@ -125,12 +125,11 @@ class BaseReceiver:
 
     def _save_code_info_and_noti(self):
         """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
-        from utility import UI_NUM
         if self.dict_info:
             dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
             dict_code = {name: code for code, name in dict_name.items()}
 
-            self.windowQ.put((UI_NUM['종목명데이터'], dict_name, dict_code))
+            self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
             if self.market_gubun > 5:
                 self.stgQ.put(('종목정보', self.dict_info))
 
@@ -142,9 +141,9 @@ class BaseReceiver:
             if self.dict_set['알림소리']:
                 self.soundQ.put(text)
 
-            self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
         else:
-            self.windowQ.put((UI_NUM['시스템로그'], f"오류 알림 - 종목정보 조회 실패 매매 프로세스를 종료합니다."))
+            self.windowQ.put((ui_num['시스템로그'], f"오류 알림 - 종목정보 조회 실패 매매 프로세스를 종료합니다."))
             self._sys_exit('강제종료')
 
     def _update_vi(self, code):
@@ -152,7 +151,6 @@ class BaseReceiver:
         Args:
             code: 종목 코드
         """
-        from utility import UI_NUM, timedelta_sec
         if code not in self.dict_info:
             return
 
@@ -161,7 +159,7 @@ class BaseReceiver:
         else:
             self.dict_vipr[code] = [False, timedelta_sec(5), 0, 0, 0]
 
-        self.windowQ.put((UI_NUM['기본로그'], f"변동성 완화 장치 발동 - [{code}] {self.dict_info[code]['종목명']}"))
+        self.windowQ.put((ui_num['기본로그'], f"변동성 완화 장치 발동 - [{code}] {self.dict_info[code]['종목명']}"))
 
     def _check_vi(self, code, c, o):
         """장시작 최초틱 및 VI발동 이후 최초틱 수신 시 VI가격을 계산합니다.
@@ -170,7 +168,6 @@ class BaseReceiver:
             c: 현재가
             o: 시작가
         """
-        from utility import now
         vipr = self.dict_vipr.get(code)
         if vipr is None:
             self._insert_vi_price(code, o)
@@ -183,7 +180,6 @@ class BaseReceiver:
             code: 종목 코드
             o: 시가
         """
-        from utility import get_vi_price, timedelta_sec
         uvi, dvi, vi_hgunit = get_vi_price(o)
         self.dict_vipr[code] = [True, timedelta_sec(-3600), uvi, dvi, vi_hgunit]
 
@@ -193,7 +189,6 @@ class BaseReceiver:
             code: 종목 코드
             price: 가격
         """
-        from utility import get_vi_price, timedelta_sec
         uvi, dvi, vi_hgunit = get_vi_price(price)
         self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
 
@@ -581,7 +576,6 @@ class BaseReceiver:
         Returns:
             전송 데이터 튜플
         """
-        from utility import now
         c, _, h, low, _, dm, _, bids, asks = code_data[:9]
         tm   = dm - code_dtdm[1]
         hlp  = round((c / ((h + low) / 2) - 1) * 100, 2)
@@ -608,9 +602,8 @@ class BaseReceiver:
             dt_min: 날짜시간 분
             receivetime: 수신 시간
         """
-        from utility import UI_NUM, now
         gap = (now() - receivetime).total_seconds()
-        self.windowQ.put((UI_NUM['타임로그'], f'리시버 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
+        self.windowQ.put((ui_num['타임로그'], f'리시버 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
         self.int_logt = dt_min
 
     def _update_money_top(self, dt_std):
@@ -644,7 +637,6 @@ class BaseReceiver:
 
     def _scheduler(self):
         """스케줄러를 실행합니다."""
-        from utility import get_inthms, now, timedelta_sec
         if self.dict_daym:
             self._money_top_search()
 
@@ -757,12 +749,10 @@ class BaseReceiver:
         self.traderQ.put(data)
 
         if data != '프로그램종료':
-            from utility import UI_NUM
             exit_text = '리시버 종료' if data == '프로세스종료' else '리시버 STOP'
-            self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} {exit_text}"))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} {exit_text}"))
 
         import sys
-        from utility import qtest_qwait
         qtest_qwait(1)
         self.receivQ.put('큐스레드종료')
         self.updater.wait()
@@ -784,8 +774,7 @@ class BaseReceiver:
             df.to_sql('moneytop', con, if_exists='append', chunksize=2000)
             con.close()
 
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 거래대금순위 저장 완료"))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 거래대금순위 저장 완료"))
 
         if self.market_gubun in (1, 4):
             self.stgQs[0].put(('데이터저장', codes))

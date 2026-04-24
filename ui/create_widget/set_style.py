@@ -4,8 +4,7 @@
 """
 
 from PyQt5.QtGui import QFont, QColor
-
-from utility import load_settings
+from utility.settings.setting_user import load_settings
 
 dict_set = load_settings()
 if dict_set.__class__ != dict:
@@ -22,11 +21,6 @@ qfont13.setPixelSize(13)
 qfont14 = QFont()
 qfont14.setFamily('나눔고딕')
 qfont14.setPixelSize(14)
-
-qfont16 = QFont()
-qfont16.setFamily('나눔고딕')
-qfont16.setPixelSize(16)
-qfont16.setBold(True)
 
 # 테마용 공통 색상
 color_cs_hr = QColor(255, 255, 255)

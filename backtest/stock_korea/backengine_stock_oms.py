@@ -1,8 +1,8 @@
 
-from backtest import BackEngineBaseOms
-from utility import get_hogaunit_stock, get_profit_stock
+from backtest.backengine_base_oms import BackEngineBaseOms
+from utility.static_method.static import get_hogaunit_stock, get_profit_stock
 # noinspection PyUnresolvedReferences
-from utility import timedelta_sec
+from utility.static_method.static import timedelta_sec
 
 
 class BackEngineStockOms(BackEngineBaseOms):

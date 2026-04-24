@@ -1,6 +1,6 @@
 
-from trade import BaseStrategy
-from utility import now_cme, dt_ymdhms, get_profit_future_os_long, get_profit_future_os_short
+from trade.base_strategy import BaseStrategy
+from utility.static_method.static import now_cme, dt_ymdhms, get_profit_future_os_long, get_profit_future_os_short
 
 
 class FutureOsStrategy(BaseStrategy):

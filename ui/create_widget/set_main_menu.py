@@ -1,7 +1,11 @@
 
+from ui.event_click.button_clicked_shortcut import *
 from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox
-
-from ui import *
+from ui.event_keypress.extend_window import extend_window
+from ui.create_widget.set_style import qfont12, style_pgbar
+from ui.etcetera.etc import chart_screenshot, manual_save_and_exit
+from ui.event_click.button_clicked_show_dialog import show_order, show_backscheduler, show_qsize, show_treemap, \
+    show_db, show_kimp, show_chart, show_hoga, show_giup
 
 
 class SetMainMenu:

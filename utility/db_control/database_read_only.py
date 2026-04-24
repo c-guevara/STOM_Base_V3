@@ -1,6 +1,7 @@
 
 import sqlite3
 import pandas as pd
+from utility.settings.setting_base import DB_SETTING, DB_STRATEGY, DB_BACKTEST, DB_TRADELIST
 
 
 class DatabaseReadOnly:
@@ -15,8 +16,6 @@ class DatabaseReadOnly:
         Returns:
             쿼리 실행 결과 데이터프레임
         """
-        from utility import DB_SETTING, DB_STRATEGY, DB_BACKTEST, DB_TRADELIST
-
         df = None
         if gubun == '설정디비':
             con = sqlite3.connect(DB_SETTING)

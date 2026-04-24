@@ -1,6 +1,8 @@
 
-from backtest import get_trade_info, BackEngineBase
-from utility import DICT_ORDER_RATIO, timedelta_sec, dt_ymdhms, dt_ymdhm
+from backtest.back_static import get_trade_info
+from backtest.backengine_base import BackEngineBase
+from utility.settings.setting_base import dict_order_ratio
+from utility.static_method.static import timedelta_sec, dt_ymdhms, dt_ymdhm
 
 
 class BackEngineBaseOms(BackEngineBase):
@@ -497,7 +499,7 @@ class BackEngineBaseOms(BackEngineBase):
             else:
                 betting = self.betting * self.set_weight[9]
 
-        order_ratio = DICT_ORDER_RATIO[self.dict_set['매수분할방법']][self.dict_set['매수분할횟수']]
+        order_ratio = dict_order_ratio[self.dict_set['매수분할방법']][self.dict_set['매수분할횟수']]
         oc_ratio = order_ratio[매수분할횟수]
         self.curr_trade_info['주문수량'] = self._set_buy_count(betting, 현재가, 매수가, oc_ratio)
 
@@ -704,7 +706,7 @@ class BackEngineBaseOms(BackEngineBase):
         if self.dict_set['매도분할횟수'] == 1:
             self.curr_trade_info['주문수량'] = 보유수량
         else:
-            dict_ratio = DICT_ORDER_RATIO[self.dict_set['매도분할방법']][self.dict_set['매도분할횟수']]
+            dict_ratio = dict_order_ratio[self.dict_set['매도분할방법']][self.dict_set['매도분할횟수']]
             oc_ratio = dict_ratio[매도분할횟수]
             보유비율 = sum(비율 for 횟수, 비율 in dict_ratio.items() if 횟수 >= 매도분할횟수)
             매도수량 = self._set_sell_count(보유수량, 보유비율, oc_ratio)

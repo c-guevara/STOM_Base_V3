@@ -1,21 +1,13 @@
 
-import os
-import random
-from PyQt5.QtCore import Qt, QTimer
-from multiprocessing import Process, shared_memory
-from PyQt5.QtWidgets import QMessageBox, QApplication
-
-from utility import qtest_qwait, UI_NUM
-from backtest import Optimize, BackTest, OptimizeConditions, RollingWalkForwardTest, OptimizeGeneticAlgorithm
-from ui import backengine_start, clear_backtestQ, backtest_process_alive, backtest_log, mnbutton_c_clicked_01, \
-    backengine_show, auto_back_schedule, ssbutton_clicked_06, famous_saying
-
-
 def bebutton_clicked_01(ui):
     """백테스트 엔진 시작 버튼 클릭 이벤트를 처리합니다.
     Args:
         ui: UI 클래스 인스턴스
     """
+    from PyQt5.QtWidgets import QMessageBox
+    from utility.static_method.static import qtest_qwait
+    from ui.event_click.button_clicked_backtest_engine import backengine_start
+
     if ui.backengine_starting:
         QMessageBox.critical(ui.dialog_backengine, '오류 알림', '백테엔진 구동 중...\n')
         return
@@ -38,11 +30,16 @@ def backtest_engine_kill(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
+    import os
+    from multiprocessing import shared_memory
+    from utility.settings.setting_base import ui_num
+    from ui.event_click.button_clicked_backtest_engine import clear_backtestQ
+
     if ui.shared_info and 'shm_name' in ui.shared_info[0].keys():
         if ui.dialog_backengine.isVisible():
-            ui.windowQ.put((UI_NUM['백테엔진'], '<font color=#54d2f9>공유메모리 삭제 중 ...</font>'))
+            ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>공유메모리 삭제 중 ...</font>'))
         else:
-            ui.windowQ.put((UI_NUM['시스템로그'], '백테스트엔진 공유메모리 삭제 중 ...'))
+            ui.windowQ.put((ui_num['시스템로그'], '백테스트엔진 공유메모리 삭제 중 ...'))
         for shared_info in ui.shared_info:
             try:
                 shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
@@ -52,24 +49,24 @@ def backtest_engine_kill(ui):
                 pass
         ui.shared_info = []
         if ui.dialog_backengine.isVisible():
-            ui.windowQ.put((UI_NUM['백테엔진'], '<font color=#54d2f9>공유메모리 삭제 완료</font>'))
+            ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>공유메모리 삭제 완료</font>'))
         else:
-            ui.windowQ.put((UI_NUM['시스템로그'], '백테스트엔진 공유메모리 삭제 완료'))
+            ui.windowQ.put((ui_num['시스템로그'], '백테스트엔진 공유메모리 삭제 완료'))
 
     elif ui.shared_info and 'file_name' in ui.shared_info[0].keys():
         if ui.dialog_backengine.isVisible():
-            ui.windowQ.put((UI_NUM['백테엔진'], '<font color=#54d2f9>임시파일 삭제 중 ...</font>'))
+            ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>임시파일 삭제 중 ...</font>'))
         else:
-            ui.windowQ.put((UI_NUM['시스템로그'], '백테스트엔진 임시파일 삭제 중 ...'))
+            ui.windowQ.put((ui_num['시스템로그'], '백테스트엔진 임시파일 삭제 중 ...'))
         for shared_info in ui.shared_info:
             try:
                 os.remove(shared_info['file_name'])
             except Exception:
                 pass
         if ui.dialog_backengine.isVisible():
-            ui.windowQ.put((UI_NUM['백테엔진'], '<font color=#54d2f9>임시파일 삭제 완료</font>'))
+            ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>임시파일 삭제 완료</font>'))
         else:
-            ui.windowQ.put((UI_NUM['시스템로그'], '백테스트엔진 임시파일 삭제 완료'))
+            ui.windowQ.put((ui_num['시스템로그'], '백테스트엔진 임시파일 삭제 완료'))
 
     clear_backtestQ(ui)
     for p in ui.back_sprocs:
@@ -80,7 +77,7 @@ def backtest_engine_kill(ui):
         q.close()
     for q in ui.back_eques:
         q.close()
-    ui.windowQ.put((UI_NUM['시스템로그'], '백테스트엔진 중간집계용 프로세스 종료 완료'))
+    ui.windowQ.put((ui_num['시스템로그'], '백테스트엔진 중간집계용 프로세스 종료 완료'))
 
     ui.back_eprocs = []
     ui.back_sprocs = []
@@ -90,7 +87,7 @@ def backtest_engine_kill(ui):
     ui.backengine_starting = False
     ui.backengine_running  = False
     if ui.dialog_backengine.isVisible():
-        ui.windowQ.put((UI_NUM['백테엔진'], '<font color=#54d2f9>백테스트엔진 프로세스 종료 완료</font>'))
+        ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>백테스트엔진 프로세스 종료 완료</font>'))
 
 
 def sdbutton_clicked_02(ui):
@@ -98,6 +95,19 @@ def sdbutton_clicked_02(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
+    from PyQt5.QtCore import Qt
+    from multiprocessing import Process
+    from backtest.optimiz import Optimize
+    from backtest.backtest import BackTest
+    from PyQt5.QtWidgets import QMessageBox, QApplication
+    from backtest.optimiz_conditions import OptimizeConditions
+    from ui.etcetera.process_alive import backtest_process_alive
+    from ui.event_click.button_clicked_stg_editer import backtest_log
+    from backtest.rolling_walk_forward_test import RollingWalkForwardTest
+    from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
+    from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
+    from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_show
+
     if backtest_process_alive(ui):
         QMessageBox.critical(ui.dialog_scheduler, '오류 알림', '현재 백테스트가 실행중입니다.\n중복 실행할 수 없습니다.\n')
     else:
@@ -492,6 +502,10 @@ def stop_scheduler(ui, gubun=False):
         ui: UI 클래스 인스턴스
         gubun: 구분
     """
+    import os
+    from PyQt5.QtCore import QTimer
+    from ui.etcetera.etc import auto_back_schedule
+
     ui.back_scount = 0
     ui.back_schedul = False
     if ui.auto_mode:
@@ -506,6 +520,8 @@ def sdbutton_clicked_03(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
+    from ui.event_click.button_clicked_stg_editer_backlog import ssbutton_clicked_06
+
     ssbutton_clicked_06(ui)
     for progressBar in ui.list_progressBarrr:
         progressBar.setValue(0)
@@ -534,6 +550,10 @@ def sdbutton_clicked_05(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
+    import random
+    from PyQt5.QtWidgets import QMessageBox
+    from ui.create_widget.set_text import famous_saying
+
     schedule_name = ui.sd_dlineEditttt_01.text()
     if schedule_name == '':
         QMessageBox.critical(ui.dialog_scheduler, '오류 알림', '스케쥴 이름이 공백 상태입니다.\n')

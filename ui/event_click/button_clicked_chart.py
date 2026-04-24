@@ -94,9 +94,9 @@ def indicator_setting_basic(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
-    from utility.settings.setting_base import DICT_INDICATOR_BASE
+    from utility.settings.setting_base import indi_base
 
-    k = list(DICT_INDICATOR_BASE.values())
+    k = list(indi_base.values())
     for i, linedit in enumerate(ui.factor_linedit_list):
         linedit.setText(str(k[i]))
 
@@ -140,7 +140,7 @@ def get_indicator_detail(ui):
     Returns:
         보조지표 설정 리스트
     """
-    from utility.settings.setting_base import DICT_INDICATOR
+    from utility.settings.setting_base import indicator
 
     k_list = None
     if not ui.dict_set['타임프레임']:
@@ -168,7 +168,7 @@ def get_indicator_detail(ui):
                         if 'self.indicator' in line and line[0] != '#':
                             indistg += f"{line.replace('self.indicator', 'indicator_')}\n"
                 if indistg:
-                    indicator_ = DICT_INDICATOR
+                    indicator_ = indicator
                     if vars_ is not None:
                         indistg = indistg.replace('self.vars', 'vars_')
                     exec(compile(indistg, '<string>', 'exec'))

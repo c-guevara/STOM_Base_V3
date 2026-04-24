@@ -1,9 +1,19 @@
 
+from PyQt5.QtCore import Qt
+from ui.event_activate import activated_etc
+from ui.event_click.button_clicked_etc import *
+from ui.event_click.button_clicked_order import *
+from ui.event_click.button_clicked_database import *
+from ui.event_click.button_clicked_passticks import *
+from ui.event_change.changed_text import text_changed_05
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
-
-from ui import *
-from utility import *
-from strategy import *
+from ui.event_keypress.overwrite_return_press import return_press_02
+from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
+from strategy.analyzer_pattern import pattern_setting_load, pattern_setting_save, pattern_train
+from ui.event_click.table_cell_clicked import cell_clicked_09, cell_clicked_07, cell_clicked_08
+from strategy.analyzer_volume_profile import volume_setting_load, volume_setting_save, volume_profile_train
+from utility.settings.setting_base import columns_hj, columns_hc, columns_hg, columns_gc, columns_ns, columns_jm1, \
+    columns_jm2, columns_stg1, columns_stg2, columns_kp, columns_hc2
 
 
 class SetDialogEtc:
@@ -21,10 +31,10 @@ class SetDialogEtc:
         self.ui.dialog_hoga.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_hoga)
 
-        self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HJ, 1)
-        self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HC, 12)
-        self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HC2, 12, visible=False)
-        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HG, 12, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hj, 1)
+        self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc, 12)
+        self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc2, 12, visible=False)
+        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.hg_lineeeeeeeee_01 = self.wc.setLine(self.ui.dialog_hoga, 1)
         self.ui.hg_labellllllll_01 = QLabel('', self.ui.dialog_hoga)
         self.ui.hg_pushButtonnn_01 = self.wc.setPushbutton('이전(Alt+left)', parent=self.ui.dialog_hoga, click=lambda: hg_button_clicked_01(self.ui, '이전'), shortcut='Alt+left')
@@ -37,10 +47,10 @@ class SetDialogEtc:
         self.ui.dialog_list.append(self.ui.dialog_info)
 
         self.ui.gg_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_info, font=qfont14)
-        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_GGS, 20, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
-        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_GNS, 10, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
-        self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_JM1, 13)
-        self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_JM2, 13)
+        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
+        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
+        self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm1, 13)
+        self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm2, 13)
 
         self.ui.dialog_web = self.wc.setDialog('STOM WEB')
         self.ui.dialog_web.geometry().center()
@@ -99,8 +109,8 @@ class SetDialogEtc:
         self.ui.db_labellllllll_09 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_pushButtonnn_09 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_10(self.ui))
 
-        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.dbs_tab1, COLUMNS_SG1, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
-        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.dbs_tab2, COLUMNS_SG2, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.dbs_tab1, columns_stg1, 8,    clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.dbs_tab2, columns_stg2, 8,    clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.db_tableWidgett_03 = self.wc.setTablewidget(self.ui.dbs_tab3, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.db_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_db, vscroll=True)
 
@@ -110,7 +120,7 @@ class SetDialogEtc:
 
         self.ui.od_groupBoxxxxx_01 = QGroupBox('', self.ui.dialog_order)
         self.ui.od_labellllllll_01 = QLabel('주문종목명', self.ui.od_groupBoxxxxx_01)
-        self.ui.od_comboBoxxxxx_01 = self.wc.setCombobox(self.ui.od_groupBoxxxxx_01, hover=False, activated=lambda: dactivated_03(self.ui))
+        self.ui.od_comboBoxxxxx_01 = self.wc.setCombobox(self.ui.od_groupBoxxxxx_01, hover=False, activated=lambda: activated_etc.dactivated_03(self.ui))
         self.ui.od_labellllllll_02 = QLabel('주문유형', self.ui.od_groupBoxxxxx_01)
         self.ui.od_comboBoxxxxx_02 = self.wc.setCombobox(self.ui.od_groupBoxxxxx_01, hover=False, items=['시장가', '지정가', '최유리지정가', '최우선지정가', '지정가IOC', '시장가IOC', '최유리IOC', '지정가FOK', '시장가FOK', '최유리FOK'])
         self.ui.od_labellllllll_03 = QLabel('주문가격', self.ui.od_groupBoxxxxx_01)
@@ -211,7 +221,7 @@ class SetDialogEtc:
         self.ui.dialog_kimp.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_kimp)
 
-        self.ui.kp_tableWidget_01 = self.wc.setTablewidget(self.ui.dialog_kimp, COLUMNS_KIMP, 50, vscroll=True)
+        self.ui.kp_tableWidget_01 = self.wc.setTablewidget(self.ui.dialog_kimp, columns_kp, 50, vscroll=True)
 
         self.ui.dialog_std = self.wc.setDialog('OPTIMIZ STD LIMIT', parent=self.ui)
         self.ui.dialog_std.geometry().center()

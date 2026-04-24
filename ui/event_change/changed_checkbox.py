@@ -1,16 +1,13 @@
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox
-
-from ui import trader_process_alive
-
-
 def checkbox_changed_01(ui, state):
     """모의투자 체크박스 변경 이벤트를 처리합니다.
     Args:
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QMessageBox
+    from ui.etcetera.process_alive import trader_process_alive
     if ui.focusWidget() == ui.sj_main_cheBox_01 and state != Qt.Checked and trader_process_alive(ui):
         ui.sj_main_cheBox_01.nextCheckState()
         QMessageBox.critical(ui, '오류 알림', '트레이더 실행 중에는 모의모드를 해제할 수 없습니다.\n')
@@ -22,6 +19,8 @@ def checkbox_changed_02(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QMessageBox
     if ui.dialog_factor.focusWidget() == ui.ft_checkBoxxxxx_01 and state != Qt.Checked:
         ui.ft_checkBoxxxxx_01.nextCheckState()
         QMessageBox.critical(ui.dialog_factor, '오류 알림', '현재가는 해제할 수 없습니다.\n')
@@ -33,6 +32,7 @@ def checkbox_changed_03(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() in ui.sj_ilbunback_listtt and state == Qt.Checked:
         for widget in ui.sj_ilbunback_listtt:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -45,6 +45,7 @@ def checkbox_changed_04(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() == ui.sj_back_cheBox_15 and state == Qt.Checked:
         if not ui.sj_back_cheBox_16.isChecked():
             ui.sj_back_cheBox_16.nextCheckState()
@@ -56,6 +57,7 @@ def checkbox_changed_05(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() == ui.sj_back_cheBox_16 and state != Qt.Checked:
         if ui.sj_back_cheBox_15.isChecked():
             ui.sj_back_cheBox_15.nextCheckState()
@@ -67,6 +69,7 @@ def checkbox_changed_06(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     gubun = ui.list_checkBoxxxxxx.index(ui.dialog_scheduler.focusWidget())
     if state == Qt.Checked:
         for item in ('백테스트',
@@ -97,6 +100,7 @@ def checkbox_changed_07(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() == ui.sj_back_cheBox_18:
         if state == Qt.Checked:
             if ui.sj_back_cheBox_19.isChecked():
@@ -112,6 +116,7 @@ def checkbox_changed_08(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() == ui.sj_back_cheBox_19:
         if state == Qt.Checked:
             if ui.sj_back_cheBox_18.isChecked():
@@ -138,6 +143,8 @@ def sbcheckbox_changed_01(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QMessageBox
     if ui.focusWidget() in ui.sodb_checkbox_list1 and state == Qt.Checked:
         if ui.market_gubun in (1, 2, 3, 6, 7):
             for widget in ui.sodb_checkbox_list1:
@@ -175,6 +182,7 @@ def sbcheckbox_changed_02(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() in ui.sodb_checkbox_list2 and state == Qt.Checked:
         for widget in ui.sodb_checkbox_list2:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -188,6 +196,8 @@ def sscheckbox_changed_01(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QMessageBox
     if ui.focusWidget() in ui.sods_checkbox_list1 and state == Qt.Checked:
         if ui.market_gubun in (1, 2, 3, 6, 7):
             for widget in ui.sods_checkbox_list1:
@@ -226,6 +236,7 @@ def sscheckbox_changed_02(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() in ui.sods_checkbox_list2 and state == Qt.Checked:
         for widget in ui.sods_checkbox_list2:
             if widget != ui.focusWidget() and widget.isChecked():
@@ -238,6 +249,7 @@ def setting_stock_weight_cotrol_changed(ui, state):
         ui: UI 객체
         state: 체크 상태
     """
+    from PyQt5.QtCore import Qt
     if ui.focusWidget() in ui.ss_bj_check_button_list and state == Qt.Checked:
         for widget in ui.ss_bj_check_button_list:
             if widget != ui.focusWidget() and widget.isChecked():

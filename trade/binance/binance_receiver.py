@@ -3,9 +3,9 @@ import re
 import sys
 import binance
 from PyQt5.QtWidgets import QApplication
-
-from trade import BaseReceiver, BinanceWebSocketReceiver
-from utility import now, now_utc, str_ymd, str_ymdhms_utc, error_decorator
+from trade.base_receiver import BaseReceiver
+from trade.restapi_binance import BinanceWebSocketReceiver
+from utility.static_method.static import now, now_utc, str_ymd, str_ymdhms_utc, error_decorator
 
 
 class BinanceReceiver(BaseReceiver):

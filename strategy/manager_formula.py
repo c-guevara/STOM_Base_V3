@@ -1,8 +1,7 @@
 
 import sqlite3
-
-from utility import dt_ymdhms
-from strategy import StgGlobalsFunc
+from strategy.stg_globals_func import StgGlobalsFunc
+from utility.static_method.static import dt_ymdhms
 
 dict_fm_count = {
     '선:일반': 1,

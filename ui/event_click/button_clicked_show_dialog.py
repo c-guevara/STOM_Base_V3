@@ -290,7 +290,7 @@ def show_hoga(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
-    from utility.settings.setting_base import COLUMNS_HC
+    from utility.settings.setting_base import columns_hc
     from ui.create_widget.dialog_animation import DialogAnimator
 
     if not ui.dialog_hoga.isVisible():
@@ -305,7 +305,7 @@ def show_hoga(ui):
         ui.hj_tableWidgett_01.setColumnWidth(5, 140)
         ui.hj_tableWidgett_01.setColumnWidth(6, 140)
         ui.hj_tableWidgett_01.setColumnWidth(7, 140)
-        ui.hc_tableWidgett_01.setHorizontalHeaderLabels(COLUMNS_HC)
+        ui.hc_tableWidgett_01.setHorizontalHeaderLabels(columns_hc)
         ui.hc_tableWidgett_02.setVisible(False)
         ui.hg_tableWidgett_01.setGeometry(285, 52, 282, 297)
         ui.dialog_hoga.show()

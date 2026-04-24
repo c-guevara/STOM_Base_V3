@@ -1,8 +1,7 @@
 
 import numpy as np
 from talib import stream
-
-from utility import dt_ymdhms, dt_ymdhm
+from utility.static_method.static import dt_ymdhms, dt_ymdhm
 
 
 class StgGlobalsFunc:

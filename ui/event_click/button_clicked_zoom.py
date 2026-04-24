@@ -1,5 +1,5 @@
 
-def group_animation_zoom(ui, pushButton, textEdit, pushButton_qrect, textEdit_qrect):
+def group_animation(ui, pushButton, textEdit, pushButton_qrect, textEdit_qrect):
     """그룹 애니메이션을 실행합니다.
     Args:
         ui: UI 클래스 인스턴스
@@ -44,7 +44,7 @@ def sz_button_clicked_01(ui):
         if ui.szoo_pushButon_01.text() == '확대(esc)':
             visible = False
             ui.szoo_pushButon_01.setText('축소(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_01,
                 ui.ss_textEditttt_01,
@@ -54,7 +54,7 @@ def sz_button_clicked_01(ui):
         else:
             visible = True
             ui.szoo_pushButon_01.setText('확대(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_01,
                 ui.ss_textEditttt_01,
@@ -67,7 +67,7 @@ def sz_button_clicked_01(ui):
         if ui.szoo_pushButon_01.text() == '확대(esc)':
             visible = False
             ui.szoo_pushButon_01.setText('축소(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_01,
                 ui.ss_textEditttt_03,
@@ -77,7 +77,7 @@ def sz_button_clicked_01(ui):
         else:
             visible = True
             ui.szoo_pushButon_01.setText('확대(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_01,
                 ui.ss_textEditttt_03,
@@ -103,7 +103,7 @@ def sz_button_clicked_02(ui):
         if ui.szoo_pushButon_02.text() == '확대(esc)':
             visible = False
             ui.szoo_pushButon_02.setText('축소(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_02,
                 ui.ss_textEditttt_02,
@@ -113,7 +113,7 @@ def sz_button_clicked_02(ui):
         else:
             visible = True
             ui.szoo_pushButon_02.setText('확대(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_02,
                 ui.ss_textEditttt_02,
@@ -126,7 +126,7 @@ def sz_button_clicked_02(ui):
         if ui.szoo_pushButon_02.text() == '확대(esc)':
             visible = False
             ui.szoo_pushButon_02.setText('축소(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_02,
                 ui.ss_textEditttt_04,
@@ -136,7 +136,7 @@ def sz_button_clicked_02(ui):
         else:
             visible = True
             ui.szoo_pushButon_02.setText('확대(esc)')
-            group_animation_zoom(
+            group_animation(
                 ui,
                 ui.szoo_pushButon_02,
                 ui.ss_textEditttt_04,

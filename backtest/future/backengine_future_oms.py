@@ -1,6 +1,6 @@
 
-from backtest import BackEngineBaseOms
-from utility import get_profit_future_long, get_profit_future_short
+from backtest.backengine_base_oms import BackEngineBaseOms
+from utility.static_method.static import get_profit_future_long, get_profit_future_short
 
 
 class BackEngineFutureOms(BackEngineBaseOms):

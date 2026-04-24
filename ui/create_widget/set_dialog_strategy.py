@@ -1,7 +1,8 @@
 
 from PyQt5.QtWidgets import QLabel, QGridLayout
-
-from ui import *
+from ui.event_click.button_clicked_stg_module import *
+from ui.create_widget.set_style import qfont14, style_bc_dk
+from ui.create_widget.set_text_stg_button import dict_stg_name
 
 
 class SetDialogStrategy:

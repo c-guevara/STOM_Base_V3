@@ -1,6 +1,8 @@
 
-from ui import *
-from utility import dt_ymdhms, error_decorator
+from ui.etcetera.etc import chart_clear
+from ui.draw_chart.draw_chart_base import DrawChartBase
+from utility.static_method.static import dt_ymdhms, error_decorator
+from ui.etcetera.process_alive import strategy_process_alive, receiver_process_alive
 
 
 class DrawRealChart(DrawChartBase):

@@ -7,12 +7,12 @@ import numpy as np
 from typing import Dict, List
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
+from utility.settings.setting_base import ui_num
+from ui.create_widget.set_text import famous_saying
+from utility.static_method.static import now, thread_decorator
 
-from ui import famous_saying
-from utility import UI_NUM, DB_PATH, now, thread_decorator
 
-
-PATTERN_DB = f'{DB_PATH}/pattern_analysis.db'
+PATTERN_DB = './_database/pattern_analysis.db'
 PATTERN_FUNCTIONS = [
     'CDL2CROWS', 'CDL3BLACKCROWS', 'CDL3INSIDE', 'CDL3LINESTRIKE', 'CDL3OUTSIDE',
     'CDL3STARSINSOUTH', 'CDL3WHITESOLDIERS', 'CDLABANDONEDBABY', 'CDLADVANCEBLOCK', 'CDLBELTHOLD',
@@ -28,13 +28,13 @@ PATTERN_FUNCTIONS = [
     'CDLTASUKIGAP', 'CDLTHRUSTING', 'CDLTRISTAR', 'CDLUNIQUE3RIVER', 'CDLUPSIDEGAP2CROWS',
     'CDLXSIDEGAP3METHODS'
 ]
-pattern_window_queue = None
+window_queue = None
 
 
-def _init_worker(q):
+def init_worker(q):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
-    global pattern_window_queue
-    pattern_window_queue = q
+    global window_queue
+    window_queue = q
 
 
 class AnalyzerPattern:
@@ -66,7 +66,7 @@ class AnalyzerPattern:
         code_chunks = self._split_codes(code_list, num_processes)
 
         actual_processes = min(num_processes, len(code_chunks))
-        with Pool(processes=actual_processes, initializer=_init_worker, initargs=(windowQ,)) as pool:
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [(i, chunk, self.backtest_db_path, self.market_info, self.minute, self.pct)
                     for i, chunk in enumerate(code_chunks)]
             results = pool.starmap(self._train_code_chunk, args)
@@ -76,11 +76,11 @@ class AnalyzerPattern:
             for code, pattern_scores in chunk_results.items():
                 self.pattern_database.save_pattern_scores(code, pattern_scores)
                 total_processed += 1
-            windowQ.put((UI_NUM['패턴학습'], f"학습 데이터 저장 중 ... [{i + 1}/{actual_processes}]"))
+            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
 
-        windowQ.put((UI_NUM['패턴학습'], "학습 데이터 저장 완료"))
-        windowQ.put((UI_NUM['패턴학습'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
-        windowQ.put((UI_NUM['패턴학습'], f"전체 종목 패턴 학습 완료 [{total_processed}]"))
+        windowQ.put((ui_num['패턴학습'], "학습 데이터 저장 완료"))
+        windowQ.put((ui_num['패턴학습'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
+        windowQ.put((ui_num['패턴학습'], f"전체 종목 패턴 학습 완료 [{total_processed}]"))
 
     def get_code_list(self) -> List[str]:
         """
@@ -124,7 +124,7 @@ class AnalyzerPattern:
         pct: 퍼센트 설정
         return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
         """
-        global pattern_window_queue
+        global window_queue
         pattern_learning = PatternLearning(market_info, minute, pct)
         all_pattern_scores = {}
         last = len(code_chunk)
@@ -139,10 +139,10 @@ class AnalyzerPattern:
                 if pattern_scores:
                     all_pattern_scores[code] = pattern_scores
                 # noinspection PyUnresolvedReferences
-                pattern_window_queue.put((UI_NUM['패턴학습'], f"[{i}][{code}] 패턴 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((ui_num['패턴학습'], f"[{i}][{code}] 패턴 학습 중 ... [{k+1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                pattern_window_queue.put((UI_NUM['패턴학습'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
+                window_queue.put((ui_num['패턴학습'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
 
         return all_pattern_scores
 

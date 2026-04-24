@@ -1,8 +1,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-from utility import GRAPH_PATH
+from utility.settings.setting_base import GRAPH_PATH
 
 
 class Visualization3D:

@@ -13,7 +13,7 @@ def set_builtin_print(q):
     import re
     import inspect
     import builtins
-    from utility.settings.setting_base import UI_NUM
+    from utility.settings.setting_base import ui_num
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     def ui_print(*args, sep=' ', end='\n', file=None):
@@ -45,7 +45,7 @@ def set_builtin_print(q):
             message = message.lstrip()
             message = message.rstrip()
             message = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', message)
-            q.put((UI_NUM['시스템로그'], message))
+            q.put((ui_num['시스템로그'], message))
         except Exception:
             pass
 
@@ -130,7 +130,7 @@ def error_decorator(func):
         래퍼 함수
     """
     from traceback import format_exc
-    from utility.settings.setting_base import UI_NUM
+    from utility.settings.setting_base import ui_num
 
     def wrapper(*args, **kwargs):
         try:
@@ -138,11 +138,11 @@ def error_decorator(func):
         except Exception:
             if args:
                 if hasattr(args[0], 'windowQ'):
-                    args[0].windowQ.put((UI_NUM['시스템로그'], format_exc()))
+                    args[0].windowQ.put((ui_num['시스템로그'], format_exc()))
                 elif hasattr(args[0], 'ui'):
-                    args[0].ui.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+                    args[0].ui.windowQ.put((ui_num['시스템로그'], format_exc()))
                 elif hasattr(args[0], 'wq'):
-                    args[0].wq.put((UI_NUM['시스템로그'], format_exc()))
+                    args[0].wq.put((ui_num['시스템로그'], format_exc()))
             return None
     return wrapper
 

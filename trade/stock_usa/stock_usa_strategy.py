@@ -1,6 +1,6 @@
 
-from trade import BaseStrategy
-from utility import get_profit_stock_os, now_cme, dt_ymdhms
+from trade.base_strategy import BaseStrategy
+from utility.static_method.static import get_profit_stock_os, now_cme, dt_ymdhms
 
 
 class StockUsaStrategy(BaseStrategy):

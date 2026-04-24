@@ -1,6 +1,6 @@
 
-from backtest import BackEngineBase
-from utility import get_profit_stock_os
+from backtest.backengine_base import BackEngineBase
+from utility.static_method.static import get_profit_stock_os
 
 
 class BackEngineStockUsa(BackEngineBase):

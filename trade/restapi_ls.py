@@ -6,9 +6,10 @@ import sqlite3
 import requests
 import websockets
 from traceback import format_exc
+from trade.restapi_lsdata import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
-
-from trade import LsRestData
+from utility.settings.setting_base import ui_num
+from utility.static_method.static import now, qtest_qwait
 
 
 class LsRestAPI:
@@ -73,8 +74,7 @@ class LsRestAPI:
             self.token = data['access_token']
             return self.token
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return None
 
     def get_code_info_stock(self, etfgubun=0):
@@ -119,10 +119,8 @@ class LsRestAPI:
                     exclusion_list.append(code)
 
                 if i % 100 == 0 or i == last - 1:
-                    from utility import UI_NUM
-                    self.windowQ.put((UI_NUM['기본로그'], f'국내주식 상장주식수 조회 중 ... [{i + 1}/{last}]'))
+                    self.windowQ.put((ui_num['기본로그'], f'국내주식 상장주식수 조회 중 ... [{i+1}/{last}]'))
 
-                from utility import qtest_qwait
                 qtest_qwait(0.05)
 
             if insert:
@@ -135,8 +133,7 @@ class LsRestAPI:
             return dict_data, list(dict_data.keys())
 
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return {}, []
 
     def get_code_info_stock_usa(self):
@@ -168,8 +165,7 @@ class LsRestAPI:
                 }
             return dict_data, keysymbols
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return {}, []
 
     def get_code_info_future(self):
@@ -231,8 +227,7 @@ class LsRestAPI:
 
             return dict_data, list(dict_data.keys()), dict_expcode
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return {}, [], []
 
     def get_code_info_future_night(self):
@@ -256,7 +251,6 @@ class LsRestAPI:
             dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
             dict_expcode[미니코스피200_종목코드] = data['expcode']
 
-            from utility import qtest_qwait
             qtest_qwait(1)
 
             data = self._post(tr_name, 구분='NQF')
@@ -294,8 +288,7 @@ class LsRestAPI:
 
             return dict_data, list(dict_data.keys()), dict_expcode
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return {}, [], []
 
     def get_code_info_future_oversea(self):
@@ -316,8 +309,7 @@ class LsRestAPI:
                 }
             return dict_data, list(dict_data.keys())
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return {}, []
 
     def get_balance_stock(self):
@@ -328,8 +320,7 @@ class LsRestAPI:
             data = self._post(tr_name, 레코드갯수=1, 잔고생성구분='1')
             return int(data[out_block]['D2Dps'])
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return 0
 
     def get_balance_stock_usa(self):
@@ -340,8 +331,7 @@ class LsRestAPI:
             data = self._post(tr_name, 레코드갯수=1, 통화코드='USD')
             return int(data[out_block]['FcurrDps'])
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return 0
 
     def get_balance_future(self):
@@ -352,8 +342,7 @@ class LsRestAPI:
             data = self._post(tr_name, 레코드갯수=1)
             return int(data[out_block]['Dps'])
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return 0
 
     def get_balance_future_oversea(self):
@@ -364,8 +353,7 @@ class LsRestAPI:
             data = self._post(tr_name, 계좌구분코드='1', 거래일자=LsRestData.당일일자)
             return int(data[out_block]['FcurrOrdAbleAmt'])
         except Exception:
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['시스템로그'], format_exc()))
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
             return 0
 
     def order_stock(self, 종목코드, 주문구분, 주문수량, 주문가격, 호가유형):
@@ -577,8 +565,7 @@ class LsWebSocketReceiver(QThread):
                     asyncio.create_task(self._real_reg())
                 await self._receive_message()
             except Exception:
-                from utility import UI_NUM
-                self.windowQ.put((UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketReceiver'))
+                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketReceiver'))
 
             await self._disconnect()
 
@@ -600,16 +587,14 @@ class LsWebSocketReceiver(QThread):
         data = self._get_send_data('장운영정보', '0')
         await self.websocket.send(json.dumps(data))
         await asyncio.sleep(0.02)
-        from utility import UI_NUM
-        self.windowQ.put((UI_NUM['기본로그'], '장운영정보 실시간시세 등록'))
+        self.windowQ.put((ui_num['기본로그'], '장운영정보 실시간시세 등록'))
 
         if self.gubun == '국내주식':
             gubun = f'{self.gubun}VI'
             data = self._get_send_data(gubun, '0000000000')
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
-            from utility import UI_NUM
-            self.windowQ.put((UI_NUM['기본로그'], f'{gubun}발동해제 실시간시세 등록'))
+            self.windowQ.put((ui_num['기본로그'], f'{gubun}발동해제 실시간시세 등록'))
 
         last = len(self.symbols)
         gubun = f'{self.gubun}체결'
@@ -619,8 +604,7 @@ class LsWebSocketReceiver(QThread):
             await asyncio.sleep(0.02)
 
             if i % 100 == 0 or i == last - 1:
-                from utility import UI_NUM
-                self.windowQ.put((UI_NUM['기본로그'], f'{gubun} 실시간시세 등록 [{i + 1}/{last}]'))
+                self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]'))
 
         gubun = f'{self.gubun}호가'
         for i, code in enumerate(self.symbols):
@@ -629,8 +613,7 @@ class LsWebSocketReceiver(QThread):
             await asyncio.sleep(0.02)
 
             if i % 100 == 0 or i == last - 1:
-                from utility import UI_NUM
-                self.windowQ.put((UI_NUM['기본로그'], f'{gubun} 실시간시세 등록 [{i + 1}/{last}]'))
+                self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]'))
 
     def _get_send_data(self, gubun: str, code: str):
         if gubun in ('국내주식체결', '국내주식호가'):
@@ -688,8 +671,7 @@ class LsWebSocketTrader(QThread):
                     await self._connect()
                 await self._receive_message()
             except Exception:
-                from utility import UI_NUM
-                self.windowQ.put((UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketTrader'))
+                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketTrader'))
 
             await self._disconnect()
 
@@ -700,8 +682,7 @@ class LsWebSocketTrader(QThread):
             if self.market in k:
                 data = self._get_send_data(v)
                 await self.websocket.send(json.dumps(data))
-                from utility import UI_NUM
-                self.windowQ.put((UI_NUM['기본로그'], f'{k} 실시간시세 계좌등록'))
+                self.windowQ.put((ui_num['기본로그'], f'{k} 실시간시세 계좌등록'))
 
     async def _receive_message(self):
         while self.connected:
@@ -792,7 +773,6 @@ if __name__ == "__main__":
         print()
 
     def real_data_print(data):
-        from utility import now
         print(f'[{now()}] {data}')
 
     writer = MonitorWindowQ(windowQ_)
