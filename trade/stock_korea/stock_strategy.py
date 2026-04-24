@@ -1,6 +1,6 @@
 
-from trade.base_strategy import BaseStrategy
-from utility.static_method.static import get_profit_stock, now, dt_ymdhms, get_hogaunit_stock
+from trade import BaseStrategy
+from utility import get_profit_stock, now, dt_ymdhms, get_hogaunit_stock
 
 
 class StockStrategy(BaseStrategy):

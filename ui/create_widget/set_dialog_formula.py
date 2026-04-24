@@ -1,8 +1,7 @@
 
-from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QLabel, QGroupBox, QFrame
-from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14
-from ui.event_click.button_clicked_formula import formula_button_clicked, formula_activated
+
+from ui import *
 
 
 class SetDialogFormula:

@@ -2,7 +2,8 @@
 import pyqtgraph as pg
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPicture, QPainter
-from ui.create_widget.set_style import color_bg_ct, color_pluss, color_minus
+
+from ui import color_bg_ct, color_pluss, color_minus
 
 
 class AreaItem(pg.GraphicsObject):

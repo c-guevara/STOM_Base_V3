@@ -4,16 +4,12 @@ import numpy as np
 import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
-from strategy.analyzer_risk import AnalyzerRisk
-from strategy.stg_globals_func import StgGlobalsFunc
-from strategy.manager_formula import get_formula_data
-from strategy.analyzer_pattern import AnalyzerPattern
-from strategy.analyzer_microstruc import AnalyzerMicrostructure
-from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
-from utility.settings.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY, DB_SETTING
-from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
-    set_builtin_print, get_profile_text
-from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
+
+from strategy import AnalyzerRisk, StgGlobalsFunc, AnalyzerPattern, AnalyzerMicrostructure, AnalyzerVolumeProfile, \
+    get_formula_data
+from utility import DICT_INDICATOR, UI_NUM, BACK_TEMP, DB_STRATEGY, DB_SETTING,  pickle_read, pickle_write, dt_ymdhms, \
+    dt_ymdhm, get_ema_list, add_rolling_data, set_builtin_print, get_profile_text
+from backtest import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
     get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
 
 
@@ -35,7 +31,7 @@ class BackEngineBase(StgGlobalsFunc):
         self.bstq_list       = bstq_list
         self.profile         = profile
         self.dict_set        = dict_set
-        self.indicator       = indicator
+        self.indicator       = DICT_INDICATOR
         self.backtest        = True
         self.update_formula  = False
 
@@ -321,7 +317,7 @@ class BackEngineBase(StgGlobalsFunc):
                                 self.buystg = compile(data[6], '<string>', 'exec')
                             except Exception:
                                 if self.gubun == 0:
-                                    self.wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
+                                    self.wq.put((UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
                                 self._back_stop()
                             else:
                                 self.opti_kind = data[7]
@@ -347,7 +343,7 @@ class BackEngineBase(StgGlobalsFunc):
                     self._back_stop(2)
             except Exception:
                 if self.gubun == 0:
-                    self.wq.put((ui_num['시스템로그'], format_exc()))
+                    self.wq.put((UI_NUM['시스템로그'], format_exc()))
 
     def _data_load(self, data):
         """백테스트 데이터를 로드합니다.
@@ -467,8 +463,8 @@ class BackEngineBase(StgGlobalsFunc):
         """
         not_in_list = [x for x in avg_list if x not in self.avg_list]
         if len(not_in_list) > 0 and self.gubun == 0:
-            self.wq.put((ui_num['백테스트'], '백테엔진 구동 시 포함되지 않은 평균값 틱수를 사용하여 중지되었습니다.'))
-            self.wq.put((ui_num['백테스트'], '누락된 평균값 틱수를 추가하여 백테엔진을 재시작하십시오.'))
+            self.wq.put((UI_NUM['백테스트'], '백테엔진 구동 시 포함되지 않은 평균값 틱수를 사용하여 중지되었습니다.'))
+            self.wq.put((UI_NUM['백테스트'], '누락된 평균값 틱수를 추가하여 백테엔진을 재시작하십시오.'))
             self._back_stop()
 
     def _check_day_and_time(self):
@@ -492,11 +488,11 @@ class BackEngineBase(StgGlobalsFunc):
         """
         self.back_type = None
         if gubun in (0, 1):
-            if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 중지 중 ...'))
+            if self.gubun == 0: self.wq.put((UI_NUM['백테스트'], '백테스트 엔진 중지 중 ...'))
         if gubun in (1, 2):
             self.bq.put('백테중지완료')
         if gubun == 3:
-            if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 전략연산 오류, 자동 중지 중 ...'))
+            if self.gubun == 0: self.wq.put((UI_NUM['백테스트'], '백테스트 엔진 전략연산 오류, 자동 중지 중 ...'))
 
     def _init_trade_info(self):
         """거래 정보를 초기화합니다.
@@ -643,7 +639,7 @@ class BackEngineBase(StgGlobalsFunc):
                         try:
                             self._strategy()
                         except Exception:
-                            if self.gubun == 0: self.wq.put((ui_num['시스템로그'], format_exc()))
+                            if self.gubun == 0: self.wq.put((UI_NUM['시스템로그'], format_exc()))
                             self._back_stop(3)
                             return
 
@@ -668,7 +664,7 @@ class BackEngineBase(StgGlobalsFunc):
             return
 
         if self.gubun == 0 and self.profile:
-            self.wq.put((ui_num['시스템로그'], get_profile_text(self.pr)))
+            self.wq.put((UI_NUM['시스템로그'], get_profile_text(self.pr)))
 
     # noinspection PyUnusedLocal
     def _strategy(self):

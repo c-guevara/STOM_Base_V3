@@ -2,7 +2,8 @@
 import asyncio
 from traceback import format_exc
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.settings.setting_base import ui_num
+
+from utility import UI_NUM
 from binance import AsyncClient, BinanceSocketManager
 
 
@@ -47,7 +48,7 @@ class BinanceWebSocketReceiver(QThread):
                 await self.receive_trader()
             except Exception:
                 self.windowQ.put(
-                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 체결 수신 중 오류가 발생하여 재연결합니다.')
+                    (UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 체결 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
             self.con_trade = False
@@ -62,7 +63,7 @@ class BinanceWebSocketReceiver(QThread):
                 await self.receive_order()
             except Exception:
                 self.windowQ.put(
-                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 호가 수신 중 오류가 발생하여 재연결합니다.')
+                    (UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 호가 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
             self.con_depth = False
@@ -151,7 +152,7 @@ class BinanceWebSocketTrader(QThread):
                 await self.receive_msgs()
             except Exception:
                 self.windowQ.put(
-                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 체잔 수신 중 오류가 발생하여 재연결합니다.')
+                    (UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 웹소켓 체잔 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
             self.connected = False

@@ -1,6 +1,6 @@
 
-from backtest.backengine_base_oms import BackEngineBaseOms
-from utility.static_method.static import get_profit_stock_os
+from backtest import BackEngineBaseOms
+from utility import get_profit_stock_os
 
 
 class BackEngineStockUsaOms(BackEngineBaseOms):

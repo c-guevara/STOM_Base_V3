@@ -1,12 +1,12 @@
 
 import pyqtgraph as pg
 from PyQt5.QtGui import QPen
-from utility.static_method import syntax
-from ui.create_widget.set_style import *
-from utility.settings.setting_base import *
-from PyQt5.QtCore import Qt, QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEvent
+from PyQt5.QtCore import QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEvent
 from PyQt5.QtWidgets import QPushButton, QFrame, QTextEdit, QComboBox, QCheckBox, QLineEdit, QDateEdit, QProgressBar, \
     QDialog, QTableWidget, QAbstractItemView, QGroupBox, QTableWidgetItem, QSizePolicy
+
+from ui import *
+from utility import *
 
 
 class CustomViewBox(pg.ViewBox):
@@ -99,7 +99,7 @@ class CustomViewBox(pg.ViewBox):
                         self.ui.hj_tableWidgett_01.setColumnWidth(5, 105)
                         self.ui.hj_tableWidgett_01.setColumnWidth(6, 105)
                         self.ui.hj_tableWidgett_01.setColumnWidth(7, 106)
-                        self.ui.hc_tableWidgett_01.setHorizontalHeaderLabels(columns_hc2)
+                        self.ui.hc_tableWidgett_01.setHorizontalHeaderLabels(COLUMNS_HC2)
                         self.ui.hc_tableWidgett_02.setVisible(True)
                         self.ui.hg_tableWidgett_01.setGeometry(565, 52, 282, 297)
                     code = self.ui.ct_lineEdittttt_04.text()
@@ -816,7 +816,7 @@ class WidgetCreater:
         line.setFrameShape(QFrame.HLine)
         return line
 
-    def setTextEdit(self, parent, visible=True, font=None, vscroll=False, filter_=False, event_filter=True):
+    def setTextEdit(self, parent, visible=True, font=None, vscroll=False, filter_=False, event_filter_=True):
         """텍스트 에디터를 생성합니다.
         Args:
             parent: 부모 위젯
@@ -824,7 +824,7 @@ class WidgetCreater:
             font: 폰트
             vscroll: 수직 스크롤바 표시 여부
             filter_: 필터 사용 여부
-            event_filter: 이벤트 필터 사용 여부
+            event_filter_: 이벤트 필터 사용 여부
         Returns:
             텍스트 에디터 위젯
         """
@@ -834,9 +834,9 @@ class WidgetCreater:
             textedit = QTextEdit(parent)
         textedit.setStyleSheet(style_bc_dk)
         if filter_:
-            if event_filter:
+            if event_filter_:
                 textedit.installEventFilter(self.ui)
-            syntax.PythonHighlighter(textedit)
+            PythonHighlighter(textedit)
         else:
             textedit.setReadOnly(True)
         if not vscroll:
@@ -1134,7 +1134,7 @@ class WidgetCreater:
                 tableWidget.setColumnWidth(12, 55)
                 tableWidget.setColumnWidth(13, 55)
                 tableWidget.setColumnWidth(14, 55)
-        elif columns in (columns_nt, columns_nd):
+        elif columns in (COLUMNS_NTT, COLUMNS_NTD):
             if parent in (self.ui.slv_tab, self.ui.clv_tab, self.ui.flv_tab):
                 tableWidget.setColumnWidth(0, 94)
             else:
@@ -1145,7 +1145,7 @@ class WidgetCreater:
             tableWidget.setColumnWidth(4, 100)
             tableWidget.setColumnWidth(5, 66)
             tableWidget.setColumnWidth(6, 100)
-        elif columns == columns_sb:
+        elif columns == COLUMNS_SLT:
             tableWidget.setColumnWidth(0, 68)
             tableWidget.setColumnWidth(1, 70)
             tableWidget.setColumnWidth(2, 70)
@@ -1165,7 +1165,7 @@ class WidgetCreater:
             tableWidget.setColumnWidth(16, 70)
             tableWidget.setColumnWidth(17, 70)
             tableWidget.setColumnWidth(18, 68)
-        elif columns == columns_sd:
+        elif columns == COLUMNS_SLB:
             tableWidget.setColumnWidth(0, 159)
             tableWidget.setColumnWidth(1, 159)
             tableWidget.setColumnWidth(2, 54)
@@ -1184,7 +1184,7 @@ class WidgetCreater:
             tableWidget.setColumnWidth(15, 54)
             tableWidget.setColumnWidth(16, 97)
             tableWidget.setColumnWidth(17, 55)
-        elif columns == columns_jg:
+        elif columns == COLUMNS_JG:
             tableWidget.setColumnWidth(0, 126)
             tableWidget.setColumnWidth(1, 90)
             tableWidget.setColumnWidth(2, 90)
@@ -1198,13 +1198,13 @@ class WidgetCreater:
             tableWidget.setColumnWidth(10, 90)
             tableWidget.setColumnWidth(11, 90)
             tableWidget.setColumnWidth(12, 90)
-        elif columns == columns_kp:
+        elif columns == COLUMNS_KIMP:
             tableWidget.setColumnWidth(0, 90)
             tableWidget.setColumnWidth(1, 120)
             tableWidget.setColumnWidth(2, 120)
             tableWidget.setColumnWidth(3, 90)
             tableWidget.setColumnWidth(4, 90)
-        elif columns == columns_cj:
+        elif columns == COLUMNS_CG:
             tableWidget.setColumnWidth(0, 126)
             tableWidget.setColumnWidth(1, 90)
             tableWidget.setColumnWidth(2, 90)
@@ -1214,7 +1214,7 @@ class WidgetCreater:
             tableWidget.setColumnWidth(6, 90)
             tableWidget.setColumnWidth(7, 90)
             tableWidget.setColumnWidth(8, 90)
-        elif columns == columns_hj:
+        elif columns == COLUMNS_HJ:
             tableWidget.setColumnWidth(0, 140)
             tableWidget.setColumnWidth(1, 140)
             tableWidget.setColumnWidth(2, 140)
@@ -1223,33 +1223,33 @@ class WidgetCreater:
             tableWidget.setColumnWidth(5, 140)
             tableWidget.setColumnWidth(6, 140)
             tableWidget.setColumnWidth(7, 140)
-        elif columns in (columns_hc, columns_hc2, columns_hg):
+        elif columns in (COLUMNS_HC, COLUMNS_HC2, COLUMNS_HG):
             tableWidget.setColumnWidth(0, 140)
             tableWidget.setColumnWidth(1, 140)
-        elif columns == columns_ns:
-            tableWidget.setColumnWidth(0, 140)
-            tableWidget.setColumnWidth(1, 140)
-            tableWidget.setColumnWidth(2, 410)
-            tableWidget.setColumnWidth(3, 410)
-        elif columns == columns_gc:
+        elif columns == COLUMNS_GNS:
             tableWidget.setColumnWidth(0, 140)
             tableWidget.setColumnWidth(1, 140)
             tableWidget.setColumnWidth(2, 410)
             tableWidget.setColumnWidth(3, 410)
-        elif columns == columns_jm1:
+        elif columns == COLUMNS_GGS:
+            tableWidget.setColumnWidth(0, 140)
+            tableWidget.setColumnWidth(1, 140)
+            tableWidget.setColumnWidth(2, 410)
+            tableWidget.setColumnWidth(3, 410)
+        elif columns == COLUMNS_JM1:
             tableWidget.setColumnWidth(0, 70)
             tableWidget.setColumnWidth(1, 62)
             tableWidget.setColumnWidth(2, 62)
             tableWidget.setColumnWidth(3, 62)
             tableWidget.setColumnWidth(4, 62)
-        elif columns == columns_jm2:
+        elif columns == COLUMNS_JM2:
             tableWidget.setColumnWidth(0, 62)
             tableWidget.setColumnWidth(1, 62)
             tableWidget.setColumnWidth(2, 62)
             tableWidget.setColumnWidth(3, 62)
             tableWidget.setColumnWidth(4, 62)
             tableWidget.setColumnWidth(5, 62)
-        elif columns == columns_bt:
+        elif columns == COLUMNS_BTD:
             tableWidget.setColumnWidth(0, 87)
             tableWidget.setColumnWidth(1, 60)
             tableWidget.setColumnWidth(2, 130)
@@ -1264,7 +1264,7 @@ class WidgetCreater:
             tableWidget.setColumnWidth(11, 90)
             tableWidget.setColumnWidth(12, 600)
             tableWidget.setColumnWidth(13, 750)
-        elif columns in (columns_stg1, columns_stg2):
+        elif columns in (COLUMNS_SG1, COLUMNS_SG2):
             tableWidget.setColumnWidth(0, 125)
             tableWidget.setColumnWidth(1, 125)
             tableWidget.setColumnWidth(2, 125)

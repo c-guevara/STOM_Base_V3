@@ -1,7 +1,7 @@
 
 from PyQt5.QtWidgets import QLabel
-from ui.event_change.changed_checkbox import *
-from ui.event_click.button_clicked_settings import *
+
+from ui import *
 
 
 class SetOrderTap:

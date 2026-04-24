@@ -9,8 +9,8 @@ def load_settings():
     import pandas as pd
     from cryptography import fernet
     from traceback import format_exc
-    from utility.settings.setting_base import DB_SETTING
-    from utility.static_method.static import read_key, de_text
+
+    from utility import DB_SETTING, read_key, de_text
 
     EN_KEY = read_key()
 

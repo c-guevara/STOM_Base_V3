@@ -3,9 +3,9 @@ import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QApplication, QMessageBox
-from ui.etcetera.splash_screen import StomSplashScreen
-from ui.etcetera.import_hook import ImportProgressHook
-from utility.db_control.database_check import database_check
+
+from utility import database_check
+from ui import StomSplashScreen, ImportProgressHook
 
 if __name__ == '__main__':
     auto_run = 0
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     import_hook = ImportProgressHook(splash)
     import_hook.install()
 
-    from ui.ui_mainwindow import MainWindow
+    from ui.main_window import MainWindow
     from ui.create_widget.set_style import color_bg_bc, color_fg_bc, color_bg_dk, color_fg_bk, color_fg_hl, color_bg_bk
 
     palette = QPalette()

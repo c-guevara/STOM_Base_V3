@@ -1,5 +1,6 @@
 
-from utility.static_method.static import thread_decorator
+from ui import auto_back_schedule, mnbutton_c_clicked_03
+from utility import thread_decorator, now, str_hms, now_utc, now_cme, str_ymdhms_ios
 
 
 def process_starter(ui):
@@ -8,12 +9,7 @@ def process_starter(ui):
     Args:
         ui: UI 객체
     """
-    from ui.etcetera.etc import auto_back_schedule
-    from utility.static_method.static import now, str_hms
-    from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_03
-
     inthms = int(str_hms())
-
     if ui.dict_set['백테스케쥴실행'] and not ui.backengine_running and now().weekday() == ui.dict_set['백테스케쥴요일']:
         if ui.int_time < ui.dict_set['백테스케쥴시간'] <= inthms:
             if not ui.dict_set['타임프레임'] and ui.dict_set['자동학습']:
@@ -36,7 +32,6 @@ def _update_window_title(ui):
     Args:
         ui: UI 객체
     """
-    from utility.static_method.static import now_utc, now_cme, str_ymdhms_ios
     market_text = ui.dict_set['거래소']
     data_type = '1초스냅샷' if ui.dict_set['타임프레임'] else '1분봉'
     trade_type = '모의' if ui.dict_set['모의투자'] else '실전'

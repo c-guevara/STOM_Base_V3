@@ -1,6 +1,6 @@
 
-from backtest.backengine_base import BackEngineBase
-from utility.static_method.static import get_hogaunit_coin, get_profit_coin
+from backtest import BackEngineBase
+from utility import get_hogaunit_coin, get_profit_coin
 
 
 class BackEngineUpbit(BackEngineBase):

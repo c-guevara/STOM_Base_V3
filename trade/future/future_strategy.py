@@ -1,6 +1,6 @@
 
-from trade.base_strategy import BaseStrategy
-from utility.static_method.static import now, dt_ymdhms, get_profit_future_long, get_profit_future_short
+from trade import BaseStrategy
+from utility import now, dt_ymdhms, get_profit_future_long, get_profit_future_short
 
 
 class FutureStrategy(BaseStrategy):

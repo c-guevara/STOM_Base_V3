@@ -4,7 +4,8 @@ import ntplib
 import win32api
 from dateutil import tz
 from datetime import datetime
-from utility.static_method.static import thread_decorator
+
+from utility import thread_decorator
 
 
 @thread_decorator

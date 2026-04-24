@@ -1,18 +1,10 @@
 
 import pyqtgraph as pg
-from PyQt5.QtGui import QFont, QPen, QColor
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect
+from PyQt5.QtGui import QPen
+from PyQt5.QtCore import QPropertyAnimation, QRect
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout, QHBoxLayout
-from ui.create_widget.set_style import color_fg_bc, color_bg_ct, style_ht_gb, style_ht_pb
 
-qfont16 = QFont()
-qfont16.setFamily('나눔고딕')
-qfont16.setPixelSize(16)
-qfont16.setBold(True)
-
-qfont12 = QFont()
-qfont12.setFamily('나눔고딕')
-qfont12.setPixelSize(12)
+from ui import *
 
 
 class HomTapGroupBox(QGroupBox):

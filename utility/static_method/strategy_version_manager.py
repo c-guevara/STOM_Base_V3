@@ -25,7 +25,8 @@ class StrategyVersionManager:
         self.gubun1 = gubun1
         self.gubun2 = gubun2
         self.name   = strategy_name
-        self.base_path = './_database/strategy_versions'
+        from utility import DB_PATH
+        self.base_path = f'{DB_PATH}/strategy_versions'
         os.makedirs(self.base_path, exist_ok=True)
         self.file_name = f'{market}_{gubun1}_{gubun2}_{strategy_name}'
 

@@ -1,9 +1,9 @@
 
 import sys
 from PyQt5.QtWidgets import QApplication
-from trade.base_receiver import BaseReceiver
-from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
-from utility.static_method.static import now, error_decorator
+
+from utility import now, error_decorator
+from trade import BaseReceiver, LsRestAPI, LsWebSocketReceiver
 
 
 class FutureOsReceiver(BaseReceiver):

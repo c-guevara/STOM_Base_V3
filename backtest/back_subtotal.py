@@ -1,9 +1,9 @@
 
 import numpy as np
 from traceback import format_exc
-from backtest.back_static import add_mdd
-from utility.settings.setting_base import ui_num
-from backtest.back_static_numba import get_result
+
+from utility import UI_NUM
+from backtest import add_mdd, get_result
 
 
 class BackSubTotal:
@@ -90,7 +90,7 @@ class BackSubTotal:
                         self._send_subtotal()
                     self.complete1 = False
             except Exception:
-                self.wq.put((ui_num['시스템로그'], format_exc()))
+                self.wq.put((UI_NUM['시스템로그'], format_exc()))
 
     def _collect_data(self, data):
         """백테스트 결과를 수집합니다."""
