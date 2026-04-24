@@ -9,11 +9,11 @@ from ui.event_change.changed_text import text_changed_05
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.event_keypress.overwrite_return_press import return_press_02
 from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
-from trade.analyzer_pattern import pattern_setting_load, pattern_setting_save, pattern_train
+from strategy.analyzer_pattern import pattern_setting_load, pattern_setting_save, pattern_train
 from ui.event_click.table_cell_clicked import cell_clicked_09, cell_clicked_07, cell_clicked_08
-from trade.analyzer_volume_profile import volume_setting_load, volume_setting_save, volume_profile_train
-from utility.settings.setting_base import columns_hj, columns_hc, columns_hg, columns_gc, columns_ns, columns_jm1, \
-    columns_jm2, columns_stg1, columns_stg2, columns_kp, columns_hc2
+from strategy.analyzer_volume_profile import volume_setting_load, volume_setting_save, volume_profile_train
+from utility.settings.setting_base import COLUMNS_HJ, COLUMNS_HC, COLUMNS_HG, COLUMNS_GGS, COLUMNS_GNS, COLUMNS_JM1, \
+    COLUMNS_JM2, COLUMNS_DSG, COLUMNS_DSV, COLUMNS_KIMP, COLUMNS_HC2
 
 
 class SetDialogEtc:
@@ -27,14 +27,14 @@ class SetDialogEtc:
 
     def set(self):
         """기타 다이얼로그를 설정합니다."""
-        self.ui.dialog_hoga = self.wc.setDialog('STOM HOGA')
+        self.ui.dialog_hoga = self.wc.setDialog('STOM HOGA', location_save=True)
         self.ui.dialog_hoga.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_hoga)
 
-        self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hj, 1)
-        self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc, 12)
-        self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc2, 12, visible=False)
-        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HJ, 1)
+        self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HC, 12)
+        self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HC2, 12, visible=False)
+        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, COLUMNS_HG, 12, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.hg_lineeeeeeeee_01 = self.wc.setLine(self.ui.dialog_hoga, 1)
         self.ui.hg_labellllllll_01 = QLabel('', self.ui.dialog_hoga)
         self.ui.hg_pushButtonnn_01 = self.wc.setPushbutton('이전(Alt+left)', parent=self.ui.dialog_hoga, click=lambda: hg_button_clicked_01(self.ui, '이전'), shortcut='Alt+left')
@@ -42,21 +42,21 @@ class SetDialogEtc:
         self.ui.hg_pushButtonnn_03 = self.wc.setPushbutton('매수(Alt+up)', parent=self.ui.dialog_hoga, color=2, click=lambda: hg_button_clicked_02(self.ui, '매수'), shortcut='Alt+up')
         self.ui.hg_pushButtonnn_04 = self.wc.setPushbutton('매도(Alt+down)', parent=self.ui.dialog_hoga, color=3, click=lambda: hg_button_clicked_02(self.ui, '매도'), shortcut='Alt+down')
 
-        self.ui.dialog_info = self.wc.setDialog('STOM INFO')
+        self.ui.dialog_info = self.wc.setDialog('STOM INFO', location_save=True)
         self.ui.dialog_info.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_info)
 
         self.ui.gg_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_info, font=qfont14)
-        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
-        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
-        self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm1, 13)
-        self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm2, 13)
+        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_GGS, 20, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
+        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_GNS, 10, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
+        self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_JM1, 13)
+        self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, COLUMNS_JM2, 13)
 
-        self.ui.dialog_web = self.wc.setDialog('STOM WEB')
+        self.ui.dialog_web = self.wc.setDialog('STOM WEB', location_save=True)
         self.ui.dialog_web.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_web)
 
-        self.ui.dialog_tree = self.wc.setDialog('STOM TREEMAP')
+        self.ui.dialog_tree = self.wc.setDialog('STOM TREEMAP', location_save=True)
         self.ui.dialog_tree.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_tree)
 
@@ -64,7 +64,7 @@ class SetDialogEtc:
         self.ui.dialog_graph.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_graph)
 
-        self.ui.dialog_db = self.wc.setDialog('STOM DATABASE')
+        self.ui.dialog_db = self.wc.setDialog('STOM DATABASE', self.ui)
         self.ui.dialog_db.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_db)
 
@@ -109,12 +109,12 @@ class SetDialogEtc:
         self.ui.db_labellllllll_09 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_pushButtonnn_09 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_10(self.ui))
 
-        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.dbs_tab1, columns_stg1, 8,    clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
-        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.dbs_tab2, columns_stg2, 8,    clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.dbs_tab1, COLUMNS_DSG, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.dbs_tab2, COLUMNS_DSV, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.db_tableWidgett_03 = self.wc.setTablewidget(self.ui.dbs_tab3, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.db_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_db, vscroll=True)
 
-        self.ui.dialog_order = self.wc.setDialog('STOM ORDER')
+        self.ui.dialog_order = self.wc.setDialog('STOM ORDER', location_save=True)
         self.ui.dialog_order.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_order)
 
@@ -136,7 +136,7 @@ class SetDialogEtc:
         self.ui.od_pushButtonnn_07 = self.wc.setPushbutton('매수취소', parent=self.ui.od_groupBoxxxxx_01, click=lambda: odbutton_clicked_07(self.ui))
         self.ui.od_pushButtonnn_08 = self.wc.setPushbutton('매도취소', parent=self.ui.od_groupBoxxxxx_01, click=lambda: odbutton_clicked_08(self.ui))
 
-        self.ui.dialog_optuna = self.wc.setDialog('STOM OPTUNA', parent=self.ui)
+        self.ui.dialog_optuna = self.wc.setDialog('STOM OPTUNA', self.ui)
         self.ui.dialog_optuna.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_optuna)
 
@@ -200,7 +200,7 @@ class SetDialogEtc:
         self.ui.op_labelllllll_05.setAlignment(Qt.AlignCenter)
         self.ui.op_pushButtonn_01 = self.wc.setPushbutton('OPTUNA DASHBOARD', parent=self.ui.op_groupBoxxxx_01, color=3, click=lambda: opbutton_clicked_01(self.ui))
 
-        self.ui.dialog_pass = self.wc.setDialog('STOM PASSWARD', parent=self.ui)
+        self.ui.dialog_pass = self.wc.setDialog('STOM PASSWARD', self.ui)
         self.ui.dialog_pass.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_pass)
 
@@ -209,7 +209,7 @@ class SetDialogEtc:
         self.ui.pa_labelllllll_01.setAlignment(Qt.AlignCenter)
         self.ui.pa_lineEditttt_01 = self.wc.setLineedit(self.ui.pa_groupBoxxxx_01, enter=lambda: return_press_02(self.ui), style=style_fc_dk)
 
-        self.ui.dialog_comp = self.wc.setDialog('STOM COMPARISON', parent=self.ui)
+        self.ui.dialog_comp = self.wc.setDialog('STOM COMPARISON', self.ui)
         self.ui.dialog_comp.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_comp)
 
@@ -217,13 +217,13 @@ class SetDialogEtc:
         self.ui.cp_pushButtonn_01 = self.wc.setPushbutton('그래프 비교', parent=self.ui.dialog_comp, click=lambda: cpbutton_clicked_01(self.ui))
         self.ui.cp_tableWidget_01 = self.wc.setTablewidget(self.ui.dialog_comp, ['백테스트 상세기록'], 40, vscroll=True)
 
-        self.ui.dialog_kimp = self.wc.setDialog('STOM KIMP')
+        self.ui.dialog_kimp = self.wc.setDialog('STOM KIMP', location_save=True)
         self.ui.dialog_kimp.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_kimp)
 
-        self.ui.kp_tableWidget_01 = self.wc.setTablewidget(self.ui.dialog_kimp, columns_kp, 50, vscroll=True)
+        self.ui.kp_tableWidget_01 = self.wc.setTablewidget(self.ui.dialog_kimp, COLUMNS_KIMP, 50, vscroll=True)
 
-        self.ui.dialog_std = self.wc.setDialog('OPTIMIZ STD LIMIT', parent=self.ui)
+        self.ui.dialog_std = self.wc.setDialog('OPTIMIZ STD LIMIT', self.ui)
         self.ui.dialog_std.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_std)
 
@@ -241,7 +241,7 @@ class SetDialogEtc:
             lineEdit = self.wc.setLineedit(self.ui.st_groupBoxxxx_01, style=style_bc_dk)
             setattr(self.ui, f'st_lineEditttt_{i+1:02d}', lineEdit)
 
-        self.ui.dialog_leverage = self.wc.setDialog('BINACE FUTURE LEVERAGE', parent=self.ui)
+        self.ui.dialog_leverage = self.wc.setDialog('BINACE FUTURE LEVERAGE', self.ui)
         self.ui.dialog_leverage.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_leverage)
 
@@ -263,7 +263,7 @@ class SetDialogEtc:
 
         self.ui.lv_checkbox_listt = [self.ui.lv_checkBoxxxx_01, self.ui.lv_checkBoxxxx_02]
 
-        self.ui.dialog_setsj = self.wc.setDialog('STOM SETSJ', parent=self.ui)
+        self.ui.dialog_setsj = self.wc.setDialog('STOM SETSJ', self.ui)
         self.ui.dialog_setsj.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_setsj)
 
@@ -293,7 +293,7 @@ class SetDialogEtc:
             self.ui.set_lineEdittt_19, self.ui.set_lineEdittt_20
         ]
 
-        self.ui.dialog_pattern = self.wc.setDialog('STOM PATTERN', parent=self.ui)
+        self.ui.dialog_pattern = self.wc.setDialog('STOM PATTERN', self.ui)
         self.ui.dialog_pattern.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_pattern)
 
@@ -313,7 +313,7 @@ class SetDialogEtc:
         self.ui.ptn_labellllll_02 = QLabel(text, self.ui.ptn_groupBoxxx_01)
         self.ui.ptn_textEdittt_01 = self.wc.setTextEdit(self.ui.ptn_groupBoxxx_01, vscroll=True)
 
-        self.ui.dialog_volume = self.wc.setDialog('STOM VOLUME PROFILE', parent=self.ui)
+        self.ui.dialog_volume = self.wc.setDialog('STOM VOLUME PROFILE', self.ui)
         self.ui.dialog_volume.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_volume)
 
@@ -334,11 +334,6 @@ class SetDialogEtc:
         self.ui.vpf_textEdittt_01 = self.wc.setTextEdit(self.ui.vpf_groupBoxxx_01, vscroll=True)
 
         self.ui.dialog_hoga.setFixedSize(572, 355)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_hoga.move(self.ui.dict_set['창위치'][14], self.ui.dict_set['창위치'][15])
-            except Exception:
-                pass
         self.ui.hj_tableWidgett_01.setGeometry(5, 5, 562, 42)
         self.ui.hc_tableWidgett_01.setGeometry(5, 52, 282, 297)
         self.ui.hc_tableWidgett_02.setGeometry(285, 52, 282, 297)
@@ -351,11 +346,6 @@ class SetDialogEtc:
         self.ui.hg_pushButtonnn_04.setGeometry(710, 354, 130, 30)
 
         self.ui.dialog_info.setFixedSize(1403, 570)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_info.move(self.ui.dict_set['창위치'][6], self.ui.dict_set['창위치'][7])
-            except Exception:
-                pass
         self.ui.gg_textEdittttt_01.setGeometry(7, 5, 692, 90)
         self.ui.gs_tableWidgett_01.setGeometry(7, 100, 692, 463)
         self.ui.ns_tableWidgett_01.setGeometry(704, 5, 693, 233)
@@ -363,18 +353,8 @@ class SetDialogEtc:
         self.ui.jm_tableWidgett_02.setGeometry(1024, 243, 373, 320)
 
         self.ui.dialog_web.resize(1000, 1000)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_web.move(self.ui.dict_set['창위치'][8], self.ui.dict_set['창위치'][9])
-            except Exception:
-                pass
 
         self.ui.dialog_tree.resize(1000, 1000)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_tree.move(self.ui.dict_set['창위치'][10], self.ui.dict_set['창위치'][11])
-            except Exception:
-                pass
 
         self.ui.dialog_graph.setFixedSize(1403, 1010)
 
@@ -419,11 +399,6 @@ class SetDialogEtc:
         self.ui.db_tableWidgett_03.setGeometry(5, 5, 500, 210)
 
         self.ui.dialog_order.setFixedSize(232, 303)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_order.move(self.ui.dict_set['창위치'][18], self.ui.dict_set['창위치'][19])
-            except Exception:
-                pass
         self.ui.od_groupBoxxxxx_01.setGeometry(5, 5, 222, 293)
         self.ui.od_labellllllll_01.setGeometry(10, 10, 100, 30)
         self.ui.od_comboBoxxxxx_01.setGeometry(115, 10, 100, 30)
@@ -463,11 +438,6 @@ class SetDialogEtc:
         self.ui.cp_tableWidget_01.setGeometry(5, 40, 340, 718)
 
         self.ui.dialog_kimp.setFixedSize(535, 763)
-        if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
-            try:
-                self.ui.dialog_kimp.move(self.ui.dict_set['창위치'][12], self.ui.dict_set['창위치'][13])
-            except Exception:
-                pass
         self.ui.kp_tableWidget_01.setGeometry(5, 5, 525, 753)
 
         self.ui.dialog_std.setFixedSize(255, 260)

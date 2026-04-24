@@ -3,7 +3,7 @@ import os
 import sqlite3
 import pandas as pd
 from traceback import format_exc
-from utility.settings.setting_base import code_info_tables
+from utility.settings.setting_base import CODE_INFO_TABLES
 from utility.static_method.static import read_key, write_key
 
 MAIN_CLOUMNS = [
@@ -483,7 +483,7 @@ def database_check():
                 table_list = df['name'].to_list()
                 if 'moneytop' in table_list:
                     table_list.remove('moneytop')
-                for table in code_info_tables:
+                for table in CODE_INFO_TABLES:
                     if table in table_list:
                         table_list.remove(table)
                 if table_list:

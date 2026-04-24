@@ -1,4 +1,11 @@
 
+def dialog_move(ui):
+    """다이얼로그를 이동합니다."""
+    for i, dialog in enumerate(ui.move_dialog_list):
+        x, y = ui.dict_set['창위치'][i]
+        dialog.move(int(x), int(y))
+
+
 def update_image(ui, data):
     """이미지를 업데이트합니다.
     Args:
@@ -30,7 +37,7 @@ def auto_back_schedule(ui, gubun):
 
     if gubun == 0:
         from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
-        from trade.analyzer_pattern import pattern_setting_load, pattern_train
+        from strategy.analyzer_pattern import pattern_setting_load, pattern_train
 
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
@@ -44,7 +51,7 @@ def auto_back_schedule(ui, gubun):
 
     elif gubun == 0.5:
         from ui.event_click.button_clicked_show_dialog import show_volume_dialog
-        from trade.analyzer_volume_profile import volume_setting_load, volume_profile_train
+        from strategy.analyzer_volume_profile import volume_setting_load, volume_profile_train
 
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
@@ -98,7 +105,7 @@ def update_dictset(ui, force=False):
     from utility.settings.setting_user import load_settings
 
     if force:
-        ui.dict_set = load_settings()
+        ui.dict_set, _ = load_settings()
         change_chart_factors(ui)
         send_dict_set(ui)
 
@@ -180,7 +187,7 @@ def calendar_clicked(ui):
         ui: UI 객체
     """
     import pandas as pd
-    from utility.settings.setting_base import columns_dt, columns_dd, ui_num
+    from utility.settings.setting_base import COLUMNS_DTT, COLUMNS_DTD, UI_NUM
 
     table_name = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
@@ -194,13 +201,13 @@ def calendar_clicked(ui):
         nbg, nsg = df1['매수금액'].sum(), df1['매도금액'].sum()
         sp = round((nsg / nbg - 1) * 100, 2)
         npg, nmg, nsig = df1[df1['수익금'] > 0]['수익금'].sum(), df1[df1['수익금'] < 0]['수익금'].sum(), df1['수익금'].sum()
-        df2 = pd.DataFrame(columns=columns_dt)
+        df2 = pd.DataFrame(columns=COLUMNS_DTT)
         df2.loc[0] = [searchday, nbg, nsg, npg, nmg, sp, nsig]
     else:
-        df1 = pd.DataFrame(columns=columns_dd)
-        df2 = pd.DataFrame(columns=columns_dt)
-    ui.update_tablewidget.update_tablewidget((ui_num['당일합계'], df2))
-    ui.update_tablewidget.update_tablewidget((ui_num['당일상세'], df1))
+        df1 = pd.DataFrame(columns=COLUMNS_DTD)
+        df2 = pd.DataFrame(columns=COLUMNS_DTT)
+    ui.update_tablewidget.update_tablewidget((UI_NUM['당일합계'], df2))
+    ui.update_tablewidget.update_tablewidget((UI_NUM['당일상세'], df1))
 
 
 def chart_screenshot(ui):

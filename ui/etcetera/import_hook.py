@@ -35,7 +35,6 @@ class ImportProgressHook:
             'ui.create_widget.set_dialog_formula',
             'ui.create_widget.set_dialog_strategy',
 
-            'ui.etcetera.etc',
             'ui.draw_chart.draw_treemap',
             'ui.draw_chart.draw_chart_db',
             'ui.etcetera.load_database',
@@ -43,6 +42,7 @@ class ImportProgressHook:
             'ui.etcetera.process_starter',
             'ui.draw_chart.draw_home_chart',
             'ui.draw_chart.draw_chart_real',
+            'ui.etcetera.etc',
             'ui.update_widget.update_textedit',
             'ui.create_widget.set_text_stg_button',
             'ui.update_widget.update_tablewidget',

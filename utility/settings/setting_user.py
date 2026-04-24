@@ -31,11 +31,17 @@ def load_settings():
         lvrg_list_ = [float(x) for x in lvrg_list_]
         binance_leverage_.append(lvrg_list_)
 
+    location_list = None
     df_a_not_empty = True if len(df_a) > 0 else False
     df_t_not_empty  = True if len(df_t) > 0 else False
 
     try:
         no = int(df_m['거래소'][0][-2:])
+        dialog_location = df_e['창위치'][no]
+        if dialog_location and '^' in dialog_location and ';' in dialog_location:
+            location_list = [x.split('^') for x in df_e['창위치'][no].split(';')]
+        else:
+            location_list = [['0', '0'] for _ in range(11)]
 
         DICT_SET = {
             '키':            EN_KEY,
@@ -107,7 +113,7 @@ def load_settings():
             '휴무프로세스종료':   df_e['휴무프로세스종료'][no],
             '휴무컴퓨터종료':    df_e['휴무컴퓨터종료'][no],
             '창위치기억':       df_e['창위치기억'][no],
-            '창위치':          [int(x) for x in df_e['창위치'][no].split(';')] if df_e['창위치'][no] else None,
+            '창위치':          location_list,
             '스톰라이브':       df_e['스톰라이브'][no],
             '프로그램종료':      df_e['프로그램종료'][no],
             '테마':            df_e['테마'][no],
@@ -186,8 +192,8 @@ def load_settings():
             '백테엔진프로파일링': False
         }
     except fernet.InvalidToken:
-        return 'fernet.InvalidToken'
+        return 'fernet.InvalidToken', location_list
     except Exception:
-        return format_exc()
+        return format_exc(), location_list
     else:
-        return DICT_SET
+        return DICT_SET, location_list
