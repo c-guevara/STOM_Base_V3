@@ -7,7 +7,7 @@ class ImportProgressHook:
         self.splash = splash
         self.original_import = None
         self.modules = [
-            'ui.ui_mainwindow',
+            'ui.main_window',
             'ui.set_style',
 
             'utility.settings.setting_user',
