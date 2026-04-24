@@ -17,7 +17,7 @@ class ImportProgressHook:
             'utility.sub_process_and_thread.webcrawling',
             'utility.sub_process_and_thread.telegram_bot',
             'utility.sub_process_and_thread.pyttsx_sound',
-            'utility.sub_process_and_thread.chart_hoga_query_sound',
+            'utility.sub_process_and_thread.chart_hoga_query',
             'utility.static_method.static',
 
             'ui.create_widget.set_icon',
