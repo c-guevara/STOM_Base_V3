@@ -117,6 +117,7 @@ class LsRestAPI:
                 else:
                     insert = True
                     exclusion_list.append(code)
+                    dict_data.pop(code, None)
 
                 if i % 100 == 0 or i == last - 1:
                     self.windowQ.put((UI_NUM['기본로그'], f'국내주식 상장주식수 조회 중 ... [{i + 1}/{last}]'))
