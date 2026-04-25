@@ -767,21 +767,21 @@ class WidgetCreater:
         elif color == 6:
             pushbutton.setStyleSheet(style_bc_bb)
         elif color == 7:
-            pushbutton.setStyleSheet(style_st_cf)
-        elif color == 8:
-            pushbutton.setStyleSheet(style_st_sf)
-        elif color == 9:
-            pushbutton.setStyleSheet(style_st_mf)
-        elif color == 10:
-            pushbutton.setStyleSheet(style_st_sp)
-        elif color == 11:
-            pushbutton.setStyleSheet(style_st_ct)
-        elif color == 12:
-            pushbutton.setStyleSheet(style_st_ks)
-        elif color == 13:
             pushbutton.setStyleSheet(style_st_ss)
-        elif color == 14:
+        elif color == 8:
             pushbutton.setStyleSheet(style_st_su)
+        elif color == 9:
+            pushbutton.setStyleSheet(style_st_cf)
+        elif color == 10:
+            pushbutton.setStyleSheet(style_st_sf)
+        elif color == 11:
+            pushbutton.setStyleSheet(style_st_mf)
+        elif color == 12:
+            pushbutton.setStyleSheet(style_st_sp)
+        elif color == 13:
+            pushbutton.setStyleSheet(style_st_ct)
+        elif color == 14:
+            pushbutton.setStyleSheet(style_st_ks)
         else:
             pushbutton.setStyleSheet(style_bc_bt)
         pushbutton.setFont(qfont12)
