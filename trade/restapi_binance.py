@@ -80,7 +80,7 @@ class BinanceWebSocketReceiver(QThread):
             self.async_client = await AsyncClient.create()
             self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=10000)
 
-        self.wsk_trade = self.sock_manager.futures_multiplex_socket(self.trade_stream_list)
+        self.wsk_trade = self.sock_manager.futures_multiplex_socket(self.trade_stream_list, category='market')
         self.con_trade = True
 
     async def connect_order(self):
@@ -95,7 +95,7 @@ class BinanceWebSocketReceiver(QThread):
             self.async_client = await AsyncClient.create()
             self.sock_manager = BinanceSocketManager(self.async_client, max_queue_size=10000)
 
-        self.wsk_depth = self.sock_manager.futures_multiplex_socket(self.depth_stream_list)
+        self.wsk_depth = self.sock_manager.futures_multiplex_socket(self.depth_stream_list, category='public')
         self.con_depth = True
 
     async def receive_trader(self):
