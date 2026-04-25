@@ -1,5 +1,4 @@
 
-import os
 import talib
 import random
 import sqlite3
@@ -37,16 +36,24 @@ def init_worker(q):
     window_queue = q
 
 
-class AnalyzerPattern:
+class AnalyzerCandlePattern:
     """메인 패턴 분석 통합 클래스"""
-    def __init__(self, market_info: dict, minute: int = 30, pct: int = 5):
-        self.market_info      = market_info
-        self.strategy_type    = market_info['전략구분']
+    def __init__(self, market_gubun: int, market_info: dict, min_samples: int = 10):
+        """
+        초기화
+        :param market_gubun: 마켓 구분 번호
+        :param market_info: 마켓 정보 딕셔너리
+        :param min_samples: 최소 샘플 수 (기본값 10)
+        """
         self.backtest_db_path = market_info['백테디비'][0]
-        self.minute           = minute
-        self.pct              = pct
-        self.pattern_database = PatternDatabase(self.strategy_type)
-        self.pattern_realtime = PatternRealtime(market_info)
+        self.factor_list      = market_info['팩터목록'][0]
+        self.strategy_gubun   = market_info['전략구분']
+        self.pattern_database = CandlePatternDatabase(self.strategy_gubun)
+        analysis_period, rate_threshold = self.pattern_database.load_pattern_setting(market_gubun)
+        self.analysis_period  = analysis_period
+        self.rate_threshold   = rate_threshold
+        self.min_samples      = min_samples
+        self.pattern_realtime = CandlePatternRealtime(self.factor_list, self.strategy_gubun)
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -58,16 +65,15 @@ class AnalyzerPattern:
         return self.pattern_realtime.analyze_patterns(code, realtime_data)
 
     def train_all_codes(self, windowQ):
-        """
-        전체 종목 패턴 학습 수행 (종목 기반 멀티프로세싱)
-        """
+        """전체 종목 패턴 학습 수행 (종목 기반 멀티프로세싱)"""
         code_list = self.get_code_list()
         num_processes = cpu_count()
         code_chunks = self._split_codes(code_list, num_processes)
 
         actual_processes = min(num_processes, len(code_chunks))
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
-            args = [(i, chunk, self.backtest_db_path, self.market_info, self.minute, self.pct)
+            args = [(i, chunk, self.backtest_db_path, self.factor_list, self.analysis_period,
+                     self.rate_threshold, self.min_samples)
                     for i, chunk in enumerate(code_chunks)]
             results = pool.starmap(self._train_code_chunk, args)
 
@@ -76,11 +82,11 @@ class AnalyzerPattern:
             for code, pattern_scores in chunk_results.items():
                 self.pattern_database.save_pattern_scores(code, pattern_scores)
                 total_processed += 1
-            windowQ.put((UI_NUM['패턴학습'], f"학습 데이터 저장 중 ... [{i + 1}/{actual_processes}]"))
+            windowQ.put((UI_NUM['학습로그'], f"학습 데이터 저장 중 ... [{i + 1}/{actual_processes}]"))
 
-        windowQ.put((UI_NUM['패턴학습'], "학습 데이터 저장 완료"))
-        windowQ.put((UI_NUM['패턴학습'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
-        windowQ.put((UI_NUM['패턴학습'], f"전체 종목 패턴 학습 완료 [{total_processed}]"))
+        windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
+        windowQ.put((UI_NUM['학습로그'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
+        windowQ.put((UI_NUM['학습로그'], f"캔들분석 학습 완료 [{total_processed}]"))
 
     def get_code_list(self) -> List[str]:
         """
@@ -113,19 +119,19 @@ class AnalyzerPattern:
         return chunks
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str,
-                          market_info: dict, minute: int, pct: int) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str, factor_list: list,
+                          analysis_period: int, rate_threshold: int, min_samples: int) -> Dict[str, Dict[str, float]]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
         backtest_db_path: 백테디비 경로
-        market_info: 마켓 정보 딕셔너리
-        minute: 분봉 설정
-        pct: 퍼센트 설정
+        factor_list: 팩터 리스트
+        analysis_period: 분봉 설정
+        rate_threshold: 퍼센트 설정
         return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
         """
         global window_queue
-        pattern_learning = PatternLearning(market_info, minute, pct)
+        pattern_learning = CandlePatternLearning(factor_list, analysis_period, rate_threshold, min_samples)
         all_pattern_scores = {}
         last = len(code_chunk)
         for k, code in enumerate(code_chunk):
@@ -139,28 +145,30 @@ class AnalyzerPattern:
                 if pattern_scores:
                     all_pattern_scores[code] = pattern_scores
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['패턴학습'], f"[{i}][{code}] 패턴 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 패턴 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['패턴학습'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
 
         return all_pattern_scores
 
 
-class PatternLearning:
+class CandlePatternLearning:
     """과거데이터 기반 패턴 점수 학습 모듈"""
-    def __init__(self, market_info: dict, minute: int, pct: int):
-        self.market_info      = market_info
-        self.strategy_type    = market_info['전략구분']
-        self.minute           = minute
-        self.pct              = pct
-        factor_list           = market_info['팩터목록'][0]
-        self.idx_open         = factor_list.index('분봉시가')
-        self.idx_high         = factor_list.index('분봉고가')
-        self.idx_low          = factor_list.index('분봉저가')
-        self.idx_close        = factor_list.index('현재가')
-        self.num_processes    = os.cpu_count()
-        self.pattern_database = PatternDatabase(self.strategy_type)
+    def __init__(self, factor_list: list, analysis_period: int, rate_threshold: int, min_samples: int):
+        """
+        초기화
+        :param factor_list: 팩터 리스트
+        :param analysis_period: 분석 기간 분
+        :param rate_threshold: 등락율 임계값
+        """
+        self.idx_open        = factor_list.index('분봉시가')
+        self.idx_high        = factor_list.index('분봉고가')
+        self.idx_low         = factor_list.index('분봉저가')
+        self.idx_close       = factor_list.index('현재가')
+        self.analysis_period = analysis_period
+        self.rate_threshold  = rate_threshold
+        self.min_samples     = min_samples
 
     def train_patterns(self, historical_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -180,52 +188,62 @@ class PatternLearning:
             pattern_result    = pattern_func(open_price, high_price, low_price, close_price)
             detection_indices = np.where(pattern_result != 0)[0]
 
-            scores = []
-            for idx in detection_indices:
-                if idx + self.minute < len(close_price):
-                    entry_date = int(datetime_data[idx] // 10000)
-                    exit_date = int(datetime_data[idx + self.minute] // 10000)
-                    if entry_date == exit_date:
-                        entry_price = close_price[idx]
-                        exit_max_price = close_price[idx:idx + self.minute].max()
-                        exit_min_price = close_price[idx:idx + self.minute].min()
-                        if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
-                            exit_price = exit_max_price
-                        else:
-                            exit_price = exit_min_price
+            if len(detection_indices) >= self.min_samples:
+                scores = []
+                for idx in detection_indices:
+                    if idx + self.analysis_period < len(close_price):
+                        entry_date = int(datetime_data[idx] // 10000)
+                        exit_date = int(datetime_data[idx + self.analysis_period] // 10000)
+                        if entry_date == exit_date:
+                            entry_price    = close_price[idx]
+                            exit_max_price = close_price[idx:idx + self.analysis_period].max()
+                            exit_min_price = close_price[idx:idx + self.analysis_period].min()
+                            if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
+                                exit_price = exit_max_price
+                            else:
+                                exit_price = exit_min_price
+                            price_change   = (exit_price - entry_price) / entry_price * 100
+                            score = self._calculate_score(price_change)
+                            scores.append(score)
 
-                        price_change = (exit_price - entry_price) / entry_price * 100
-                        score = self._calculate_score(price_change)
-                        scores.append(score)
-
-            if len(scores) >= 10:
-                pattern_scores[pattern_name] = {
-                    'avg_score': float(np.mean(scores)),
-                    'max_score': float(np.max(scores)),
-                    'min_score': float(np.min(scores)),
-                    'std_score': float(np.std(scores)),
-                    'sample_count': len(scores)
-                }
+                if len(scores) >= self.min_samples:
+                    confidence = self._calculate_confidence(len(scores), float(np.std(scores)))
+                    pattern_scores[pattern_name] = {
+                        'avg_score': float(np.mean(scores)),
+                        'max_score': float(np.max(scores)),
+                        'min_score': float(np.min(scores)),
+                        'std_score': float(np.std(scores)),
+                        'sample_count': len(scores),
+                        'confidence_score': confidence
+                    }
 
         return pattern_scores
 
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
-        score = (price_change_percent / self.pct) * 100
+        score = (price_change_percent / self.rate_threshold) * 100
         return max(-100.0, min(100.0, score))
 
+    def _calculate_confidence(self, sample_count: int, std_score: float) -> float:
+        """신뢰도 계산"""
+        sample_factor = min(sample_count / 100.0, 1.0)
+        std_factor = max(1.0 - std_score / 50.0, 0.0)
+        return (sample_factor + std_factor) / 2.0
 
-class PatternRealtime:
+
+class CandlePatternRealtime:
     """실시간 패턴인식 및 학습된 점수 반환 모듈"""
-    def __init__(self, market_info: dict):
-        self.market_info      = market_info
-        self.strategy_type    = market_info['전략구분']
-        factor_list           = market_info['팩터목록'][0]
+    def __init__(self, factor_list: list, strategy_gubun: str):
+        """
+        초기화
+        :param factor_list: 팩터 리스트
+        :param strategy_gubun: 전략 구분
+        """
         self.idx_open         = factor_list.index('분봉시가')
         self.idx_high         = factor_list.index('분봉고가')
         self.idx_low          = factor_list.index('분봉저가')
         self.idx_close        = factor_list.index('현재가')
-        self.pattern_database = PatternDatabase(self.strategy_type)
+        self.pattern_database = CandlePatternDatabase(strategy_gubun)
         self.pattern_scores   = {}
         self._load_pattern_scores()
 
@@ -259,34 +277,16 @@ class PatternRealtime:
                 learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
                 if learned_score:
                     pattern_score = learned_score['avg_score']
-                    confidence_score = self._calculate_reliability(learned_score)
+                    confidence_score = learned_score['confidence_score']
 
         return pattern_score, confidence_score
 
-    def _calculate_reliability(self, score_data: Dict[str, float]) -> float:
-        """
-        점수 데이터의 신뢰도 계산
-        score_data: 학습된 점수 데이터
-        return: 신뢰도 (0 ~ 1)
-        """
-        sample_factor = min(score_data['sample_count'] / 100.0, 1.0)
-        std_factor = max(1.0 - score_data['std_score'] / 50.0, 0.0)
-        return (sample_factor + std_factor) / 2.0
 
-
-class PatternDatabase:
+class CandlePatternDatabase:
     """패턴 점수 데이터베이스 관리 클래스"""
-    def __init__(self, strategy_type: str):
-        self.strategy_type = strategy_type
-        self.table_name    = f'{strategy_type}_pattern_score'
-        self._ensure_db_directory()
+    def __init__(self, strategy_gubun: str):
+        self.table_name = f'{strategy_gubun}_pattern_score'
         self._initialize_tables()
-
-    def _ensure_db_directory(self):
-        """데이터베이스 디렉토리 생성"""
-        db_dir = os.path.dirname(PATTERN_DB)
-        if db_dir and not os.path.exists(db_dir):
-            os.makedirs(db_dir, exist_ok=True)
 
     def _initialize_tables(self):
         """데이터베이스 테이블 초기화"""
@@ -295,8 +295,8 @@ class PatternDatabase:
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS pattern_setting (
                     market INTEGER NOT NULL,
-                    minute INTEGER NOT NULL,
-                    pct INTEGER NOT NULL,
+                    analysis_period INTEGER NOT NULL,
+                    rate_threshold INTEGER NOT NULL,
                     PRIMARY KEY (market)
                 )
             ''')
@@ -309,6 +309,7 @@ class PatternDatabase:
                     min_score REAL NOT NULL,
                     std_score REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
+                    confidence_score REAL NOT NULL,
                     last_update TEXT NOT NULL,
                     PRIMARY KEY (code, pattern_name)
                 )
@@ -335,7 +336,7 @@ class PatternDatabase:
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT pattern_name, avg_score, max_score, min_score, std_score, sample_count
+                SELECT pattern_name, avg_score, max_score, min_score, std_score, sample_count, confidence_score
                 FROM {self.table_name}
                 WHERE code = ?
             ''', (code,))
@@ -348,7 +349,8 @@ class PatternDatabase:
                     'max_score': result[2],
                     'min_score': result[3],
                     'std_score': result[4],
-                    'sample_count': result[5]
+                    'sample_count': result[5],
+                    'confidence_score': result[6]
                 }
             return pattern_scores
 
@@ -365,8 +367,9 @@ class PatternDatabase:
             for pattern_name, scores in pattern_scores.items():
                 cursor.execute(f'''
                     INSERT OR REPLACE INTO {self.table_name} 
-                    (code, pattern_name, avg_score, max_score, min_score, std_score, sample_count, last_update)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (code, pattern_name, avg_score, max_score, min_score, std_score, sample_count,
+                    confidence_score, last_update)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     code,
                     pattern_name,
@@ -375,52 +378,55 @@ class PatternDatabase:
                     scores['min_score'],
                     scores['std_score'],
                     scores['sample_count'],
+                    scores['confidence_score'],
                     current_date
                 ))
             conn.commit()
 
     def load_pattern_setting(self, market: int) -> tuple:
         """
-        마켓번호로 패턴 설정값 불러오기
+        마켓번호로 설정값 불러오기
         market: 마켓번호 (1~9)
-        return: (minute, pct) 튜플, 데이터가 없으면 (30, 10) 반환
+        return: (analysis_period, rate_threshold) 튜플, 데이터가 없으면 (30, 10) 반환
         """
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT minute, pct FROM pattern_setting WHERE market = ?', (market,))
+            cursor.execute('SELECT analysis_period, rate_threshold FROM pattern_setting WHERE market = ?', (market,))
             result = cursor.fetchone()
             if result:
                 return result
             return 30, 10
 
-    def save_pattern_setting(self, market: int, minute: int, pct: int):
+    def save_pattern_setting(self, market: int, analysis_period: int, rate_threshold: int):
         """
-        마켓번호로 패턴 설정값 저장
+        마켓번호로 설정값 저장
         market: 마켓번호 (1~9)
-        minute: 분봉설정
-        pct: 퍼센트설정
+        analysis_period: 분봉설정
+        rate_threshold: 퍼센트설정
         """
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
-            cursor.execute('INSERT OR REPLACE INTO pattern_setting (market, minute, pct) VALUES (?, ?, ?)',
-                           (market, minute, pct))
+            cursor.execute(
+                'INSERT OR REPLACE INTO pattern_setting (market, analysis_period, rate_threshold) VALUES (?, ?, ?)',
+                (market, analysis_period, rate_threshold)
+            )
             conn.commit()
 
 
 def pattern_setting_load(ui):
     """두개의 콤보박스를 현재 거래소의 설정값으로 로딩한다."""
-    pattern_database = PatternDatabase(ui.market_info['전략구분'])
-    minute, pct = pattern_database.load_pattern_setting(ui.market_gubun)
-    ui.ptn_comboBoxxx_01.setCurrentText(str(minute))
-    ui.ptn_comboBoxxx_02.setCurrentText(str(pct))
+    pattern_database = CandlePatternDatabase(ui.market_info['전략구분'])
+    analysis_period, rate_threshold = pattern_database.load_pattern_setting(ui.market_gubun)
+    ui.ptn_comboBoxxx_01.setCurrentText(str(analysis_period))
+    ui.ptn_comboBoxxx_02.setCurrentText(str(rate_threshold))
 
 
 def pattern_setting_save(ui):
     """두개의 콤보박스 텍스트를 현재 거래소의 설정값으로 저장한다."""
-    minute = int(ui.ptn_comboBoxxx_01.currentText())
-    pct = int(ui.ptn_comboBoxxx_02.currentText())
-    pattern_database = PatternDatabase(ui.market_info['전략구분'])
-    pattern_database.save_pattern_setting(ui.market_gubun, minute, pct)
+    analysis_period  = int(ui.ptn_comboBoxxx_01.currentText())
+    rate_threshold   = int(ui.ptn_comboBoxxx_02.currentText())
+    pattern_database = CandlePatternDatabase(ui.market_info['전략구분'])
+    pattern_database.save_pattern_setting(ui.market_gubun, analysis_period, rate_threshold)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
@@ -429,6 +435,15 @@ def pattern_train(ui):
     if ui.learn_running:
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 패턴학습이 진행중입니다.\n')
         return
+
+    _analysis_period = int(ui.ptn_comboBoxxx_01.currentText())
+    _rate_threshold  = int(ui.ptn_comboBoxxx_02.currentText())
+    pattern_database = CandlePatternDatabase(ui.market_info['전략구분'])
+    analysis_period, rate_threshold = pattern_database.load_pattern_setting(ui.market_gubun)
+    if _analysis_period != analysis_period or _rate_threshold != rate_threshold:
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
+        return
+
     _pattern_train(ui)
 
 
@@ -436,8 +451,6 @@ def pattern_train(ui):
 def _pattern_train(ui):
     """스레드로 패턴학습을 시작한다."""
     ui.learn_running = True
-    minute = int(ui.ptn_comboBoxxx_01.currentText())
-    pct = int(ui.ptn_comboBoxxx_02.currentText())
-    pt_analyzer = AnalyzerPattern(ui.market_info, minute, pct)
+    pt_analyzer = AnalyzerCandlePattern(ui.market_gubun, ui.market_info)
     pt_analyzer.train_all_codes(ui.windowQ)
     ui.learn_running = False

@@ -504,15 +504,3 @@ def show_pattern_dialog(ui):
         ui.dialog_pattern.show()
     else:
         ui.dialog_pattern.close()
-
-
-def show_volume_dialog(ui):
-    from PyQt5.QtWidgets import QMessageBox
-
-    if not ui.dialog_volume.isVisible():
-        if ui.dict_set['타임프레임']:
-            QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1초스냅샷 상태입니다.\n볼륨 프로파일 학습은 1분봉 타임프레임만 지원합니다.\n')
-            return
-        ui.dialog_volume.show()
-    else:
-        ui.dialog_volume.close()

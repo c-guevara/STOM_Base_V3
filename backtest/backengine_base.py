@@ -7,8 +7,8 @@ from multiprocessing import shared_memory
 from strategy.analyzer_risk import AnalyzerRisk
 from strategy.stg_globals_func import StgGlobalsFunc
 from strategy.manager_formula import get_formula_data
-from strategy.analyzer_pattern import AnalyzerPattern
-from strategy.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_candle_pattern import AnalyzerCandlePattern
+from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from utility.settings.setting_base import DICT_INDICATOR, UI_NUM, BACK_TEMP, DB_STRATEGY, DB_SETTING
 from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
@@ -163,7 +163,7 @@ class BackEngineBase(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
-        self.pt_analyzer = AnalyzerPattern(self.market_info)
+        self.pt_analyzer = AnalyzerCandlePattern(self.market_info)
         self.vf_analyzer = AnalyzerVolumeProfile(self.market_info)
 
         self._set_passticks_and_blacklist()

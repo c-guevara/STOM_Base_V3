@@ -34,52 +34,83 @@ def auto_back_schedule(ui, gubun):
         gubun (int): 구분 번호 (0: 패턴학습확인, 1: 시작, 2: 스케줄러 표시)
     """
     from utility.static_method.static import qtest_qwait
+    from strategy.analyzer_volume_spike import spike_setting_load, spike_train
+    from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
+    from strategy.analyzer_candle_pattern import pattern_setting_load, pattern_train
+    from strategy.analyzer_volume_profile import volume_setting_load, volume_profile_train
+    from strategy.analyzer_volatility_pattern import volatility_setting_load, volatility_train
+    from ui.event_click.button_clicked_backtest_engine import backengine_show, backengine_start
+    from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_04, sdbutton_clicked_02
 
     if gubun == 0:
-        from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
-        from strategy.analyzer_pattern import pattern_setting_load, pattern_train
+        if ui.dict_set['캔들분석']:
+            ui.auto_mode = True
+            if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
+                ui.soundQ.put('예약된 캔들분석 학습을 시작합니다.')
+            if not ui.dialog_pattern.isVisible():
+                ui.dialog_pattern.show()
+            qtest_qwait(2)
+            pattern_setting_load(ui)
+            qtest_qwait(2)
+            pattern_train(ui)
+        else:
+            auto_back_schedule(ui, 0.2)
 
-        ui.auto_mode = True
-        if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
-            ui.soundQ.put('예약된 패턴학습을 시작합니다.')
-        if not ui.dialog_pattern.isVisible():
-            show_pattern_dialog(ui)
-        qtest_qwait(2)
-        pattern_setting_load(ui)
-        qtest_qwait(2)
-        pattern_train(ui)
+    elif gubun == 0.2:
+        if ui.dict_set['가격대분석']:
+            ui.auto_mode = True
+            if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
+                ui.soundQ.put('예약된 가격대분석 학습을 시작합니다.')
+            if not ui.dialog_pattern.isVisible():
+                ui.dialog_pattern.show()
+            qtest_qwait(2)
+            volume_setting_load(ui)
+            qtest_qwait(2)
+            volume_profile_train(ui)
+        else:
+            auto_back_schedule(ui, 0.4)
 
-    elif gubun == 0.5:
-        from ui.event_click.button_clicked_show_dialog import show_volume_dialog
-        from strategy.analyzer_volume_profile import volume_setting_load, volume_profile_train
+    elif gubun == 0.4:
+        if ui.dict_set['거래량분석']:
+            ui.auto_mode = True
+            if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
+                ui.soundQ.put('예약된 거래량분석 학습을 시작합니다.')
+            if not ui.dialog_pattern.isVisible():
+                ui.dialog_pattern.show()
+            qtest_qwait(2)
+            spike_setting_load(ui)
+            qtest_qwait(2)
+            spike_train(ui)
+        else:
+            auto_back_schedule(ui, 0.6)
 
-        ui.auto_mode = True
-        if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
-            ui.soundQ.put('예약된 볼륨 프로파일 학습을 시작합니다.')
-        if not ui.dialog_volume.isVisible():
-            show_volume_dialog(ui)
-        qtest_qwait(2)
-        volume_setting_load(ui)
-        qtest_qwait(2)
-        volume_profile_train(ui)
+    elif gubun == 0.6:
+        if ui.dict_set['변동성분석']:
+            ui.auto_mode = True
+            if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
+                ui.soundQ.put('예약된 변동성분석 학습을 시작합니다.')
+            if not ui.dialog_pattern.isVisible():
+                ui.dialog_pattern.show()
+            qtest_qwait(2)
+            volatility_setting_load(ui)
+            qtest_qwait(2)
+            volatility_train(ui)
+        else:
+            auto_back_schedule(ui, 1)
 
     elif gubun == 1:
-        from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
-        from ui.event_click.button_clicked_backtest_engine import backengine_show, backengine_start
-
         ui.auto_mode = True
+        if ui.dialog_pattern.isVisible():
+            ui.dialog_pattern.close()
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
             ui.soundQ.put('예약된 백테스트 스케쥴러를 시작합니다.')
-        if not ui.dialog_backengine.isVisible():
-            backengine_show(ui)
+        backengine_show(ui)
         qtest_qwait(2)
         backtest_engine_kill(ui)
         qtest_qwait(3)
         backengine_start(ui)
 
     elif gubun == 2:
-        from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_04, sdbutton_clicked_02
-
         if not ui.dialog_scheduler.isVisible():
             ui.dialog_scheduler.show()
         qtest_qwait(2)
@@ -291,3 +322,17 @@ def strategy_setting_label_change(ui):
     else:
         ui.sj_strgy_label_02.setText(
             '종목당투자금                          USDT                  ▣  전략중지 및 잔고청산   |')
+
+
+def pattern_setting_help(ui):
+    from ui.create_widget.set_text import pattern_text_list
+
+    if ui.dialog_pattern.focusWidget() == ui.ptn_pushButton_00:
+        text = pattern_text_list[0]
+    elif ui.dialog_pattern.focusWidget() == ui.vpf_pushButton_00:
+        text = pattern_text_list[1]
+    elif ui.dialog_pattern.focusWidget() == ui.vsp_pushButton_00:
+        text = pattern_text_list[2]
+    else:
+        text = pattern_text_list[3]
+    ui.ptn_labellllll_02.setText(text)

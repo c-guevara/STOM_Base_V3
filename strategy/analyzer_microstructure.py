@@ -500,7 +500,7 @@ class AnalyzerMicrostructure:
 
         # 상수 캐싱 (반복 생성 회피)
         self._depth_weights = np.array([0.35, 0.25, 0.20, 0.12, 0.08])  # 1~5단계 가중치
-        self._log_depth_ratio_threshold = np.log(self.params['depth_ratio_threshold'])
+        self._log_depth_rate_threshold = np.log(self.params['depth_rate_threshold'])
 
     def _setup_parameters(self):
         """분석 파라미터를 설정합니다."""
@@ -512,9 +512,9 @@ class AnalyzerMicrostructure:
                 'order_change_threshold': 0.8,      # 80% 변화 (높은 임계값)
                 'pump_price_threshold': 0.06,       # 6% 가격 변동
                 'imbalance_threshold': 0.25,        # 25% 불균형
-                'volume_spike_threshold': 3.0,      # 3배 거래량 급증
+                'volume_rate_threshold': 3.0,      # 3배 거래량 급증
                 'concentration_threshold': 0.6,     # 60% 집중도
-                'depth_ratio_threshold': 2.0,       # 깊이 비율 2.0
+                'depth_rate_threshold': 2.0,       # 깊이 비율 2.0
                 'pressure_threshold': 0.7,          # 압력 레벨 0.7
             }
         # 코인 1초 스냅샷 파라미터 (고빈도, 고변동성, 24시간)
@@ -525,9 +525,9 @@ class AnalyzerMicrostructure:
                 'order_change_threshold': 0.7,      # 70% 변화
                 'pump_price_threshold': 0.10,       # 10% 가격 변동 (코인은 변동성 큼)
                 'imbalance_threshold': 0.20,        # 20% 불균형
-                'volume_spike_threshold': 3.5,      # 3.5배 거래량 급증
+                'volume_rate_threshold': 3.5,      # 3.5배 거래량 급증
                 'concentration_threshold': 0.55,    # 55% 집중도
-                'depth_ratio_threshold': 1.6,       # 깊이 비율 1.6
+                'depth_rate_threshold': 1.6,       # 깊이 비율 1.6
                 'pressure_threshold': 0.65          # 압력 레벨 0.65
             }
         # 해외선물 1초 스냅샷 파라미터 (고빈도, 중간변동성, 24시간+레버리지)
@@ -538,9 +538,9 @@ class AnalyzerMicrostructure:
                 'order_change_threshold': 0.75,     # 75% 변화 (높은 임계값)
                 'pump_price_threshold': 0.07,       # 7% 가격 변동 (레버리지 고려)
                 'imbalance_threshold': 0.22,        # 22% 불균형
-                'volume_spike_threshold': 3.2,      # 3.2배 거래량 급증
+                'volume_rate_threshold': 3.2,      # 3.2배 거래량 급증
                 'concentration_threshold': 0.58,    # 58% 집중도
-                'depth_ratio_threshold': 1.8,       # 깊이 비율 1.8
+                'depth_rate_threshold': 1.8,       # 깊이 비율 1.8
                 'pressure_threshold': 0.68          # 압력 레벨 0.68
             }
 
@@ -754,7 +754,7 @@ class AnalyzerMicrostructure:
 
         # Numba 함수용 파라미터
         price_threshold = self.params['pump_price_threshold']
-        vol_threshold = self.params['volume_spike_threshold']
+        vol_threshold = self.params['volume_rate_threshold']
         window = 5
 
         results = _calc_detect_pump_dump(prices, volumes, price_threshold, vol_threshold, window)
@@ -934,7 +934,7 @@ class AnalyzerMicrostructure:
         imbalance_risk = abs(self.curr_data['imbalance'])
 
         # 깊이 리스크 (깊이 비율이 임계값에서 멀어질수록 위험)
-        depth_risk = min(abs(1 - self.curr_data['depth_ratio']) / self.params['depth_ratio_threshold'], 1.0)
+        depth_risk = min(abs(1 - self.curr_data['depth_ratio']) / self.params['depth_rate_threshold'], 1.0)
 
         return (imbalance_risk + depth_risk) / 2
 
@@ -991,7 +991,7 @@ class AnalyzerMicrostructure:
         depth_ratio = self.curr_data['depth_ratio']
         bid_concentration = self.curr_data['bid_concentration']
         ask_concentration = self.curr_data['ask_concentration']
-        log_depth_ratio = np.log(depth_ratio) / self._log_depth_ratio_threshold if depth_ratio > 0 else 0
+        log_depth_ratio = np.log(depth_ratio) / self._log_depth_rate_threshold if depth_ratio > 0 else 0
         weighted_depth_ratio = self.curr_data['weighted_depth_ratio']
 
         # 매수 흐름 강도 계산 (연속적인 0.0~1.0 값)
@@ -1051,10 +1051,10 @@ class AnalyzerMicrostructure:
 
         if signal == 'buy':
             trend_confidence = min(max(0.01, imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.15
-            depth_confidence = min(max(0.01, depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.15
+            depth_confidence = min(max(0.01, depth_ratio * (self.params['depth_rate_threshold'] * 0.1)), 1.0) * 0.15
         else:
             trend_confidence = min(max(0.01, -imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.15
-            depth_confidence = min(max(0.01, 1 - depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.15
+            depth_confidence = min(max(0.01, 1 - depth_ratio * (self.params['depth_rate_threshold'] * 0.1)), 1.0) * 0.15
 
         pressure_confidence = min(max(0.01, pressure_level * (1 / self.params['pressure_threshold'])), 1.0) * 0.15
         risk_confidence = min(max(0.01, 1 - total_risk), 1.0) * 0.15

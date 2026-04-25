@@ -8,8 +8,8 @@ from traceback import format_exc
 from strategy.analyzer_risk import AnalyzerRisk
 from strategy.stg_globals_func import StgGlobalsFunc
 from strategy.manager_formula import get_formula_data
-from strategy.analyzer_pattern import AnalyzerPattern
-from strategy.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_candle_pattern import AnalyzerCandlePattern
+from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from utility.settings.setting_base import DICT_INDICATOR, DB_SETTING
 from utility.settings.setting_base import DB_STRATEGY, UI_NUM, DICT_ORDER_RATIO
@@ -113,7 +113,7 @@ class BaseStrategy(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
-        self.pt_analyzer = AnalyzerPattern(self.market_info)
+        self.pt_analyzer = AnalyzerCandlePattern(self.market_info)
         self.vf_analyzer = AnalyzerVolumeProfile(self.market_info)
 
         set_builtin_print(self.windowQ)

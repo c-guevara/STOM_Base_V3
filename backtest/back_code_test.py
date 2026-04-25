@@ -2,7 +2,7 @@
 import re
 from traceback import format_exc
 from PyQt5.QtCore import QThread
-from strategy.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from utility.settings.setting_base import DICT_INDICATOR, UI_NUM
 # noinspection PyUnresolvedReferences
 from utility.static_method.static import timedelta_sec, qtest_qwait, now

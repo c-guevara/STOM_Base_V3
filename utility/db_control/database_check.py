@@ -55,24 +55,23 @@ STG_DATA = [
 ]
 
 BACT_CLOUMNS = [
-    'index', '블랙리스트추가', '백테주문관리적용', '백테매수시간기준', '백테일괄로딩', '그래프저장하지않기', '그래프띄우지않기', '디비자동관리',
-    '교차검증가중치', '기준값최소상승률', '백테스케쥴실행', '백테스케쥴요일', '백테스케쥴시간', '백테스케쥴명', '백테날짜고정', '백테날짜',
-    '최적화기준값제한', '백테엔진분류방법', '옵튜나샘플러', '옵튜나고정변수', '옵튜나실행횟수', '옵튜나자동스탭', '범위자동관리', '보조지표설정',
-    '백테스트로그기록안함', '시장미시구조분석', '리스크분석', '자동학습', '패턴분석', '가격대분석'
+    'index', '블랙리스트추가', '백테일괄로딩', '디비자동관리', '자동학습', '백테주문관리적용', '교차검증가중치', '범위자동관리',
+    '백테매수시간기준', '백테스트로그기록안함', '그래프저장하지않기', '그래프띄우지않기', '시장미시구조분석', '리스크분석', '캔들분석', '가격대분석',
+    '거래량분석', '변동성분석' '기준값최소상승률', '백테스케쥴실행', '백테스케쥴요일', '백테스케쥴시간', '백테스케쥴명', '백테날짜고정',
+    '백테날짜', '최적화기준값제한', '백테엔진분류방법', '옵튜나샘플러', '옵튜나고정변수', '옵튜나실행횟수', '옵튜나자동스탭', '보조지표설정'
 ]
 
 BACT_DATA_BASE = [
-    0, 0, 0, 1, 0, 0, 1, 1, 2, 0, 4, 160000, '', 0, '365',
+    0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 4, 160000, '', 0, '365',
     '0.0;1000.0;0;100.0;0.0;100.0;-10.0;10.0;0.0;1000.0;-10000.0;10000.0;0.0;100.0',
-    '종목코드별 분류', 'TPESampler', '', 0, 0, 0,
-    '3;10;14;12;26;0;14;14;5;2;2;0;14;14;12;26;9;14;10;12;26;0;10;14;0.02;0.2;5;3;0;3;0;5;3;0;14',
-    0, 0, 0, 0, 0, 0
+    '종목코드별 분류', 'TPESampler', '', 0, 0,
+    '3;10;14;12;26;0;14;14;5;2;2;0;14;14;12;26;9;14;10;12;26;0;10;14;0.02;0.2;5;3;0;3;0;5;3;0;14'
 ]
 BACT_DATA = [[i+1] + BACT_DATA_BASE for i in range(18)]
 
 ETC_CLOUMNS = [
-    'index', '테마', '저해상도', '휴무프로세스종료', '휴무컴퓨터종료', '창위치기억', '창위치', '스톰라이브', '프로그램종료', '웹대시보드',
-    '웹대시보드포트번호', '팩터선택', '시가총액상위제외목록', '시리얼키'
+    'index', '테마', '저해상도', '스톰라이브', '휴무프로세스종료', '휴무컴퓨터종료', '웹대시보드', '웹대시보드포트번호', '창위치기억',
+    '프로그램종료', '팩터선택', '시가총액상위제외목록', '시리얼키'
 ]
 EXCLUSION_LIST = [
     '000150', '000270', '000660', '000720', '000810', '003230', '003550', '003670', '005380', '005490',
@@ -85,7 +84,7 @@ EXCLUSION_LIST = [
     '316140', '323410', '329180', '352820', '373220', '402340', '443060'
 ]
 ETC_DATA_BASE = [
-    '다크블루', 0, 1, 1, 1, '', 1, 1, 0, 3000, ';'.join(['1'] * 38), ';'.join(EXCLUSION_LIST), ''
+    '다크블루', 0, 1, 1, 1, 0, 3000, 1, 1, ';'.join(['1'] * 38), ';'.join(EXCLUSION_LIST), ''
 ]
 ETC_DATA = [[i+1] + ETC_DATA_BASE for i in range(18)]
 
@@ -141,34 +140,74 @@ def database_check():
         if 'main' not in table_list:
             df = pd.DataFrame(MAIN_DATA, columns=MAIN_CLOUMNS).set_index('index')
             df.to_sql('main', con)
+        else:
+            df = pd.read_sql('SELECT * FROM main', con)
+            if list(df.columns) != MAIN_CLOUMNS:
+                df = pd.DataFrame(MAIN_DATA, columns=MAIN_CLOUMNS).set_index('index')
+                df.to_sql('main', con, if_exists='replace')
 
         if 'account' not in table_list:
             df = pd.DataFrame(ACCOUNT_DATA, columns=ACCOUNT_CLOUMNS).set_index('index')
             df.to_sql('account', con)
+        else:
+            df = pd.read_sql('SELECT * FROM account', con)
+            if list(df.columns) != ACCOUNT_CLOUMNS:
+                df = pd.DataFrame(ACCOUNT_DATA, columns=ACCOUNT_CLOUMNS).set_index('index')
+                df.to_sql('account', con, if_exists='replace')
 
         if 'telegram' not in table_list:
             df = pd.DataFrame(TELE_DATA, columns=TELE_CLOUMNS).set_index('index')
             df.to_sql('telegram', con)
+        else:
+            df = pd.read_sql('SELECT * FROM telegram', con)
+            if list(df.columns) != TELE_CLOUMNS:
+                df = pd.DataFrame(TELE_DATA, columns=TELE_CLOUMNS).set_index('index')
+                df.to_sql('telegram', con, if_exists='replace')
 
         if 'strategy' not in table_list:
             df = pd.DataFrame(STG_DATA, columns=STG_CLOUMNS).set_index('index')
             df.to_sql('strategy', con)
+        else:
+            df = pd.read_sql('SELECT * FROM strategy', con)
+            if list(df.columns) != STG_CLOUMNS:
+                df = pd.DataFrame(STG_DATA, columns=STG_CLOUMNS).set_index('index')
+                df.to_sql('strategy', con, if_exists='replace')
 
         if 'back' not in table_list:
             df = pd.DataFrame(BACT_DATA, columns=BACT_CLOUMNS).set_index('index')
             df.to_sql('back', con)
+        else:
+            df = pd.read_sql('SELECT * FROM back', con)
+            if list(df.columns) != BACT_CLOUMNS:
+                df = pd.DataFrame(BACT_DATA, columns=BACT_CLOUMNS).set_index('index')
+                df.to_sql('back', con, if_exists='replace')
 
         if 'etc' not in table_list:
             df = pd.DataFrame(ETC_DATA, columns=ETC_CLOUMNS).set_index('index')
             df.to_sql('etc', con)
+        else:
+            df = pd.read_sql('SELECT * FROM etc', con)
+            if list(df.columns) != ETC_CLOUMNS:
+                df = pd.DataFrame(ETC_DATA, columns=ETC_CLOUMNS).set_index('index')
+                df.to_sql('etc', con, if_exists='replace')
 
         if 'buyorder' not in table_list:
             df = pd.DataFrame(BORDER_DATA, columns=BORDER_CLOUMNS).set_index('index')
             df.to_sql('buyorder', con)
+        else:
+            df = pd.read_sql('SELECT * FROM buyorder', con)
+            if list(df.columns) != BORDER_CLOUMNS:
+                df = pd.DataFrame(BORDER_DATA, columns=BORDER_CLOUMNS).set_index('index')
+                df.to_sql('buyorder', con, if_exists='replace')
 
         if 'sellorder' not in table_list:
             df = pd.DataFrame(SORDER_DATA, columns=SORDER_CLOUMNS).set_index('index')
             df.to_sql('sellorder', con)
+        else:
+            df = pd.read_sql('SELECT * FROM sellorder', con)
+            if list(df.columns) != SORDER_CLOUMNS:
+                df = pd.DataFrame(SORDER_DATA, columns=SORDER_CLOUMNS).set_index('index')
+                df.to_sql('sellorder', con, if_exists='replace')
 
         con.close()
 

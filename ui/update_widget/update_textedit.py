@@ -76,15 +76,18 @@ class UpdateTextedit:
                 text = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', text)
                 self.ui.log_system_textedit.append(text)
 
-            elif gubun == UI_NUM['패턴학습']:
+            elif gubun == UI_NUM['학습로그']:
                 self.ui.ptn_textEdittt_01.append(text)
-                if self.ui.auto_mode and '전체 종목 패턴 학습 완료' in text:
+                if self.ui.auto_mode and '캔들분석 학습 완료' in text:
                     qtest_qwait(2)
-                    auto_back_schedule(self.ui, 0.5)
-
-            elif gubun == UI_NUM['볼륨학습']:
-                self.ui.vpf_textEdittt_01.append(text)
-                if self.ui.auto_mode and '전체 종목 볼륨 프로파일 학습 완료' in text:
+                    auto_back_schedule(self.ui, 0.2)
+                elif self.ui.auto_mode and '가격대분석 학습 완료' in text:
+                    qtest_qwait(2)
+                    auto_back_schedule(self.ui, 0.4)
+                elif self.ui.auto_mode and '거래량분석 학습 완료' in text:
+                    qtest_qwait(2)
+                    auto_back_schedule(self.ui, 0.6)
+                elif self.ui.auto_mode and '변동성분석 학습 완료' in text:
                     qtest_qwait(2)
                     auto_back_schedule(self.ui, 1)
 
