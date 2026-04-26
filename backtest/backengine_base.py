@@ -165,10 +165,10 @@ class BackEngineBase(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
-        self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info)
-        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info)
-        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info)
-        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info)
+        self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info, backtest=True)
+        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, backtest=True)
+        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, backtest=True)
+        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, backtest=True)
 
         self._set_passticks_and_blacklist()
 

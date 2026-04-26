@@ -41,7 +41,7 @@ class SetSetupTap:
         self.ui.sj_bs_groupBox_04 = self.wc.setQGroupBox(' 전략설정', self.ui.ssd_tab, hover=True)
         self.ui.sj_bs_groupBox_05 = self.wc.setQGroupBox(' 백테설정', self.ui.ssd_tab, hover=True)
         self.ui.sj_bs_groupBox_06 = self.wc.setQGroupBox(' 기타설정', self.ui.ssd_tab, hover=True)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         from utility.settings.setting_market import DICT_MARKET_GUBUN
@@ -58,7 +58,7 @@ class SetSetupTap:
         self.ui.sj_lvrg_Button_01 = self.wc.setPushbutton('레버리지 유형 설정', parent=self.ui.sj_bs_groupBox_01, click=lambda: lvbutton_clicked_01(self.ui), tip='바이낸스 선물 레버리지를 고정, 변동 형태 중 선택하여 설정한다.')
         self.ui.sj_main_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['격리', '교차'], activated=activated_stg.activated_10)
         self.ui.sj_main_comBox_04 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['단방향', '양방향'], activated=activated_stg.activated_11)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         text = '▣  access key                                                                                  ' \
@@ -66,7 +66,7 @@ class SetSetupTap:
         self.ui.sj_accc_labell_01 = QLabel(text, self.ui.sj_bs_groupBox_02)
         self.ui.sj_accc_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_02, passhide=True)
         self.ui.sj_accc_liEdit_02 = self.wc.setLineedit(self.ui.sj_bs_groupBox_02, passhide=True)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         text = '▣  bot token                                                                                   ' \
@@ -74,7 +74,7 @@ class SetSetupTap:
         self.ui.sj_tele_labell_01 = QLabel(text, self.ui.sj_bs_groupBox_03)
         self.ui.sj_tele_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_03, passhide=True)
         self.ui.sj_tele_liEdit_02 = self.wc.setLineedit(self.ui.sj_bs_groupBox_03, passhide=True)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         text = '▣  매수전략                                       ' \
@@ -100,7 +100,7 @@ class SetSetupTap:
         self.ui.sj_strgy_lEdit_05 = self.wc.setLineedit(self.ui.sj_bs_groupBox_04)
         self.ui.sj_strgy_ckBox_06 = self.wc.setCheckBox('수익중지 - 총자산 대비 수익률 (+)           %', self.ui.sj_bs_groupBox_04)
         self.ui.sj_strgy_lEdit_06 = self.wc.setLineedit(self.ui.sj_bs_groupBox_04)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         self.ui.sj_back_cheBox_01 = self.wc.setCheckBox('백테스트 시 거래횟수 10회 이상이며 수익금이 마이너스일 경우 블랙리스트에 추가하기', self.ui.sj_bs_groupBox_05)
@@ -121,7 +121,7 @@ class SetSetupTap:
         self.ui.sj_back_liEdit_02 = self.wc.setLineedit(self.ui.sj_bs_groupBox_05)
         self.ui.sj_back_cheBox_08 = self.wc.setCheckBox('고정', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_08(self.ui, state))
         self.ui.sj_back_daEdit_01 = self.wc.setDateEdit(self.ui.sj_bs_groupBox_05)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         self.ui.sj_back_cheBox_09 = self.wc.setCheckBox('백테스트에 주문관리 설정 적용하기(최유리 및 IOC 주문 제외)', self.ui.sj_bs_groupBox_05, tip='설정 변경 시 백테엔진을 재로딩해야 합니다. 체크해제 시 시장가 호가범위선택 및 비중조절은 적용됨')
@@ -134,7 +134,7 @@ class SetSetupTap:
         self.ui.sj_back_cheBox_13 = self.wc.setCheckBox('백테스트로그 기록하지 않기', self.ui.sj_bs_groupBox_05)
         self.ui.sj_back_cheBox_14 = self.wc.setCheckBox('일반 백테스트 시 그래프 저장하지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_04(self.ui, state))
         self.ui.sj_back_cheBox_15 = self.wc.setCheckBox('띄우지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_05(self.ui, state))
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         tip_text = "시장미시구조(microstructure)분석은 호가 데이터를 기반으로\n"\
@@ -162,7 +162,7 @@ class SetSetupTap:
                    "단위 분할한 변동성별로 이후의 가격 움직임을 분석하여\n"\
                    "변동성점수(+100~-100) 및 변동성신뢰도(0~1)를 리턴합니다."
         self.ui.sj_back_cheBox_21 = self.wc.setCheckBox('1분봉 전략에 변동성분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         self.ui.sj_etc_labelll_01 = QLabel('▣  UI 테마 선택                                  (재구동 후 적용)', self.ui.sj_bs_groupBox_06)
@@ -179,7 +179,7 @@ class SetSetupTap:
         self.ui.sj_etc_labelll_02 = QLabel('▣  시리얼키', self.ui.sj_bs_groupBox_06)
         self.ui.sj_etc_liEditt_02 = self.wc.setLineedit(self.ui.sj_bs_groupBox_06, passhide=True)
         self.ui.sj_etc_daEditt_01 = self.wc.setDateEdit(self.ui.sj_bs_groupBox_06, popup=False)
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         self.ui.sj_load_Button_01 = self.wc.setPushbutton('불러오기', parent=self.ui.sj_bs_groupBox_01, click=lambda: setting_load_01(self.ui))
@@ -199,7 +199,7 @@ class SetSetupTap:
         self.ui.sj_etc_pButton_01 = self.wc.setPushbutton('계정 텍스트 보기', parent=self.ui.sj_bs_groupBox_01, click=lambda: setting_acc_view(self.ui))
         self.ui.sj_etc_pButton_02 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_passticks(self.ui))
         self.ui.sj_etc_pButton_03 = self.wc.setPushbutton('각종 분석 학습', parent=self.ui.sj_bs_groupBox_05, click=lambda: show_pattern_dialog(self.ui))
-        
+
         # --------------------------------------------------------------------------------------------------------------
 
         self.ui.set_tapWidgett_01.setGeometry(7, 10, 1341, 742)
