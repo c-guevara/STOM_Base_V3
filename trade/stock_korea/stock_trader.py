@@ -6,7 +6,10 @@ from PyQt5.QtWidgets import QApplication
 from trade.base_trader import BaseTrader
 from trade.restapi_lsdata import LsRestData
 from utility.settings.setting_base import UI_NUM
-from utility.static_method.static import now, timedelta_sec, get_profit_stock, get_hogaunit_stock, error_decorator
+from utility.static_method.static_numba import get_profit_stock
+from utility.static_method.static_decorator import error_decorator
+from utility.static_method.static_datetime import now, timedelta_sec
+from utility.static_method.static_etcetera import get_hogaunit_stock
 
 
 class StockTrader(BaseTrader):

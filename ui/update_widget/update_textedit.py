@@ -1,13 +1,14 @@
-
 import re
 from ui.event_activate import activated_stg
 from utility.settings.setting_base import UI_NUM
 from ui.etcetera.process_starter import auto_back_schedule
+from utility.static_method.static_etcetera import qtest_qwait
+from utility.static_method.static_decorator import error_decorator
 from ui.event_click.button_clicked_stg_editer import backtest_detail
+from utility.static_method.static_datetime import now, now_cme, str_hms
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_02
 from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
-from utility.static_method.static import now, qtest_qwait, now_cme, error_decorator
 from ui.create_widget.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
 from ui.event_click.button_clicked_database import dbbutton_clicked_08, dbbutton_clicked_09
 
@@ -215,7 +216,6 @@ class UpdateTextedit:
         Args:
             force: 강제 종료 여부
         """
-        from utility.static_method.static import str_hms
         if self.ui.dict_set['백테스케쥴실행'] and now().weekday() == self.ui.dict_set['백테스케쥴요일']:
             if self.ui.dict_set['알림소리']:
                 self.ui.soundQ.put('오늘은 백테 스케쥴러의 실행이 예약되어 있어 프로그램을 종료하지 않습니다.')
@@ -238,7 +238,7 @@ class UpdateTextedit:
 
 
 def _auto_learn_running(ui, gubun):
-    from utility.static_method.static import qtest_qwait
+    from utility.static_method.static_etcetera import qtest_qwait
     from strategy.analyzer_volume_spike import spike_setting_load, spike_train
     from strategy.analyzer_candle_pattern import pattern_setting_load, pattern_train
     from strategy.analyzer_volume_profile import volume_setting_load, volume_profile_train

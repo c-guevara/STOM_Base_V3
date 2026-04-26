@@ -11,15 +11,17 @@ class ImportProgressHook:
             'ui.set_style',
 
             'utility.settings.setting_user',
-            'utility.settings.setting_base',
             'utility.sub_process_and_thread.timesync',
+            'utility.static_method.static_etcetera',
             'utility.db_control.database_read_only',
             'utility.sub_process_and_thread.webcrawling',
+            'utility.static_method.static_datetime',
+            'utility.static_method.static_decorator',
             'utility.sub_process_and_thread.telegram_bot',
             'utility.sub_process_and_thread.pyttsx_sound',
+            'utility.settings.setting_base',
             'utility.sub_process_and_thread.chart_hoga_query',
-            'utility.static_method.static',
-
+            
             'ui.create_widget.set_icon',
             'ui.create_widget.set_table',
             'ui.create_widget.set_log_tap',
@@ -34,7 +36,7 @@ class ImportProgressHook:
             'ui.create_widget.set_dialog_chart',
             'ui.create_widget.set_dialog_formula',
             'ui.create_widget.set_dialog_strategy',
-
+            
             'ui.draw_chart.draw_treemap',
             'ui.draw_chart.draw_chart_db',
             'ui.etcetera.load_database',
@@ -48,12 +50,12 @@ class ImportProgressHook:
             'ui.update_widget.update_tablewidget',
             'ui.update_widget.update_telegram_msg',
             'ui.event_click.button_clicked_settings',
-            'ui.update_widget.update_crawling_date',
+            'ui.update_widget.update_crawling_data',
             'ui.event_keypress.overwrite_keypress_event',
             'ui.event_keypress.overwrite_event_filter',
             'ui.etcetera.process_alive',
             'ui.update_widget.update_progressbar',
-            'ui.event_click.button_clicked_backtest_engine'
+            'ui.event_click.button_clicked_backtest_engine',
         ]
         self.total_modules = len(self.modules)
         self.current_index = 0

@@ -215,8 +215,8 @@ def dialog_chart_show(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
-    from utility.static_method.static import str_hms, dt_hms
     from ui.create_widget.dialog_animation import DialogAnimator
+    from utility.static_method.static_datetime import str_hms, dt_hms
     from ui.event_click.button_clicked_chart_count import chart_count_change
 
     ui.ct_pushButtonnn_05.setText('CHART III')

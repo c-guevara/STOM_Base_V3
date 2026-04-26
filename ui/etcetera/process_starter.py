@@ -1,5 +1,5 @@
 
-from utility.static_method.static import thread_decorator
+from utility.static_method.static_decorator import thread_decorator
 
 
 def process_starter(ui):
@@ -8,7 +8,7 @@ def process_starter(ui):
     Args:
         ui: UI 객체
     """
-    from utility.static_method.static import now, str_hms
+    from utility.static_method.static_datetime import now, str_hms
     from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_03
 
     inthms = int(str_hms())
@@ -33,7 +33,7 @@ def auto_back_schedule(ui, gubun):
         ui: UI 객체
         gubun (int): 구분 번호 (0: 패턴학습확인, 1: 시작, 2: 스케줄러 표시)
     """
-    from utility.static_method.static import qtest_qwait
+    from utility.static_method.static_etcetera import qtest_qwait
     from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
     from ui.event_click.button_clicked_backtest_engine import backengine_show, backengine_start
     from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_04, sdbutton_clicked_02
@@ -70,7 +70,7 @@ def _update_window_title(ui):
     Args:
         ui: UI 객체
     """
-    from utility.static_method.static import now_utc, now_cme, str_ymdhms_ios
+    from utility.static_method.static_datetime import now_utc, now_cme, str_ymdhms_ios
     market_text = ui.dict_set['거래소']
     data_type = '1초스냅샷' if ui.dict_set['타임프레임'] else '1분봉'
     trade_type = '모의' if ui.dict_set['모의투자'] else '실전'

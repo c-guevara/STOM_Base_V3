@@ -2,7 +2,7 @@
 from backtest.back_static import get_trade_info
 from backtest.backengine_base import BackEngineBase
 from utility.settings.setting_base import DICT_ORDER_RATIO
-from utility.static_method.static import timedelta_sec, dt_ymdhms, dt_ymdhm
+from utility.static_method.static_datetime import timedelta_sec, dt_ymdhms, dt_ymdhm
 
 
 class BackEngineBaseOms(BackEngineBase):

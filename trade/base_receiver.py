@@ -5,7 +5,8 @@ import pandas as pd
 from trade.restapi_ls import LsRestData
 from utility.settings.setting_base import UI_NUM
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.static_method.static import now, timedelta_sec, get_inthms, get_vi_price, qtest_qwait
+from utility.static_method.static_etcetera import get_vi_price, qtest_qwait
+from utility.static_method.static_datetime import now, timedelta_sec, get_inthms
 
 
 class MonitorReceivQ(QThread):

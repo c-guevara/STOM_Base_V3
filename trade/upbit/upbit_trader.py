@@ -4,9 +4,11 @@ from PyQt5.QtCore import QTimer
 from trade.base_trader import BaseTrader
 from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import UI_NUM
+from utility.static_method.static_numba import get_profit_coin
 from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
-from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, \
-    error_decorator
+from utility.static_method.static_decorator import error_decorator
+from utility.static_method.static_etcetera import get_hogaunit_coin
+from utility.static_method.static_datetime import now, timedelta_sec, str_ymdhms_utc
 
 
 class UpbitTrader(BaseTrader):

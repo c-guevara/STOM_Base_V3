@@ -38,9 +38,9 @@ def buy_stg_save(ui):
     from ui.create_widget.set_style import style_bc_st
     from ui.create_widget.set_text import famous_saying
     from PyQt5.QtWidgets import QMessageBox, QApplication
-    from utility.static_method.static import text_not_in_special_characters
     from ui.event_click.button_clicked_varstext_change import get_fix_strategy
     from utility.static_method.strategy_version_manager import stg_save_version
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     strategy_name = ui.svjb_lineEditt_01.text()
     strategy = ui.ss_textEditttt_01.toPlainText()

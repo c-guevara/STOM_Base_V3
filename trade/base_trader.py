@@ -2,12 +2,12 @@
 import sqlite3
 import pandas as pd
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.static_method.static import qtest_qwait
 from utility.settings.setting_base import DB_TRADELIST
+from utility.static_method.static_etcetera import qtest_qwait
 from utility.settings.setting_base import UI_NUM, COLUMNS_CG, COLUMNS_JG, COLUMNS_TD, COLUMNS_TDF, COLUMNS_JGF, \
     COLUMNS_JGCF
-from utility.static_method.static import now, str_hms, str_ymd, dt_hms, timedelta_sec, get_inthms, get_str_ymdhms, \
-    get_str_ymdhmsf
+from utility.static_method.static_datetime import now, str_hms, str_ymd, dt_hms, timedelta_sec, get_inthms, \
+    get_str_ymdhms, get_str_ymdhmsf
 
 
 class MonitorTraderQ(QThread):

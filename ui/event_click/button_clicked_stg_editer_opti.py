@@ -35,9 +35,9 @@ def opti_buy_save(ui):
     from PyQt5.QtCore import Qt
     from ui.create_widget.set_text import famous_saying
     from PyQt5.QtWidgets import QMessageBox, QApplication
-    from utility.static_method.static import text_not_in_special_characters
     from ui.event_click.button_clicked_varstext_change import get_fix_strategy
     from utility.static_method.strategy_version_manager import stg_save_version
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     if ui.ss_textEditttt_03.isVisible():
         strategy_name = ui.svc_lineEdittt_01.text()
@@ -102,8 +102,8 @@ def opti_vars_save(ui):
     from PyQt5.QtCore import Qt
     from ui.create_widget.set_text import famous_saying
     from PyQt5.QtWidgets import QMessageBox, QApplication
-    from utility.static_method.static import text_not_in_special_characters
     from utility.static_method.strategy_version_manager import stg_save_version
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     if ui.ss_textEditttt_05.isVisible():
         strategy_name = ui.svc_lineEdittt_02.text()
@@ -160,9 +160,9 @@ def opti_sell_save(ui):
     from PyQt5.QtCore import Qt
     from ui.create_widget.set_text import famous_saying
     from PyQt5.QtWidgets import QMessageBox, QApplication
-    from utility.static_method.static import text_not_in_special_characters
     from ui.event_click.button_clicked_varstext_change import get_fix_strategy
     from utility.static_method.strategy_version_manager import stg_save_version
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     if ui.ss_textEditttt_04.isVisible():
         strategy_name = ui.svc_lineEdittt_03.text()
@@ -256,7 +256,7 @@ def opti_to_buy_save(ui):
     """
     from traceback import format_exc
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import text_not_in_special_characters
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_01.currentText()
@@ -300,7 +300,7 @@ def opti_to_sell_save(ui):
     """
     from traceback import format_exc
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import text_not_in_special_characters
+    from utility.static_method.static_etcetera import text_not_in_special_characters
 
     tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_08.currentText()

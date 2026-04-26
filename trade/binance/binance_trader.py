@@ -5,8 +5,9 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from trade.base_trader import BaseTrader
 from utility.settings.setting_base import UI_NUM
-from utility.static_method.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, \
-    get_str_ymdhms, error_decorator
+from utility.static_method.static_decorator import error_decorator
+from utility.static_method.static_datetime import now, timedelta_sec, get_str_ymdhms
+from utility.static_method.static_numba import get_profit_coin_future_short, get_profit_coin_future_long
 
 
 class BinanceTrader(BaseTrader):

@@ -3,7 +3,7 @@ import os
 import sqlite3
 import pandas as pd
 from traceback import format_exc
-from utility.static_method.static import read_key, write_key
+from utility.static_method.static_fernet_key import read_key, write_key
 from utility.settings.setting_base import CODE_INFO_TABLES, DB_PATH, LOG_PATH, BACK_TEMP, GRAPH_PATH, DB_SETTING, \
     DB_CODE_INFO, DB_STRATEGY, DB_TRADELIST
 

@@ -5,7 +5,7 @@ def bebutton_clicked_01(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import qtest_qwait
+    from utility.static_method.static_etcetera import qtest_qwait
     from ui.event_click.button_clicked_backtest_engine import backengine_start
 
     if ui.backengine_starting:

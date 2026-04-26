@@ -4,7 +4,7 @@ def setting_load_01(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
-    from utility.static_method.static import de_text
+    from utility.static_method.static_fernet_key import de_text
 
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
     ui.sj_main_comBox_01.setCurrentText(df['거래소'][0])
@@ -23,7 +23,7 @@ def setting_load_02(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import de_text
+    from utility.static_method.static_fernet_key import de_text
 
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM account').set_index('index')
     no = int(ui.dict_set['거래소'][-2:])
@@ -45,7 +45,7 @@ def setting_load_03(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import de_text
+    from utility.static_method.static_fernet_key import de_text
 
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM telegram').set_index('index')
     no = int(ui.dict_set['거래소'][-2:])
@@ -187,7 +187,7 @@ def setting_load_06(ui):
     Args:
         ui: UI 클래스 인스턴스
     """
-    from utility.static_method.static import de_text
+    from utility.static_method.static_fernet_key import de_text
 
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM etc').set_index('index')
     no = int(ui.dict_set['거래소'][-2:])
@@ -222,7 +222,8 @@ def setting_save_01(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import en_text, qtest_qwait
+    from utility.static_method.static_fernet_key import en_text
+    from utility.static_method.static_etcetera import qtest_qwait
 
     이전거래소 = ui.dict_set['거래소']
     이전타임프레임 = ui.dict_set['타임프레임']
@@ -289,7 +290,7 @@ def setting_save_02(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import en_text
+    from utility.static_method.static_fernet_key import en_text
 
     access_key = ui.sj_accc_liEdit_01.text()
     secret_key = ui.sj_accc_liEdit_02.text()
@@ -314,7 +315,7 @@ def setting_save_03(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import en_text
+    from utility.static_method.static_fernet_key import en_text
 
     bot_token = ui.sj_tele_liEdit_01.text()
     chatingid = ui.sj_tele_liEdit_02.text()
@@ -460,7 +461,7 @@ def setting_save_06(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtWidgets import QMessageBox
-    from utility.static_method.static import en_text
+    from utility.static_method.static_fernet_key import en_text
 
     테마 = ui.sj_etc_comBoxx_01.currentText()
     저해상도 = 1 if ui.sj_etc_checBox_01.isChecked() else 0
@@ -889,7 +890,7 @@ def setting_all_app(ui):
     from PyQt5.QtWidgets import QMessageBox
     from utility.settings.setting_base import DB_PATH
     from ui.create_widget.set_text import famous_saying
-    from utility.static_method.static import qtest_qwait
+    from utility.static_method.static_etcetera import qtest_qwait
 
     name = ui.sj_set_comBoxx_01.currentText()
     if name == '':

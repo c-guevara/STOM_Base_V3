@@ -9,6 +9,9 @@ from strategy.analyzer_risk import AnalyzerRisk
 from strategy.stg_globals_func import StgGlobalsFunc
 from strategy.manager_formula import get_formula_data
 from strategy.analyzer_volume_spike import AnalyzerVolumeSpike
+from utility.static_method.static_etcetera import get_ema_list
+from utility.static_method.static_indicator import get_indicator
+from utility.static_method.builtin_print import set_builtin_print
 from strategy.analyzer_candle_pattern import AnalyzerCandlePattern
 from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from strategy.analyzer_microstructure import AnalyzerMicrostructure
@@ -16,8 +19,7 @@ from utility.settings.setting_base import DICT_INDICATOR, DB_SETTING
 from strategy.analyzer_volatility_pattern import AnalyzerVolatilityPattern
 from utility.settings.setting_base import DB_STRATEGY, UI_NUM, DICT_ORDER_RATIO
 # noinspection PyUnusedImports
-from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema_list, set_builtin_print, \
-    get_indicator
+from utility.static_method.static_datetime import now, timedelta_sec, str_ymdhms
 
 
 class BaseStrategy(StgGlobalsFunc):
