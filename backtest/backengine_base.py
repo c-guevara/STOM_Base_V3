@@ -166,9 +166,9 @@ class BackEngineBase(StgGlobalsFunc):
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
         self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info, backtest=True)
-        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, backtest=True)
-        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, backtest=True)
-        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, backtest=True)
+        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, self.is_tick, backtest=True)
+        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, self.is_tick, backtest=True)
+        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, self.is_tick, backtest=True)
 
         self._set_passticks_and_blacklist()
 
@@ -655,19 +655,15 @@ class BackEngineBase(StgGlobalsFunc):
 
                 start_idx = 0
                 for end_idx in day_last_indexs:
-                    if not self.is_tick and (
-                            self.dict_set['캔들분석'] or self.dict_set['가격대분석'] or
-                            self.dict_set['거래량분석'] or self.dict_set['변동성분석']
-                    ):
-                        date = int(str(indexs[start_idx])[:8])
-                        if self.dict_set['캔들분석']:
-                            self.pt_analyzer.load_pattern_code_scores(code, date)
-                        if self.dict_set['가격대분석']:
-                            self.vf_analyzer.load_volume_code_nodes(code, date)
-                        if self.dict_set['거래량분석']:
-                            self.vs_analyzer.load_spike_code_scores(code, date)
-                        if self.dict_set['변동성분석']:
-                            self.vp_analyzer.load_volatility_code_scores(code, date)
+                    date = int(str(indexs[start_idx])[:8])
+                    if not self.is_tick and self.dict_set['캔들분석']:
+                        self.pt_analyzer.load_pattern_code_scores(code, date)
+                    if self.dict_set['가격대분석']:
+                        self.vf_analyzer.load_volume_code_nodes(code, date)
+                    if self.dict_set['거래량분석']:
+                        self.vs_analyzer.load_spike_code_scores(code, date)
+                    if self.dict_set['변동성분석']:
+                        self.vp_analyzer.load_volatility_code_scores(code, date)
 
                     for i in range(start_idx, end_idx):
                         self.index = indexs[i]
@@ -776,19 +772,15 @@ class BackEngineBase(StgGlobalsFunc):
                 리스크점수 = self.rk_analyzer.get_risk_score(current_data)
 
         패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
-        if not self.is_tick and (
-                self.dict_set['캔들분석'] or self.dict_set['가격대분석'] or
-                self.dict_set['거래량분석'] or self.dict_set['변동성분석']
-        ):
-            current_data = self.arry_code[self.indexn + 1 - self.tick_count:self.indexn + 1, :]
-            if self.dict_set['캔들분석']:
-                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, current_data)
-            if self.dict_set['가격대분석']:
-                가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
-            if self.dict_set['거래량분석']:
-                거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, current_data)
-            if self.dict_set['변동성분석']:
-                변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, current_data)
+        current_data = self.arry_code[self.indexn + 1 - self.tick_count:self.indexn + 1, :]
+        if not self.is_tick and self.dict_set['캔들분석']:
+            패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, current_data)
+        if self.dict_set['가격대분석']:
+            가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+        if self.dict_set['거래량분석']:
+            거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, current_data)
+        if self.dict_set['변동성분석']:
+            변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, current_data)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]

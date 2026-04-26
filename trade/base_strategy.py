@@ -116,9 +116,9 @@ class BaseStrategy(StgGlobalsFunc):
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
         self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info)
-        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info)
-        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info)
-        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info)
+        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, self.is_tick)
+        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, self.is_tick)
+        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, self.is_tick)
 
         set_builtin_print(self.windowQ)
         self._set_formula_data()
@@ -409,6 +409,14 @@ class BaseStrategy(StgGlobalsFunc):
                 self.ms_analyzer.update_data(self.code, self.arry_code)
             if self.dict_set['리스크분석']:
                 리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+
+        가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0
+        if self.dict_set['가격대분석']:
+            가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+        if self.dict_set['거래량분석']:
+            거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+        if self.dict_set['변동성분석']:
+            변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
         self._update_high_low(종목코드, 현재가)
 
@@ -890,6 +898,14 @@ class BaseStrategy(StgGlobalsFunc):
                 self.ms_analyzer.update_data(self.code, self.arry_code)
             if self.dict_set['리스크분석']:
                 리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+
+        가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0
+        if self.dict_set['가격대분석']:
+            가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+        if self.dict_set['거래량분석']:
+            거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+        if self.dict_set['변동성분석']:
+            변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
         self._update_high_low(종목코드, 현재가)
 

@@ -504,7 +504,7 @@ def stop_scheduler(ui, gubun=False):
     """
     import os
     from PyQt5.QtCore import QTimer
-    from ui.etcetera.etc import auto_back_schedule
+    from ui.etcetera.process_starter import auto_back_schedule
 
     ui.back_scount = 0
     ui.back_schedul = False

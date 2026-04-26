@@ -82,14 +82,16 @@ def calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_p
 
 class AnalyzerVolumeProfile:
     """메인 볼륨 프로파일 분석 통합 클래스"""
-    def __init__(self, market_gubun: int, market_info: dict, backtest: bool = False, top_nodes: int = 20):
+    def __init__(self, market_gubun: int, market_info: dict, is_tick: bool,
+                 backtest: bool = False, top_nodes: int = 20):
         """
         초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
         top_nodes: 상위 볼륨 노드 개수 (기본값 20)
+        is_tick: 틱 데이터 여부 (기본값 False)
         """
-        self.volume_database = VolumeProfileDatabase(market_info['전략구분'])
+        self.volume_database = VolumeProfileDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold, self.price_range_pct = \
             self.volume_database.load_volume_setting(market_gubun)
 
@@ -97,7 +99,7 @@ class AnalyzerVolumeProfile:
         self.factor_list  = market_info['팩터목록'][0]
         self.top_nodes    = top_nodes
         self.idx_close    = self.factor_list.index('현재가')
-        self.idx_volume   = self.factor_list.index('분당거래대금')
+        self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
         self.volume_nodes = {}
         if not backtest:
             self._load_volume_all_nodes()
@@ -149,7 +151,7 @@ class AnalyzerVolumeProfile:
             code_list = [result[0] for result in results if result[0] != 'moneytop' and '_info' not in result[0]]
 
         existing_dates_dict = {}
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.volume_database.db_path) as conn:
             cursor = conn.cursor()
             for code in code_list:
                 cursor.execute(
@@ -192,7 +194,7 @@ class AnalyzerVolumeProfile:
 
         if total_processed > 0:
             windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
-            windowQ.put((UI_NUM['학습로그'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
+            windowQ.put((UI_NUM['학습로그'], f"{self.volume_database.db_path} -> {self.volume_database.table_name}"))
             windowQ.put((UI_NUM['학습로그'], f"가격대분석 학습 완료 [{total_processed}]"))
         else:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
@@ -207,7 +209,7 @@ class AnalyzerVolumeProfile:
         code_chunk: 종목코드 청크
         backtest_db: 백테디비 경로
         idx_close: 현재가 인덱스
-        idx_volume: 분당거래대금 인덱스
+        idx_volume: 거래량 인덱스
         analysis_period: 분석 기간
         rate_threshold: 등락율 임계값
         price_range_pct: 가격대 분할 퍼센트
@@ -291,23 +293,26 @@ class AnalyzerVolumeProfile:
 
 class VolumeProfileDatabase:
     """볼륨 프로파일 점수 데이터베이스 관리 클래스"""
-
-    def __init__(self, strategy_gubun: str):
-        self.table_name   = f'{strategy_gubun}_volume_score'
+    def __init__(self, strategy_gubun: str, is_tick: bool):
+        gubun = 'tick' if is_tick else 'min'
+        self.table_name   = f'{strategy_gubun}_volume_score_{gubun}'
+        self.is_tick      = is_tick
+        self.db_path      = VOLUME_PROFILE_DB
         self.setting_hash = None
         self._initialize_tables()
 
     def _initialize_tables(self):
         """데이터베이스 테이블 초기화"""
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS volume_setting (
                     market INTEGER NOT NULL,
+                    is_tick INTEGER NOT NULL,
                     analysis_period INTEGER NOT NULL,
                     rate_threshold REAL NOT NULL,
                     price_range_pct REAL NOT NULL,
-                    PRIMARY KEY (market)
+                    PRIMARY KEY (market, is_tick)
                 )
             ''')
             cursor.execute(f'''
@@ -328,7 +333,7 @@ class VolumeProfileDatabase:
 
     def get_all_codes(self) -> List[str]:
         """데이터베이스에 저장된 전체 종목코드 조회"""
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'SELECT DISTINCT code FROM {self.table_name}')
             results = cursor.fetchall()
@@ -336,7 +341,7 @@ class VolumeProfileDatabase:
 
     def get_volume_all_scores(self, code: str) -> Dict[str, Dict[str, float]]:
         """종목의 전체 볼륨 프로파일 점수 조회 (최신 날짜 기준)"""
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
                 SELECT price_level, avg_score, upward_strength, downward_strength, sample_count, confidence_score
@@ -364,7 +369,7 @@ class VolumeProfileDatabase:
         backtest_date: 백테스트 기준 날짜 (YYYYMMDD)
         return: 가격대별 점수 딕셔너리
         """
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
                 SELECT price_level, avg_score, upward_strength, downward_strength, sample_count, confidence_score
@@ -387,7 +392,7 @@ class VolumeProfileDatabase:
 
     def save_volume_scores(self, code: str, volume_scores: Dict[str, Dict[str, float]], date: int):
         """종목별 볼륨 프로파일 점수 저장"""
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
             data = [
@@ -418,19 +423,20 @@ class VolumeProfileDatabase:
         """
         마켓번호로 설정값 불러오기
         market: 마켓번호 (1~9)
+        is_tick: 틱 데이터 여부 (기본값 False)
         return: (price_range_pct, rate_threshold) 튜플, 데이터가 없으면 (30, 10) 반환
         """
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, rate_threshold, price_range_pct FROM volume_setting WHERE market = ?',
-                (market,)
+                'SELECT analysis_period, rate_threshold, price_range_pct FROM volume_setting WHERE market = ? AND is_tick = ?',
+                (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
             if not result:
                 result = 10, 0.5, 0.33
 
-            self.setting_hash = calculate_setting_hash(*result)
+            self.setting_hash = calculate_setting_hash(*result, self.is_tick)
             return result
 
     def save_volume_setting(self, market: int, analysis_period: int, rate_threshold: float, price_range_pct: float):
@@ -440,20 +446,21 @@ class VolumeProfileDatabase:
         analysis_period: 분석기간설정
         rate_threshold: 퍼센트설정
         price_range_pct: 분봉설정
+        is_tick: 틱 데이터 여부 (기본값 False)
         """
-        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+        with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'INSERT OR REPLACE INTO volume_setting (market, analysis_period, rate_threshold, price_range_pct)'
-                'VALUES (?, ?, ?, ?)',
-                (market, analysis_period, rate_threshold, price_range_pct)
+                'INSERT OR REPLACE INTO volume_setting (market, is_tick, analysis_period, rate_threshold, price_range_pct)'
+                'VALUES (?, ?, ?, ?, ?)',
+                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, price_range_pct)
             )
             conn.commit()
 
 
 def volume_setting_load(ui):
     """두개의 콤보박스를 현재 거래소의 설정값으로 로딩한다."""
-    database = VolumeProfileDatabase(ui.market_info['전략구분'])
+    database = VolumeProfileDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
     analysis_period, rate_threshold, price_range_pct = database.load_volume_setting(ui.market_gubun)
     ui.vpf_comboBoxxx_01.setCurrentText(str(analysis_period))
     ui.vpf_comboBoxxx_02.setCurrentText(str(rate_threshold))
@@ -465,7 +472,7 @@ def volume_setting_save(ui):
     analysis_period = int(ui.vpf_comboBoxxx_01.currentText())
     rate_threshold  = float(ui.vpf_comboBoxxx_02.currentText())
     price_range_pct = float(ui.vpf_comboBoxxx_03.currentText())
-    database = VolumeProfileDatabase(ui.market_info['전략구분'])
+    database = VolumeProfileDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
     database.save_volume_setting(ui.market_gubun, analysis_period, rate_threshold, price_range_pct)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
@@ -479,7 +486,7 @@ def volume_profile_train(ui):
     _analysis_period = int(ui.vpf_comboBoxxx_01.currentText())
     _rate_threshold  = float(ui.vpf_comboBoxxx_02.currentText())
     _price_range_pct = float(ui.vpf_comboBoxxx_03.currentText())
-    database = VolumeProfileDatabase(ui.market_info['전략구분'])
+    database = VolumeProfileDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
     analysis_period, rate_threshold, price_range_pct = database.load_volume_setting(ui.market_gubun)
 
     if _analysis_period != analysis_period or _rate_threshold != rate_threshold or _price_range_pct != price_range_pct:
@@ -493,6 +500,6 @@ def volume_profile_train(ui):
 def _volume_profile_train(ui):
     """스레드로 볼륨 프로파일 학습을 시작한다."""
     ui.learn_running = True
-    vf_analyzer = AnalyzerVolumeProfile(ui.market_gubun, ui.market_info)
+    vf_analyzer = AnalyzerVolumeProfile(ui.market_gubun, ui.market_info, ui.dict_set['타임프레임'])
     vf_analyzer.train_all_codes(ui.windowQ)
     ui.learn_running = False
