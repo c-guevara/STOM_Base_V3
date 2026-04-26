@@ -565,8 +565,8 @@ class BaseReceiver:
         """전송 데이터를 생성합니다.
         Args:
             code: 종목 코드
-            code_data: 코드 데이터
-            code_dtdm: 코드 데이터타임
+            code_data: 체결 데이터 리스트
+            code_dtdm: 당일거래대금 딕셔너리
             money_arr: 머니 배열
             hoga_samount: 호가 매도 수량
             hoga_bamount: 호가 매수 수량
@@ -577,7 +577,8 @@ class BaseReceiver:
             전송 데이터 튜플
         """
         c, _, h, low, _, dm, _, bids, asks = code_data[:9]
-        tm   = dm - code_dtdm[1]
+        tm = dm - code_dtdm[1]
+        if tm == dm and not self.is_tick: tm = 0
         hlp  = round((c / ((h + low) / 2) - 1) * 100, 2)
         lhp  = round((h / low - 1) * 100, 2)
         hjt  = sum(hoga_samount + hoga_bamount)
