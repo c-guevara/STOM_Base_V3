@@ -152,8 +152,8 @@ def setting_load_05(ui):
     ui.sj_back_cheBox_14.setChecked(True) if df['그래프저장하지않기'][no] else ui.sj_back_cheBox_14.setChecked(False)
     ui.sj_back_cheBox_15.setChecked(True) if df['그래프띄우지않기'][no] else ui.sj_back_cheBox_15.setChecked(False)
     ui.sj_back_cheBox_16.setChecked(True) if df['시장미시구조분석'][no] else ui.sj_back_cheBox_16.setChecked(False)
-    ui.sj_back_cheBox_17.setChecked(True) if df['리스크분석'][no] else ui.sj_back_cheBox_17.setChecked(False)
-    ui.sj_back_cheBox_18.setChecked(True) if df['캔들분석'][no] else ui.sj_back_cheBox_18.setChecked(False)
+    ui.sj_back_cheBox_18.setChecked(True) if df['리스크분석'][no] else ui.sj_back_cheBox_18.setChecked(False)
+    ui.sj_back_cheBox_17.setChecked(True) if df['캔들분석'][no] else ui.sj_back_cheBox_17.setChecked(False)
     ui.sj_back_cheBox_19.setChecked(True) if df['가격대분석'][no] else ui.sj_back_cheBox_19.setChecked(False)
     ui.sj_back_cheBox_20.setChecked(True) if df['거래량분석'][no] else ui.sj_back_cheBox_20.setChecked(False)
     ui.sj_back_cheBox_21.setChecked(True) if df['변동성분석'][no] else ui.sj_back_cheBox_21.setChecked(False)
@@ -410,8 +410,8 @@ def setting_save_05(ui):
     그래프저장하지않기 = 1 if ui.sj_back_cheBox_14.isChecked() else 0
     그래프띄우지않기 = 1 if ui.sj_back_cheBox_15.isChecked() else 0
     시장미시구조분석 = 1 if ui.sj_back_cheBox_16.isChecked() else 0
-    리스크분석 = 1 if ui.sj_back_cheBox_17.isChecked() else 0
-    캔들분석 = 1 if ui.sj_back_cheBox_18.isChecked() else 0
+    리스크분석 = 1 if ui.sj_back_cheBox_18.isChecked() else 0
+    캔들분석 = 1 if ui.sj_back_cheBox_17.isChecked() else 0
     가격대분석 = 1 if ui.sj_back_cheBox_19.isChecked() else 0
     거래량분석 = 1 if ui.sj_back_cheBox_20.isChecked() else 0
     변동성분석 = 1 if ui.sj_back_cheBox_21.isChecked() else 0

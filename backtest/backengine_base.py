@@ -763,22 +763,24 @@ class BackEngineBase(StgGlobalsFunc):
         종목명, 종목코드, 데이터길이, 체결시간 = self.name, self.code, self.tick_count, self.index
         self.hoga_unit = 호가단위 = self._get_hogaunit(현재가 if self.market_gubun < 6 else self.code)
 
-        리스크점수 = 0
-        if self.is_tick and 데이터길이 >= 30 and (self.dict_set['시장미시구조분석'] or self.dict_set['리스크분석']):
-            current_data = self.arry_code[self.indexn + 1 - self.tick_count:self.indexn + 1, :]
-            if self.dict_set['시장미시구조분석']:
-                self.ms_analyzer.update_data(self.code, current_data)
-            if self.dict_set['리스크분석']:
-                리스크점수 = self.rk_analyzer.get_risk_score(current_data)
-
-        패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
+        리스크점수 = 패턴점수 = 패턴신뢰도 = 가격대점수 = 가격대신뢰도 = 거래량점수 = 거래량신뢰도 = 변동성점수 = 변동성신뢰도 = 0
         current_data = self.arry_code[self.indexn + 1 - self.tick_count:self.indexn + 1, :]
+
+        if self.is_tick and self.dict_set['시장미시구조분석']:
+            self.ms_analyzer.update_data(self.code, current_data)
+
         if not self.is_tick and self.dict_set['캔들분석']:
             패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, current_data)
+
+        if self.dict_set['리스크분석']:
+            리스크점수 = self.rk_analyzer.get_risk_score(current_data)
+
         if self.dict_set['가격대분석']:
             가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+
         if self.dict_set['거래량분석']:
             거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, current_data)
+
         if self.dict_set['변동성분석']:
             변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, current_data)
 
