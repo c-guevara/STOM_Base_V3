@@ -578,7 +578,7 @@ class BaseReceiver:
         """
         c, _, h, low, _, dm, _, bids, asks = code_data[:9]
         tm = dm - code_dtdm[1]
-        if tm == dm and not self.is_tick: tm = 0
+        if tm == dm: tm = 0
         hlp  = round((c / ((h + low) / 2) - 1) * 100, 2)
         lhp  = round((h / low - 1) * 100, 2)
         hjt  = sum(hoga_samount + hoga_bamount)
