@@ -473,7 +473,7 @@ def volume_setting_save(ui):
 def volume_profile_train(ui):
     """볼륨 프로파일 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 볼륨 프로파일 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 가격대분석 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vpf_comboBoxxx_01.currentText())

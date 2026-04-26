@@ -485,7 +485,7 @@ def spike_setting_save(ui):
 def spike_train(ui):
     """급증 패턴 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 급증 패턴 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 거래량분석 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vsp_comboBoxxx_01.currentText())
