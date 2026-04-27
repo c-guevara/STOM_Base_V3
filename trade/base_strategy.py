@@ -251,7 +251,9 @@ class BaseStrategy(StgGlobalsFunc):
 
     def _main_loop(self):
         """메인 루프를 실행합니다."""
-        self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략 연산 시작"))
+        if self.gubun == 0:
+            self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략 연산 시작"))
+
         while True:
             try:
                 data = self.stgQ.get()
@@ -344,7 +346,7 @@ class BaseStrategy(StgGlobalsFunc):
             self.sellstrategy = None
             self.teleQ.put('매도전략 중지 완료')
         else:
-            if data != '프로그램종료':
+            if data != '프로그램종료' and self.gubun == 0:
                 exit_text = '전략연산 종료' if data == '프로세스종료' else '전략연산 STOP'
                 self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} {exit_text}"))
 

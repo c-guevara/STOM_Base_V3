@@ -759,12 +759,12 @@ class BaseReceiver:
 
         if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_moneytop()
-
-        if self.market_gubun in (1, 4):
+        elif self.market_gubun in (1, 4):
             for q in self.stgQs:
                 q.put(data)
         else:
             self.stgQ.put(data)
+
         self.traderQ.put(data)
 
         if data != '프로그램종료':
