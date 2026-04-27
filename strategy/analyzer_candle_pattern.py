@@ -480,6 +480,13 @@ def pattern_setting_save(ui):
 
 def pattern_train(ui):
     """패턴학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
+    if ui.dict_set['타임프레임']:
+        QMessageBox.critical(
+            ui.dialog_pattern, '오류 알림',
+            '현재 타임프레임이 1초스냅샷 상태입니다.\n캔들분석 학습은 1분봉 타임프레임만 지원합니다.\n'
+        )
+        return
+
     if ui.learn_running:
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 캔들분석 학습이 진행중입니다.\n')
         return

@@ -133,6 +133,7 @@ def setting_load_05(ui):
         ui: UI 클래스 인스턴스
     """
     from PyQt5.QtCore import QDate
+    from PyQt5.QtWidgets import QMessageBox
 
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM back').set_index('index')
     no = int(ui.dict_set['거래소'][-2:])
@@ -152,13 +153,14 @@ def setting_load_05(ui):
     ui.sj_back_cheBox_14.setChecked(True) if df['그래프저장하지않기'][no] else ui.sj_back_cheBox_14.setChecked(False)
     ui.sj_back_cheBox_15.setChecked(True) if df['그래프띄우지않기'][no] else ui.sj_back_cheBox_15.setChecked(False)
     ui.sj_back_cheBox_16.setChecked(True) if df['시장미시구조분석'][no] else ui.sj_back_cheBox_16.setChecked(False)
-    ui.sj_back_cheBox_18.setChecked(True) if df['리스크분석'][no] else ui.sj_back_cheBox_18.setChecked(False)
     ui.sj_back_cheBox_17.setChecked(True) if df['캔들분석'][no] else ui.sj_back_cheBox_17.setChecked(False)
+    ui.sj_back_cheBox_18.setChecked(True) if df['리스크분석'][no] else ui.sj_back_cheBox_18.setChecked(False)
     ui.sj_back_cheBox_19.setChecked(True) if df['가격대분석'][no] else ui.sj_back_cheBox_19.setChecked(False)
     ui.sj_back_cheBox_20.setChecked(True) if df['거래량분석'][no] else ui.sj_back_cheBox_20.setChecked(False)
     ui.sj_back_cheBox_21.setChecked(True) if df['변동성분석'][no] else ui.sj_back_cheBox_21.setChecked(False)
     ui.sj_back_liEdit_03.setText(str(df['기준값최소상승률'][no]))
     ui.sj_back_comBox_02.clear()
+
     dfs = ui.dbreader.read_sql('전략디비', 'SELECT * FROM schedule').set_index('index')
     indexs = list(dfs.index)
     indexs.sort()
@@ -180,6 +182,16 @@ def setting_load_05(ui):
         ui.sj_back_daEdit_01.setDate(QDate.fromString(ui.dict_set['백테날짜'], 'yyyyMMdd'))
     else:
         ui.sj_back_liEdit_02.setText(df['백테날짜'][no])
+
+    if not ui.dict_set['타임프레임']:
+        if df['시장미시구조분석'][no]:
+            QMessageBox.critical(ui, '오류 알림',
+                                 '현재 타임프레임이 1분봉 상태입니다.\n시장미시구조분석은 1초스냅샷 타임프레임만 지원합니다.\n')
+            ui.sj_back_cheBox_16.setChecked(False)
+    else:
+        if df['캔들분석'][no]:
+            QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1초스냅샷 상태입니다.\n캔들분석은 1분봉 타임프레임만 지원합니다.\n')
+            ui.sj_back_cheBox_17.setChecked(False)
 
 
 def setting_load_06(ui):
@@ -411,8 +423,8 @@ def setting_save_05(ui):
     그래프저장하지않기 = 1 if ui.sj_back_cheBox_14.isChecked() else 0
     그래프띄우지않기 = 1 if ui.sj_back_cheBox_15.isChecked() else 0
     시장미시구조분석 = 1 if ui.sj_back_cheBox_16.isChecked() else 0
-    리스크분석 = 1 if ui.sj_back_cheBox_18.isChecked() else 0
     캔들분석 = 1 if ui.sj_back_cheBox_17.isChecked() else 0
+    리스크분석 = 1 if ui.sj_back_cheBox_18.isChecked() else 0
     가격대분석 = 1 if ui.sj_back_cheBox_19.isChecked() else 0
     거래량분석 = 1 if ui.sj_back_cheBox_20.isChecked() else 0
     변동성분석 = 1 if ui.sj_back_cheBox_21.isChecked() else 0
@@ -435,6 +447,14 @@ def setting_save_05(ui):
 
     if '' in (백테날짜, 백테스케쥴시간):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
+        return
+
+    if 시장미시구조분석 and not ui.dict_set['타임프레임']:
+        QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1분봉 상태입니다.\n시장미시구조분석은 1초스냅샷 타임프레임만 지원합니다.\n')
+        return
+
+    if 캔들분석 and ui.dict_set['타임프레임']:
+        QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1초스냅샷 상태입니다.\n캔들분석은 1분봉 타임프레임만 지원합니다.\n')
         return
 
     if ui.proc_chqs.is_alive():

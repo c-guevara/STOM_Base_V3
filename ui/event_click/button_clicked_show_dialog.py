@@ -495,12 +495,4 @@ def show_order(ui):
 
 
 def show_pattern_dialog(ui):
-    from PyQt5.QtWidgets import QMessageBox
-
-    if not ui.dialog_pattern.isVisible():
-        if ui.dict_set['타임프레임']:
-            QMessageBox.critical(ui, '오류 알림', '현재 타임프레임이 1초스냅샷 상태입니다.\n패턴학습은 1분봉 타임프레임만 지원합니다.\n')
-            return
-        ui.dialog_pattern.show()
-    else:
-        ui.dialog_pattern.close()
+    ui.dialog_pattern.show() if not ui.dialog_pattern.isVisible() else ui.dialog_pattern.close()
