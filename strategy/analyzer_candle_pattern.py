@@ -4,7 +4,7 @@ import random
 import sqlite3
 import hashlib
 import numpy as np
-from numba import njit
+from numba import njit, prange
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
@@ -44,13 +44,15 @@ def _calculate_setting_hash(*args) -> str:
     return hashlib.md5(hash_input.encode()).hexdigest()
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray,
                               detection_indices: np.ndarray, analysis_period: int,
                               rate_threshold: float) -> np.ndarray:
     """패턴 점수 계산 (numba 최적화)"""
-    scores = []
-    for idx in detection_indices:
+    max_scores = len(detection_indices)
+    scores = np.zeros(max_scores)
+    for k in prange(max_scores):
+        idx = detection_indices[k]
         if idx + analysis_period < len(close_price):
             entry_date = int(datetime_data[idx] // 10000)
             exit_date  = int(datetime_data[idx + analysis_period] // 10000)
@@ -65,8 +67,8 @@ def _calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray
                 price_change   = (exit_price - entry_price) / entry_price * 100
                 score = price_change / rate_threshold * 100
                 score = max(-100.0, min(100.0, score))
-                scores.append(score)
-    return np.array(scores)
+                scores[k] = score
+    return scores[scores != 0.0]
 
 
 class AnalyzerCandlePattern:

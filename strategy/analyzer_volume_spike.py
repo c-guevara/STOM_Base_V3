@@ -3,7 +3,7 @@ import random
 import sqlite3
 import hashlib
 import numpy as np
-from numba import njit
+from numba import njit, prange
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
@@ -28,34 +28,37 @@ def _calculate_setting_hash(*args) -> str:
     return hashlib.md5(hash_input.encode()).hexdigest()
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_ma_volume(volume_data: np.ndarray, analysis_period: int) -> np.ndarray:
     """이동평균 거래량 계산 (numba 최적화)"""
     ma_volume = np.zeros(len(volume_data))
-    for idx in range(analysis_period, len(volume_data)):
+    for idx in prange(analysis_period, len(volume_data)):
         ma_volume[idx] = np.mean(volume_data[idx-analysis_period:idx])
     return ma_volume
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray,
                              ratio_threshold: float, analysis_period: int) -> np.ndarray:
     """거래량 급증 인덱스 계산 (numba 최적화)"""
-    spike_indices = []
-    for idx in range(analysis_period, len(volume_data)):
+    max_indices = len(volume_data) - analysis_period
+    spike_indices = np.zeros(max_indices, dtype=np.int64)
+    for idx in prange(analysis_period, len(volume_data)):
         if ma_volume[idx] > 0:
             multiplier = volume_data[idx] / ma_volume[idx]
             if multiplier >= ratio_threshold:
-                spike_indices.append(idx)
-    return np.array(spike_indices)
+                spike_indices[idx - analysis_period] = idx
+    return spike_indices[spike_indices != 0]
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_spike_score_array(close_price: np.ndarray, indices: np.ndarray,
                                  analysis_period: int, rate_threshold: float) -> np.ndarray:
     """거래량 급증 점수 배열 계산 (numba 최적화)"""
-    scores = []
-    for idx in indices:
+    max_scores = len(indices)
+    scores = np.zeros(max_scores)
+    for k in prange(max_scores):
+        idx = indices[k]
         if idx + analysis_period < len(close_price):
             entry_price = close_price[idx]
             exit_max_price = close_price[idx:idx + analysis_period].max()
@@ -67,10 +70,8 @@ def _calculate_spike_score_array(close_price: np.ndarray, indices: np.ndarray,
             price_change = (exit_price - entry_price) / entry_price * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
-            scores.append(score)
-        else:
-            scores.append(0.0)
-    return np.array(scores)
+            scores[k] = score
+    return scores[scores != 0.0]
 
 
 class AnalyzerVolumeSpike:

@@ -3,7 +3,7 @@ import random
 import sqlite3
 import hashlib
 import numpy as np
-from numba import njit
+from numba import njit, prange
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
@@ -28,18 +28,18 @@ def _calculate_setting_hash(*args) -> str:
     return hashlib.md5(hash_input.encode()).hexdigest()
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
     """로그 수익률 기반 변동성 계산 (numba 최적화)"""
     log_returns = np.diff(np.log(close_price))
     volatility  = np.zeros(len(close_price))
-    for idx in range(analysis_period, len(close_price)):
+    for idx in prange(analysis_period, len(close_price)):
         if idx - analysis_period < len(log_returns):
             volatility[idx] = np.std(log_returns[idx-analysis_period:idx])
     return volatility
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
                    analysis_period: int) -> np.ndarray:
     """ATR 계산 (numba 최적화)"""
@@ -48,17 +48,17 @@ def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: n
     tr3 = np.abs(low_price[1:] - close_price[:-1])
     tr  = np.maximum(tr1, tr2, tr3)
     atr = np.zeros(len(close_price))
-    for idx in range(analysis_period, len(close_price)):
+    for idx in prange(analysis_period, len(close_price)):
         atr[idx] = np.mean(tr[idx-analysis_period:idx])
     return atr
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _classify_volatility_levels(volatility_data: np.ndarray, level_boundaries: np.ndarray,
                                 num_levels: int) -> np.ndarray:
     """변동성 레벨 분류 (numba 최적화)"""
     levels = np.zeros(len(volatility_data), dtype=np.int32)
-    for idx in range(len(volatility_data)):
+    for idx in prange(len(volatility_data)):
         if volatility_data[idx] > 0:
             for level in range(num_levels):
                 if level_boundaries[level] <= volatility_data[idx] < level_boundaries[level + 1]:
@@ -69,14 +69,16 @@ def _classify_volatility_levels(volatility_data: np.ndarray, level_boundaries: n
     return levels
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_volatility_scores(close_price: np.ndarray, level_indices: np.ndarray,
                                  analysis_period: int, rate_threshold: float) -> np.ndarray:
     """변동성 점수 계산 (numba 최적화)"""
-    scores = []
-    for idx in level_indices:
+    max_scores = len(level_indices)
+    scores = np.zeros(max_scores)
+    for k in prange(max_scores):
+        idx = level_indices[k]
         if idx + analysis_period < len(close_price):
-            entry_price = close_price[idx]
+            entry_price    = close_price[idx]
             exit_max_price = close_price[idx:idx + analysis_period].max()
             exit_min_price = close_price[idx:idx + analysis_period].min()
             if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
@@ -86,8 +88,8 @@ def _calculate_volatility_scores(close_price: np.ndarray, level_indices: np.ndar
             price_change   = (exit_price - entry_price) / entry_price * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
-            scores.append(score)
-    return np.array(scores)
+            scores[k] = score
+    return scores[scores != 0.0]
 
 
 class AnalyzerVolatilityPattern:

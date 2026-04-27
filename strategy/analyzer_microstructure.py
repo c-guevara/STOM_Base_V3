@@ -5,17 +5,16 @@ from collections import defaultdict
 from typing import Dict, List, Tuple
 
 
-@njit(cache=True, fastmath=True, parallel=True)
+@njit(cache=True, fastmath=True)
 def _calc_analyze_price_levels(quantities: np.ndarray, multiplier: float, min_occurrences: int):
     """가격 레벨별 분석 (Numba JIT 최적화) - 튜플 대신 배열 반환"""
     n_rows, n_cols = quantities.shape
     if n_rows < 3:
         return np.empty((0, 5), dtype=np.float64)
 
-    # 5개 레벨 각각 계산
-    total_qtys = np.zeros(n_cols, dtype=np.float64)
+    total_qtys  = np.zeros(n_cols, dtype=np.float64)
     occurrences = np.zeros(n_cols, dtype=np.int32)
-    max_qtys = np.zeros(n_cols, np.float64)
+    max_qtys    = np.zeros(n_cols, np.float64)
 
     for col in range(n_cols):
         max_val = 0.0
@@ -127,8 +126,8 @@ def _calc_layering_confidence(levels: np.ndarray):
     if n == 0:
         return 0.0
 
-    max_suspicion = 0.0
-    sum_suspicion = 0.0
+    max_suspicion   = 0.0
+    sum_suspicion   = 0.0
     max_occurrences = 0.0
 
     for i in range(n):
