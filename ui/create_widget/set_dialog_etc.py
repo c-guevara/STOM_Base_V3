@@ -1,6 +1,5 @@
 
 from PyQt5.QtCore import Qt
-
 from ui.event_activate import activated_etc
 from ui.event_click.button_clicked_etc import *
 from ui.etcetera.etc import pattern_setting_help

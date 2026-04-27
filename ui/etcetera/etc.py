@@ -2,7 +2,10 @@
 def dialog_move(ui):
     """다이얼로그를 이동합니다."""
     for i, dialog in enumerate(ui.move_dialog_list):
-        x, y = ui.dict_set['창위치'][i]
+        try:
+            x, y = ui.dict_set['창위치'][i]
+        except Exception:
+            x, y = 0, 0
         dialog.move(int(x), int(y))
 
 

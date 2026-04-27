@@ -230,6 +230,9 @@ def dialog_chart_show(ui):
     DialogAnimator.setup_dialog_animation(ui.dialog_chart, duration=300)
     ui.dialog_chart.show()
 
+    if ui.dict_set['타임프레임'] and ui.dict_set['시장미시구조분석']:
+        ui.radar_dialog.show()
+
 
 def show_qsize(ui):
     """큐 사이즈 표시를 토글합니다.

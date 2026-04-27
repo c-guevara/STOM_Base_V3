@@ -8,6 +8,7 @@ from utility.static_method.static_datetime import str_hms, dt_hms
 from ui.event_keypress.overwrite_return_press import return_press_01
 from ui.event_click.button_clicked_chart_count import chart_count_change
 from ui.create_widget.set_style import style_bc_dk, style_ck_bx, color_bg_bk
+from ui.create_widget.dialog_radar_microstructure import MicrostructureRadarDialog
 from ui.event_change.changed_checkbox import checkbox_changed_02, checkbox_changed_09
 from ui.event_click.button_clicked_etc import hg_button_clicked_01, hg_button_clicked_02
 from ui.event_click.button_clicked_show_dialog import show_dialog_formula, show_dialog_factor
@@ -26,6 +27,11 @@ class SetDialogChart:
 
     def set(self):
         """차트 다이얼로그를 설정합니다."""
+        rader_name = 'STOM MICROSTRUCTURE RADER'
+        self.ui.radar_dialog = MicrostructureRadarDialog(rader_name)
+        self.ui.radar_dialog.finished.connect(lambda event: self.wc.location_save(event, rader_name))
+        self.ui.dialog_list.append(self.ui.radar_dialog)
+
         self.ui.dialog_chart = self.wc.setDialog('STOM CHART', location_save=True)
         self.ui.dialog_chart.geometry().center()
         self.ui.dialog_list.append(self.ui.dialog_chart)

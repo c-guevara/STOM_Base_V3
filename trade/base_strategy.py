@@ -572,6 +572,9 @@ class BaseStrategy(StgGlobalsFunc):
 
         if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
             self.windowQ.put((UI_NUM['실시간차트'], 종목코드, self.arry_code))
+            if self.dict_set['시장미시구조분석']:
+                curr_values, avg_values, overall_risk = self.ms_analyzer.get_radar_values(종목코드)
+                self.windowQ.put((UI_NUM['실시간차트'], curr_values, avg_values, overall_risk))
 
         if 틱수신시간 != 0:
             gap = (now() - 틱수신시간).total_seconds()

@@ -1,8 +1,8 @@
 
 import numpy as np
 from numba import njit
-from collections import defaultdict
-from typing import Dict, List, Tuple
+from collections import defaultdict, deque
+from typing import Dict, List, Tuple, Optional
 
 
 @njit(cache=True, fastmath=True)
@@ -493,6 +493,13 @@ class AnalyzerMicrostructure:
         # 분석 히스토리 버퍼
         self.data_history = defaultdict(lambda: HistoryBuffer(self.history_cnt))
 
+        # 레이더 차트용 히스토리 저장소 (종목코드별 30개 8지표 저장)
+        self._radar_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=30))
+        self._radar_axis_names = [
+            'depth_ratio', 'weighted_depth_ratio', 'imbalance', 'pressure_level',
+            'layering', 'pump_dump', 'iceberg', 'stop_hunt'
+        ]
+
         # 상수 캐싱 (반복 생성 회피)
         self._depth_weights = np.array([0.35, 0.25, 0.20, 0.12, 0.08])  # 1~5단계 가중치
         self._log_depth_rate_threshold = np.log(self.params['depth_rate_threshold'])
@@ -667,6 +674,104 @@ class AnalyzerMicrostructure:
             'stop_hunt': stop_hunt,
             'overall_risk': overall_risk
         }
+
+        # 레이더 차트용 8지표 정규화 및 저장 (overall_risk 포함 9개)
+        radar_data = self._normalize_radar_data(self.curr_data)
+        self._radar_history[code].append(radar_data)
+
+    def _normalize_radar_data(self, curr_data: Dict) -> List[float]:
+        """curr_data의 8개 지표와 overall_risk를 0~1 범위로 정규화합니다.
+        Args:
+            curr_data: 현재 데이터 딕셔너리
+        Returns:
+            9개 정규화된 값의 리스트 (8지표 + overall_risk)
+        """
+        values = []
+        for key in self._radar_axis_names:
+            val = curr_data.get(key, 0)
+            normalized = self._normalize_radar_value(key, val)
+            values.append(normalized)
+
+        # overall_risk 정규화 (0~1 범위)
+        risk_data = curr_data.get('overall_risk', 0)
+        normalized_risk = self._normalize_radar_value('overall_risk', risk_data)
+        values.append(normalized_risk)
+
+        return values
+
+    def _normalize_radar_value(self, key: str, value) -> float:
+        """개별 지표값을 0~1 범위로 정규화합니다.
+        Args:
+            key: 지표명
+            value: 원시값
+        Returns:
+            0~1 범위의 정규화된 값
+        """
+        if value is None:
+            return 0.0
+        if key in ['depth_ratio', 'weighted_depth_ratio']:
+            return min(float(value) / 2.0, 1.0)
+        elif key in ['imbalance', 'pressure_level']:
+            return (float(value) + 1.0) / 2.0
+        elif key in ['layering', 'pump_dump', 'iceberg', 'stop_hunt']:
+            if isinstance(value, list) and len(value) > 0:
+                max_conf = 0.0
+                for item in value:
+                    if isinstance(item, (list, tuple)) and len(item) > 0:
+                        conf = float(item[-1]) if item[-1] is not None else 0.0
+                    elif isinstance(item, (int, float)):
+                        conf = float(item)
+                    else:
+                        conf = 0.0
+                    max_conf = max(max_conf, conf)
+                return min(max_conf, 1.0)
+            return 0.0
+        elif key == 'overall_risk':
+            # overall_risk는 dict, float, int 등 다양한 형태 가능
+            if isinstance(value, dict):
+                risk_level = value.get('risk_level', 'LOW')
+                max_conf = value.get('max_confidence', 0)
+                if risk_level == 'HIGH':
+                    base_risk = 0.8
+                elif risk_level == 'MEDIUM':
+                    base_risk = 0.5
+                else:
+                    base_risk = 0.2
+                return min(max(base_risk, max_conf * 0.5), 1.0)
+            elif isinstance(value, (int, float)):
+                return min(float(value), 1.0)
+            return 0.0
+        return 0.0
+
+    def get_radar_values(self, code: str) -> Tuple[Optional[List[float]], Optional[List[float]], Optional[float]]:
+        """특정 종목의 현재값, 평균값, overall_risk를 반환합니다.
+        Args:
+            code: 종목 코드
+        Returns:
+            (현재값 리스트[8개], 평균값 리스트[8개], overall_risk) 튜플, 데이터 없으면 (None, None, None)
+        """
+        if code not in self._radar_history or len(self._radar_history[code]) == 0:
+            return None, None, None
+
+        history = list(self._radar_history[code])
+        current_data = history[-1]  # 9개 값 (8지표 + overall_risk)
+
+        if len(history) == 0:
+            return current_data[:8], None, current_data[8] if len(current_data) > 8 else 0.0
+
+        # 현재값 (8개 지표만)
+        current_values = current_data[:8]
+
+        # overall_risk (마지막 값)
+        overall_risk = current_data[8] if len(current_data) > 8 else 0.0
+
+        # 30개 평균 계산 (8개 지표만)
+        avg_values = []
+        for i in range(8):
+            axis_values = [data[i] for data in history]
+            avg_values.append(np.mean(axis_values))
+
+        return current_values, avg_values, overall_risk
 
     def _detect_layering(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
         """레이어링을 탐지합니다.
