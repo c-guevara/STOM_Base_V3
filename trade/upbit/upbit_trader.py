@@ -5,7 +5,6 @@ from trade.base_trader import BaseTrader
 from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import UI_NUM
 from utility.static_method.static_numba import get_profit_coin
-from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
 from utility.static_method.static_decorator import error_decorator
 from utility.static_method.static_etcetera import get_hogaunit_coin
 from utility.static_method.static_datetime import now, timedelta_sec, str_ymdhms_utc
@@ -26,14 +25,14 @@ class UpbitTrader(BaseTrader):
             'cancel': '취소'
         }
 
-        self.upbit = UpbitRestAPI(self.access_key, self.secret_key, self.windowQ)
-
-        self._get_balances()
-
         if not self.dict_set['모의투자']:
+            from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
+            self.upbit = UpbitRestAPI(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread = UpbitWebSocketTrader(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
+
+        self._get_balances()
 
         app.exec_()
 

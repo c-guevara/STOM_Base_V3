@@ -1,6 +1,5 @@
 
 import sys
-import binance
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from trade.base_trader import BaseTrader
@@ -18,15 +17,15 @@ class BinanceTrader(BaseTrader):
 
         super().__init__(qlist, dict_set, market_infos)
 
-        self.binance = binance.Client(self.access_key, self.secret_key)
-
-        self._get_balances()
-
         if not self.dict_set['모의투자']:
+            import binance
             from trade.restapi_binance import BinanceWebSocketTrader
+            self.binance = binance.Client(self.access_key, self.secret_key)
             self.ws_thread = BinanceWebSocketTrader(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
+
+        self._get_balances()
 
         app.exec_()
 
