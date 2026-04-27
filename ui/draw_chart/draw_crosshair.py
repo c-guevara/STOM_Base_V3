@@ -51,6 +51,34 @@ class CrossHair:
         vLine12 = setInfiniteLine()
         vLine13 = setInfiniteLine()
 
+        hLine1.setZValue(29)
+        hLine2.setZValue(29)
+        hLine3.setZValue(29)
+        hLine4.setZValue(29)
+        hLine5.setZValue(29)
+        hLine6.setZValue(29)
+        hLine7.setZValue(29)
+        hLine8.setZValue(29)
+        hLine9.setZValue(29)
+        hLine10.setZValue(29)
+        hLine11.setZValue(29)
+        hLine12.setZValue(29)
+        hLine13.setZValue(29)
+
+        vLine1.setZValue(29)
+        vLine2.setZValue(29)
+        vLine3.setZValue(29)
+        vLine4.setZValue(29)
+        vLine5.setZValue(29)
+        vLine6.setZValue(29)
+        vLine7.setZValue(29)
+        vLine8.setZValue(29)
+        vLine9.setZValue(29)
+        vLine10.setZValue(29)
+        vLine11.setZValue(29)
+        vLine12.setZValue(29)
+        vLine13.setZValue(29)
+
         pg_list = [pg01, pg02, pg03, pg04, pg05, pg06]
         hLines  = [hLine1, hLine2, hLine3, hLine4, hLine5, hLine6]
         vLines  = [vLine1, vLine2, vLine3, vLine4, vLine5, vLine6]
