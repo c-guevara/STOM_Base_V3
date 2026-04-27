@@ -356,10 +356,8 @@ def _calc_detect_pump_dump(prices: np.ndarray, volumes: np.ndarray, price_thresh
 
 class HistoryBuffer:
     """전처리 데이터 히스토리용 numpy ring buffer
-
     스칼라값과 5단계 호가 데이터를 효율적으로 저장
     """
-
     __slots__ = ['maxlen', 'ptr', 'count', 'curr_price', 'imbalance', 
                  'ask_prices', 'bid_prices', 'ask_qtys', 'bid_qtys',
                  'buy_volume', 'sell_volume', 'total_volume', 'weighted_depth_ratio']

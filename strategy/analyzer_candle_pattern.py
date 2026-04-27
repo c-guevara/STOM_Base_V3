@@ -218,70 +218,70 @@ class AnalyzerCandlePattern:
         all_pattern_scores = {}
         last = len(code_chunk)
 
-        for k, code in enumerate(code_chunk):
-            try:
-                with sqlite3.connect(backtest_db) as conn:
-                    cursor = conn.cursor()
+        with sqlite3.connect(backtest_db) as conn:
+            cursor = conn.cursor()
+            for k, code in enumerate(code_chunk):
+                try:
                     cursor.execute(f'SELECT * FROM "{code}"')
                     results = cursor.fetchall()
                     historical_data = np.array(results)
 
-                datetime_data = historical_data[:, 0]
-                dates = datetime_data // 10000
-                target_dates = np.unique(dates)
-                target_dates.sort()
-                existing_dates = existing_dates_dict.get(code, set())
+                    datetime_data = historical_data[:, 0]
+                    dates = datetime_data // 10000
+                    target_dates = np.unique(dates)
+                    target_dates.sort()
+                    existing_dates = existing_dates_dict.get(code, set())
 
-                for target_date in target_dates:
-                    if target_date in existing_dates:
-                        continue
+                    for target_date in target_dates:
+                        if target_date in existing_dates:
+                            continue
 
-                    mask = dates <= target_date
-                    date_data = historical_data[mask]
+                        mask = dates <= target_date
+                        date_data = historical_data[mask]
 
-                    if len(date_data) < analysis_period * 2:
-                        continue
+                        if len(date_data) < analysis_period * 2:
+                            continue
 
-                    open_price    = date_data[:, idx_open]
-                    high_price    = date_data[:, idx_high]
-                    low_price     = date_data[:, idx_low]
-                    close_price   = date_data[:, idx_close]
-                    date_datetime = date_data[:, 0]
+                        open_price    = date_data[:, idx_open]
+                        high_price    = date_data[:, idx_high]
+                        low_price     = date_data[:, idx_low]
+                        close_price   = date_data[:, idx_close]
+                        date_datetime = date_data[:, 0]
 
-                    pattern_scores = {}
-                    for pattern_name in PATTERN_FUNCTIONS:
-                        pattern_func      = getattr(talib, pattern_name)
-                        pattern_result    = pattern_func(open_price, high_price, low_price, close_price)
-                        detection_indices = np.where(pattern_result != 0)[0]
+                        pattern_scores = {}
+                        for pattern_name in PATTERN_FUNCTIONS:
+                            pattern_func      = getattr(talib, pattern_name)
+                            pattern_result    = pattern_func(open_price, high_price, low_price, close_price)
+                            detection_indices = np.where(pattern_result != 0)[0]
 
-                        if len(detection_indices) >= min_samples:
-                            scores = _calculate_pattern_scores(close_price, date_datetime, detection_indices,
-                                                               analysis_period, rate_threshold)
+                            if len(detection_indices) >= min_samples:
+                                scores = _calculate_pattern_scores(close_price, date_datetime, detection_indices,
+                                                                   analysis_period, rate_threshold)
 
-                            if len(scores) >= min_samples:
-                                sample_factor = min(len(scores) / 100.0, 1.0)
-                                std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
-                                confidence    = (sample_factor + std_factor) / 2.0
+                                if len(scores) >= min_samples:
+                                    sample_factor = min(len(scores) / 100.0, 1.0)
+                                    std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
+                                    confidence    = (sample_factor + std_factor) / 2.0
 
-                                pattern_scores[pattern_name] = {
-                                    'avg_score': round(float(np.mean(scores)), 2),
-                                    'max_score': round(float(np.max(scores)), 2),
-                                    'min_score': round(float(np.min(scores)), 2),
-                                    'std_score': round(float(np.std(scores)), 2),
-                                    'sample_count': len(scores),
-                                    'confidence_score': round(confidence, 2)
-                                }
+                                    pattern_scores[pattern_name] = {
+                                        'avg_score': round(float(np.mean(scores)), 2),
+                                        'max_score': round(float(np.max(scores)), 2),
+                                        'min_score': round(float(np.min(scores)), 2),
+                                        'std_score': round(float(np.std(scores)), 2),
+                                        'sample_count': len(scores),
+                                        'confidence_score': round(confidence, 2)
+                                    }
 
-                    if pattern_scores:
-                        if code not in all_pattern_scores:
-                            all_pattern_scores[code] = {}
-                        all_pattern_scores[code][target_date] = pattern_scores
+                        if pattern_scores:
+                            if code not in all_pattern_scores:
+                                all_pattern_scores[code] = {}
+                            all_pattern_scores[code][target_date] = pattern_scores
 
-                # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
-            except Exception as e:
-                # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 실패 - {e}"))
+                    # noinspection PyUnresolvedReferences
+                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
+                except Exception as e:
+                    # noinspection PyUnresolvedReferences
+                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 실패 - {e}"))
 
         return all_pattern_scores
 

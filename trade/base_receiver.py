@@ -279,12 +279,14 @@ class BaseReceiver:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, vi_dt, uvi, vi_hgunit]
             else:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, vi_dt, uvi, vi_hgunit, mo, mh, ml]
+
         elif self.market_gubun == 4:
             sgta = int(c * self.dict_info[code]['상장주식수'] / 100_000)
             if self.is_tick:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta]
             else:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, mo, mh, ml]
+
         else:
             if self.is_tick:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks]

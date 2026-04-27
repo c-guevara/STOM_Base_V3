@@ -222,71 +222,71 @@ class AnalyzerVolumeProfile:
         all_volume_scores = {}
         last = len(code_chunk)
 
-        for k, code in enumerate(code_chunk):
-            try:
-                with sqlite3.connect(backtest_db) as conn:
-                    cursor = conn.cursor()
+        with sqlite3.connect(backtest_db) as conn:
+            cursor = conn.cursor()
+            for k, code in enumerate(code_chunk):
+                try:
                     cursor.execute(f'SELECT * FROM "{code}"')
                     results = cursor.fetchall()
                     historical_data = np.array(results)
 
-                datetime_data = historical_data[:, 0]
-                dates = datetime_data // 10000
-                target_dates = np.unique(dates)
-                target_dates.sort()
-                existing_dates = existing_dates_dict.get(code, set())
+                    datetime_data = historical_data[:, 0]
+                    dates = datetime_data // 10000
+                    target_dates = np.unique(dates)
+                    target_dates.sort()
+                    existing_dates = existing_dates_dict.get(code, set())
 
-                for target_date in target_dates:
-                    if target_date in existing_dates:
-                        continue
+                    for target_date in target_dates:
+                        if target_date in existing_dates:
+                            continue
 
-                    mask = dates <= target_date
-                    date_data = historical_data[mask]
+                        mask = dates <= target_date
+                        date_data = historical_data[mask]
 
-                    if len(date_data) < analysis_period * 2:
-                        continue
+                        if len(date_data) < analysis_period * 2:
+                            continue
 
-                    close_price    = date_data[:, idx_close]
-                    volume_data    = date_data[:, idx_volume]
-                    min_price      = close_price.min()
-                    max_price      = close_price.max()
-                    bin_size       = min_price * price_range_pct / 100
-                    num_bins       = int((max_price - min_price) / bin_size) + 1
-                    price_bins     = np.linspace(min_price, max_price, num_bins)
+                        close_price    = date_data[:, idx_close]
+                        volume_data    = date_data[:, idx_volume]
+                        min_price      = close_price.min()
+                        max_price      = close_price.max()
+                        bin_size       = min_price * price_range_pct / 100
+                        num_bins       = int((max_price - min_price) / bin_size) + 1
+                        price_bins     = np.linspace(min_price, max_price, num_bins)
 
-                    volume_by_bin  = _calculate_volume_by_bin(close_price, volume_data, price_bins)
-                    bin_centers    = (price_bins[:-1] + price_bins[1:]) / 2
-                    sorted_indices = np.argsort(volume_by_bin)[::-1]
-                    top_indices    = sorted_indices[:top_nodes]
-                    volume_nodes   = [float(bin_centers[idx]) for idx in top_indices]
+                        volume_by_bin  = _calculate_volume_by_bin(close_price, volume_data, price_bins)
+                        bin_centers    = (price_bins[:-1] + price_bins[1:]) / 2
+                        sorted_indices = np.argsort(volume_by_bin)[::-1]
+                        top_indices    = sorted_indices[:top_nodes]
+                        volume_nodes   = [float(bin_centers[idx]) for idx in top_indices]
 
-                    node_scores = {}
-                    for node_price in volume_nodes:
-                        upward_strength, downward_strength, sample_count = \
-                            _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
+                        node_scores = {}
+                        for node_price in volume_nodes:
+                            upward_strength, downward_strength, sample_count = \
+                                _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
 
-                        if sample_count >= 10:
-                            final_score = (upward_strength - downward_strength) * 100
-                            final_score = max(-100.0, min(100.0, final_score))
-                            confidence_score = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
-                            node_scores[node_price] = {
-                                'avg_score': round(final_score, 2),
-                                'upward_strength': round(upward_strength, 2),
-                                'downward_strength': round(downward_strength, 2),
-                                'sample_count': sample_count,
-                                'confidence_score': round(confidence_score, 2)
-                            }
+                            if sample_count >= 10:
+                                final_score = (upward_strength - downward_strength) * 100
+                                final_score = max(-100.0, min(100.0, final_score))
+                                confidence_score = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
+                                node_scores[node_price] = {
+                                    'avg_score': round(final_score, 2),
+                                    'upward_strength': round(upward_strength, 2),
+                                    'downward_strength': round(downward_strength, 2),
+                                    'sample_count': sample_count,
+                                    'confidence_score': round(confidence_score, 2)
+                                }
 
-                    if node_scores:
-                        if code not in all_volume_scores:
-                            all_volume_scores[code] = {}
-                        all_volume_scores[code][target_date] = node_scores
+                        if node_scores:
+                            if code not in all_volume_scores:
+                                all_volume_scores[code] = {}
+                            all_volume_scores[code][target_date] = node_scores
 
-                # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
-            except Exception as e:
-                # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 실패 - {e}"))
+                    # noinspection PyUnresolvedReferences
+                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
+                except Exception as e:
+                    # noinspection PyUnresolvedReferences
+                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 실패 - {e}"))
 
         return all_volume_scores
 
