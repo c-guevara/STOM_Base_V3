@@ -376,9 +376,9 @@ def summer_time():
     Returns:
         서머타임 초
     """
-    import pytz
-    now_utc_ = datetime.datetime.now(pytz.utc)
-    now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
+    from zoneinfo import ZoneInfo
+    now_utc_ = datetime.datetime.now(datetime.timezone.utc)
+    now_cme_ = now_utc_.astimezone(ZoneInfo('America/Chicago'))
     # noinspection PyUnresolvedReferences
     summer_t = int(now_cme_.dst().total_seconds())
     return summer_t
