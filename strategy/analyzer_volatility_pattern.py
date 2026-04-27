@@ -16,20 +16,20 @@ VOLATILITY_PATTERN_DB = f'{DB_PATH}/volatility_pattern.db'
 window_queue = None
 
 
-def calculate_setting_hash(*args) -> str:
-    """설정값들을 MD5 해시로 변환"""
-    hash_input = '_'.join(map(str, args))
-    return hashlib.md5(hash_input.encode()).hexdigest()
-
-
 def init_worker(q):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
     window_queue = q
 
 
+def _calculate_setting_hash(*args) -> str:
+    """설정값들을 MD5 해시로 변환"""
+    hash_input = '_'.join(map(str, args))
+    return hashlib.md5(hash_input.encode()).hexdigest()
+
+
 @njit(cache=True, fastmath=True)
-def calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
+def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
     """로그 수익률 기반 변동성 계산 (numba 최적화)"""
     log_returns = np.diff(np.log(close_price))
     volatility  = np.zeros(len(close_price))
@@ -40,8 +40,8 @@ def calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> n
 
 
 @njit(cache=True, fastmath=True)
-def calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
-                  analysis_period: int) -> np.ndarray:
+def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
+                   analysis_period: int) -> np.ndarray:
     """ATR 계산 (numba 최적화)"""
     tr1 = high_price[1:] - low_price[1:]
     tr2 = np.abs(high_price[1:] - close_price[:-1])
@@ -54,8 +54,8 @@ def calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np
 
 
 @njit(cache=True, fastmath=True)
-def classify_volatility_levels(volatility_data: np.ndarray, level_boundaries: np.ndarray,
-                               num_levels: int) -> np.ndarray:
+def _classify_volatility_levels(volatility_data: np.ndarray, level_boundaries: np.ndarray,
+                                num_levels: int) -> np.ndarray:
     """변동성 레벨 분류 (numba 최적화)"""
     levels = np.zeros(len(volatility_data), dtype=np.int32)
     for idx in range(len(volatility_data)):
@@ -70,8 +70,8 @@ def classify_volatility_levels(volatility_data: np.ndarray, level_boundaries: np
 
 
 @njit(cache=True, fastmath=True)
-def calculate_volatility_scores(close_price: np.ndarray, level_indices: np.ndarray,
-                                analysis_period: int, rate_threshold: float) -> np.ndarray:
+def _calculate_volatility_scores(close_price: np.ndarray, level_indices: np.ndarray,
+                                 analysis_period: int, rate_threshold: float) -> np.ndarray:
     """변동성 점수 계산 (numba 최적화)"""
     scores = []
     for idx in level_indices:
@@ -144,11 +144,11 @@ class AnalyzerVolatilityPattern:
             close_price = realtime_data[:, self.idx_close]
 
             if self.is_tick:
-                volatility_data = calculate_log_volatility(close_price, self.analysis_period)
+                volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
             else:
                 high_price      = realtime_data[:, self.idx_high]
                 low_price       = realtime_data[:, self.idx_low]
-                volatility_data = calculate_atr(close_price, high_price, low_price, self.analysis_period)
+                volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
 
             volatility_value = volatility_data[-1]
 
@@ -278,11 +278,11 @@ class AnalyzerVolatilityPattern:
                     close_price = date_data[:, idx_close]
 
                     if is_tick:
-                        volatility_data = calculate_log_volatility(close_price, analysis_period)
+                        volatility_data = _calculate_log_volatility(close_price, analysis_period)
                     else:
                         high_price      = date_data[:, idx_high]
                         low_price       = date_data[:, idx_low]
-                        volatility_data = calculate_atr(close_price, high_price, low_price, analysis_period)
+                        volatility_data = _calculate_atr(close_price, high_price, low_price, analysis_period)
 
                     valid_data = volatility_data[volatility_data > 0]
 
@@ -292,14 +292,14 @@ class AnalyzerVolatilityPattern:
                         percentiles      = np.linspace(0, 100, num_levels + 1)
                         level_boundaries = np.percentile(valid_data, percentiles)
 
-                    levels = classify_volatility_levels(volatility_data, level_boundaries, num_levels)
+                    levels = _classify_volatility_levels(volatility_data, level_boundaries, num_levels)
 
                     level_scores = {}
                     for level in range(num_levels):
                         level_indices = np.where(levels == level)[0]
                         if len(level_indices) >= min_samples:
-                            scores = calculate_volatility_scores(close_price, level_indices,
-                                                                 analysis_period, rate_threshold)
+                            scores = _calculate_volatility_scores(close_price, level_indices,
+                                                                  analysis_period, rate_threshold)
 
                             if len(scores) >= min_samples:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
@@ -506,7 +506,7 @@ class VolatilityPatternDatabase:
             if not result:
                 result = 30, 5, 5
 
-            self.setting_hash = calculate_setting_hash(*result, self.is_tick)
+            self.setting_hash = _calculate_setting_hash(*result, self.is_tick)
             return result
 
     def save_volatility_setting(self, market: int, analysis_period: int, rate_threshold: str, num_levels: int):

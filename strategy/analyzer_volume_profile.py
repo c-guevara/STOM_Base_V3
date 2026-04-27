@@ -16,20 +16,20 @@ VOLUME_PROFILE_DB = f'{DB_PATH}/volume_profile.db'
 window_queue = None
 
 
-def calculate_setting_hash(*args) -> str:
-    """설정값들을 MD5 해시로 변환"""
-    hash_input = '_'.join(map(str, args))
-    return hashlib.md5(hash_input.encode()).hexdigest()
-
-
 def init_worker(q):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
     window_queue = q
 
 
+def _calculate_setting_hash(*args) -> str:
+    """설정값들을 MD5 해시로 변환"""
+    hash_input = '_'.join(map(str, args))
+    return hashlib.md5(hash_input.encode()).hexdigest()
+
+
 @njit(cache=True, fastmath=True)
-def calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, price_bins: np.ndarray) -> np.ndarray:
+def _calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, price_bins: np.ndarray) -> np.ndarray:
     """가격대별 거래량 계산 (numba 최적화)"""
     volume_by_bin = np.zeros(len(price_bins) - 1)
     for idx in range(len(close_price)):
@@ -46,8 +46,8 @@ def calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, pr
 
 
 @njit(cache=True, fastmath=True)
-def calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_period: int,
-                          rate_threshold: float) -> tuple:
+def _calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_period: int,
+                           rate_threshold: float) -> tuple:
     """노드별 점수 계산 (numba 최적화)"""
     upward_penetration   = 0
     downward_penetration = 0
@@ -254,7 +254,7 @@ class AnalyzerVolumeProfile:
                     num_bins       = int((max_price - min_price) / bin_size) + 1
                     price_bins     = np.linspace(min_price, max_price, num_bins)
 
-                    volume_by_bin  = calculate_volume_by_bin(close_price, volume_data, price_bins)
+                    volume_by_bin  = _calculate_volume_by_bin(close_price, volume_data, price_bins)
                     bin_centers    = (price_bins[:-1] + price_bins[1:]) / 2
                     sorted_indices = np.argsort(volume_by_bin)[::-1]
                     top_indices    = sorted_indices[:top_nodes]
@@ -263,7 +263,7 @@ class AnalyzerVolumeProfile:
                     node_scores = {}
                     for node_price in volume_nodes:
                         upward_strength, downward_strength, sample_count = \
-                            calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
+                            _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
 
                         if sample_count >= 10:
                             final_score = (upward_strength - downward_strength) * 100
@@ -438,7 +438,7 @@ class VolumeProfileDatabase:
             if not result:
                 result = 10, 0.5, 0.33
 
-            self.setting_hash = calculate_setting_hash(*result, self.is_tick)
+            self.setting_hash = _calculate_setting_hash(*result, self.is_tick)
             return result
 
     def save_volume_setting(self, market: int, analysis_period: int, rate_threshold: float, price_range_pct: float):

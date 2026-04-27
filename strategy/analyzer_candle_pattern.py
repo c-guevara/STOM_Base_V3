@@ -32,22 +32,22 @@ PATTERN_FUNCTIONS = [
 window_queue = None
 
 
-def calculate_setting_hash(*args) -> str:
-    """설정값들을 MD5 해시로 변환"""
-    hash_input = '_'.join(map(str, args))
-    return hashlib.md5(hash_input.encode()).hexdigest()
-
-
 def init_worker(q):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
     window_queue = q
 
 
+def _calculate_setting_hash(*args) -> str:
+    """설정값들을 MD5 해시로 변환"""
+    hash_input = '_'.join(map(str, args))
+    return hashlib.md5(hash_input.encode()).hexdigest()
+
+
 @njit(cache=True, fastmath=True)
-def calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray,
-                             detection_indices: np.ndarray, analysis_period: int,
-                             rate_threshold: float) -> np.ndarray:
+def _calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray,
+                              detection_indices: np.ndarray, analysis_period: int,
+                              rate_threshold: float) -> np.ndarray:
     """패턴 점수 계산 (numba 최적화)"""
     scores = []
     for idx in detection_indices:
@@ -253,8 +253,8 @@ class AnalyzerCandlePattern:
                         detection_indices = np.where(pattern_result != 0)[0]
 
                         if len(detection_indices) >= min_samples:
-                            scores = calculate_pattern_scores(close_price, date_datetime, detection_indices,
-                                                              analysis_period, rate_threshold)
+                            scores = _calculate_pattern_scores(close_price, date_datetime, detection_indices,
+                                                               analysis_period, rate_threshold)
 
                             if len(scores) >= min_samples:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
@@ -441,7 +441,7 @@ class CandlePatternDatabase:
             if not result:
                 result = 30, 5
 
-            self.setting_hash = calculate_setting_hash(*result)
+            self.setting_hash = _calculate_setting_hash(*result)
             return result
 
     def save_pattern_setting(self, market: int, analysis_period: int, rate_threshold: int):

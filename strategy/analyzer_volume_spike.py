@@ -16,20 +16,20 @@ VOLUME_SPIKE_DB = f'{DB_PATH}/volume_spike.db'
 window_queue = None
 
 
-def calculate_setting_hash(*args) -> str:
-    """설정값들을 MD5 해시로 변환"""
-    hash_input = '_'.join(map(str, args))
-    return hashlib.md5(hash_input.encode()).hexdigest()
-
-
 def init_worker(q):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
     window_queue = q
 
 
+def _calculate_setting_hash(*args) -> str:
+    """설정값들을 MD5 해시로 변환"""
+    hash_input = '_'.join(map(str, args))
+    return hashlib.md5(hash_input.encode()).hexdigest()
+
+
 @njit(cache=True, fastmath=True)
-def calculate_ma_volume(volume_data: np.ndarray, analysis_period: int) -> np.ndarray:
+def _calculate_ma_volume(volume_data: np.ndarray, analysis_period: int) -> np.ndarray:
     """이동평균 거래량 계산 (numba 최적화)"""
     ma_volume = np.zeros(len(volume_data))
     for idx in range(analysis_period, len(volume_data)):
@@ -38,8 +38,8 @@ def calculate_ma_volume(volume_data: np.ndarray, analysis_period: int) -> np.nda
 
 
 @njit(cache=True, fastmath=True)
-def calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray,
-                            ratio_threshold: float, analysis_period: int) -> np.ndarray:
+def _calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray,
+                             ratio_threshold: float, analysis_period: int) -> np.ndarray:
     """거래량 급증 인덱스 계산 (numba 최적화)"""
     spike_indices = []
     for idx in range(analysis_period, len(volume_data)):
@@ -51,8 +51,8 @@ def calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray,
 
 
 @njit(cache=True, fastmath=True)
-def calculate_spike_score_array(close_price: np.ndarray, indices: np.ndarray,
-                                analysis_period: int, rate_threshold: float) -> np.ndarray:
+def _calculate_spike_score_array(close_price: np.ndarray, indices: np.ndarray,
+                                 analysis_period: int, rate_threshold: float) -> np.ndarray:
     """거래량 급증 점수 배열 계산 (numba 최적화)"""
     scores = []
     for idx in indices:
@@ -242,8 +242,8 @@ class AnalyzerVolumeSpike:
 
                     close_price   = date_data[:, idx_close]
                     volume_data   = date_data[:, idx_volume]
-                    ma_volume     = calculate_ma_volume(volume_data, analysis_period)
-                    spike_indices = calculate_spike_indices(volume_data, ma_volume, ratio_threshold, analysis_period)
+                    ma_volume     = _calculate_ma_volume(volume_data, analysis_period)
+                    spike_indices = _calculate_spike_indices(volume_data, ma_volume, ratio_threshold, analysis_period)
 
                     spike_groups = {}
                     for idx in spike_indices:
@@ -257,8 +257,8 @@ class AnalyzerVolumeSpike:
                     for multiplier, indices in spike_groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
-                            scores = calculate_spike_score_array(close_price, indices_array,
-                                                                 analysis_period, rate_threshold)
+                            scores = _calculate_spike_score_array(close_price, indices_array,
+                                                                  analysis_period, rate_threshold)
                             valid_scores = scores[scores != 0.0]
 
                             if len(valid_scores) >= min_samples:
@@ -451,7 +451,7 @@ class VolumeSpikeDatabase:
             if not result:
                 result = 30, 5, 3
 
-            self.setting_hash = calculate_setting_hash(*result, self.is_tick)
+            self.setting_hash = _calculate_setting_hash(*result, self.is_tick)
             return result
 
     def save_spike_setting(self, market: int, analysis_period: int, rate_threshold: float, ratio_threshold: int):
