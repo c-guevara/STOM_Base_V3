@@ -29,28 +29,28 @@ def init_worker(q):
 
 
 @njit(cache=True, fastmath=True)
+def calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
+    """로그 수익률 기반 변동성 계산 (numba 최적화)"""
+    log_returns = np.diff(np.log(close_price))
+    volatility  = np.zeros(len(close_price))
+    for idx in range(analysis_period, len(close_price)):
+        if idx - analysis_period < len(log_returns):
+            volatility[idx] = np.std(log_returns[idx-analysis_period:idx])
+    return volatility
+
+
+@njit(cache=True, fastmath=True)
 def calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
                   analysis_period: int) -> np.ndarray:
     """ATR 계산 (numba 최적화)"""
     tr1 = high_price[1:] - low_price[1:]
     tr2 = np.abs(high_price[1:] - close_price[:-1])
     tr3 = np.abs(low_price[1:] - close_price[:-1])
-    tr = np.maximum(tr1, tr2, tr3)
+    tr  = np.maximum(tr1, tr2, tr3)
     atr = np.zeros(len(close_price))
     for idx in range(analysis_period, len(close_price)):
         atr[idx] = np.mean(tr[idx-analysis_period:idx])
     return atr
-
-
-@njit(cache=True, fastmath=True)
-def calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
-    """로그 수익률 기반 변동성 계산 (numba 최적화)"""
-    log_returns = np.diff(np.log(close_price))
-    volatility = np.zeros(len(close_price))
-    for idx in range(analysis_period, len(close_price)):
-        if idx - analysis_period < len(log_returns):
-            volatility[idx] = np.std(log_returns[idx-analysis_period:idx])
-    return volatility
 
 
 @njit(cache=True, fastmath=True)
@@ -83,7 +83,7 @@ def calculate_volatility_scores(close_price: np.ndarray, level_indices: np.ndarr
                 exit_price = exit_max_price
             else:
                 exit_price = exit_min_price
-            price_change = (exit_price - entry_price) / entry_price * 100
+            price_change   = (exit_price - entry_price) / entry_price * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
             scores.append(score)
@@ -106,8 +106,8 @@ class AnalyzerVolatilityPattern:
             self.volatility_database.load_volatility_setting(market_gubun)
 
         self.is_tick           = is_tick
-        self.backtest_db       = market_info['백테디비'][0]
-        self.factor_list       = market_info['팩터목록'][0]
+        self.backtest_db       = market_info['백테디비'][is_tick]
+        self.factor_list       = market_info['팩터목록'][is_tick]
         self.min_samples       = min_samples
         self.idx_close         = self.factor_list.index('현재가')
         self.idx_high          = self.factor_list.index('분봉고가') if not is_tick else None
@@ -143,24 +143,12 @@ class AnalyzerVolatilityPattern:
         if len(realtime_data) >= self.analysis_period:
             close_price = realtime_data[:, self.idx_close]
 
-            if not self.is_tick:
-                high_price  = realtime_data[:, self.idx_high]
-                low_price   = realtime_data[:, self.idx_low]
-
-                tr1 = high_price[1:] - low_price[1:]
-                tr2 = np.abs(high_price[1:] - close_price[:-1])
-                tr3 = np.abs(low_price[1:] - close_price[:-1])
-                tr  = np.maximum(tr1, tr2, tr3)
-                atr = np.zeros(len(close_price))
-                for idx in range(self.analysis_period, len(close_price)):
-                    atr[idx] = np.mean(tr[idx-self.analysis_period:idx])
-                volatility_data = atr
+            if self.is_tick:
+                volatility_data = calculate_log_volatility(close_price, self.analysis_period)
             else:
-                log_returns = np.diff(np.log(close_price))
-                volatility_data = np.zeros(len(close_price))
-                for idx in range(self.analysis_period, len(close_price)):
-                    if idx - self.analysis_period < len(log_returns):
-                        volatility_data[idx] = np.std(log_returns[idx-self.analysis_period:idx])
+                high_price      = realtime_data[:, self.idx_high]
+                low_price       = realtime_data[:, self.idx_low]
+                volatility_data = calculate_atr(close_price, high_price, low_price, self.analysis_period)
 
             volatility_value = volatility_data[-1]
 
@@ -289,12 +277,12 @@ class AnalyzerVolatilityPattern:
 
                     close_price = date_data[:, idx_close]
 
-                    if not is_tick:
-                        high_price  = date_data[:, idx_high]
-                        low_price   = date_data[:, idx_low]
-                        volatility_data = calculate_atr(close_price, high_price, low_price, analysis_period)
-                    else:
+                    if is_tick:
                         volatility_data = calculate_log_volatility(close_price, analysis_period)
+                    else:
+                        high_price      = date_data[:, idx_high]
+                        low_price       = date_data[:, idx_low]
+                        volatility_data = calculate_atr(close_price, high_price, low_price, analysis_period)
 
                     valid_data = volatility_data[volatility_data > 0]
 
@@ -509,7 +497,9 @@ class VolatilityPatternDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, rate_threshold, num_levels FROM volatility_setting WHERE market = ? AND is_tick = ?',
+                'SELECT analysis_period, rate_threshold, num_levels '
+                'FROM volatility_setting '
+                'WHERE market = ? AND is_tick = ?',
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
@@ -532,7 +522,8 @@ class VolatilityPatternDatabase:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT OR REPLACE INTO volatility_setting '
-                '(market, is_tick, analysis_period, rate_threshold, num_levels) VALUES (?, ?, ?, ?, ?)',
+                '(market, is_tick, analysis_period, rate_threshold, num_levels) '
+                'VALUES (?, ?, ?, ?, ?)',
                 (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, num_levels)
             )
             conn.commit()

@@ -88,8 +88,8 @@ class AnalyzerVolumeSpike:
         self.analysis_period, self.rate_threshold, self.ratio_threshold = \
             self.spike_database.load_spike_setting(market_gubun)
 
-        self.backtest_db  = market_info['백테디비'][0]
-        self.factor_list  = market_info['팩터목록'][0]
+        self.backtest_db  = market_info['백테디비'][is_tick]
+        self.factor_list  = market_info['팩터목록'][is_tick]
         self.min_samples  = min_samples
         self.idx_close    = self.factor_list.index('현재가')
         self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
@@ -442,7 +442,9 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, rate_threshold, ratio_threshold FROM spike_setting WHERE market = ? AND is_tick = ?',
+                'SELECT analysis_period, rate_threshold, ratio_threshold '
+                'FROM spike_setting '
+                'WHERE market = ? AND is_tick = ?',
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
@@ -464,7 +466,8 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'INSERT OR REPLACE INTO spike_setting (market, is_tick, analysis_period, rate_threshold, ratio_threshold) '
+                'INSERT OR REPLACE INTO spike_setting '
+                '(market, is_tick, analysis_period, rate_threshold, ratio_threshold) '
                 'VALUES (?, ?, ?, ?, ?)',
                 (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, ratio_threshold)
             )
