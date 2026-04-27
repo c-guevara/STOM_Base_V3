@@ -202,7 +202,7 @@ class BaseStrategy(StgGlobalsFunc):
         Args:
             buytxt: 매수 전략 텍스트
         """
-        self.buystrategy, indistg = self.get_buy_indi_stg(buytxt)
+        self.buystrategy, indistg = self._get_buy_indi_stg(buytxt)
         if indistg is not None:
             try:
                 exec(indistg)
@@ -210,7 +210,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.windowQ.put((UI_NUM['시스템로그'], f'{format_exc()}오류 알림 - indistg'))
         self.indi_settings = list(self.indicator.values())
 
-    def get_buy_indi_stg(self, buytxt):
+    def _get_buy_indi_stg(self, buytxt):
         """매수 지표 전략을 반환합니다.
         Args:
             buytxt: 매수 전략 텍스트

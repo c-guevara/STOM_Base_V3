@@ -112,7 +112,7 @@ class BaseTrader:
 
         self.str_today  = str_ymd()
         self.order_time = now()
-        self.jgcs_time  = self.get_jgcs_time()
+        self.jgcs_time  = self._get_jgcs_time()
 
         self.qtimer1 = QTimer()
         self.qtimer1.setInterval(500)
@@ -164,7 +164,7 @@ class BaseTrader:
         self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 예수금 조회 완료"))
         self.windowQ.put((UI_NUM['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 시작"))
 
-    def get_jgcs_time(self):
+    def _get_jgcs_time(self):
         """잔고청산 시간을 반환합니다.
         Returns:
             int: 잔고청산 시간 (HHMMSS)
@@ -523,7 +523,7 @@ class BaseTrader:
                     self._cancel_order(data, 'SELL_SHORT')
         elif gubun == '설정변경':
             self.dict_set = data
-            self.jgcs_time = self.get_jgcs_time()
+            self.jgcs_time = self._get_jgcs_time()
         elif gubun == '종목정보':
             if self.market_gubun in (1, 4):
                 self.dict_info, self.dict_sgbn = data

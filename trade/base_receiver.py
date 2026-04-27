@@ -181,7 +181,7 @@ class BaseReceiver:
             code: 종목 코드
             o: 시가
         """
-        uvi, dvi, vi_hgunit  = self.get_vi_price(o)
+        uvi, dvi, vi_hgunit  = self._get_vi_price(o)
         self.dict_vipr[code] = [True, timedelta_sec(-3600), uvi, dvi, vi_hgunit]
 
     def _update_vi_price(self, code, price):
@@ -190,10 +190,10 @@ class BaseReceiver:
             code: 종목 코드
             price: 가격
         """
-        uvi, dvi, vi_hgunit  = self.get_vi_price(price)
+        uvi, dvi, vi_hgunit  = self._get_vi_price(price)
         self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
 
-    def get_vi_price(self, std_price):
+    def _get_vi_price(self, std_price):
         """VI 가격을 계산합니다.
         Args:
             std_price: 기준 가격
