@@ -33,8 +33,8 @@ def calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, pr
     """가격대별 거래량 계산 (numba 최적화)"""
     volume_by_bin = np.zeros(len(price_bins) - 1)
     for idx in range(len(close_price)):
-        price = close_price[idx]
-        volume = volume_data[idx]
+        price   = close_price[idx]
+        volume  = volume_data[idx]
         bin_idx = 0
         for i in range(len(price_bins) - 1):
             if price_bins[i] <= price < price_bins[i + 1]:
@@ -49,9 +49,9 @@ def calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, pr
 def calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_period: int,
                           rate_threshold: float) -> tuple:
     """노드별 점수 계산 (numba 최적화)"""
-    upward_penetration = 0
+    upward_penetration   = 0
     downward_penetration = 0
-    bounce_up = 0
+    bounce_up   = 0
     bounce_down = 0
     total_count = 0
     threshold = node_price * rate_threshold / 100
@@ -70,13 +70,13 @@ def calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_p
                 else:
                     bounce_down += 1
     if total_count == 0:
-        upward_strength = 0.0
+        upward_strength   = 0.0
         downward_strength = 0.0
-        sample_count = 0
+        sample_count      = 0
     else:
-        upward_strength = (upward_penetration + bounce_up) / total_count
+        upward_strength   = (upward_penetration + bounce_up) / total_count
         downward_strength = (downward_penetration + bounce_down) / total_count
-        sample_count = total_count
+        sample_count      = total_count
     return upward_strength, downward_strength, sample_count
 
 
@@ -95,8 +95,8 @@ class AnalyzerVolumeProfile:
         self.analysis_period, self.rate_threshold, self.price_range_pct = \
             self.volume_database.load_volume_setting(market_gubun)
 
-        self.backtest_db  = market_info['백테디비'][0]
-        self.factor_list  = market_info['팩터목록'][0]
+        self.backtest_db  = market_info['백테디비'][is_tick]
+        self.factor_list  = market_info['팩터목록'][is_tick]
         self.top_nodes    = top_nodes
         self.idx_close    = self.factor_list.index('현재가')
         self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
@@ -429,7 +429,9 @@ class VolumeProfileDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, rate_threshold, price_range_pct FROM volume_setting WHERE market = ? AND is_tick = ?',
+                'SELECT analysis_period, rate_threshold, price_range_pct '
+                'FROM volume_setting '
+                'WHERE market = ? AND is_tick = ?',
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
@@ -451,7 +453,8 @@ class VolumeProfileDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'INSERT OR REPLACE INTO volume_setting (market, is_tick, analysis_period, rate_threshold, price_range_pct)'
+                'INSERT OR REPLACE INTO volume_setting '
+                '(market, is_tick, analysis_period, rate_threshold, price_range_pct) '
                 'VALUES (?, ?, ?, ?, ?)',
                 (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, price_range_pct)
             )

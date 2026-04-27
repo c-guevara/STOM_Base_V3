@@ -15,8 +15,8 @@ from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from utility.static_method.static_datetime import dt_ymdhms, dt_ymdhm
 from strategy.analyzer_volatility_pattern import AnalyzerVolatilityPattern
+from utility.static_method.static_etcetera import pickle_read, pickle_write, get_ema_list
 from utility.settings.setting_base import DICT_INDICATOR, UI_NUM, BACK_TEMP, DB_STRATEGY, DB_SETTING
-from utility.static_method.static_etcetera import pickle_read, pickle_write, get_ema_list, get_profile_text
 from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
     get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
 
@@ -700,7 +700,22 @@ class BackEngineBase(StgGlobalsFunc):
             return
 
         if self.gubun == 0 and self.profile:
-            self.wq.put((UI_NUM['시스템로그'], get_profile_text(self.pr)))
+            self.wq.put((UI_NUM['시스템로그'], self.get_profile_text()))
+
+    def get_profile_text(self):
+        """프로파일 텍스트를 가져옵니다.
+        Returns:
+            프로파일 텍스트
+        """
+        import io
+        import pstats
+        output = io.StringIO()
+        stats = pstats.Stats(self.pr, stream=output)
+        stats.sort_stats('cumulative')
+        stats.print_stats(30)
+        result = output.getvalue()
+        output.close()
+        return result
 
     # noinspection PyUnusedLocal
     def _strategy(self):

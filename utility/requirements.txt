@@ -26,7 +26,6 @@ pywin32==311
 python-dateutil==2.9.0.post0
 pytz==2025.2
 tzlocal==5.3.1
-loguru==0.7.3
 Cython==3.2.4
 cryptography==46.0.7
 fake-useragent==2.2.0

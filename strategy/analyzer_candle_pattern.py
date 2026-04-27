@@ -53,16 +53,16 @@ def calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray,
     for idx in detection_indices:
         if idx + analysis_period < len(close_price):
             entry_date = int(datetime_data[idx] // 10000)
-            exit_date = int(datetime_data[idx + analysis_period] // 10000)
+            exit_date  = int(datetime_data[idx + analysis_period] // 10000)
             if entry_date == exit_date:
-                entry_price = close_price[idx]
+                entry_price    = close_price[idx]
                 exit_max_price = close_price[idx:idx + analysis_period].max()
                 exit_min_price = close_price[idx:idx + analysis_period].min()
                 if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
                     exit_price = exit_max_price
                 else:
                     exit_price = exit_min_price
-                price_change = (exit_price - entry_price) / entry_price * 100
+                price_change   = (exit_price - entry_price) / entry_price * 100
                 score = price_change / rate_threshold * 100
                 score = max(-100.0, min(100.0, score))
                 scores.append(score)
@@ -124,13 +124,13 @@ class AnalyzerCandlePattern:
             close_price   = realtime_data[:, self.idx_close]
 
             for pattern_name in PATTERN_FUNCTIONS:
-                pattern_func = getattr(talib, pattern_name)
+                pattern_func   = getattr(talib, pattern_name)
                 pattern_result = pattern_func(open_price, high_price, low_price, close_price)
 
                 if pattern_result[-1] != 0:
                     learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
                     if learned_score:
-                        pattern_score = learned_score['avg_score']
+                        pattern_score    = learned_score['avg_score']
                         confidence_score = learned_score['confidence_score']
 
         return pattern_score, confidence_score
@@ -431,7 +431,12 @@ class CandlePatternDatabase:
         """
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT analysis_period, rate_threshold FROM pattern_setting WHERE market = ?', (market,))
+            cursor.execute(
+                'SELECT analysis_period, rate_threshold '
+                'FROM pattern_setting '
+                'WHERE market = ?',
+                (market,)
+            )
             result = cursor.fetchone()
             if not result:
                 result = 30, 5
@@ -449,7 +454,8 @@ class CandlePatternDatabase:
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'INSERT OR REPLACE INTO pattern_setting (market, analysis_period, rate_threshold) VALUES (?, ?, ?)',
+                'INSERT OR REPLACE INTO pattern_setting '
+                '(market, analysis_period, rate_threshold) VALUES (?, ?, ?)',
                 (market, analysis_period, rate_threshold)
             )
             conn.commit()
