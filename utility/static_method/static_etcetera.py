@@ -1,4 +1,10 @@
 
+def send_query_data(queryQ, gubun, table_name, values):
+    place_holder = f'({', '.join(['?'] * len(values))})'
+    query = f'INSERT OR REPLACE INTO {table_name} VALUES {place_holder}'
+    queryQ.put((gubun, query, values))
+
+
 _UPBIT_HOGA_KEYS = (0.01, 1, 10, 100, 1000, 10000, 100000, 500000, 1000000, 2000000, float('inf'))
 _UPBIT_HOGA_VALS = (0.0001, 0.001, 0.01, 0.1, 1, 5, 10, 50, 100, 500, 1000)
 

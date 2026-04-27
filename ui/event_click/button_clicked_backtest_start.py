@@ -553,6 +553,7 @@ def sdbutton_clicked_05(ui):
     import random
     from PyQt5.QtWidgets import QMessageBox
     from ui.create_widget.set_text import famous_saying
+    from utility.static_method.static_etcetera import send_query_data
 
     schedule_name = ui.sd_dlineEditttt_01.text()
     if schedule_name == '':
@@ -579,7 +580,6 @@ def sdbutton_clicked_05(ui):
         schedule += ui.sd_oclineEdittt_02.text() + ';'
         schedule += ui.sd_oclineEdittt_03.text()
         if ui.proc_chqs.is_alive():
-            insert_query  = 'INSERT OR REPLACE INTO schedule VALUES (?, ?)'
-            insert_values = (schedule_name, schedule)
-            ui.queryQ.put(('전략디비', insert_query, insert_values))
+            values = (schedule_name, schedule)
+            send_query_data(ui.queryQ, '전략디비', 'schedule', values)
             QMessageBox.information(ui.dialog_scheduler, '저장 완료', random.choice(famous_saying))
