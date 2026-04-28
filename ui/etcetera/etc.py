@@ -84,6 +84,23 @@ def send_dict_set(ui):
             bpq.put(('설정변경', ui.dict_set))
 
 
+def send_analyzer_setting_change(ui):
+    from ui.etcetera.process_alive import receiver_process_alive
+
+    ui.chartQ.put('분석설정변경')
+
+    if receiver_process_alive(ui):
+        if ui.market_gubun in (1, 4):
+            for q in ui.stgQs:
+                q.put('분석설정변경')
+        else:
+            ui.stgQs[0].put('분석설정변경')
+
+    if ui.backengine_running:
+        for bpq in ui.back_eques:
+            bpq.put('분석설정변경')
+
+
 def update_market_gubun(ui):
     """시장 구분을 업데이트합니다.
     Args:

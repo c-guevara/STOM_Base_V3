@@ -51,6 +51,13 @@ class BaseStrategy(StgGlobalsFunc):
         self.info_for_buy    = None
         self.info_for_sell   = None
 
+        self.ms_analyzer     = None
+        self.rk_analyzer     = None
+        self.pt_analyzer     = None
+        self.vf_analyzer     = None
+        self.vs_analyzer     = None
+        self.vp_analyzer     = None
+
         self.dict_data: dict[str, list] = {}
         self.dict_gj: dict[str, dict[str, int | float]] = {}
         self.dict_jg: dict[str, dict[str, int | float]] = {}
@@ -95,12 +102,13 @@ class BaseStrategy(StgGlobalsFunc):
         self.angle_dtm_cf    = angle_cf[1]
         factor_list          = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex     = {factor: i for i, factor in enumerate(factor_list)}
-        self.data_cnt        = self.market_info['팩터개수'][self.is_tick]
 
+        self.data_cnt        = self.market_info['팩터개수'][self.is_tick]
         self.base_cnt        = self.dict_findex['관심종목'] + 1
         self.area_cnt        = self.dict_findex['당일거래대금각도'] + 1
-        if self.market_gubun < 4:
-            self.vitime_cnt  = self.dict_findex['VI해제시간']
+        self.patn_cnt        = self.dict_findex['변동성신뢰도'] + 1
+        self.indi_cnt        = self.dict_findex['WILLR'] + 1 if not self.is_tick else 0
+        self.vitime_cnt      = self.dict_findex['VI해제시간'] if self.market_gubun < 4 else 0
 
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']
@@ -115,17 +123,19 @@ class BaseStrategy(StgGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
-        self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
+        set_builtin_print(self.windowQ)
+        self._set_analyzer()
+        self._set_formula_data()
+        self._set_strategy_and_blacklist()
+        self._main_loop()
+
+    def _set_analyzer(self):
+        self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], self.dict_findex)
+        self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], self.dict_findex)
         self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info)
         self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, self.is_tick)
         self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, self.is_tick)
         self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, self.is_tick)
-
-        set_builtin_print(self.windowQ)
-        self._set_formula_data()
-        self._set_strategy_and_blacklist()
-        self._main_loop()
 
     def _set_formula_data(self):
         """공식 데이터를 설정합니다."""
@@ -345,6 +355,8 @@ class BaseStrategy(StgGlobalsFunc):
         elif data == '매도전략중지':
             self.sellstrategy = None
             self.teleQ.put('매도전략 중지 완료')
+        elif data == '분석설정변경':
+            self._set_analyzer()
         else:
             if data != '프로그램종료' and self.gubun == 0:
                 exit_text = '전략연산 종료' if data == '프로세스종료' else '전략연산 STOP'
@@ -406,8 +418,9 @@ class BaseStrategy(StgGlobalsFunc):
         self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
 
         if 데이터길이 >= self.rolling_window:
-            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(self.rolling_window)
+            self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
+        시그널, 신뢰도, 리스크 = 'hold', 0., 0.
         리스크점수 = 가격대점수 = 가격대신뢰도 = 거래량점수 = 거래량신뢰도 = 변동성점수 = 변동성신뢰도 = 0
 
         if self.dict_set['시장미시구조분석']:
@@ -556,6 +569,10 @@ class BaseStrategy(StgGlobalsFunc):
                     if 매도:
                         self.Sell()
 
+        시그널 = 1 if 시그널 == 'buy' else (-1 if 시그널 == 'sell' else 0)
+        self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+            [시그널, 신뢰도, 리스크, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+
         if 관심종목:
             """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
@@ -661,7 +678,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[:, self.dict_findex['분당거래대금']],
                 self.indi_settings
             )
-            self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
+            self.arry_code[-1, self.area_cnt:self.indi_cnt] = indicator_list
 
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
@@ -800,6 +817,9 @@ class BaseStrategy(StgGlobalsFunc):
 
                         if 매도:
                             self.Sell()
+
+            self.arry_code[-1, self.indi_cnt:self.patn_cnt] = \
+                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
         else:
             pre_data = self.dict_data.get(종목코드)
             if pre_data is None:
@@ -908,8 +928,9 @@ class BaseStrategy(StgGlobalsFunc):
         self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
 
         if 데이터길이 >= self.rolling_window:
-            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(self.rolling_window)
+            self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
+        시그널, 신뢰도, 리스크 = 'hold', 0., 0.
         리스크점수 = 가격대점수 = 가격대신뢰도 = 거래량점수 = 거래량신뢰도 = 변동성점수 = 변동성신뢰도 = 0
 
         if self.dict_set['시장미시구조분석']:
@@ -1097,6 +1118,10 @@ class BaseStrategy(StgGlobalsFunc):
                     if (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):
                         self.Sell(SELL_LONG)
 
+        시그널 = 1 if 시그널 == 'buy' else (-1 if 시그널 == 'sell' else 0)
+        self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+            [시그널, 신뢰도, 리스크, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+
         if 관심종목:
             """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
@@ -1113,6 +1138,9 @@ class BaseStrategy(StgGlobalsFunc):
 
         if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
             self.windowQ.put((UI_NUM['실시간차트'], 종목코드, self.arry_code))
+            if self.dict_set['시장미시구조분석']:
+                curr_values, avg_values, overall_risk = self.ms_analyzer.get_radar_values(종목코드)
+                self.windowQ.put((UI_NUM['실시간차트'], curr_values, avg_values, overall_risk))
 
         if 틱수신시간 != 0:
             gap = (now() - 틱수신시간).total_seconds()
@@ -1181,7 +1209,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[:, self.dict_findex['분당거래대금']],
                 self.indi_settings
             )
-            self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
+            self.arry_code[-1, self.area_cnt:self.indi_cnt] = indicator_list
 
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
@@ -1366,6 +1394,9 @@ class BaseStrategy(StgGlobalsFunc):
 
                         if (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):
                             self.Sell(SELL_LONG)
+
+            self.arry_code[-1, self.indi_cnt:self.patn_cnt] = \
+                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
 
         else:
             pre_data = self.dict_data.get(종목코드)

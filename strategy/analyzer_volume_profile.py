@@ -157,8 +157,7 @@ class AnalyzerVolumeProfile:
         results = np.zeros((n, 2))
 
         for i, current_price in enumerate(code_data[:, 1]):
-            volume_profile_score, confidence_score = self.analyze_current_price(code, current_price)
-            results[i] = [volume_profile_score, confidence_score]
+            results[i] = list(self.analyze_current_price(code, current_price))
 
         return results
 
@@ -175,8 +174,9 @@ class AnalyzerVolumeProfile:
             cursor = conn.cursor()
             for code in code_list:
                 cursor.execute(
-                    f'SELECT DISTINCT last_update FROM {self.volume_database.table_name} WHERE code = ?',
-                    (code,)
+                    f'SELECT DISTINCT last_update FROM {self.volume_database.table_name} '
+                    f'WHERE code = ? and setting_hash = ?',
+                    (code, self.volume_database.setting_hash)
                 )
                 existing_dates_dict[code] = set([row[0] for row in cursor.fetchall()])
 
@@ -203,7 +203,7 @@ class AnalyzerVolumeProfile:
 
         total_processed = 0
         columns = [
-            'code', 'price_level', 'avg_score', 'upward_strength', 'downward_strength'
+            'code', 'price_level', 'avg_score', 'upward_strength', 'downward_strength',
             'sample_count', 'confidence_score', 'setting_hash', 'last_update'
         ]
         for i, result in enumerate(results):
@@ -216,7 +216,7 @@ class AnalyzerVolumeProfile:
         if total_processed > 0:
             windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
             windowQ.put((UI_NUM['학습로그'], f"{self.volume_database.db_path} -> {self.volume_database.table_name}"))
-            windowQ.put((UI_NUM['학습로그'], f"가격대분석 학습 완료 [{total_processed}]"))
+            windowQ.put((UI_NUM['학습로그'], '가격대분석 학습 완료'))
         else:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
 
@@ -282,7 +282,6 @@ class AnalyzerVolumeProfile:
                         top_indices    = sorted_indices[:top_nodes]
                         volume_nodes   = [float(bin_centers[idx]) for idx in top_indices]
 
-                        node_scores = None
                         for node_price in volume_nodes:
                             upward_strength, downward_strength, sample_count = \
                                 _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
@@ -291,6 +290,7 @@ class AnalyzerVolumeProfile:
                                 final_score = (upward_strength - downward_strength) * 100
                                 final_score = max(-100.0, min(100.0, final_score))
                                 confidence_score = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
+
                                 node_scores = [
                                     code,
                                     node_price,
@@ -302,9 +302,7 @@ class AnalyzerVolumeProfile:
                                     setting_hash,
                                     target_date
                                 ]
-
-                        if node_scores:
-                            all_volume_scores.append(node_scores)
+                                all_volume_scores.append(node_scores)
 
                     # noinspection PyUnresolvedReferences
                     window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
@@ -438,7 +436,7 @@ class VolumeProfileDatabase:
             if not result:
                 result = 10, 0.5, 0.33
 
-            self.setting_hash = _calculate_setting_hash(*result, self.is_tick)
+            self.setting_hash = _calculate_setting_hash(result[0], result[1], result[2], self.is_tick)
             return result
 
     def save_volume_setting(self, market: int, analysis_period: int, rate_threshold: float, price_range_pct: float):
@@ -472,11 +470,13 @@ def volume_setting_load(ui):
 
 def volume_setting_save(ui):
     """두개의 콤보박스 텍스트를 현재 거래소의 설정값으로 저장한다."""
+    from ui.etcetera.etc import send_analyzer_setting_change
     analysis_period = int(ui.vpf_comboBoxxx_01.currentText())
     rate_threshold  = float(ui.vpf_comboBoxxx_02.currentText())
     price_range_pct = float(ui.vpf_comboBoxxx_03.currentText())
     database = VolumeProfileDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
     database.save_volume_setting(ui.market_gubun, analysis_period, rate_threshold, price_range_pct)
+    send_analyzer_setting_change(ui)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
@@ -496,6 +496,7 @@ def volume_profile_train(ui):
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
         return
 
+    ui.windowQ.put((UI_NUM['학습로그'], '가격대분석 학습을 시작합니다.'))
     _volume_profile_train(ui)
 
 

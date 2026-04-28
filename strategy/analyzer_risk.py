@@ -44,7 +44,7 @@ def _calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
 def _calculate_volatility(prices: np.ndarray, window: int = 20) -> float:
     """변동성 계산 (Numba JIT 최적화)"""
     n = len(prices)
-    if n < window:
+    if n <= window:
         return 0.0
 
     returns = np.zeros(n - window, dtype=np.float64)
@@ -70,30 +70,29 @@ def _calculate_volatility(prices: np.ndarray, window: int = 20) -> float:
 class AnalyzerRisk:
     """리스크 분석을 수행하는 클래스입니다.
     RSI, 변동성 등 리스크 관련 지표를 계산합니다."""
-    def __init__(self, market_type: str, columns: list):
+    def __init__(self, market_type: str, dict_findex: dict):
         self.market_type = market_type
-        self.columns = columns
+        self.dict_findex = dict_findex
         self._setup_columns()
         self._setup_analysis_parameters()
 
     def _setup_columns(self):
         """시장 및 데이터 타입에 따른 칼럼 설정"""
-        col_index = {col: idx for idx, col in enumerate(self.columns)}
-        self.is_tick = '초당매수수량' in col_index
-        self.idx_curr_price        = col_index['현재가']
-        self.idx_volume            = col_index['당일거래대금']
-        self.idx_chegyeol_strength = col_index['체결강도']
+        self.is_tick = '초당매수수량' in self.dict_findex
+        self.idx_curr_price        = self.dict_findex['현재가']
+        self.idx_volume            = self.dict_findex['당일거래대금']
+        self.idx_chegyeol_strength = self.dict_findex['체결강도']
         if self.is_tick:
-            self.idx_buy_vol       = col_index['초당매수수량']
-            self.idx_sell_vol      = col_index['초당매도수량']
+            self.idx_buy_vol       = self.dict_findex['초당매수수량']
+            self.idx_sell_vol      = self.dict_findex['초당매도수량']
         else:
-            self.idx_buy_vol       = col_index['분당매수수량']
-            self.idx_sell_vol      = col_index['분당매도수량']
-        self.idx_high_low_ratio    = col_index['고저평균대비등락율']
-        self.idx_max_price         = col_index['최고현재가']
-        self.idx_min_price         = col_index['최저현재가']
-        self.idx_chegyeol_avg      = col_index['체결강도평균']
-        self.idx_change_angle      = col_index['등락율각도']
+            self.idx_buy_vol       = self.dict_findex['분당매수수량']
+            self.idx_sell_vol      = self.dict_findex['분당매도수량']
+        self.idx_high_low_ratio    = self.dict_findex['고저평균대비등락율']
+        self.idx_max_price         = self.dict_findex['최고현재가']
+        self.idx_min_price         = self.dict_findex['최저현재가']
+        self.idx_chegyeol_avg      = self.dict_findex['체결강도평균']
+        self.idx_change_angle      = self.dict_findex['등락율각도']
 
     def _setup_analysis_parameters(self):
         """분석 파라미터를 설정합니다.
@@ -340,10 +339,10 @@ class AnalyzerRisk:
         Args:
             code_data: 코드 데이터 2차원 어레이
         Returns:
-            (N, 1) 형태의 2차원 어레이 - 리스크점수
+            (N) 형태의 1차원 어레이 - 리스크점수
         """
         n = len(code_data)
-        results = np.zeros((n, 1))  # [리스크 점수]
+        results = np.zeros(n)  # [리스크 점수]
 
         for i in range(20, n):
             window_data = code_data[:i]  # 0부터 i까지의 데이터 사용
@@ -410,9 +409,12 @@ class AnalyzerRisk:
         else:
             direction = 'neutral'
 
-        x = np.arange(len(prices))
-        slope = np.polyfit(x, prices, 1)[0] / np.mean(prices) * 100
-        strength = abs(slope)
+        try:
+            x = np.arange(len(prices))
+            slope = np.polyfit(x, prices, 1)[0] / np.mean(prices) * 100
+            strength = abs(slope)
+        except (np.linalg.LinAlgError, ValueError, ZeroDivisionError):
+            strength = 0.0
 
         return {
             'direction': direction,

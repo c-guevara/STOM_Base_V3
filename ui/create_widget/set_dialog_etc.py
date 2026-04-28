@@ -475,7 +475,7 @@ class SetDialogEtc:
             getattr(self.ui, f'lv_labelllllll_{i+1:02d}').setGeometry(65, y, 140, 25)
 
         for i in range(15):
-            x = 10 if i % 3 == 0 else 205 if i % 3 == 1 else 263
+            x = 10 if i % 3 == 0 else (205 if i % 3 == 1 else 263)
             y = 55 + i // 3 * 30
             getattr(self.ui, f'lv_lineEditttt_{i+2:02d}').setGeometry(x, y, 50, 25)
 

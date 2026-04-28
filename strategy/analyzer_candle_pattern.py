@@ -119,12 +119,12 @@ class AnalyzerCandlePattern:
         """
         pattern_score, confidence_score = 0.0, 0.0
 
-        if len(code_data) >= 5:
-            code_data = code_data[-5:]
-            open_price    = code_data[:, self.idx_open]
-            high_price    = code_data[:, self.idx_high]
-            low_price     = code_data[:, self.idx_low]
-            close_price   = code_data[:, self.idx_close]
+        if code in self.pattern_scores and len(code_data) >= 5:
+            code_data   = code_data[-5:]
+            open_price  = code_data[:, self.idx_open]
+            high_price  = code_data[:, self.idx_high]
+            low_price   = code_data[:, self.idx_low]
+            close_price = code_data[:, self.idx_close]
 
             high_avg_score = 0
             for pattern_name in PATTERN_FUNCTIONS:
@@ -132,7 +132,7 @@ class AnalyzerCandlePattern:
                 pattern_result = pattern_func(open_price, high_price, low_price, close_price)
 
                 if pattern_result[-1] != 0:
-                    learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
+                    learned_score = self.pattern_scores[code].get(pattern_name)
                     if learned_score:
                         avg_score = learned_score['avg_score']
                         if avg_score > high_avg_score:
@@ -152,12 +152,11 @@ class AnalyzerCandlePattern:
         self.load_pattern_code_scores(code, date)
 
         n = len(code_data)
-        results = np.zeros((n, 3))
+        results = np.zeros((n, 2))
 
         for i in range(5, n):
             window_data = code_data[i-5:i]
-            pattern_score, confidence_score = self.analyze_current_patterns(code, window_data)
-            results[i] = [pattern_score, confidence_score]
+            results[i] = list(self.analyze_current_patterns(code, window_data))
 
         return results
 
@@ -174,8 +173,9 @@ class AnalyzerCandlePattern:
             cursor = conn.cursor()
             for code in code_list:
                 cursor.execute(
-                    f'SELECT DISTINCT last_update FROM {self.pattern_database.table_name} WHERE code = ?',
-                    (code,)
+                    f'SELECT DISTINCT last_update FROM {self.pattern_database.table_name} '
+                    f'WHERE code = ? and setting_hash = ?',
+                    (code, self.pattern_database.setting_hash)
                 )
                 existing_dates_dict[code] = set([row[0] for row in cursor.fetchall()])
 
@@ -215,7 +215,7 @@ class AnalyzerCandlePattern:
         if total_processed > 0:
             windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
             windowQ.put((UI_NUM['학습로그'], f"{self.pattern_database.db_path} -> {self.pattern_database.table_name}"))
-            windowQ.put((UI_NUM['학습로그'], f"캔들분석 학습 완료 [{total_processed}]"))
+            windowQ.put((UI_NUM['학습로그'], '캔들분석 학습 완료'))
         else:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다"))
 
@@ -274,7 +274,6 @@ class AnalyzerCandlePattern:
                         close_price   = date_data[:, idx_close]
                         date_datetime = date_data[:, 0]
 
-                        pattern_scores = None
                         for pattern_name in PATTERN_FUNCTIONS:
                             pattern_func      = getattr(talib, pattern_name)
                             pattern_result    = pattern_func(open_price, high_price, low_price, close_price)
@@ -301,9 +300,7 @@ class AnalyzerCandlePattern:
                                         setting_hash,
                                         target_date
                                     ]
-
-                        if pattern_scores:
-                            all_pattern_scores.append(pattern_scores)
+                                    all_pattern_scores.append(pattern_scores)
 
                     # noinspection PyUnresolvedReferences
                     window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
@@ -442,7 +439,7 @@ class CandlePatternDatabase:
             if not result:
                 result = 30, 5
 
-            self.setting_hash = _calculate_setting_hash(*result)
+            self.setting_hash = _calculate_setting_hash(result[0], result[1])
             return result
 
     def save_pattern_setting(self, market: int, analysis_period: int, rate_threshold: int):
@@ -472,10 +469,12 @@ def pattern_setting_load(ui):
 
 def pattern_setting_save(ui):
     """두개의 콤보박스 텍스트를 현재 거래소의 설정값으로 저장한다."""
+    from ui.etcetera.etc import send_analyzer_setting_change
     analysis_period  = int(ui.ptn_comboBoxxx_01.currentText())
     rate_threshold   = int(ui.ptn_comboBoxxx_02.currentText())
     database = CandlePatternDatabase(ui.market_info['전략구분'])
     database.save_pattern_setting(ui.market_gubun, analysis_period, rate_threshold)
+    send_analyzer_setting_change(ui)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
@@ -501,6 +500,7 @@ def pattern_train(ui):
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
         return
 
+    ui.windowQ.put((UI_NUM['학습로그'], '캔들분석 학습을 시작합니다.'))
     _pattern_train(ui)
 
 

@@ -143,20 +143,20 @@ class AnalyzerVolatilityPattern:
         """
         volatility_score, confidence = 0.0, 0.0
 
-        if len(code_data) >= self.analysis_period:
-            close_price = code_data[:, self.idx_close]
+        if code in self.volatility_scores and code in self.level_boundaries and len(code_data) >= self.analysis_period:
+            boundaries = self.level_boundaries[code]
+            if boundaries is not None:
+                close_price = code_data[:, self.idx_close]
 
-            if self.is_tick:
-                volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
-            else:
-                high_price      = code_data[:, self.idx_high]
-                low_price       = code_data[:, self.idx_low]
-                volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
+                if self.is_tick:
+                    volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
+                else:
+                    high_price      = code_data[:, self.idx_high]
+                    low_price       = code_data[:, self.idx_low]
+                    volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
 
-            volatility_value = volatility_data[-1]
+                volatility_value = volatility_data[-1]
 
-            if code in self.level_boundaries:
-                boundaries = self.level_boundaries[code]
                 volatility_level = 0
                 for level in range(len(boundaries) - 1):
                     if boundaries[level] <= volatility_value < boundaries[level + 1]:
@@ -165,7 +165,7 @@ class AnalyzerVolatilityPattern:
                 if volatility_value >= boundaries[-1]:
                     volatility_level = len(boundaries) - 2
 
-                if code in self.volatility_scores and volatility_level in self.volatility_scores[code]:
+                if volatility_level in self.volatility_scores[code]:
                     score_data       = self.volatility_scores[code][volatility_level]
                     volatility_score = score_data['avg_score']
                     confidence       = score_data['confidence_score']
@@ -185,10 +185,9 @@ class AnalyzerVolatilityPattern:
         n = len(code_data)
         results = np.zeros((n, 2))
 
-        for i in range(5, n):
-            window_data = code_data[i-5:i]
-            volatility_score, confidence = self.analyze_current_volatility(code, window_data)
-            results[i] = [volatility_score, confidence]
+        for i in range(self.analysis_period, n):
+            window_data = code_data[i-self.analysis_period:i]
+            results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results
 
@@ -205,8 +204,9 @@ class AnalyzerVolatilityPattern:
             cursor = conn.cursor()
             for code in code_list:
                 cursor.execute(
-                    f'SELECT DISTINCT last_update FROM {self.volatility_database.table_name} WHERE code = ?',
-                    (code,)
+                    f'SELECT DISTINCT last_update FROM {self.volatility_database.table_name} '
+                    f'WHERE code = ? and setting_hash = ?',
+                    (code, self.volatility_database.setting_hash)
                 )
                 existing_dates_dict[code] = set([row[0] for row in cursor.fetchall()])
 
@@ -246,7 +246,7 @@ class AnalyzerVolatilityPattern:
         if total_processed > 0:
             windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
             windowQ.put((UI_NUM['학습로그'], f"{self.volatility_database.db_path} -> {self.volatility_database.table_name}"))
-            windowQ.put((UI_NUM['학습로그'], f"변동성분석 학습 완료 [{total_processed}]"))
+            windowQ.put((UI_NUM['학습로그'], '변동성분석 학습 완료'))
         else:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
 
@@ -317,8 +317,8 @@ class AnalyzerVolatilityPattern:
                         level_boundaries = np.percentile(valid_data, percentiles)
 
                     levels = _classify_volatility_levels(volatility_data, level_boundaries, num_levels)
+                    level_boundaries = ','.join(map(str, level_boundaries))
 
-                    level_scores = None
                     for level in range(num_levels):
                         level_indices = np.where(levels == level)[0]
                         if len(level_indices) >= min_samples:
@@ -329,6 +329,7 @@ class AnalyzerVolatilityPattern:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
                                 std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
+
                                 level_scores = [
                                     code,
                                     level,
@@ -342,9 +343,7 @@ class AnalyzerVolatilityPattern:
                                     setting_hash,
                                     target_date
                                 ]
-
-                    if level_scores:
-                        all_volatility_scores.append(level_scores)
+                                all_volatility_scores.append(level_scores)
 
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 변동성분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
@@ -498,7 +497,7 @@ class VolatilityPatternDatabase:
             if not result:
                 result = 30, 5, 5
 
-            self.setting_hash = _calculate_setting_hash(*result, self.is_tick)
+            self.setting_hash = _calculate_setting_hash(result[0], result[1], result[2], self.is_tick)
             return result
 
     def save_volatility_setting(self, market: int, analysis_period: int, rate_threshold: str, num_levels: int):
@@ -532,11 +531,13 @@ def volatility_setting_load(ui):
 
 def volatility_setting_save(ui):
     """세개의 콤보박스 텍스트를 현재 거래소의 설정값으로 저장한다."""
+    from ui.etcetera.etc import send_analyzer_setting_change
     analysis_period = int(ui.vlp_comboBoxxx_01.currentText())
     rate_threshold  = int(ui.vlp_comboBoxxx_02.currentText())
     num_levels      = int(ui.vlp_comboBoxxx_03.currentText())
     database = VolatilityPatternDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
     database.save_volatility_setting(ui.market_gubun, analysis_period, rate_threshold, num_levels)
+    send_analyzer_setting_change(ui)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
@@ -556,6 +557,7 @@ def volatility_train(ui):
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
         return
 
+    ui.windowQ.put((UI_NUM['학습로그'], '변동성분석 학습을 시작합니다.'))
     _volatility_train(ui)
 
 

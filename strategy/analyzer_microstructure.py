@@ -474,15 +474,14 @@ class AnalyzerMicrostructure:
     """시장 미시구조 분석기 클래스입니다.
     호가 데이터를 분석하여 시장 조작 패턴을 탐지합니다.
     """
-    def __init__(self, market_type: str, columns: list, data_cnt: int = 1800, history_cnt: int = 30):
-        # 기본 설정
+    def __init__(self, market_type: str, dict_findex: dict, data_cnt: int = 1800, history_cnt: int = 30):
+        self.market_type       = market_type
+        self.dict_findex       = dict_findex
+        self.data_cnt          = data_cnt
+        self.history_cnt       = history_cnt
+        self.curr_data         = None
+        self.data_results      = []
         self._price_risk_cache = {}
-        self.market_type = market_type
-        self.columns = columns
-        self.data_cnt = data_cnt
-        self.history_cnt = history_cnt
-        self.curr_data = None
-        self.data_results = []
 
         # 데이터 타입별 파라미터 설정
         self._setup_parameters()
@@ -549,14 +548,13 @@ class AnalyzerMicrostructure:
     def _setup_columns(self):
         """컬럼을 설정합니다."""
         # 칼럼 인덱스 매핑 (빠른 접근용)
-        col_index = {col: idx for idx, col in enumerate(self.columns)}
-        self.idx_curr_price = col_index.get('현재가', 0)
-        self.idx_buy_vol    = col_index.get('초당매수수량', 0)
-        self.idx_sell_vol   = col_index.get('초당매도수량', 0)
-        self.idx_ask_price  = [col_index.get(f'매도호가{i}', 0) for i in range(1, 6)]
-        self.idx_ask_qty    = [col_index.get(f'매도잔량{i}', 0) for i in range(1, 6)]
-        self.idx_bid_price  = [col_index.get(f'매수호가{i}', 0) for i in range(1, 6)]
-        self.idx_bid_qty    = [col_index.get(f'매수잔량{i}', 0) for i in range(1, 6)]
+        self.idx_curr_price = self.dict_findex.get('현재가', 0)
+        self.idx_buy_vol    = self.dict_findex.get('초당매수수량', 0)
+        self.idx_sell_vol   = self.dict_findex.get('초당매도수량', 0)
+        self.idx_ask_price  = [self.dict_findex.get(f'매도호가{i}', 0) for i in range(1, 6)]
+        self.idx_ask_qty    = [self.dict_findex.get(f'매도잔량{i}', 0) for i in range(1, 6)]
+        self.idx_bid_price  = [self.dict_findex.get(f'매수호가{i}', 0) for i in range(1, 6)]
+        self.idx_bid_qty    = [self.dict_findex.get(f'매수잔량{i}', 0) for i in range(1, 6)]
 
     def update_data(self, code: str, code_data: np.ndarray):
         """데이터를 업데이트합니다.
@@ -700,7 +698,7 @@ class AnalyzerMicrostructure:
             recent_data = code_data[i - self.history_cnt:i]
             self._calculate_processed_data(code, recent_data, real=False)
             signal, confidence, total_risk = self.get_signal(buy_cf, sell_cf)
-            signal_num = 1 if signal == 'buy' else -1 if signal == 'sell' else 0
+            signal_num = 1 if signal == 'buy' else (-1 if signal == 'sell' else 0)
             results[i] = [signal_num, confidence, total_risk]
 
         return results
