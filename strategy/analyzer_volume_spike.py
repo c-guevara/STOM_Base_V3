@@ -359,7 +359,10 @@ class VolumeSpikeDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(f'SELECT DISTINCT code FROM {self.table_name}')
+            cursor.execute(
+                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
+                (self.setting_hash,)
+            )
             results = cursor.fetchall()
             return [result[0] for result in results]
 

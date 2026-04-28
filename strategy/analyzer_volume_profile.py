@@ -357,7 +357,10 @@ class VolumeProfileDatabase:
         """데이터베이스에 저장된 전체 종목코드 조회"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(f'SELECT DISTINCT code FROM {self.table_name}')
+            cursor.execute(
+                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
+                (self.setting_hash,)
+            )
             results = cursor.fetchall()
             return [result[0] for result in results]
 
