@@ -685,14 +685,22 @@ class BaseReceiver:
                 self.lvhp_time = timedelta_sec(300)
 
     def _money_top_search(self):
-        """머니 탑을 검색합니다."""
-        sorted_daym = sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]
+        """거래대금상위 종목을 검색합니다.
+        국내주식와 해외주식은 등락율 0% 이상으로 필터링
+        """
+        sorted_daym = sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)
+        if self.market_gubun < 6:
+            sorted_daym = [(x, y) for x, y in sorted_daym if self.dict_data[x][4] > 0]
+        sorted_daym = sorted_daym[:self.mtop_rank]
+
         if self.market_gubun in (6, 7, 8):
             list_mtop = [self.dict_info[x]['종목명'] for x, y in sorted_daym]
         else:
             list_mtop = [x for x, y in sorted_daym]
+
         insert_set = set(list_mtop) - set(self.list_gsjm)
         delete_set = set(self.list_gsjm) - set(list_mtop)
+
         if insert_set:
             for code in insert_set:
                 self._insert_gsjm_list(code)
