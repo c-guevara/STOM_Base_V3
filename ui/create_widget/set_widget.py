@@ -1099,7 +1099,7 @@ class WidgetCreater:
         elif name == 'STOM STRATEGY':
             number = 10
             dialog = self.ui.dialog_strategy
-        elif name == 'STOM MICROSTRUCTURE RADER':
+        elif name == 'STOM MICROSTRUCTURE RADAR':
             number = 11
             dialog = self.ui.radar_dialog
 
