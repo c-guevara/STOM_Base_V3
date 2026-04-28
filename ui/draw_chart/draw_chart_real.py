@@ -18,7 +18,8 @@ class DrawRealChart(DrawChartBase):
         """
         if type(data[1]) != str:
             curr_values, avg_values, overall_risk = data[1:]
-            self.ui.radar_dialog.update_radar(curr_values, avg_values, overall_risk)
+            if self.ui.radar_dialog.isVisible():
+                self.ui.radar_dialog.update_radar(curr_values, avg_values, overall_risk)
             return
 
         self.real = True
