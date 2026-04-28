@@ -107,7 +107,6 @@ class BaseStrategy(StgGlobalsFunc):
         self.base_cnt        = self.dict_findex['관심종목'] + 1
         self.area_cnt        = self.dict_findex['당일거래대금각도'] + 1
         self.patn_cnt        = self.dict_findex['변동성신뢰도'] + 1
-        self.indi_cnt        = self.dict_findex['WILLR'] + 1 if not self.is_tick else 0
         self.vitime_cnt      = self.dict_findex['VI해제시간'] if self.market_gubun < 4 else 0
 
         if self.is_tick:
@@ -570,7 +569,7 @@ class BaseStrategy(StgGlobalsFunc):
                         self.Sell()
 
         시그널 = 1 if 시그널 == 'buy' else (-1 if 시그널 == 'sell' else 0)
-        self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+        self.arry_code[-1, self.area_cnt:] = \
             [시그널, 신뢰도, 리스크, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
 
         if 관심종목:
@@ -671,6 +670,9 @@ class BaseStrategy(StgGlobalsFunc):
             if self.dict_set['변동성분석']:
                 변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
+            self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],
                 self.arry_code[:, self.dict_findex['분봉고가']],
@@ -678,7 +680,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[:, self.dict_findex['분당거래대금']],
                 self.indi_settings
             )
-            self.arry_code[-1, self.area_cnt:self.indi_cnt] = indicator_list
+            self.arry_code[-1, self.patn_cnt:] = indicator_list
 
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
@@ -817,9 +819,6 @@ class BaseStrategy(StgGlobalsFunc):
 
                         if 매도:
                             self.Sell()
-
-            self.arry_code[-1, self.indi_cnt:self.patn_cnt] = \
-                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
         else:
             pre_data = self.dict_data.get(종목코드)
             if pre_data is None:
@@ -847,7 +846,20 @@ class BaseStrategy(StgGlobalsFunc):
                 new_data_tick[:self.base_cnt] = data[:self.base_cnt]
                 self.arry_code = np.concatenate([pre_data, [new_data_tick]])
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
-                self.arry_code[-1, self.area_cnt:self.data_cnt] = get_indicator(
+                패턴점수 = 패턴신뢰도 = 리스크점수 = 가격대점수 = 가격대신뢰도 = 거래량점수 = 거래량신뢰도 = 변동성점수 = 변동성신뢰도 = 0
+                if self.dict_set['캔들분석']:
+                    패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
+                if self.dict_set['리스크분석']:
+                    리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+                if self.dict_set['가격대분석']:
+                    가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+                if self.dict_set['거래량분석']:
+                    거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+                if self.dict_set['변동성분석']:
+                    변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
+                self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+                    [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+                self.arry_code[-1, self.patn_cnt:] = get_indicator(
                     self.arry_code[:, self.dict_findex['현재가']],
                     self.arry_code[:, self.dict_findex['분봉고가']],
                     self.arry_code[:, self.dict_findex['분봉저가']],
@@ -1119,7 +1131,7 @@ class BaseStrategy(StgGlobalsFunc):
                         self.Sell(SELL_LONG)
 
         시그널 = 1 if 시그널 == 'buy' else (-1 if 시그널 == 'sell' else 0)
-        self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+        self.arry_code[-1, self.area_cnt:] = \
             [시그널, 신뢰도, 리스크, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
 
         if 관심종목:
@@ -1202,6 +1214,9 @@ class BaseStrategy(StgGlobalsFunc):
             if self.dict_set['변동성분석']:
                 변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
+            self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],
                 self.arry_code[:, self.dict_findex['분봉고가']],
@@ -1209,7 +1224,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[:, self.dict_findex['분당거래대금']],
                 self.indi_settings
             )
-            self.arry_code[-1, self.area_cnt:self.indi_cnt] = indicator_list
+            self.arry_code[-1, self.patn_cnt:] = indicator_list
 
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
@@ -1395,9 +1410,6 @@ class BaseStrategy(StgGlobalsFunc):
                         if (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):
                             self.Sell(SELL_LONG)
 
-            self.arry_code[-1, self.indi_cnt:self.patn_cnt] = \
-                [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
-
         else:
             pre_data = self.dict_data.get(종목코드)
             if pre_data is None:
@@ -1425,7 +1437,20 @@ class BaseStrategy(StgGlobalsFunc):
                 new_data_tick[:self.base_cnt] = data[:self.base_cnt]
                 self.arry_code = np.concatenate([pre_data, [new_data_tick]])
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
-                self.arry_code[-1, self.area_cnt:self.data_cnt] = get_indicator(
+                패턴점수 = 패턴신뢰도 = 리스크점수 = 가격대점수 = 가격대신뢰도 = 거래량점수 = 거래량신뢰도 = 변동성점수 = 변동성신뢰도 = 0
+                if self.dict_set['캔들분석']:
+                    패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
+                if self.dict_set['리스크분석']:
+                    리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+                if self.dict_set['가격대분석']:
+                    가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+                if self.dict_set['거래량분석']:
+                    거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+                if self.dict_set['변동성분석']:
+                    변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
+                self.arry_code[-1, self.area_cnt:self.patn_cnt] = \
+                    [패턴점수, 패턴신뢰도, 리스크점수, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도]
+                self.arry_code[-1, self.patn_cnt:] = get_indicator(
                     self.arry_code[:, self.dict_findex['현재가']],
                     self.arry_code[:, self.dict_findex['분봉고가']],
                     self.arry_code[:, self.dict_findex['분봉저가']],
@@ -1686,13 +1711,13 @@ class BaseStrategy(StgGlobalsFunc):
                     del self.dict_data[code]
 
         last = len(self.dict_data)
-        columns_ = self.market_info['팩터목록'][self.is_tick][:self.base_cnt]
+        columns = self.market_info['팩터목록'][self.is_tick][:self.base_cnt]
         con = sqlite3.connect(self.market_info['당일디비'][self.is_tick])
         if last > 0:
             start = now()
-            cllen = len(columns_)
+            cllen = len(columns)
             for i, code in enumerate(self.dict_data):
-                df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
+                df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns)
                 df['index'] = df['index'].astype('int64')
                 if self.market_gubun in (6, 7, 8):
                     name = self.dict_info[code]['종목명']

@@ -409,12 +409,21 @@ class AnalyzerRisk:
         else:
             direction = 'neutral'
 
-        try:
-            x = np.arange(len(prices))
-            slope = np.polyfit(x, prices, 1)[0] / np.mean(prices) * 100
-            strength = abs(slope)
-        except (np.linalg.LinAlgError, ValueError, ZeroDivisionError):
-            strength = 0.0
+        prices_clean = prices[~np.isnan(prices) & ~np.isinf(prices)]
+        
+        if len(prices_clean) < 2 or np.all(prices_clean == prices_clean[0]):
+            strength = 1e-10
+        else:
+            try:
+                x = np.arange(len(prices_clean))
+                mean_price = np.mean(prices_clean)
+                if mean_price == 0:
+                    strength = 1e-10
+                else:
+                    slope = np.polyfit(x, prices_clean, 1)[0] / mean_price * 100
+                    strength = abs(slope)
+            except (np.linalg.LinAlgError, ValueError, ZeroDivisionError):
+                strength = 1e-10
 
         return {
             'direction': direction,

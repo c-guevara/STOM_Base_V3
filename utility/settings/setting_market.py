@@ -96,9 +96,9 @@ LIST_BASIC_MIN = [
     '최고분봉고가', '최저분봉저가',
     '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
     '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도',
+    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도',
     'AD', 'ADOSC', 'ADXR', 'APO', 'AROOND', 'AROONU', 'ATR', 'BBU', 'BBM', 'BBL', 'CCI', 'DIM', 'DIP', 'MACD', 'MACDS',
-    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR',
-    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도'
+    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
 LIST_STOCK_TICK = [
@@ -127,9 +127,9 @@ LIST_STOCK_MIN = [
     '최고분봉고가', '최저분봉저가',
     '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
     '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도',
+    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도',
     'AD', 'ADOSC', 'ADXR', 'APO', 'AROOND', 'AROONU', 'ATR', 'BBU', 'BBM', 'BBL', 'CCI', 'DIM', 'DIP', 'MACD', 'MACDS',
-    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR',
-    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도'
+    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
 LIST_STOCK_USA_TICK = [
@@ -157,9 +157,9 @@ LIST_STOCK_USA_MIN = [
     '최고분봉고가', '최저분봉저가',
     '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
     '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도',
+    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도',
     'AD', 'ADOSC', 'ADXR', 'APO', 'AROOND', 'AROONU', 'ATR', 'BBU', 'BBM', 'BBL', 'CCI', 'DIM', 'DIP', 'MACD', 'MACDS',
-    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR',
-    '패턴점수', '패턴신뢰도', '리스크점수', '가격대점수', '가격대신뢰도', '거래량점수', '거래량신뢰도', '변동성점수', '변동성신뢰도'
+    'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
 LEN_LIST_STOCK_TICK     = len(LIST_STOCK_TICK)
