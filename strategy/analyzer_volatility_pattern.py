@@ -3,6 +3,7 @@ import random
 import sqlite3
 import hashlib
 import numpy as np
+import pandas as pd
 from numba import njit, prange
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
@@ -133,23 +134,23 @@ class AnalyzerVolatilityPattern:
         self.volatility_scores[code], self.level_boundaries[code] = \
             self.volatility_database.get_volatility_code_scores(code, date)
 
-    def analyze_current_volatility(self, code: str, realtime_data: np.ndarray) -> Tuple[float, float]:
+    def analyze_current_volatility(self, code: str, code_data: np.ndarray) -> Tuple[float, float]:
         """
         실시간 변동성 분석 및 학습된 점수 반환
         code: 종목코드
-        realtime_data: 실시간 데이터 (1분봉 또는 틱)
+        code_data: 실시간 데이터 (1분봉 또는 틱)
         return: 변동성점수, 변동성신뢰도
         """
         volatility_score, confidence = 0.0, 0.0
 
-        if len(realtime_data) >= self.analysis_period:
-            close_price = realtime_data[:, self.idx_close]
+        if len(code_data) >= self.analysis_period:
+            close_price = code_data[:, self.idx_close]
 
             if self.is_tick:
                 volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
             else:
-                high_price      = realtime_data[:, self.idx_high]
-                low_price       = realtime_data[:, self.idx_low]
+                high_price      = code_data[:, self.idx_high]
+                low_price       = code_data[:, self.idx_low]
                 volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
 
             volatility_value = volatility_data[-1]
@@ -170,6 +171,26 @@ class AnalyzerVolatilityPattern:
                     confidence       = score_data['confidence_score']
 
         return volatility_score, confidence
+
+    def analyze_batch_data(self, code: str, code_data: np.ndarray) -> np.ndarray:
+        """2차원 어레이 데이터 전체를 일괄 분석합니다.
+        code: 종목코드
+        code_data: 코드 데이터 2차원 어레이
+        return:
+            (N, 2) 형태의 2차원 어레이 - 변동성점수, 변동성신뢰도
+        """
+        date = int(str(code_data[0, 0])[:8])
+        self.load_volatility_code_scores(code, date)
+
+        n = len(code_data)
+        results = np.zeros((n, 2))
+
+        for i in range(5, n):
+            window_data = code_data[i-5:i]
+            volatility_score, confidence = self.analyze_current_volatility(code, window_data)
+            results[i] = [volatility_score, confidence]
+
+        return results
 
     def train_all_codes(self, windowQ):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
@@ -203,22 +224,23 @@ class AnalyzerVolatilityPattern:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.idx_high, self.idx_low, self.analysis_period,
-                    self.rate_threshold, self.num_levels, self.min_samples, existing_dates_dict, self.is_tick
+                    self.rate_threshold, self.num_levels, self.min_samples, existing_dates_dict, self.is_tick,
+                    self.volatility_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
             results = pool.starmap(self._train_code_chunk, args)
 
         total_processed = 0
-        for i, chunk_results in enumerate(results):
-            code_count = 0
-            for code, date_scores in chunk_results.items():
-                for date, (volatility_scores, level_boundaries) in date_scores.items():
-                    self.volatility_database.save_volatility_scores(code, volatility_scores, level_boundaries, date)
-                    code_count += 1
-                    total_processed += 1
-
-            if code_count > 0:
+        columns = [
+            'code', 'volatility_level', 'avg_score', 'max_score', 'min_score', 'std_score',
+            'sample_count', 'confidence_score', 'level_boundaries', 'setting_hash', 'last_update'
+        ]
+        for i, result in enumerate(results):
+            if result:
+                df = pd.DataFrame(result, columns=columns)
+                self.volatility_database.save_volatility_scores(df)
+                total_processed += 1
                 windowQ.put((UI_NUM['학습로그'], f"학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]"))
 
         if total_processed > 0:
@@ -233,7 +255,7 @@ class AnalyzerVolatilityPattern:
                           idx_close: int, idx_high: int, idx_low: int,
                           analysis_period: int, rate_threshold: int, num_levels: int,
                           min_samples: int, existing_dates_dict: Dict[str, set],
-                          is_tick: bool) -> Dict[str, Dict[str, float]]:
+                          is_tick: bool, setting_hash: str) -> Dict[str, Dict[str, float]]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
@@ -250,7 +272,7 @@ class AnalyzerVolatilityPattern:
         """
         global window_queue
 
-        all_volatility_scores = {}
+        all_volatility_scores = []
         last = len(code_chunk)
 
         for k, code in enumerate(code_chunk):
@@ -296,7 +318,7 @@ class AnalyzerVolatilityPattern:
 
                     levels = _classify_volatility_levels(volatility_data, level_boundaries, num_levels)
 
-                    level_scores = {}
+                    level_scores = None
                     for level in range(num_levels):
                         level_indices = np.where(levels == level)[0]
                         if len(level_indices) >= min_samples:
@@ -307,19 +329,22 @@ class AnalyzerVolatilityPattern:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
                                 std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
-                                level_scores[level] = {
-                                    'avg_score': round(float(np.mean(scores)), 2),
-                                    'max_score': round(float(np.max(scores)), 2),
-                                    'min_score': round(float(np.min(scores)), 2),
-                                    'std_score': round(float(np.std(scores)), 2),
-                                    'sample_count': len(scores),
-                                    'confidence_score': round(confidence, 2)
-                                }
+                                level_scores = [
+                                    code,
+                                    level,
+                                    round(float(np.mean(scores)), 2),
+                                    round(float(np.max(scores)), 2),
+                                    round(float(np.min(scores)), 2),
+                                    round(float(np.std(scores)), 2),
+                                    len(scores),
+                                    round(confidence, 2),
+                                    level_boundaries,
+                                    setting_hash,
+                                    target_date
+                                ]
 
                     if level_scores:
-                        if code not in all_volatility_scores:
-                            all_volatility_scores[code] = {}
-                        all_volatility_scores[code][target_date] = (level_scores, level_boundaries)
+                        all_volatility_scores.append(level_scores)
 
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 변동성분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
@@ -449,45 +474,10 @@ class VolatilityPatternDatabase:
 
             return volatility_scores, level_boundaries
 
-    def save_volatility_scores(self, code: str, volatility_scores: Dict[int, Dict[str, float]],
-                               level_boundaries: np.ndarray, date: int):
-        """
-        종목별 변동성 점수 저장
-        code: 종목코드
-        volatility_scores: 변동성 레벨별 점수 딕셔너리
-        level_boundaries: 레벨 경계 배열
-        date: 학습 날짜
-        """
-        boundaries_str = ','.join(map(str, level_boundaries))
-
+    def save_volatility_scores(self, df: pd.DataFrame):
+        """종목별 변동성 점수 저장"""
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-
-            data = [
-                (
-                    code,
-                    volatility_level,
-                    scores['avg_score'],
-                    scores['max_score'],
-                    scores['min_score'],
-                    scores['std_score'],
-                    scores['sample_count'],
-                    scores['confidence_score'],
-                    boundaries_str,
-                    self.setting_hash,
-                    date
-                )
-                for volatility_level, scores in volatility_scores.items()
-            ]
-
-            cursor.executemany(f'''
-                INSERT OR REPLACE INTO {self.table_name} 
-                (code, volatility_level, avg_score, max_score, min_score, std_score, sample_count,
-                confidence_score, level_boundaries, setting_hash, last_update)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', data)
-
-            conn.commit()
+            df.to_sql(self.table_name, conn, if_exists='append', index=False, chunksize=2000)
 
     def load_volatility_setting(self, market: int) -> tuple:
         """

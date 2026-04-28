@@ -558,13 +558,13 @@ class AnalyzerMicrostructure:
         self.idx_bid_price  = [col_index.get(f'매수호가{i}', 0) for i in range(1, 6)]
         self.idx_bid_qty    = [col_index.get(f'매수잔량{i}', 0) for i in range(1, 6)]
 
-    def update_data(self, code: str, tick_data: np.ndarray):
+    def update_data(self, code: str, code_data: np.ndarray):
         """데이터를 업데이트합니다.
         Args:
             code: 종목 코드
-            tick_data: 틱 데이터
+            code_data: 틱 데이터
         """
-        self._calculate_processed_data(code, tick_data)
+        self._calculate_processed_data(code, code_data)
 
     def get_signal(self, buy_cf: float, sell_cf: float) -> Tuple[str, float, float]:
         """시그널을 반환합니다.
@@ -578,16 +578,16 @@ class AnalyzerMicrostructure:
         signal, confidence = self._analyze_signal(buy_cf, sell_cf)
         return signal, confidence, total_risk
 
-    def _calculate_processed_data(self, code: str, tick_data: np.ndarray):
+    def _calculate_processed_data(self, code: str, code_data: np.ndarray, real: bool = True):
         """전처리 데이터를 계산합니다.
         Args:
             code: 종목 코드
-            tick_data: 틱 데이터
+            code_data: 틱 데이터
         """
-        if len(tick_data) < self.history_cnt:
+        if len(code_data) < self.history_cnt:
             return
 
-        recent_data   = tick_data[-self.history_cnt:]
+        recent_data   = code_data[-self.history_cnt:]
         curr_price    = recent_data[-1, self.idx_curr_price]
         buy_volume    = recent_data[-1, self.idx_buy_vol]
         sell_volume   = recent_data[-1, self.idx_sell_vol]
@@ -675,9 +675,35 @@ class AnalyzerMicrostructure:
             'overall_risk': overall_risk
         }
 
-        # 레이더 차트용 8지표 정규화 및 저장 (overall_risk 포함 9개)
-        radar_data = self._normalize_radar_data(self.curr_data)
-        self._radar_history[code].append(radar_data)
+        if real:
+            # 레이더 차트용 8지표 정규화 및 저장 (overall_risk 포함 9개)
+            radar_data = self._normalize_radar_data(self.curr_data)
+            self._radar_history[code].append(radar_data)
+
+    def analyze_batch_data(self, code: str, code_data: np.ndarray, buy_cf: float, sell_cf: float) -> np.ndarray:
+        """2차원 어레이 데이터 전체를 일괄 분석합니다.
+        Args:
+            code: 종목코드
+            code_data: 코드 데이터 2차원 어레이
+            buy_cf: 매수 신뢰도 계수
+            sell_cf: 매도 신뢰도 계수
+        Returns:
+            (N, 3) 형태의 2차원 어레이 - 시그널(숫자), 신뢰도, 리스크
+            시그널: buy=1, sell=-1, hold=0
+        """
+        self.clear_code_data(code)
+
+        n = len(code_data)
+        results = np.zeros((n, 3))  # [시그널, 신뢰도, 리스크]
+
+        for i in range(self.history_cnt, n):
+            recent_data = code_data[i - self.history_cnt:i]
+            self._calculate_processed_data(code, recent_data, real=False)
+            signal, confidence, total_risk = self.get_signal(buy_cf, sell_cf)
+            signal_num = 1 if signal == 'buy' else -1 if signal == 'sell' else 0
+            results[i] = [signal_num, confidence, total_risk]
+
+        return results
 
     def _normalize_radar_data(self, curr_data: Dict) -> List[float]:
         """curr_data의 8개 지표와 overall_risk를 0~1 범위로 정규화합니다.

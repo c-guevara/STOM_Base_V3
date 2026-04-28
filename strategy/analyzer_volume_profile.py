@@ -3,6 +3,7 @@ import random
 import sqlite3
 import hashlib
 import numpy as np
+import pandas as pd
 from numba import njit
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
@@ -142,6 +143,25 @@ class AnalyzerVolumeProfile:
 
         return volume_profile_score, confidence_score
 
+    def analyze_batch_data(self, code: str, code_data: np.ndarray) -> np.ndarray:
+        """2차원 어레이 데이터 전체를 일괄 분석합니다.
+        code: 종목코드
+        code_data: 코드 데이터 2차원 어레이
+        return:
+            (N, 2) 형태의 2차원 어레이 - 가격대점수, 가격대신뢰도
+        """
+        date = int(str(code_data[0, 0])[:8])
+        self.load_volume_code_nodes(code, date)
+
+        n = len(code_data)
+        results = np.zeros((n, 2))
+
+        for i, current_price in enumerate(code_data[:, 1]):
+            volume_profile_score, confidence_score = self.analyze_current_price(code, current_price)
+            results[i] = [volume_profile_score, confidence_score]
+
+        return results
+
     def train_all_codes(self, windowQ):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
         with sqlite3.connect(self.backtest_db) as conn:
@@ -174,22 +194,23 @@ class AnalyzerVolumeProfile:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.idx_volume, self.analysis_period,
-                    self.rate_threshold, self.price_range_pct, self.top_nodes, existing_dates_dict
+                    self.rate_threshold, self.price_range_pct, self.top_nodes, existing_dates_dict,
+                    self.volume_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
             results = pool.starmap(self._train_code_chunk, args)
 
         total_processed = 0
-        for i, chunk_results in enumerate(results):
-            code_count = 0
-            for code, date_scores in chunk_results.items():
-                for date, volume_scores in date_scores.items():
-                    self.volume_database.save_volume_scores(code, volume_scores, date)
-                    code_count += 1
-                    total_processed += 1
-
-            if code_count > 0:
+        columns = [
+            'code', 'price_level', 'avg_score', 'upward_strength', 'downward_strength'
+            'sample_count', 'confidence_score', 'setting_hash', 'last_update'
+        ]
+        for i, result in enumerate(results):
+            if result:
+                df = pd.DataFrame(result, columns=columns)
+                self.volume_database.save_volume_scores(df)
+                total_processed += 1
                 windowQ.put((UI_NUM['학습로그'], f"학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]"))
 
         if total_processed > 0:
@@ -203,7 +224,8 @@ class AnalyzerVolumeProfile:
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str,
                           idx_close: int, idx_volume: int,
                           analysis_period: int, rate_threshold: float, price_range_pct: float,
-                          top_nodes: int, existing_dates_dict: Dict[str, set]) -> Dict[str, Dict[str, float]]:
+                          top_nodes: int, existing_dates_dict: Dict[str, set],
+                          setting_hash: str) -> Dict[str, Dict[str, float]]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
@@ -219,7 +241,7 @@ class AnalyzerVolumeProfile:
         """
         global window_queue
 
-        all_volume_scores = {}
+        all_volume_scores = []
         last = len(code_chunk)
 
         with sqlite3.connect(backtest_db) as conn:
@@ -260,7 +282,7 @@ class AnalyzerVolumeProfile:
                         top_indices    = sorted_indices[:top_nodes]
                         volume_nodes   = [float(bin_centers[idx]) for idx in top_indices]
 
-                        node_scores = {}
+                        node_scores = None
                         for node_price in volume_nodes:
                             upward_strength, downward_strength, sample_count = \
                                 _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
@@ -269,18 +291,20 @@ class AnalyzerVolumeProfile:
                                 final_score = (upward_strength - downward_strength) * 100
                                 final_score = max(-100.0, min(100.0, final_score))
                                 confidence_score = min(1.0, sample_count / 100) if sample_count >= 10 else 0.0
-                                node_scores[node_price] = {
-                                    'avg_score': round(final_score, 2),
-                                    'upward_strength': round(upward_strength, 2),
-                                    'downward_strength': round(downward_strength, 2),
-                                    'sample_count': sample_count,
-                                    'confidence_score': round(confidence_score, 2)
-                                }
+                                node_scores = [
+                                    code,
+                                    node_price,
+                                    round(final_score, 2),
+                                    round(upward_strength, 2),
+                                    round(downward_strength, 2),
+                                    sample_count,
+                                    round(confidence_score, 2),
+                                    setting_hash,
+                                    target_date
+                                ]
 
                         if node_scores:
-                            if code not in all_volume_scores:
-                                all_volume_scores[code] = {}
-                            all_volume_scores[code][target_date] = node_scores
+                            all_volume_scores.append(node_scores)
 
                     # noinspection PyUnresolvedReferences
                     window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
@@ -390,34 +414,10 @@ class VolumeProfileDatabase:
                 }
             return volume_scores
 
-    def save_volume_scores(self, code: str, volume_scores: Dict[str, Dict[str, float]], date: int):
+    def save_volume_scores(self, df: pd.DataFrame):
         """종목별 볼륨 프로파일 점수 저장"""
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-
-            data = [
-                (
-                    code,
-                    price_level,
-                    scores['avg_score'],
-                    scores['upward_strength'],
-                    scores['downward_strength'],
-                    scores['sample_count'],
-                    scores['confidence_score'],
-                    self.setting_hash,
-                    date
-                )
-                for price_level, scores in volume_scores.items()
-            ]
-
-            cursor.executemany(f'''
-                INSERT OR REPLACE INTO {self.table_name} 
-                (code, price_level, avg_score, upward_strength, downward_strength, sample_count,
-                confidence_score, setting_hash, last_update)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', data)
-
-            conn.commit()
+            df.to_sql(self.table_name, conn, if_exists='append', index=False, chunksize=2000)
 
     def load_volume_setting(self, market: int) -> tuple:
         """
