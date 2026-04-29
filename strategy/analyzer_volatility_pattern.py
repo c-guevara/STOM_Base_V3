@@ -5,8 +5,8 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit, prange
-from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
+from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
@@ -108,9 +108,9 @@ class AnalyzerVolatilityPattern:
         self.analysis_period, self.rate_threshold, self.num_levels = \
             self.volatility_database.load_volatility_setting(market_gubun)
 
-        self.is_tick           = is_tick
         self.backtest_db       = market_info['백테디비'][is_tick]
         self.factor_list       = market_info['팩터목록'][is_tick]
+        self.is_tick           = is_tick
         self.min_samples       = min_samples
         self.idx_close         = self.factor_list.index('현재가')
         self.idx_high          = self.factor_list.index('분봉고가') if not is_tick else None
@@ -223,9 +223,9 @@ class AnalyzerVolatilityPattern:
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [
                 (
-                    i, chunk, self.backtest_db, self.idx_close, self.idx_high, self.idx_low, self.analysis_period,
-                    self.rate_threshold, self.num_levels, self.min_samples, existing_dates_dict, self.is_tick,
-                    self.volatility_database.setting_hash
+                    i, chunk, self.backtest_db, self.idx_close, self.idx_high, self.idx_low,
+                    self.analysis_period, self.rate_threshold, self.num_levels, self.min_samples,
+                    existing_dates_dict, self.is_tick, self.volatility_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -251,11 +251,9 @@ class AnalyzerVolatilityPattern:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str,
-                          idx_close: int, idx_high: int, idx_low: int,
-                          analysis_period: int, rate_threshold: int, num_levels: int,
-                          min_samples: int, existing_dates_dict: Dict[str, set],
-                          is_tick: bool, setting_hash: str) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_high: int, idx_low: int,
+                          analysis_period: int, rate_threshold: int, num_levels: int, min_samples: int,
+                          existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
@@ -284,7 +282,7 @@ class AnalyzerVolatilityPattern:
                     historical_data = np.array(results)
 
                 datetime_data = historical_data[:, 0]
-                dates = datetime_data // 10000
+                dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
                 target_dates = np.unique(dates)
                 target_dates.sort()
                 existing_dates = existing_dates_dict.get(code, set())
@@ -357,8 +355,7 @@ class AnalyzerVolatilityPattern:
 class VolatilityPatternDatabase:
     """변동성 패턴 점수 데이터베이스 관리 클래스"""
     def __init__(self, strategy_gubun: str, is_tick: bool):
-        gubun = 'tick' if is_tick else 'min'
-        self.table_name   = f'{strategy_gubun}_volatility_pattern_{gubun}'
+        self.table_name   = f"{strategy_gubun}_volatility_pattern_{'tick' if is_tick else 'min'}"
         self.is_tick      = is_tick
         self.db_path      = VOLATILITY_PATTERN_DB
         self.setting_hash = None
@@ -497,11 +494,14 @@ class VolatilityPatternDatabase:
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
-            if not result:
-                result = 30, 5, 5
+            if result:
+                analysis_period, rate_threshold, num_levels = result
+            else:
+                analysis_period, rate_threshold, num_levels = 30, 3, 5
+                self.save_volatility_setting(market, analysis_period, rate_threshold, num_levels)
 
-            self.setting_hash = _calculate_setting_hash(result[0], result[1], result[2], self.is_tick)
-            return result
+            self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold, num_levels)
+            return analysis_period, rate_threshold, num_levels
 
     def save_volatility_setting(self, market: int, analysis_period: int, rate_threshold: str, num_levels: int):
         """

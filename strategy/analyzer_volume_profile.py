@@ -5,8 +5,8 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit
-from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
+from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
@@ -98,6 +98,7 @@ class AnalyzerVolumeProfile:
 
         self.backtest_db  = market_info['백테디비'][is_tick]
         self.factor_list  = market_info['팩터목록'][is_tick]
+        self.is_tick      = is_tick
         self.top_nodes    = top_nodes
         self.idx_close    = self.factor_list.index('현재가')
         self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
@@ -193,9 +194,9 @@ class AnalyzerVolumeProfile:
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [
                 (
-                    i, chunk, self.backtest_db, self.idx_close, self.idx_volume, self.analysis_period,
-                    self.rate_threshold, self.price_range_pct, self.top_nodes, existing_dates_dict,
-                    self.volume_database.setting_hash
+                    i, chunk, self.backtest_db, self.idx_close, self.idx_volume,
+                    self.analysis_period, self.rate_threshold, self.price_range_pct, self.top_nodes,
+                    existing_dates_dict, self.is_tick, self.volume_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -221,11 +222,9 @@ class AnalyzerVolumeProfile:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str,
-                          idx_close: int, idx_volume: int,
-                          analysis_period: int, rate_threshold: float, price_range_pct: float,
-                          top_nodes: int, existing_dates_dict: Dict[str, set],
-                          setting_hash: str) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
+                          analysis_period: int, rate_threshold: float, price_range_pct: float, top_nodes: int,
+                          existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
@@ -253,7 +252,7 @@ class AnalyzerVolumeProfile:
                     historical_data = np.array(results)
 
                     datetime_data = historical_data[:, 0]
-                    dates = datetime_data // 10000
+                    dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
                     target_dates = np.unique(dates)
                     target_dates.sort()
                     existing_dates = existing_dates_dict.get(code, set())
@@ -316,8 +315,7 @@ class AnalyzerVolumeProfile:
 class VolumeProfileDatabase:
     """볼륨 프로파일 점수 데이터베이스 관리 클래스"""
     def __init__(self, strategy_gubun: str, is_tick: bool):
-        gubun = 'tick' if is_tick else 'min'
-        self.table_name   = f'{strategy_gubun}_volume_score_{gubun}'
+        self.table_name   = f"{strategy_gubun}_volume_score_{'tick' if is_tick else 'min'}"
         self.is_tick      = is_tick
         self.db_path      = VOLUME_PROFILE_DB
         self.setting_hash = None
@@ -436,11 +434,14 @@ class VolumeProfileDatabase:
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
-            if not result:
-                result = 10, 0.5, 0.33
+            if result:
+                analysis_period, rate_threshold, price_range_pct = result
+            else:
+                analysis_period, rate_threshold, price_range_pct = 5, 0.5, 0.33
+                self.save_volume_setting(market, analysis_period, rate_threshold, price_range_pct)
 
-            self.setting_hash = _calculate_setting_hash(result[0], result[1], result[2], self.is_tick)
-            return result
+            self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold, price_range_pct)
+            return analysis_period, rate_threshold, price_range_pct
 
     def save_volume_setting(self, market: int, analysis_period: int, rate_threshold: float, price_range_pct: float):
         """

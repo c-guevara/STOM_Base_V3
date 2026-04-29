@@ -6,8 +6,8 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit, prange
-from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
+from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
@@ -100,15 +100,12 @@ class AnalyzerCandlePattern:
         """데이터베이스에서 모든 종목의 패턴 점수 로드"""
         all_codes = self.pattern_database.get_all_codes()
         if all_codes:
-            pattern_scores = {}
             for code in all_codes:
-                pattern_scores[code] = self.pattern_database.get_pattern_all_scores(code)
-            self.pattern_scores = pattern_scores
+                self.pattern_scores[code] = self.pattern_database.get_pattern_all_scores(code)
 
     def load_pattern_code_scores(self, code: str, date: int):
         """데이터베이스에서 종목코드의 패턴 점수 로드"""
-        pattern_scores = self.pattern_database.get_pattern_code_scores(code, date)
-        self.pattern_scores = {code: pattern_scores}
+        self.pattern_scores[code] = self.pattern_database.get_pattern_code_scores(code, date)
 
     def analyze_current_patterns(self, code: str, code_data: np.ndarray) -> Tuple[float, float]:
         """
@@ -192,9 +189,9 @@ class AnalyzerCandlePattern:
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [
                 (
-                    i, chunk, self.backtest_db, self.idx_open, self.idx_high, self.idx_low, self.idx_close,
-                    self.analysis_period, self.rate_threshold, self.min_samples, existing_dates_dict,
-                    self.pattern_database.setting_hash
+                    i, chunk, self.backtest_db, self.idx_open, self.idx_high,
+                    self.idx_low, self.idx_close, self.analysis_period, self.rate_threshold,
+                    self.min_samples, existing_dates_dict, self.pattern_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -220,11 +217,9 @@ class AnalyzerCandlePattern:
             windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다"))
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str,
-                          idx_open: int, idx_high: int, idx_low: int, idx_close: int,
-                          analysis_period: int, rate_threshold: int,
-                          min_samples: int, existing_dates_dict: Dict[str, set],
-                          setting_hash: str) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_open: int, idx_high: int,
+                          idx_low: int, idx_close: int, analysis_period: int, rate_threshold: int,
+                          min_samples: int, existing_dates_dict: Dict[str, set], setting_hash: str) -> List[Any]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
@@ -439,11 +434,14 @@ class CandlePatternDatabase:
                 (market,)
             )
             result = cursor.fetchone()
-            if not result:
-                result = 30, 5
+            if result:
+                analysis_period, rate_threshold = result
+            else:
+                analysis_period, rate_threshold = 30, 5
+                self.save_pattern_setting(market, analysis_period, rate_threshold)
 
-            self.setting_hash = _calculate_setting_hash(result[0], result[1])
-            return result
+            self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold)
+            return analysis_period, rate_threshold
 
     def save_pattern_setting(self, market: int, analysis_period: int, rate_threshold: int):
         """
