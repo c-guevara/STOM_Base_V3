@@ -414,6 +414,9 @@ class ChartHogaQuery:
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
         table_list = df['name'].to_list()
         if table_list:
+            for table in CODE_INFO_TABLES:
+                if table in table_list:
+                    table_list.remove(table)
             cur = con.cursor()
             last = len(table_list)
             for i, code in enumerate(table_list):
