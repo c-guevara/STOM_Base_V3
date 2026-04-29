@@ -34,10 +34,10 @@ def _calculate_std_volatility(prices: np.ndarray, period: int) -> np.ndarray:
     """표준편차 기반 변동성 계산 (Numba 최적화)"""
     n = len(prices)
     volatility = np.zeros(n, dtype=np.float64)
-    for i in prange(period - 1, n):
-        window = prices[i - period + 1:i + 1]
-        mean   = np.mean(window)
-        std    = np.std(window)
+    for i in prange(period, n):
+        w    = prices[i-period:i]
+        mean = np.mean(w)
+        std  = np.std(w)
         volatility[i] = std / mean * 100
     return volatility
 
@@ -45,12 +45,10 @@ def _calculate_std_volatility(prices: np.ndarray, period: int) -> np.ndarray:
 @njit(cache=True, fastmath=True)
 def _calculate_std_volatility_last(prices: np.ndarray, period: int) -> float:
     """표준편차 기반 마지막 변동성만 계산 (실시간용, Numba 최적화)"""
-    n = len(prices)
-    if n < period:
-        return 0.0
-    window = prices[n - period:n]
-    mean = np.mean(window)
-    std = np.std(window)
+    n    = len(prices)
+    w    = prices[n-period:n]
+    mean = np.mean(w)
+    std  = np.std(w)
     return std / mean * 100
 
 
@@ -58,12 +56,12 @@ def _calculate_std_volatility_last(prices: np.ndarray, period: int) -> float:
 def _calculate_realized_volatility_tick(prices: np.ndarray, period: int) -> np.ndarray:
     """로그 수익률의 표준편차 기반 실현 변동성 (Numba 최적화)"""
     n = len(prices)
-    returns = np.zeros(n - 1, dtype=np.float64)
+    returns = np.zeros(n-1, dtype=np.float64)
     for i in prange(1, n):
-        returns[i - 1] = np.log(prices[i] / prices[i - 1])
+        returns[i-1] = np.log(prices[i] / prices[i-1])
     rv = np.zeros(n, dtype=np.float64)
     for i in prange(period, n):
-        window = returns[i - period:i]
+        window = returns[i-period:i]
         rv[i] = np.std(window) * np.sqrt(period) * 100
     return rv
 
@@ -72,10 +70,8 @@ def _calculate_realized_volatility_tick(prices: np.ndarray, period: int) -> np.n
 def _calculate_realized_volatility_tick_last(prices: np.ndarray, period: int) -> float:
     """로그 수익률 기반 마지막 실현 변동성만 계산 (실시간용, Numba 최적화)"""
     n = len(prices)
-    if n < period + 1:
-        return 0.0
     returns = np.zeros(period)
-    base_idx = n - period - 1
+    base_idx = n - 1 - period
     for i in prange(period):
         returns[i] = np.log(prices[base_idx + i + 1] / prices[base_idx + i])
     return np.std(returns) * np.sqrt(period) * 100
@@ -110,7 +106,8 @@ def _calculate_absolute_change_rate_last(prices: np.ndarray, period: int) -> flo
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _simulate_stop_take(prices: np.ndarray, stop_loss_pct: float, take_profit_pct: float, start_period: int):
+def _simulate_stop_take(prices: np.ndarray, dates: np.ndarray, stop_loss_pct: float,
+                        take_profit_pct: float, start_period: int):
     """손절/익절 시뮬레이션 (Numba 최적화)"""
     n = len(prices)
     returns = np.zeros(n, dtype=np.float64)
@@ -118,16 +115,18 @@ def _simulate_stop_take(prices: np.ndarray, stop_loss_pct: float, take_profit_pc
         entry_price = prices[i]
         sl_price    = entry_price * (1 - stop_loss_pct / 100)
         tp_price    = entry_price * (1 + take_profit_pct / 100)
-        for j in range(i + 1, min(i + start_period + 1, n)):
-            if prices[j] <= sl_price:
-                returns[i] = -stop_loss_pct
+        for j in range(i + 1, min(i + 1 + start_period, n)):
+            if dates[i] == dates[j]:
+                if prices[j] <= sl_price:
+                    returns[i] = -stop_loss_pct
+                    break
+                elif prices[j] >= tp_price:
+                    returns[i] = take_profit_pct
+                    break
+            else:
+                returns[i] = np.round((prices[j-1] / entry_price - 1) * 100, 2)
                 break
-            elif prices[j] >= tp_price:
-                returns[i] = take_profit_pct
-                break
-        else:
-            returns[i] = (prices[i + start_period] - entry_price) / entry_price * 100
-    return returns
+    return returns[returns != 0.0]
 
 
 @njit(cache=True, fastmath=True, parallel=True)
@@ -141,7 +140,7 @@ def _calculate_volatility_percentiles(volatility_array: np.ndarray, group_count:
 
 
 class AnalyzerVolatilityStopTake:
-    """변동성 기반 손절/익절 분석 통합 클래스"""
+    """변손익분석 분석 통합 클래스"""
     def __init__(self, market_gubun: int, market_info: dict, is_tick: bool, backtest: bool = False):
         """초기화
         market_gubun: 마켓 구분 번호
@@ -273,7 +272,7 @@ class AnalyzerVolatilityStopTake:
         if total_processed > 0:
             windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
             windowQ.put((UI_NUM['학습로그'], f'{self.volatility_database.db_path} -> {self.volatility_database.table_name}'))
-            windowQ.put((UI_NUM['학습로그'], '변동성 기반 손절/익절 학습 완료'))
+            windowQ.put((UI_NUM['학습로그'], '변손익분석 학습 완료'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다'))
 
@@ -290,14 +289,13 @@ class AnalyzerVolatilityStopTake:
                     cursor = conn.cursor()
                     cursor.execute(f'SELECT * FROM "{code}"')
                     results = cursor.fetchall()
-                    data = np.array(results)
+                    historical_data = np.array(results)
 
-                if len(data) < start_period * 2:
+                if len(historical_data) < start_period * 2:
                     continue
 
-                datetime_data = data[:, 0]
-                dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
-                target_dates = np.unique(dates)
+                all_dates = historical_data[:, 0] // 1000000 if is_tick else historical_data[:, 0] // 10000
+                target_dates = np.unique(all_dates)
                 target_dates.sort()
                 existing_dates = existing_dates_dict.get(code, set())
 
@@ -305,11 +303,13 @@ class AnalyzerVolatilityStopTake:
                     if target_date in existing_dates:
                         continue
 
-                    mask = dates <= target_date
-                    date_data = data[mask]
+                    mask = all_dates <= target_date
+                    date_data = historical_data[mask]
+
                     if len(date_data) < start_period * 2:
                         continue
 
+                    dates         = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
                     date_prices   = date_data[:, idx_close]
                     vol_std       = _calculate_std_volatility(date_prices, start_period)
                     vol_abs       = _calculate_absolute_change_rate(date_prices, start_period)
@@ -338,7 +338,7 @@ class AnalyzerVolatilityStopTake:
                         best_params  = None
                         for stop_mult in stop_mult_range:
                             for take_mult in take_mult_range:
-                                returns = _simulate_stop_take(date_prices, stop_mult, take_mult, start_period)
+                                returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult, start_period)
                                 if len(returns) > 0:
                                     sharpe = np.mean(returns) / np.std(returns) if np.std(returns) > 0 else 0
                                     if sharpe > best_sharpe:
@@ -347,7 +347,7 @@ class AnalyzerVolatilityStopTake:
 
                         if best_params:
                             stop_mult, take_mult = best_params
-                            returns    = _simulate_stop_take(date_prices, stop_mult, take_mult, start_period)
+                            returns    = _simulate_stop_take(date_prices, dates, stop_mult, take_mult, start_period)
                             avg_return = np.mean(returns)
                             # noinspection PyUnresolvedReferences
                             win_rate   = (returns > 0).mean() * 100
@@ -371,16 +371,16 @@ class AnalyzerVolatilityStopTake:
                             all_volatility_scores.append(volatility_scores)
 
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변동성 손절/익절 학습 중 ... [{k+1:02d}/{last:02d}]'))
+                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변손익분석 학습 중 ... [{k+1:02d}/{last:02d}]'))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변동성 손절/익절 학습 실패 - {e}'))
+                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변손익분석 학습 실패 - {e}'))
 
         return all_volatility_scores
 
 
 class VolatilityStopTakeDatabase:
-    """변동성 기반 손절/익절 데이터베이스 관리 클래스"""
+    """변손익분석 데이터베이스 관리 클래스"""
     def __init__(self, strategy_gubun: str, is_tick: bool):
         self.table_name     = f"{strategy_gubun}_volatility_{'tick' if is_tick else 'min'}"
         self.db_path        = VOLATILITY_STOP_TAKE_DB
@@ -570,7 +570,7 @@ def volatility_stop_take_train(ui):
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
         return
 
-    ui.windowQ.put((UI_NUM['학습로그'], '변동성 기반 손절/익절 학습을 시작합니다.'))
+    ui.windowQ.put((UI_NUM['학습로그'], '변손익분석 학습을 시작합니다.'))
     _volatility_stop_take_train(ui)
 
 

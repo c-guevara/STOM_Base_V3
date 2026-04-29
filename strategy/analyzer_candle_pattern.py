@@ -46,29 +46,26 @@ def _calculate_setting_hash(*args) -> str:
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _calculate_pattern_scores(close_price: np.ndarray, datetime_data: np.ndarray,
-                              detection_indices: np.ndarray, analysis_period: int,
-                              rate_threshold: float) -> np.ndarray:
+def _calculate_pattern_scores(close_price: np.ndarray, dates: np.ndarray, detection_indices: np.ndarray,
+                              analysis_period: int, rate_threshold: float) -> np.ndarray:
     """패턴 점수 계산 (numba 최적화)"""
     max_scores = len(detection_indices)
     scores = np.zeros(max_scores)
     for k in prange(max_scores):
         idx = detection_indices[k]
-        if idx + analysis_period < len(close_price):
-            entry_date = int(datetime_data[idx] // 10000)
-            exit_date  = int(datetime_data[idx + analysis_period] // 10000)
-            if entry_date == exit_date:
-                entry_price    = close_price[idx]
-                exit_max_price = close_price[idx:idx + analysis_period].max()
-                exit_min_price = close_price[idx:idx + analysis_period].min()
-                if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
-                    exit_price = exit_max_price
-                else:
-                    exit_price = exit_min_price
-                price_change   = (exit_price - entry_price) / entry_price * 100
-                score = price_change / rate_threshold * 100
-                score = max(-100.0, min(100.0, score))
-                scores[k] = score
+        if dates[idx] == dates[idx + analysis_period] and \
+                idx + analysis_period < len(close_price):
+            entry_price    = close_price[idx]
+            exit_max_price = close_price[idx:idx + analysis_period].max()
+            exit_min_price = close_price[idx:idx + analysis_period].min()
+            if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
+                exit_price = exit_max_price
+            else:
+                exit_price = exit_min_price
+            price_change   = (exit_price - entry_price) / entry_price * 100
+            score = price_change / rate_threshold * 100
+            score = max(-100.0, min(100.0, score))
+            scores[k] = score
     return scores[scores != 0.0]
 
 
@@ -247,9 +244,8 @@ class AnalyzerCandlePattern:
                     results = cursor.fetchall()
                     historical_data = np.array(results)
 
-                    datetime_data = historical_data[:, 0]
-                    dates = datetime_data // 10000
-                    target_dates = np.unique(dates)
+                    all_dates = historical_data[:, 0] // 10000
+                    target_dates = np.unique(all_dates)
                     target_dates.sort()
                     existing_dates = existing_dates_dict.get(code, set())
 
@@ -257,17 +253,17 @@ class AnalyzerCandlePattern:
                         if target_date in existing_dates:
                             continue
 
-                        mask = dates <= target_date
+                        mask = all_dates <= target_date
                         date_data = historical_data[mask]
 
                         if len(date_data) < analysis_period * 2:
                             continue
 
-                        open_price    = date_data[:, idx_open]
-                        high_price    = date_data[:, idx_high]
-                        low_price     = date_data[:, idx_low]
-                        close_price   = date_data[:, idx_close]
-                        date_datetime = date_data[:, 0]
+                        dates       = date_data[:, 0] // 10000
+                        open_price  = date_data[:, idx_open]
+                        high_price  = date_data[:, idx_high]
+                        low_price   = date_data[:, idx_low]
+                        close_price = date_data[:, idx_close]
 
                         for pattern_name in PATTERN_FUNCTIONS:
                             pattern_func      = getattr(talib, pattern_name)
@@ -275,7 +271,7 @@ class AnalyzerCandlePattern:
                             detection_indices = np.where(pattern_result != 0)[0]
 
                             if len(detection_indices) >= min_samples:
-                                scores = _calculate_pattern_scores(close_price, date_datetime, detection_indices,
+                                scores = _calculate_pattern_scores(close_price, dates, detection_indices,
                                                                    analysis_period, rate_threshold)
 
                                 if len(scores) >= min_samples:

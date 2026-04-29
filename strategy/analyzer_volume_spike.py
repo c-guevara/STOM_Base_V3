@@ -50,14 +50,14 @@ def _calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray, ana
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _calculate_spike_score_array(close_price: np.ndarray, indices: np.ndarray,
+def _calculate_spike_score_array(close_price: np.ndarray, dates: np.ndarray, indices: np.ndarray,
                                  analysis_period: int, rate_threshold: float) -> np.ndarray:
     """거래량 급증 점수 배열 계산 (numba 최적화)"""
     max_scores = len(indices)
     scores = np.zeros(max_scores)
     for k in prange(max_scores):
         idx = indices[k]
-        if idx + analysis_period < len(close_price):
+        if idx + analysis_period < len(close_price) and dates[idx] == dates[idx + analysis_period]:
             entry_price = close_price[idx]
             exit_max_price = close_price[idx:idx + analysis_period].max()
             exit_min_price = close_price[idx:idx + analysis_period].min()
@@ -241,8 +241,8 @@ class AnalyzerVolumeSpike:
                     historical_data = np.array(results)
 
                 datetime_data = historical_data[:, 0]
-                dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
-                target_dates = np.unique(dates)
+                all_dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
+                target_dates = np.unique(all_dates)
                 target_dates.sort()
                 existing_dates = existing_dates_dict.get(code, set())
 
@@ -250,12 +250,13 @@ class AnalyzerVolumeSpike:
                     if target_date in existing_dates:
                         continue
 
-                    mask = dates <= target_date
+                    mask = all_dates <= target_date
                     date_data = historical_data[mask]
 
                     if len(date_data) < analysis_period * 2:
                         continue
 
+                    dates         = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
                     close_price   = date_data[:, idx_close]
                     volume_data   = date_data[:, idx_volume]
                     ma_volume     = _calculate_ma_volume(volume_data, analysis_period)
@@ -272,7 +273,7 @@ class AnalyzerVolumeSpike:
                     for multiplier, indices in spike_groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
-                            scores = _calculate_spike_score_array(close_price, indices_array,
+                            scores = _calculate_spike_score_array(close_price, dates, indices_array,
                                                                   analysis_period, rate_threshold)
                             valid_scores = scores[scores != 0.0]
 

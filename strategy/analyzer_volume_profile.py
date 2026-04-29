@@ -47,8 +47,8 @@ def _calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, p
 
 
 @njit(cache=True, fastmath=True)
-def _calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_period: int,
-                           rate_threshold: float) -> tuple:
+def _calculate_node_scores(close_price: np.ndarray, dates: np.ndarray, node_price: float,
+                           analysis_period: int, rate_threshold: float) -> tuple:
     """노드별 점수 계산 (numba 최적화)"""
     upward_penetration   = 0
     downward_penetration = 0
@@ -58,7 +58,8 @@ def _calculate_node_scores(close_price: np.ndarray, node_price: float, analysis_
     threshold = node_price * rate_threshold / 100
     for idx in range(len(close_price) - analysis_period):
         price = close_price[idx]
-        if abs(price - node_price) / node_price * 100 <= rate_threshold:
+        if dates[idx] == dates[idx + analysis_period] and \
+                abs(price - node_price) / node_price * 100 <= rate_threshold:
             total_count += 1
             future_prices = close_price[idx+1:idx+1+analysis_period]
             if future_prices.max() >= node_price + threshold:
@@ -252,8 +253,8 @@ class AnalyzerVolumeProfile:
                     historical_data = np.array(results)
 
                     datetime_data = historical_data[:, 0]
-                    dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
-                    target_dates = np.unique(dates)
+                    all_dates = datetime_data // 1000000 if is_tick else datetime_data // 10000
+                    target_dates = np.unique(all_dates)
                     target_dates.sort()
                     existing_dates = existing_dates_dict.get(code, set())
 
@@ -261,12 +262,13 @@ class AnalyzerVolumeProfile:
                         if target_date in existing_dates:
                             continue
 
-                        mask = dates <= target_date
+                        mask = all_dates <= target_date
                         date_data = historical_data[mask]
 
                         if len(date_data) < analysis_period * 2:
                             continue
 
+                        dates          = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
                         close_price    = date_data[:, idx_close]
                         volume_data    = date_data[:, idx_volume]
                         min_price      = close_price.min()
@@ -283,7 +285,7 @@ class AnalyzerVolumeProfile:
 
                         for node_price in volume_nodes:
                             upward_strength, downward_strength, sample_count = \
-                                _calculate_node_scores(close_price, node_price, analysis_period, rate_threshold)
+                                _calculate_node_scores(close_price, dates, node_price, analysis_period, rate_threshold)
 
                             if sample_count >= 10:
                                 final_score = (upward_strength - downward_strength) * 100
