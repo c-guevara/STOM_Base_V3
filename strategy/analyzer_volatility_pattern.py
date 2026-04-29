@@ -41,6 +41,19 @@ def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> 
 
 
 @njit(cache=True, fastmath=True, parallel=True)
+def _calculate_log_volatility_last(close_price: np.ndarray, analysis_period: int) -> float:
+    """로그 수익률 기반 마지막 변동성만 계산 (실시간용, numba 최적화)"""
+    n = len(close_price)
+    if n < analysis_period + 1:
+        return 0.0
+    log_returns = np.zeros(analysis_period)
+    base_idx = n - analysis_period - 1
+    for i in prange(analysis_period):
+        log_returns[i] = np.log(close_price[base_idx + i + 1] / close_price[base_idx + i])
+    return np.std(log_returns)
+
+
+@njit(cache=True, fastmath=True, parallel=True)
 def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
                    analysis_period: int) -> np.ndarray:
     """ATR 계산 (numba 최적화)"""
@@ -52,6 +65,26 @@ def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: n
     for idx in prange(analysis_period, len(close_price)):
         atr[idx] = np.mean(tr[idx-analysis_period:idx])
     return atr
+
+
+@njit(cache=True, fastmath=True)
+def _calculate_atr_last(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
+                        analysis_period: int) -> float:
+    """ATR 마지막 값만 계산 (실시간용, numba 최적화)"""
+    n = len(close_price)
+    if n < analysis_period + 1:
+        return 0.0
+    tr_sum = 0.0
+    base_idx = n - analysis_period
+    for i in range(analysis_period):
+        idx = base_idx + i
+        tr1 = high_price[idx] - low_price[idx]
+        tr2 = abs(high_price[idx] - close_price[idx - 1])
+        tr3 = abs(low_price[idx] - close_price[idx - 1])
+        tr = tr1 if tr1 > tr2 else tr2
+        tr = tr if tr > tr3 else tr3
+        tr_sum += tr
+    return tr_sum / analysis_period
 
 
 @njit(cache=True, fastmath=True, parallel=True)
@@ -149,13 +182,11 @@ class AnalyzerVolatilityPattern:
                 close_price = code_data[:, self.idx_close]
 
                 if self.is_tick:
-                    volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
+                    volatility_value = _calculate_log_volatility_last(close_price, self.analysis_period)
                 else:
-                    high_price      = code_data[:, self.idx_high]
-                    low_price       = code_data[:, self.idx_low]
-                    volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
-
-                volatility_value = volatility_data[-1]
+                    high_price       = code_data[:, self.idx_high]
+                    low_price        = code_data[:, self.idx_low]
+                    volatility_value = _calculate_atr_last(close_price, high_price, low_price, self.analysis_period)
 
                 volatility_level = 0
                 for level in range(len(boundaries) - 1):
