@@ -10,7 +10,7 @@ def setting_load_01(ui):
     ui.sj_main_comBox_01.setCurrentText(df['거래소'][0])
     ui.sj_main_cheBox_01.setChecked(True) if df['모의투자'][0] else ui.sj_main_cheBox_01.setChecked(False)
     ui.sj_main_cheBox_02.setChecked(True) if df['데이터저장'][0] else ui.sj_main_cheBox_02.setChecked(False)
-    ui.sj_main_cheBox_03.setChecked(True) if df['알림소리'][0] else ui.sj_main_cheBox_04.setChecked(False)
+    ui.sj_main_cheBox_03.setChecked(True) if df['알림소리'][0] else ui.sj_main_cheBox_03.setChecked(False)
     ui.sj_main_comBox_02.setCurrentText('1초스냅샷' if df['타임프레임'][0] else '1분봉')
     ui.sj_main_liEdit_01.setText(de_text(ui.dict_set['키'], df['프로그램비밀번호'][0]) if df['프로그램비밀번호'][0] else '')
     ui.sj_main_comBox_03.setCurrentText('격리' if df['바이낸스선물마진타입'][0] == 'ISOLATED' else '교차')
