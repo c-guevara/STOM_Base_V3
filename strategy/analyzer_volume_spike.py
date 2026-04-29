@@ -11,6 +11,7 @@ from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
+from utility.static_method.static_datetime import timedelta_day, dt_ymd, str_ymd
 
 VOLUME_SPIKE_DB = f'{DB_PATH}/volume_spike.db'
 
@@ -92,7 +93,7 @@ class AnalyzerVolumeSpike:
         self.min_samples  = min_samples
         self.idx_close    = self.factor_list.index('현재가')
         self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
-        self.spike_scores: Dict[str, Dict[float, Dict[str, float]]] = {}
+        self.spike_scores: dict[str, dict[float, dict[str, float]]] = {}
 
         if not backtest:
             self._load_spike_all_scores()
@@ -126,8 +127,8 @@ class AnalyzerVolumeSpike:
             if current_ma_volume > 0:
                 spike_multiplier   = current_volume / current_ma_volume
                 rounded_multiplier = round(spike_multiplier * 2) / 2
-                if rounded_multiplier in spike_scores:
-                    score_data  = spike_scores[rounded_multiplier]
+                score_data = spike_scores.get(rounded_multiplier)
+                if score_data:
                     spike_score = score_data['avg_score']
                     confidence  = score_data['confidence_score']
 
@@ -250,7 +251,8 @@ class AnalyzerVolumeSpike:
                     if target_date in existing_dates:
                         continue
 
-                    mask = all_dates <= target_date
+                    start_date = float(str_ymd(timedelta_day(-30, dt_ymd(str(int(target_date))))))
+                    mask = (start_date <= all_dates) & (all_dates <= target_date)
                     date_data = historical_data[mask]
 
                     if len(date_data) < analysis_period * 2:
@@ -486,7 +488,7 @@ def spike_setting_save(ui):
 def spike_train(ui):
     """급증 패턴 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 거래량분석 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vsp_comboBoxxx_01.currentText())

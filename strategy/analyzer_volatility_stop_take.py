@@ -11,6 +11,7 @@ from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
+from utility.static_method.static_datetime import timedelta_day, dt_ymd, str_ymd
 
 VOLATILITY_STOP_TAKE_DB = f'{DB_PATH}/volatility_stop_take.db'
 
@@ -156,7 +157,7 @@ class AnalyzerVolatilityStopTake:
         self.is_tick         = is_tick
         self.idx_close       = self.factor_list.index('현재가')
         self.start_period    = 30
-        self.volatility_data = {}
+        self.volatility_data: dict[str, dict[int, dict[str, float]]] = {}
 
         if not backtest:
             self._load_volatility_all_data()
@@ -182,9 +183,9 @@ class AnalyzerVolatilityStopTake:
         return: (손절%, 익절%, 변동성, 그룹번호)
         """
         estimated_return, take_profit_pct, stop_loss_pct = 0.0, 0.0, 0.0
+
         price_history = code_data[:, self.idx_close]
         group_data = self.volatility_data[code]
-
         if group_data and len(price_history) >= self.start_period:
             vol_std = _calculate_std_volatility_last(price_history, self.start_period)
             vol_abs = _calculate_absolute_change_rate_last(price_history, self.start_period)
@@ -303,7 +304,8 @@ class AnalyzerVolatilityStopTake:
                     if target_date in existing_dates:
                         continue
 
-                    mask = all_dates <= target_date
+                    start_date = float(str_ymd(timedelta_day(-30, dt_ymd(str(int(target_date))))))
+                    mask = (start_date <= all_dates) & (all_dates <= target_date)
                     date_data = historical_data[mask]
 
                     if len(date_data) < start_period * 2:
@@ -558,7 +560,7 @@ def volatility_stop_take_setting_save(ui):
 def volatility_stop_take_train(ui):
     """변동성 손절/익절 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 변동성 손절/익절 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 학습이 진행중입니다.\n')
         return
 
     _start_period = int(ui.vst_comboBoxxx_01.currentText())

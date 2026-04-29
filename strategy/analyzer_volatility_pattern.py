@@ -11,6 +11,7 @@ from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
+from utility.static_method.static_datetime import timedelta_day, dt_ymd, str_ymd
 
 VOLATILITY_PATTERN_DB = f'{DB_PATH}/volatility_pattern.db'
 
@@ -137,7 +138,7 @@ class AnalyzerVolatilityPattern:
         self.idx_close         = self.factor_list.index('현재가')
         self.idx_high          = self.factor_list.index('분봉고가') if not is_tick else None
         self.idx_low           = self.factor_list.index('분봉저가') if not is_tick else None
-        self.volatility_scores: dict[str, dict[str, float]] = {}
+        self.volatility_scores: dict[str, dict[int, dict[str, float]]] = {}
         self.level_boundaries: dict[str, np.ndarray] = {}
 
         if not backtest:
@@ -167,7 +168,7 @@ class AnalyzerVolatilityPattern:
 
         code_scores     = self.volatility_scores.get(code)
         code_boundaries = self.level_boundaries.get(code)
-        if code_scores and code_boundaries and len(code_data) >= self.analysis_period + 1:
+        if code_scores and code_boundaries is not None and len(code_data) >= self.analysis_period + 1:
             close_price = code_data[:, self.idx_close]
 
             if self.is_tick:
@@ -204,8 +205,8 @@ class AnalyzerVolatilityPattern:
         n = len(code_data)
         results = np.zeros((n, 2))
 
-        for i in range(self.analysis_period, n):
-            window_data = code_data[i-self.analysis_period:i]
+        for i in range(self.analysis_period + 1, n):
+            window_data = code_data[i-(self.analysis_period + 1):i]
             results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results
@@ -309,7 +310,8 @@ class AnalyzerVolatilityPattern:
                     if target_date in existing_dates:
                         continue
 
-                    mask = all_dates <= target_date
+                    start_date = float(str_ymd(timedelta_day(-30, dt_ymd(str(int(target_date))))))
+                    mask = (start_date <= all_dates) & (all_dates <= target_date)
                     date_data = historical_data[mask]
 
                     if len(date_data) < analysis_period * 2:
@@ -566,7 +568,7 @@ def volatility_setting_save(ui):
 def volatility_train(ui):
     """변동성 패턴 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 변동성분석 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vlp_comboBoxxx_01.currentText())
