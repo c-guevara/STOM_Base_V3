@@ -39,16 +39,13 @@ def _calculate_ma_volume(volume_data: np.ndarray, analysis_period: int) -> np.nd
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray,
-                             ratio_threshold: float, analysis_period: int) -> np.ndarray:
+def _calculate_spike_indices(volume_data: np.ndarray, ma_volume: np.ndarray, analysis_period: int) -> np.ndarray:
     """거래량 급증 인덱스 계산 (numba 최적화)"""
     max_indices = len(volume_data) - analysis_period
     spike_indices = np.zeros(max_indices, dtype=np.int64)
     for idx in prange(analysis_period, len(volume_data)):
         if ma_volume[idx] > 0:
-            multiplier = volume_data[idx] / ma_volume[idx]
-            if multiplier >= ratio_threshold:
-                spike_indices[idx - analysis_period] = idx
+            spike_indices[idx - analysis_period] = idx
     return spike_indices[spike_indices != 0]
 
 
@@ -87,8 +84,7 @@ class AnalyzerVolumeSpike:
         is_tick: 틱 데이터 여부 (기본값 False)
         """
         self.spike_database = VolumeSpikeDatabase(market_info['전략구분'], is_tick)
-        self.analysis_period, self.rate_threshold, self.ratio_threshold = \
-            self.spike_database.load_spike_setting(market_gubun)
+        self.analysis_period, self.rate_threshold = self.spike_database.load_spike_setting(market_gubun)
 
         self.backtest_db  = market_info['백테디비'][is_tick]
         self.factor_list  = market_info['팩터목록'][is_tick]
@@ -128,13 +124,12 @@ class AnalyzerVolumeSpike:
             current_volume = volume_data[-1]
 
             if current_ma_volume > 0:
-                spike_multiplier = current_volume / current_ma_volume
-                if spike_multiplier >= self.ratio_threshold:
-                    rounded_multiplier = round(spike_multiplier * 2) / 2
-                    if rounded_multiplier in spike_scores:
-                        score_data  = spike_scores[rounded_multiplier]
-                        spike_score = score_data['avg_score']
-                        confidence  = score_data['confidence_score']
+                spike_multiplier   = current_volume / current_ma_volume
+                rounded_multiplier = round(spike_multiplier * 2) / 2
+                if rounded_multiplier in spike_scores:
+                    score_data  = spike_scores[rounded_multiplier]
+                    spike_score = score_data['avg_score']
+                    confidence  = score_data['confidence_score']
 
         return spike_score, confidence
 
@@ -190,7 +185,7 @@ class AnalyzerVolumeSpike:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.idx_volume,
-                    self.analysis_period, self.rate_threshold, self.ratio_threshold, self.min_samples,
+                    self.analysis_period, self.rate_threshold, self.min_samples,
                     existing_dates_dict, self.is_tick, self.spike_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
@@ -218,7 +213,7 @@ class AnalyzerVolumeSpike:
 
     @staticmethod
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
-                          analysis_period: int, rate_threshold: int, ratio_threshold: int, min_samples: int,
+                          analysis_period: int, rate_threshold: int, min_samples: int,
                           existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
@@ -228,7 +223,6 @@ class AnalyzerVolumeSpike:
         idx_volume: 거래량 인덱스
         analysis_period: 분석 기간 분
         rate_threshold: 등락율 임계값
-        ratio_threshold: 급증 임계값
         min_samples: 최소 샘플 수
         existing_dates_dict: 종목별 기존 저장 날짜 딕셔너리 {code: set(dates)}
         return: 종목별 급증 점수 딕셔너리 {code: spike_scores}
@@ -265,7 +259,7 @@ class AnalyzerVolumeSpike:
                     close_price   = date_data[:, idx_close]
                     volume_data   = date_data[:, idx_volume]
                     ma_volume     = _calculate_ma_volume(volume_data, analysis_period)
-                    spike_indices = _calculate_spike_indices(volume_data, ma_volume, ratio_threshold, analysis_period)
+                    spike_indices = _calculate_spike_indices(volume_data, ma_volume, analysis_period)
 
                     spike_groups = {}
                     for idx in spike_indices:
@@ -329,7 +323,6 @@ class VolumeSpikeDatabase:
                     is_tick INTEGER NOT NULL,
                     analysis_period INTEGER NOT NULL,
                     rate_threshold INTEGER NOT NULL,
-                    ratio_threshold INTEGER NOT NULL,
                     PRIMARY KEY (market, is_tick)
                 )
             ''')
@@ -431,42 +424,41 @@ class VolumeSpikeDatabase:
         마켓번호로 설정값 불러오기
         market: 마켓번호 (1~9)
         is_tick: 틱 데이터 여부 (기본값 False)
-        return: (analysis_period, rate_threshold, ratio_threshold) 튜플, 데이터가 없으면 (30, 3.0, 20) 반환
+        return: (analysis_period, rate_threshold) 튜플, 데이터가 없으면 (30, 3.0, 20) 반환
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, rate_threshold, ratio_threshold '
+                'SELECT analysis_period, rate_threshold '
                 'FROM spike_setting '
                 'WHERE market = ? AND is_tick = ?',
                 (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
             if result:
-                analysis_period, rate_threshold, ratio_threshold = result
+                analysis_period, rate_threshold = result
             else:
-                analysis_period, rate_threshold, ratio_threshold = 30, 3, 1
-                self.save_spike_setting(market, analysis_period, rate_threshold, ratio_threshold)
+                analysis_period, rate_threshold = 30, 3
+                self.save_spike_setting(market, analysis_period, rate_threshold)
 
-            self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold, ratio_threshold)
-            return analysis_period, rate_threshold, ratio_threshold
+            self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold)
+            return analysis_period, rate_threshold
 
-    def save_spike_setting(self, market: int, analysis_period: int, rate_threshold: int, ratio_threshold: int):
+    def save_spike_setting(self, market: int, analysis_period: int, rate_threshold: int):
         """
         마켓번호로 설정값 저장
         market: 마켓번호 (1~9)
         analysis_period: 분석 기간 분
         rate_threshold: 등락율 임계값
-        ratio_threshold: 급증 임계값
         is_tick: 틱 데이터 여부 (기본값 False)
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT OR REPLACE INTO spike_setting '
-                '(market, is_tick, analysis_period, rate_threshold, ratio_threshold) '
-                'VALUES (?, ?, ?, ?, ?)',
-                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, ratio_threshold)
+                '(market, is_tick, analysis_period, rate_threshold) '
+                'VALUES (?, ?, ?, ?)',
+                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold)
             )
             conn.commit()
 
@@ -474,10 +466,9 @@ class VolumeSpikeDatabase:
 def spike_setting_load(ui):
     """세개의 콤보박스를 현재 거래소의 설정값으로 로딩한다."""
     database = VolumeSpikeDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
-    analysis_period, rate_threshold, ratio_threshold = database.load_spike_setting(ui.market_gubun)
+    analysis_period, rate_threshold = database.load_spike_setting(ui.market_gubun)
     ui.vsp_comboBoxxx_01.setCurrentText(str(analysis_period))
     ui.vsp_comboBoxxx_02.setCurrentText(str(rate_threshold))
-    ui.vsp_comboBoxxx_03.setCurrentText(str(ratio_threshold))
 
 
 def spike_setting_save(ui):
@@ -485,9 +476,8 @@ def spike_setting_save(ui):
     from ui.etcetera.etc import send_analyzer_setting_change
     analysis_period = int(ui.vsp_comboBoxxx_01.currentText())
     rate_threshold  = int(ui.vsp_comboBoxxx_02.currentText())
-    ratio_threshold = int(ui.vsp_comboBoxxx_03.currentText())
     database = VolumeSpikeDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
-    database.save_spike_setting(ui.market_gubun, analysis_period, rate_threshold, ratio_threshold)
+    database.save_spike_setting(ui.market_gubun, analysis_period, rate_threshold)
     send_analyzer_setting_change(ui)
     QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
@@ -500,11 +490,10 @@ def spike_train(ui):
 
     _analysis_period = int(ui.vsp_comboBoxxx_01.currentText())
     _rate_threshold  = int(ui.vsp_comboBoxxx_02.currentText())
-    _ratio_threshold = int(ui.vsp_comboBoxxx_03.currentText())
     database = VolumeSpikeDatabase(ui.market_info['전략구분'], ui.dict_set['타임프레임'])
-    analysis_period, rate_threshold, ratio_threshold = database.load_spike_setting(ui.market_gubun)
+    analysis_period, rate_threshold = database.load_spike_setting(ui.market_gubun)
 
-    if _analysis_period != analysis_period or _rate_threshold != rate_threshold or _ratio_threshold != ratio_threshold:
+    if _analysis_period != analysis_period or _rate_threshold != rate_threshold:
         QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 콤보박스 선택과 저장된 값이 다릅니다.\n저장 후 재실행하십시오.\n')
         return
 
