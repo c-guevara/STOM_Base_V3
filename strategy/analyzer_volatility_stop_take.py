@@ -108,11 +108,11 @@ def _calculate_absolute_change_rate_last(prices: np.ndarray, period: int) -> flo
 
 @njit(cache=True, fastmath=True, parallel=True)
 def _simulate_stop_take(prices: np.ndarray, dates: np.ndarray, stop_loss_pct: float,
-                        take_profit_pct: float, start_period: int):
+                        take_profit_pct: float, start_period: int, check_step: int):
     """손절/익절 시뮬레이션 (Numba 최적화)"""
     n = len(prices)
     returns = np.zeros(n, dtype=np.float64)
-    for i in prange(start_period, n - start_period):
+    for i in prange(start_period, n - start_period, check_step):
         entry_price = prices[i]
         sl_price    = entry_price * (1 - stop_loss_pct / 100)
         tp_price    = entry_price * (1 + take_profit_pct / 100)
@@ -334,6 +334,7 @@ class AnalyzerVolatilityStopTake:
                         if len(group_indices) < 100:
                             continue
 
+                        check_step      = 60 if is_tick else 10
                         stop_mult_range = np.linspace(0.5, 10.0, 20)
                         take_mult_range = np.linspace(0.5, 10.0, 20)
                         best_sharpe     = -float('inf')
@@ -341,7 +342,8 @@ class AnalyzerVolatilityStopTake:
                         best_params  = None
                         for stop_mult in stop_mult_range:
                             for take_mult in take_mult_range:
-                                returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult, start_period)
+                                returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
+                                                              start_period, check_step)
                                 if len(returns) > 0:
                                     sharpe = np.mean(returns) / np.std(returns) if np.std(returns) > 0 else 0
                                     if sharpe > best_sharpe:
@@ -350,7 +352,8 @@ class AnalyzerVolatilityStopTake:
 
                         if best_params:
                             stop_mult, take_mult = best_params
-                            returns    = _simulate_stop_take(date_prices, dates, stop_mult, take_mult, start_period)
+                            returns    = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
+                                                             start_period, check_step)
                             avg_return = np.mean(returns)
                             # noinspection PyUnresolvedReferences
                             win_rate   = (returns > 0).mean() * 100
