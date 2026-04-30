@@ -85,7 +85,7 @@ class BaseStrategy(StgGlobalsFunc):
         self.black_list      = []
 
         self.jgrv_count      = 0
-        self.int_tujagm      = 0
+        self.betting         = 0
         self.비중조절기준       = 0
         self.vitime_cnt      = 0
 
@@ -335,7 +335,7 @@ class BaseStrategy(StgGlobalsFunc):
         elif gubun == '매도전략':
             self.sellstrategy = compile(data, '<string>', 'exec')
         elif gubun == '종목당투자금':
-            self.int_tujagm = data
+            self.betting = data
         elif gubun == '차트종목코드':
             self.chart_code = data
         elif gubun == '설정변경':
@@ -1622,29 +1622,29 @@ class BaseStrategy(StgGlobalsFunc):
             매수 수량
         """
         if self.dict_set['비중조절'][0] == 0:
-            betting = self.int_tujagm
+            betting = self.betting
         else:
-            if self.dict_set['비중조절'][0] == 1:
+            if self.set_weight[0] == 1:
                 비중조절기준 = 저가대비고가등락율
-            elif self.dict_set['비중조절'][0] == 2:
+            elif self.set_weight[0] == 2:
                 비중조절기준 = self._거래대금평균대비비율(30)
-            elif self.dict_set['비중조절'][0] == 3:
+            elif self.set_weight[0] == 3:
                 비중조절기준 = self._등락율각도(30)
-            elif self.dict_set['비중조절'][0] == 4:
+            elif self.set_weight[0] == 4:
                 비중조절기준 = self._당일거래대금각도(30)
             else:
                 비중조절기준 = self.비중조절기준
 
-            if 비중조절기준 < self.dict_set['비중조절'][1]:
-                betting = self.int_tujagm * self.dict_set['비중조절'][5]
-            elif 비중조절기준 < self.dict_set['비중조절'][2]:
-                betting = self.int_tujagm * self.dict_set['비중조절'][6]
-            elif 비중조절기준 < self.dict_set['비중조절'][3]:
-                betting = self.int_tujagm * self.dict_set['비중조절'][7]
-            elif 비중조절기준 < self.dict_set['비중조절'][4]:
-                betting = self.int_tujagm * self.dict_set['비중조절'][8]
+            if 비중조절기준 < self.set_weight[1]:
+                betting = self.betting * self.set_weight[5]
+            elif 비중조절기준 < self.set_weight[2]:
+                betting = self.betting * self.set_weight[6]
+            elif 비중조절기준 < self.set_weight[3]:
+                betting = self.betting * self.set_weight[7]
+            elif 비중조절기준 < self.set_weight[4]:
+                betting = self.betting * self.set_weight[8]
             else:
-                betting = self.int_tujagm * self.dict_set['비중조절'][9]
+                betting = self.betting * self.set_weight[9]
 
         oc_ratio = DICT_ORDER_RATIO[self.dict_set['매수분할방법']][self.dict_set['매수분할횟수']][분할매수횟수]
         매수수량 = self._set_buy_count(betting, 현재가, 매수가, oc_ratio)

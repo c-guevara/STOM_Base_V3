@@ -139,8 +139,8 @@ class BackEngineBase(StgGlobalsFunc):
         self.angle_dtm_cf  = angle_cf[1]
         factor_list        = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex   = {factor: i for i, factor in enumerate(factor_list)}
-        self.base_cnt      = self.dict_findex['관심종목'] + 1
 
+        self.base_cnt      = self.dict_findex['관심종목'] + 1
         self.hoga_sidex    = self.dict_findex['매도호가1']
         self.hoga_eidex    = self.dict_findex['매수잔량5'] + 1
         self.add_cnt       = len(self.dict_findex) - self.dict_findex['최고현재가']
@@ -1087,6 +1087,7 @@ class BackEngineBase(StgGlobalsFunc):
                 betting = self.betting * self.set_weight[8]
             else:
                 betting = self.betting * self.set_weight[9]
+
         self.curr_trade_info['주문수량'] = self._set_buy_count(betting, 현재가, 0, 100)
 
     def _get_hold_info(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
