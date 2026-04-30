@@ -32,18 +32,20 @@ def _calculate_setting_hash(*args) -> str:
 
 @njit(cache=True, fastmath=True)
 def _calculate_volume_by_bin(close_price: np.ndarray, volume_data: np.ndarray, price_bins: np.ndarray) -> np.ndarray:
-    """가격대별 거래량 계산 (numba 최적화)"""
-    volume_by_bin = np.zeros(len(price_bins) - 1)
+    """가격대별 거래량 계산 - 균등분할 최적화 버전"""
+    bin_count = len(price_bins) - 1
+    volume_by_bin = np.zeros(bin_count, dtype=np.float64)
+    min_price = price_bins[0]
+    max_price = price_bins[-1]
+    bin_width = (max_price - min_price) / bin_count
     for idx in range(len(close_price)):
-        price   = close_price[idx]
-        volume  = volume_data[idx]
-        bin_idx = 0
-        for i in range(len(price_bins) - 1):
-            if price_bins[i] <= price < price_bins[i + 1]:
-                bin_idx = i
-                break
-        if 0 <= bin_idx < len(volume_by_bin):
-            volume_by_bin[bin_idx] += volume
+        price  = close_price[idx]
+        volume = volume_data[idx]
+        if price < max_price:
+            bin_idx = int((price - min_price) / bin_width)
+        else:
+            bin_idx = bin_count - 1
+        volume_by_bin[bin_idx] += volume
     return volume_by_bin
 
 
