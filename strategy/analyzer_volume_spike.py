@@ -5,6 +5,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit, prange
+from traceback import format_exc
 from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
@@ -300,9 +301,9 @@ class AnalyzerVolumeSpike:
 
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 거래량분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
-            except Exception as e:
+            except Exception:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 거래량분석 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['시스템로그'], format_exc()))
 
         return all_spike_scores
 

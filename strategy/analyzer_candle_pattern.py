@@ -297,9 +297,9 @@ class AnalyzerCandlePattern:
 
                     # noinspection PyUnresolvedReferences
                     window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
-                except Exception as e:
+                except Exception:
                     # noinspection PyUnresolvedReferences
-                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 캔들분석 학습 실패 - {e}"))
+                    window_queue.put((UI_NUM['시스템로그'], format_exc()))
 
         return all_pattern_scores
 

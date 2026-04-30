@@ -5,6 +5,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit, prange
+from traceback import format_exc
 from PyQt5.QtWidgets import QMessageBox
 from typing import Tuple, List, Dict, Any
 from multiprocessing import Pool, cpu_count
@@ -112,7 +113,9 @@ def _simulate_stop_take(prices: np.ndarray, dates: np.ndarray, stop_loss_pct: fl
     """손절/익절 시뮬레이션 (Numba 최적화)"""
     n = len(prices)
     returns = np.zeros(n, dtype=np.float64)
-    for i in prange(start_period, n - start_period, check_step):
+    total_iterations = (n - start_period - start_period + check_step - 1) // check_step
+    for idx in prange(total_iterations):
+        i = start_period + idx * check_step
         entry_price = prices[i]
         sl_price    = entry_price * (1 - stop_loss_pct / 100)
         tp_price    = entry_price * (1 + take_profit_pct / 100)
@@ -378,9 +381,9 @@ class AnalyzerVolatilityStopTake:
 
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변손익분석 학습 중 ... [{k+1:02d}/{last:02d}]'))
-            except Exception as e:
+            except Exception:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변손익분석 학습 실패 - {e}'))
+                window_queue.put((UI_NUM['시스템로그'], format_exc()))
 
         return all_volatility_scores
 

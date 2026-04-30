@@ -5,6 +5,7 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit
+from traceback import format_exc
 from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
@@ -272,14 +273,17 @@ class AnalyzerVolumeProfile:
                         if len(date_data) < analysis_period * 2:
                             continue
 
-                        dates          = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
-                        close_price    = date_data[:, idx_close]
-                        volume_data    = date_data[:, idx_volume]
-                        min_price      = close_price.min()
-                        max_price      = close_price.max()
-                        bin_size       = min_price * price_range_pct / 100
-                        num_bins       = int((max_price - min_price) / bin_size) + 1
-                        price_bins     = np.linspace(min_price, max_price, num_bins)
+                        dates       = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
+                        close_price = date_data[:, idx_close]
+                        volume_data = date_data[:, idx_volume]
+                        min_price   = close_price.min()
+                        max_price   = close_price.max()
+                        bin_size    = min_price * price_range_pct / 100
+                        num_bins    = int((max_price - min_price) / bin_size) + 1
+                        price_bins  = np.linspace(min_price, max_price, num_bins)
+
+                        if len(price_bins) < 2:
+                            continue
 
                         volume_by_bin  = _calculate_volume_by_bin(close_price, volume_data, price_bins)
                         bin_centers    = (price_bins[:-1] + price_bins[1:]) / 2
@@ -311,9 +315,9 @@ class AnalyzerVolumeProfile:
 
                     # noinspection PyUnresolvedReferences
                     window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
-                except Exception as e:
+                except Exception:
                     # noinspection PyUnresolvedReferences
-                    window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 가격대분석 학습 실패 - {e}"))
+                    window_queue.put((UI_NUM['시스템로그'], format_exc()))
 
         return all_volume_scores
 
