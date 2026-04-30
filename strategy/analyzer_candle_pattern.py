@@ -62,7 +62,7 @@ def _calculate_pattern_scores(close_price: np.ndarray, dates: np.ndarray, detect
                 exit_price = exit_max_price
             else:
                 exit_price = exit_min_price
-            price_change   = (exit_price - entry_price) / entry_price * 100
+            price_change   = (exit_price / entry_price - 1) * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
             scores[k] = score
@@ -81,13 +81,13 @@ class AnalyzerCandlePattern:
         self.pattern_database = CandlePatternDatabase(market_info['전략구분'])
         self.analysis_period, self.rate_threshold = self.pattern_database.load_pattern_setting(market_gubun)
 
-        self.backtest_db    = market_info['백테디비'][0]
-        self.factor_list    = market_info['팩터목록'][0]
-        self.min_samples    = min_samples
-        self.idx_open       = self.factor_list.index('분봉시가')
-        self.idx_high       = self.factor_list.index('분봉고가')
-        self.idx_low        = self.factor_list.index('분봉저가')
-        self.idx_close      = self.factor_list.index('현재가')
+        self.backtest_db = market_info['백테디비'][0]
+        self.factor_list = market_info['팩터목록'][0]
+        self.min_samples = min_samples
+        self.idx_open    = self.factor_list.index('분봉시가')
+        self.idx_high    = self.factor_list.index('분봉고가')
+        self.idx_low     = self.factor_list.index('분봉저가')
+        self.idx_close   = self.factor_list.index('현재가')
         self.pattern_scores: dict[str, dict[str, dict[str, float]]] = {}
 
         if not backtest:

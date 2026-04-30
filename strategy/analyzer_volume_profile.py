@@ -97,12 +97,12 @@ class AnalyzerVolumeProfile:
         self.analysis_period, self.rate_threshold, self.price_range_pct = \
             self.volume_database.load_volume_setting(market_gubun)
 
-        self.backtest_db  = market_info['백테디비'][is_tick]
-        self.factor_list  = market_info['팩터목록'][is_tick]
-        self.is_tick      = is_tick
-        self.top_nodes    = top_nodes
-        self.idx_close    = self.factor_list.index('현재가')
-        self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
+        self.backtest_db = market_info['백테디비'][is_tick]
+        self.factor_list = market_info['팩터목록'][is_tick]
+        self.is_tick     = is_tick
+        self.top_nodes   = top_nodes
+        self.idx_close   = self.factor_list.index('현재가')
+        self.idx_volume  = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
         self.volume_nodes: dict[str, dict[float, dict[str, float]]] = {}
         if not backtest:
             self._load_volume_all_nodes()

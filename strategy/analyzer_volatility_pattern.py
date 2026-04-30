@@ -109,7 +109,7 @@ def _calculate_volatility_scores(close_price: np.ndarray, dates: np.ndarray, lev
                 exit_price = exit_max_price
             else:
                 exit_price = exit_min_price
-            price_change   = (exit_price - entry_price) / entry_price * 100
+            price_change   = (exit_price / entry_price - 1) * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
             scores[k] = score
@@ -131,13 +131,13 @@ class AnalyzerVolatilityPattern:
         self.analysis_period, self.rate_threshold, self.num_levels = \
             self.volatility_database.load_volatility_setting(market_gubun)
 
-        self.backtest_db       = market_info['백테디비'][is_tick]
-        self.factor_list       = market_info['팩터목록'][is_tick]
-        self.is_tick           = is_tick
-        self.min_samples       = min_samples
-        self.idx_close         = self.factor_list.index('현재가')
-        self.idx_high          = self.factor_list.index('분봉고가') if not is_tick else None
-        self.idx_low           = self.factor_list.index('분봉저가') if not is_tick else None
+        self.backtest_db = market_info['백테디비'][is_tick]
+        self.factor_list = market_info['팩터목록'][is_tick]
+        self.is_tick     = is_tick
+        self.min_samples = min_samples
+        self.idx_close   = self.factor_list.index('현재가')
+        self.idx_high    = self.factor_list.index('분봉고가') if not is_tick else None
+        self.idx_low     = self.factor_list.index('분봉저가') if not is_tick else None
         self.volatility_scores: dict[str, dict[int, dict[str, float]]] = {}
         self.level_boundaries: dict[str, np.ndarray] = {}
 
@@ -164,7 +164,7 @@ class AnalyzerVolatilityPattern:
         code_data: 실시간 데이터 (1분봉 또는 틱)
         return: 변동성점수, 변동성신뢰도
         """
-        volatility_score, confidence = 0.0, 0.0
+        volatility_score, confidence_score = 0.0, 0.0
 
         code_scores     = self.volatility_scores.get(code)
         code_boundaries = self.level_boundaries.get(code)
@@ -178,19 +178,15 @@ class AnalyzerVolatilityPattern:
                 low_price        = code_data[:, self.idx_low]
                 volatility_value = _calculate_atr_last(close_price, high_price, low_price, self.analysis_period)
 
-            volatility_level = -1
             for level in range(len(code_boundaries) - 1):
                 if code_boundaries[level] <= volatility_value < code_boundaries[level + 1]:
-                    volatility_level = level
-                    break
+                    score_data = code_scores.get(level)
+                    if score_data:
+                        volatility_score = score_data['avg_score']
+                        confidence_score = score_data['confidence_score']
+                        break
 
-            level_scores = code_scores.get(volatility_level)
-            if level_scores:
-                score_data       = code_scores[volatility_level]
-                volatility_score = score_data['avg_score']
-                confidence       = score_data['confidence_score']
-
-        return volatility_score, confidence
+        return volatility_score, confidence_score
 
     def analyze_batch_data(self, code: str, code_data: np.ndarray) -> np.ndarray:
         """2차원 어레이 데이터 전체를 일괄 분석합니다.

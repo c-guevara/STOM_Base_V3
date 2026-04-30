@@ -5,8 +5,8 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit, prange
-from typing import Tuple, List, Dict, Any
 from PyQt5.QtWidgets import QMessageBox
+from typing import Tuple, List, Dict, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
@@ -84,7 +84,7 @@ def _calculate_absolute_change_rate(prices: np.ndarray, period: int) -> np.ndarr
     n = len(prices)
     abs_changes = np.zeros(n - 1, dtype=np.float64)
     for i in prange(1, n):
-        abs_changes[i - 1] = abs(prices[i] - prices[i - 1]) / prices[i - 1] * 100
+        abs_changes[i-1] = abs(prices[i] / prices[i - 1] - 1) * 100
     volatility = np.zeros(n, dtype=np.float64)
     for i in prange(period - 1, n):
         window = abs_changes[i - period + 1:i]
@@ -102,7 +102,7 @@ def _calculate_absolute_change_rate_last(prices: np.ndarray, period: int) -> flo
     base_idx = n - period
     for i in range(period):
         idx = base_idx + i
-        abs_changes[i] = abs(prices[idx] - prices[idx - 1]) / prices[idx - 1] * 100
+        abs_changes[i] = abs(prices[idx] / prices[idx - 1] - 1)  * 100
     return np.mean(abs_changes)
 
 
@@ -152,11 +152,10 @@ class AnalyzerVolatilityStopTake:
         self.volatility_database = VolatilityStopTakeDatabase(market_info['전략구분'], is_tick)
         self.start_period, self.group_count = \
             self.volatility_database.load_volatility_stop_take_setting(market_gubun, is_tick)
-        self.backtest_db     = market_info['백테디비'][is_tick]
-        self.factor_list     = market_info['팩터목록'][is_tick]
-        self.is_tick         = is_tick
-        self.idx_close       = self.factor_list.index('현재가')
-        self.start_period    = 30
+        self.backtest_db = market_info['백테디비'][is_tick]
+        self.factor_list = market_info['팩터목록'][is_tick]
+        self.is_tick     = is_tick
+        self.idx_close   = self.factor_list.index('현재가')
         self.volatility_data: dict[str, dict[int, dict[str, float]]] = {}
 
         if not backtest:
@@ -180,18 +179,18 @@ class AnalyzerVolatilityStopTake:
         """실시간 변동성 분석 및 학습된 손절/익절 반환
         code: 종목코드
         code_data: 코드 데이터 2차원 어레이
-        return: (손절%, 익절%, 변동성, 그룹번호)
+        return: (에상수익률, 익절수익률, 손절수익률)
         """
         estimated_return, take_profit_pct, stop_loss_pct = 0.0, 0.0, 0.0
 
-        price_history = code_data[:, self.idx_close]
-        group_data = self.volatility_data[code]
-        if group_data and len(price_history) >= self.start_period:
-            vol_std = _calculate_std_volatility_last(price_history, self.start_period)
-            vol_abs = _calculate_absolute_change_rate_last(price_history, self.start_period)
-            vol_rv  = _calculate_realized_volatility_tick_last(price_history, self.start_period)
-
+        close_price = code_data[:, self.idx_close]
+        group_data  = self.volatility_data[code]
+        if group_data and len(close_price) >= self.start_period:
+            vol_std = _calculate_std_volatility_last(close_price, self.start_period)
+            vol_abs = _calculate_absolute_change_rate_last(close_price, self.start_period)
+            vol_rv  = _calculate_realized_volatility_tick_last(close_price, self.start_period)
             current_volatility = vol_std * 0.4 + vol_rv * 0.4 + vol_abs * 0.2
+
             for _, v in group_data.items():
                 if v['volatility_min'] <= current_volatility < v['volatility_max']:
                     estimated_return = v['expected_return']
@@ -205,7 +204,7 @@ class AnalyzerVolatilityStopTake:
         """2차원 어레이 데이터 전체를 일괄 분석
         code: 종목코드
         code_data: 코드 데이터 2차원 어레이
-        return: (N, 3) 형태 - 손절%, 익절%
+        return: (N, 3) 형태 - 에상수익률, 익절수익률, 손절수익률
         """
         date = int(str(code_data[0, 0])[:8])
         self.load_volatility_code_data(code, date)
@@ -251,7 +250,8 @@ class AnalyzerVolatilityStopTake:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.start_period,
-                    self.group_count, existing_dates_dict, self.is_tick, self.volatility_database.setting_hash
+                    self.group_count, existing_dates_dict, self.is_tick,
+                    self.volatility_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -279,7 +279,8 @@ class AnalyzerVolatilityStopTake:
 
     @staticmethod
     def _train_single_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, start_period: int,
-                            group_count: int, existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
+                            group_count: int, existing_dates_dict: Dict[str, set], is_tick: bool,
+                            setting_hash: str) -> List[Any]:
         """단일 종목 청크 학습 (멀티프로세싱용)"""
         all_volatility_scores = []
         last = len(code_chunk)

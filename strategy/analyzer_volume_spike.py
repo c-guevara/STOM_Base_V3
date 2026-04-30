@@ -66,7 +66,7 @@ def _calculate_spike_score_array(close_price: np.ndarray, dates: np.ndarray, ind
                 exit_price = exit_max_price
             else:
                 exit_price = exit_min_price
-            price_change = (exit_price - entry_price) / entry_price * 100
+            price_change = (exit_price / entry_price - 1) * 100
             score = price_change / rate_threshold * 100
             score = max(-100.0, min(100.0, score))
             scores[k] = score
@@ -87,12 +87,12 @@ class AnalyzerVolumeSpike:
         self.spike_database = VolumeSpikeDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold = self.spike_database.load_spike_setting(market_gubun)
 
-        self.backtest_db  = market_info['백테디비'][is_tick]
-        self.factor_list  = market_info['팩터목록'][is_tick]
-        self.is_tick      = is_tick
-        self.min_samples  = min_samples
-        self.idx_close    = self.factor_list.index('현재가')
-        self.idx_volume   = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
+        self.backtest_db = market_info['백테디비'][is_tick]
+        self.factor_list = market_info['팩터목록'][is_tick]
+        self.is_tick     = is_tick
+        self.min_samples = min_samples
+        self.idx_close   = self.factor_list.index('현재가')
+        self.idx_volume  = self.factor_list.index('초당거래대금') if is_tick else self.factor_list.index('분당거래대금')
         self.spike_scores: dict[str, dict[float, dict[str, float]]] = {}
 
         if not backtest:
@@ -116,7 +116,7 @@ class AnalyzerVolumeSpike:
         code_data: 실시간 1분봉 데이터
         return: 거래량점수, 거래량신뢰도
         """
-        spike_score, confidence = 0.0, 0.0
+        volume_spike_score, confidence_score = 0.0, 0.0
 
         spike_scores = self.spike_scores.get(code)
         if spike_scores and len(code_data) >= self.analysis_period:
@@ -129,10 +129,10 @@ class AnalyzerVolumeSpike:
                 rounded_multiplier = round(spike_multiplier * 2) / 2
                 score_data = spike_scores.get(rounded_multiplier)
                 if score_data:
-                    spike_score = score_data['avg_score']
-                    confidence  = score_data['confidence_score']
+                    volume_spike_score = score_data['avg_score']
+                    confidence_score   = score_data['confidence_score']
 
-        return spike_score, confidence
+        return volume_spike_score, confidence_score
 
     def analyze_batch_data(self, code: str, code_data: np.ndarray) -> np.ndarray:
         """2차원 어레이 데이터 전체를 일괄 분석합니다.
