@@ -337,7 +337,7 @@ class SetDialogEtc:
         self.ui.vlp_pushButton_02 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_pattern, click=lambda: volatility_setting_save(self.ui))
         self.ui.vlp_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, color=4, click=lambda: volatility_train(self.ui))
 
-        self.ui.vst_labellllll_01 = QLabel('  ▣ 변손익분석  |  시작시간(초/분)                                                            변동성레벨수', self.ui.dialog_pattern)
+        self.ui.vst_labellllll_01 = QLabel('  ▣ 변손익분석  |  분석시간(초/분)                                                            변동성레벨수', self.ui.dialog_pattern)
         self.ui.vst_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['30', '60', '120', '180'])
         self.ui.vst_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '20', '30', '50'])
         self.ui.vst_pushButton_00 = self.wc.setPushbutton('도움말', parent=self.ui.dialog_pattern, click=lambda: pattern_setting_help(self.ui))
