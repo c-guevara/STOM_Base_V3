@@ -1146,8 +1146,10 @@ class BaseStrategy(StgGlobalsFunc):
                         self.Sell(SELL_LONG)
 
         시그널 = 1 if 시그널 == 'buy' else (-1 if 시그널 == 'sell' else 0)
-        self.arry_code[-1, self.area_cnt:] = \
-            [시그널, 신뢰도, 리스크, 리스크점수, 거래량점수, 거래량신뢰도, 가격대점수, 가격대신뢰도, 변동성점수, 변동성신뢰도, 예상수익률, 익절수익률, 손절수익률]
+        self.arry_code[-1, self.area_cnt:] = [
+            시그널, 신뢰도, 리스크, 리스크점수, 거래량점수, 거래량신뢰도, 가격대점수, 가격대신뢰도, 변동성점수, 변동성신뢰도,
+            예상수익률, 익절수익률, 손절수익률
+        ]
 
         if 관심종목:
             """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
