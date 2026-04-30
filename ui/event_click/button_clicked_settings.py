@@ -994,7 +994,7 @@ def setting_all_save(ui):
 
 
 def setting_passticks(ui):
-    """패스틱스 설정 다이얼로그를 토글합니다.
+    """경과틱수 설정 다이얼로그를 토글합니다.
     Args:
         ui: UI 클래스 인스턴스
     """
