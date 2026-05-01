@@ -68,7 +68,7 @@ def _calculate_volatility_change_rate(volatility_data: np.ndarray, analysis_peri
         prev_vol   = np.mean(volatility_data[i - 2 * analysis_period:i - analysis_period])
         recent_vol = np.mean(volatility_data[i - analysis_period:i])
         if prev_vol > 0:
-            change_rates[i] = (recent_vol / prev_vol - 1) * 100
+            change_rates[i] = recent_vol / prev_vol
     return change_rates
 
 
@@ -79,7 +79,7 @@ def _calculate_volatility_change_rate_last(volatility_data: np.ndarray, analysis
     prev_vol   = np.mean(volatility_data[n - 2 * analysis_period:n - analysis_period])
     recent_vol = np.mean(volatility_data[n - analysis_period:n])
     if prev_vol > 0:
-        return (recent_vol / prev_vol - 1) * 100
+        return recent_vol / prev_vol
     return 0.0
 
 
@@ -109,14 +109,14 @@ def _calculate_volatility_scores(close_price: np.ndarray, dates: np.ndarray, ind
 class AnalyzerVolatilityPattern:
     """메인 변동성 패턴 분석 통합 클래스"""
     def __init__(self, market_gubun: int, market_info: dict, is_tick: bool,
-                 backtest: bool = False, min_samples: int = 100):
+                 backtest: bool = False, min_samples: int = 20):
         """
         초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
         is_tick: 틱 데이터 여부
         backtest: 백테스트 모드 여부
-        min_samples: 최소 샘플 수 (기본값 100)
+        min_samples: 최소 샘플 수 (기본값 20)
         """
         self.volatility_database = VolatilityPatternDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold = \
@@ -301,7 +301,7 @@ class AnalyzerVolatilityPattern:
                         low_price       = date_data[:, idx_low]
                         volatility_data = _calculate_atr(close_price, high_price, low_price, analysis_period)
 
-                    change_rates  = _calculate_volatility_change_rate(volatility_data, analysis_period)
+                    change_rates = _calculate_volatility_change_rate(volatility_data, analysis_period)
 
                     groups = {}
                     for idx in range(len(change_rates)):
@@ -316,7 +316,7 @@ class AnalyzerVolatilityPattern:
                             scores = _calculate_volatility_scores(close_price, dates, indices_array,
                                                                   analysis_period, rate_threshold)
 
-                            if len(scores) >= min_samples:
+                            if len(scores) >= 100:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
                                 std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
@@ -369,7 +369,7 @@ class VolatilityPatternDatabase:
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS {self.table_name} (
                     code TEXT NOT NULL,
-                    volatility_level INTEGER NOT NULL,
+                    volatility_level REAL NOT NULL,
                     avg_score REAL NOT NULL,
                     max_score REAL NOT NULL,
                     min_score REAL NOT NULL,

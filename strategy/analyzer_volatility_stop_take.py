@@ -49,7 +49,7 @@ def _calculate_volatility_change_rate(prices: np.ndarray, analysis_period: int) 
         recent_std    = np.std(recent_window)
         recent_vol    = recent_std / recent_mean * 100 if recent_mean > 0 else 0.0
         if prev_vol > 0:
-            change_rates[i] = (recent_vol / prev_vol - 1) * 100
+            change_rates[i] = recent_vol / prev_vol
     return change_rates
 
 
@@ -66,7 +66,7 @@ def _calculate_volatility_change_rate_last(prices: np.ndarray, analysis_period: 
     recent_std    = np.std(recent_window)
     recent_vol    = recent_std / recent_mean * 100 if recent_mean > 0 else 0.0
     if prev_vol > 0:
-        return (recent_vol / prev_vol - 1) * 100
+        return recent_vol / prev_vol
     return 0.0
 
 
@@ -87,7 +87,7 @@ def _calculate_realized_volatility_change_rate(prices: np.ndarray, analysis_peri
             recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
         recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
         if prev_vol > 0:
-            change_rates[i] = (recent_vol / prev_vol - 1) * 100
+            change_rates[i] = recent_vol / prev_vol
     return change_rates
 
 
@@ -106,7 +106,7 @@ def _calculate_realized_volatility_change_rate_last(prices: np.ndarray, analysis
         recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
     recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
     if prev_vol > 0:
-        return (recent_vol / prev_vol - 1) * 100
+        return recent_vol / prev_vol
     return 0.0
 
 
@@ -127,7 +127,7 @@ def _calculate_absolute_change_rate_change(prices: np.ndarray, analysis_period: 
             recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
         recent_vol = np.mean(recent_abs_changes)
         if prev_vol > 0:
-            change_rates[i] = (recent_vol / prev_vol - 1) * 100
+            change_rates[i] = recent_vol / prev_vol
     return change_rates
 
 
@@ -146,7 +146,7 @@ def _calculate_absolute_change_rate_change_last(prices: np.ndarray, analysis_per
         recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
     recent_vol = np.mean(recent_abs_changes)
     if prev_vol > 0:
-        return (recent_vol / prev_vol - 1) * 100
+        return recent_vol / prev_vol
     return 0.0
 
 
@@ -387,7 +387,7 @@ class AnalyzerVolatilityStopTake:
                                     returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
                                                                   analysis_period, check_step)
 
-                                    if len(returns) > 0:
+                                    if len(returns) >= 100:
                                         total_return = returns.sum()
                                         if total_return > best_return:
                                             best_return = total_return
@@ -447,7 +447,7 @@ class VolatilityStopTakeDatabase:
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS {self.table_name} (
                     code TEXT NOT NULL,
-                    volatility_level INTEGER NOT NULL,
+                    volatility_level REAL NOT NULL,
                     level_stop REAL NOT NULL,
                     level_take REAL NOT NULL,
                     expected_return REAL NOT NULL,
