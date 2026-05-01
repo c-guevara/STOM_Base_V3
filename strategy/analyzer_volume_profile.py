@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static_datetime import now
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
 
@@ -168,6 +169,7 @@ class AnalyzerVolumeProfile:
 
     def train_all_codes(self, windowQ):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
+        start = now()
         with sqlite3.connect(self.backtest_db) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE TYPE = 'table'")
@@ -216,14 +218,15 @@ class AnalyzerVolumeProfile:
                 df = pd.DataFrame(result, columns=columns)
                 self.volume_database.save_volume_scores(df)
                 total_processed += 1
-                windowQ.put((UI_NUM['학습로그'], f"학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]"))
+                windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
 
         if total_processed > 0:
-            windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
-            windowQ.put((UI_NUM['학습로그'], f"{self.volume_database.db_path} -> {self.volume_database.table_name}"))
-            windowQ.put((UI_NUM['학습로그'], '가격대분석 학습 완료'))
+            pass_time = now() - start
+            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
+            windowQ.put((UI_NUM['학습로그'], f'{self.volume_database.db_path} -> {self.volume_database.table_name}'))
+            windowQ.put((UI_NUM['학습로그'], f'가격대분석 학습 완료, 소요시간[{pass_time}]'))
         else:
-            windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
+            windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
 
     @staticmethod
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,

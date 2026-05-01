@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static_datetime import now
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
 
@@ -158,6 +159,7 @@ class AnalyzerVolumeSpike:
 
     def train_all_codes(self, windowQ):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
+        start = now()
         with sqlite3.connect(self.backtest_db) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE TYPE = 'table'")
@@ -206,14 +208,15 @@ class AnalyzerVolumeSpike:
                 df = pd.DataFrame(result, columns=columns)
                 self.spike_database.save_spike_scores(df)
                 total_processed += 1
-                windowQ.put((UI_NUM['학습로그'], f"학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]"))
+                windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
 
         if total_processed > 0:
-            windowQ.put((UI_NUM['학습로그'], "학습 데이터 저장 완료"))
-            windowQ.put((UI_NUM['학습로그'], f"{self.spike_database.db_path} -> {self.spike_database.table_name}"))
-            windowQ.put((UI_NUM['학습로그'], '거래량분석 학습 완료'))
+            pass_time = now() - start
+            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
+            windowQ.put((UI_NUM['학습로그'], f'{self.spike_database.db_path} -> {self.spike_database.table_name}'))
+            windowQ.put((UI_NUM['학습로그'], f'거래량분석 학습 완료, 소요시간[{pass_time}]'))
         else:
-            windowQ.put((UI_NUM['학습로그'], "이미 모든 데이터가 학습되어 있습니다."))
+            windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
 
     @staticmethod
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
@@ -266,34 +269,33 @@ class AnalyzerVolumeSpike:
                     ma_volume     = _calculate_ma_volume(volume_data, analysis_period)
                     spike_indices = _calculate_spike_indices(volume_data, ma_volume, analysis_period)
 
-                    spike_groups = {}
+                    groups = {}
                     for idx in spike_indices:
                         multiplier = volume_data[idx] / ma_volume[idx]
                         rounded_multiplier = round(multiplier * 2) / 2
-                        if rounded_multiplier not in spike_groups:
-                            spike_groups[rounded_multiplier] = []
-                        spike_groups[rounded_multiplier].append(idx)
+                        if rounded_multiplier not in groups:
+                            groups[rounded_multiplier] = []
+                        groups[rounded_multiplier].append(idx)
 
-                    for multiplier, indices in spike_groups.items():
+                    for multiplier, indices in groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
                             scores = _calculate_spike_score_array(close_price, dates, indices_array,
                                                                   analysis_period, rate_threshold)
-                            valid_scores = scores[scores != 0.0]
 
-                            if len(valid_scores) >= min_samples:
-                                sample_factor = min(len(valid_scores) / 100.0, 1.0)
-                                std_factor    = max(1.0 - float(np.std(valid_scores)) / 50.0, 0.0)
+                            if len(scores) >= min_samples:
+                                sample_factor = min(len(scores) / 100.0, 1.0)
+                                std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
 
                                 spike_scores = [
                                     code,
                                     multiplier,
-                                    round(float(np.mean(valid_scores)), 2),
-                                    round(float(np.max(valid_scores)), 2),
-                                    round(float(np.min(valid_scores)), 2),
-                                    round(float(np.std(valid_scores)), 2),
-                                    len(valid_scores),
+                                    round(float(np.mean(scores)), 2),
+                                    round(float(np.max(scores)), 2),
+                                    round(float(np.min(scores)), 2),
+                                    round(float(np.std(scores)), 2),
+                                    len(scores),
                                     round(confidence, 2),
                                     setting_hash,
                                     target_date
