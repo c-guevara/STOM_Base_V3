@@ -178,18 +178,21 @@ def _simulate_stop_take(prices: np.ndarray, dates: np.ndarray, stop_loss_pct: fl
 
 class AnalyzerVolatilityStopTake:
     """변손익분석 분석 통합 클래스"""
-    def __init__(self, market_gubun: int, market_info: dict, is_tick: bool, backtest: bool = False):
+    def __init__(self, market_gubun: int, market_info: dict, is_tick: bool,
+                 backtest: bool = False, min_samples: int = 20):
         """초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
         is_tick: 틱 데이터 여부
         backtest: 백테스트 모드 여부
+        min_samples: 최소 샘플 수 (기본값 20)
         """
         self.volatility_database = VolatilityStopTakeDatabase(market_info['전략구분'], is_tick)
         self.analysis_period = self.volatility_database.load_volatility_stop_take_setting(market_gubun, is_tick)
         self.backtest_db = market_info['백테디비'][is_tick]
         self.factor_list = market_info['팩터목록'][is_tick]
         self.is_tick     = is_tick
+        self.min_samples = min_samples
         self.idx_close   = self.factor_list.index('현재가')
         self.volatility_data: dict[str, dict[int, dict[str, float]]] = {}
 
@@ -230,8 +233,8 @@ class AnalyzerVolatilityStopTake:
             score_data = group_data.get(rounded_rate)
             if score_data:
                 estimated_return = score_data['expected_return']
-                take_profit_pct  = score_data['multiplier_take']
-                stop_loss_pct    = -score_data['multiplier_stop']
+                take_profit_pct  = score_data['level_take']
+                stop_loss_pct    = -score_data['level_stop']
 
         return estimated_return, take_profit_pct, stop_loss_pct
 
@@ -288,7 +291,8 @@ class AnalyzerVolatilityStopTake:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.analysis_period,
-                    existing_dates_dict, self.is_tick, self.volatility_database.setting_hash
+                    self.min_samples, existing_dates_dict, self.is_tick,
+                    self.volatility_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -296,7 +300,7 @@ class AnalyzerVolatilityStopTake:
 
         total_processed = 0
         columns = [
-            'code', 'volatility_group', 'multiplier_stop', 'multiplier_take', 'expected_return',
+            'code', 'volatility_level', 'level_stop', 'level_take', 'expected_return',
             'win_rate', 'total_return', 'sample_count', 'setting_hash', 'last_update'
         ]
         for i, result in enumerate(results):
@@ -308,16 +312,21 @@ class AnalyzerVolatilityStopTake:
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
-            windowQ.put((UI_NUM['학습로그'], f'{self.volatility_database.db_path} -> {self.volatility_database.table_name}'))
+            windowQ.put((
+                UI_NUM['학습로그'],
+                f'학습 데이터 저장 완료, {self.volatility_database.db_path} -> {self.volatility_database.table_name}'
+            ))
             windowQ.put((UI_NUM['학습로그'], f'변손익분석 학습 완료, 소요시간[{pass_time}]'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다'))
 
     @staticmethod
     def _train_single_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, analysis_period: int,
-                            existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
+                            min_samples: int, existing_dates_dict: Dict[str, set], is_tick: bool,
+                            setting_hash: str) -> List[Any]:
         """단일 종목 청크 학습 (멀티프로세싱용)"""
+        global window_queue
+
         all_volatility_scores = []
         last = len(code_chunk)
 
@@ -360,53 +369,51 @@ class AnalyzerVolatilityStopTake:
 
                     groups = {}
                     for idx in range(len(change_rates)):
-                        rounded_multiplier = round(change_rates[idx] * 2) / 2
-                        if rounded_multiplier not in groups:
-                            groups[rounded_multiplier] = []
-                        groups[rounded_multiplier].append(idx)
+                        rounded_level = round(change_rates[idx] * 2) / 2
+                        if rounded_level not in groups:
+                            groups[rounded_level] = []
+                        groups[rounded_level].append(idx)
 
-                    for multiplier, indices in groups.items():
-                        len_indices = len(indices)
-                        if len_indices < 100:
-                            continue
+                    for level, indices in groups.items():
+                        if len(indices) >= min_samples:
+                            check_step      = 60 if is_tick else 10
+                            stop_mult_range = np.linspace(0.5, 10.0, 20)
+                            take_mult_range = np.linspace(0.5, 10.0, 20)
+                            best_return     = -float('inf')
 
-                        check_step      = 60 if is_tick else 10
-                        stop_mult_range = np.linspace(0.5, 10.0, 20)
-                        take_mult_range = np.linspace(0.5, 10.0, 20)
-                        best_return     = -float('inf')
+                            best_params  = None
+                            for stop_mult in stop_mult_range:
+                                for take_mult in take_mult_range:
+                                    returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
+                                                                  analysis_period, check_step)
 
-                        best_params  = None
-                        for stop_mult in stop_mult_range:
-                            for take_mult in take_mult_range:
+                                    if len(returns) > 0:
+                                        total_return = returns.sum()
+                                        if total_return > best_return:
+                                            best_return = total_return
+                                            best_params = (stop_mult, take_mult)
+
+                            if best_params:
+                                stop_mult, take_mult = best_params
                                 returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
                                                               analysis_period, check_step)
-                                if len(returns) > 0:
-                                    total_return = returns.sum()
-                                    if total_return > best_return:
-                                        best_return = total_return
-                                        best_params = (stop_mult, take_mult)
+                                avg_return = np.mean(returns)
+                                # noinspection PyUnresolvedReferences
+                                win_rate = (returns > 0).mean() * 100
 
-                        if best_params:
-                            stop_mult, take_mult = best_params
-                            returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
-                                                          analysis_period, check_step)
-                            avg_return = np.mean(returns)
-                            # noinspection PyUnresolvedReferences
-                            win_rate = (returns > 0).mean() * 100
-
-                            volatility_scores = [
-                                code,
-                                multiplier,
-                                round(float(stop_mult), 2),
-                                round(float(take_mult), 2),
-                                round(float(avg_return), 4),
-                                round(float(win_rate), 2),
-                                round(float(best_return), 4),
-                                len_indices,
-                                setting_hash,
-                                target_date
-                            ]
-                            all_volatility_scores.append(volatility_scores)
+                                volatility_scores = [
+                                    code,
+                                    level,
+                                    round(float(stop_mult), 2),
+                                    round(float(take_mult), 2),
+                                    round(float(avg_return), 4),
+                                    round(float(win_rate), 2),
+                                    round(float(best_return), 4),
+                                    len(returns),
+                                    setting_hash,
+                                    target_date
+                                ]
+                                all_volatility_scores.append(volatility_scores)
 
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변손익분석 학습 중 ... [{k+1:02d}/{last:02d}]'))
@@ -440,16 +447,16 @@ class VolatilityStopTakeDatabase:
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS {self.table_name} (
                     code TEXT NOT NULL,
-                    volatility_group INTEGER NOT NULL,
-                    multiplier_stop REAL NOT NULL,
-                    multiplier_take REAL NOT NULL,
+                    volatility_level INTEGER NOT NULL,
+                    level_stop REAL NOT NULL,
+                    level_take REAL NOT NULL,
                     expected_return REAL NOT NULL,
                     win_rate REAL NOT NULL,
                     total_return REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     setting_hash TEXT NOT NULL,
                     last_update INTEGER NOT NULL,
-                    PRIMARY KEY (code, volatility_group, setting_hash, last_update)
+                    PRIMARY KEY (code, volatility_level, setting_hash, last_update)
                 )
             ''')
             conn.commit()
@@ -470,20 +477,20 @@ class VolatilityStopTakeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                f'SELECT volatility_group, multiplier_stop, multiplier_take, '
+                f'SELECT volatility_level, level_stop, level_take, '
                 f'expected_return, win_rate, total_return, sample_count '
                 f'FROM {self.table_name} '
                 f'WHERE code = ? AND setting_hash = ? AND last_update = '
                 f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?) '
-                f'ORDER BY volatility_group',
+                f'ORDER BY volatility_level',
                 (code, self.setting_hash, code, self.setting_hash)
             )
             results = cursor.fetchall()
             scores = {}
             for row in results:
                 scores[row[0]] = {
-                    'multiplier_stop': row[1],
-                    'multiplier_take': row[2],
+                    'level_stop': row[1],
+                    'level_take': row[2],
                     'expected_return': row[3],
                     'win_rate': row[4],
                     'total_return': row[5],
@@ -500,20 +507,20 @@ class VolatilityStopTakeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                f'SELECT volatility_group, multiplier_stop, multiplier_take, '
+                f'SELECT volatility_level, level_stop, level_take, '
                 f'expected_return, win_rate, total_return, sample_count '
                 f'FROM {self.table_name} '
                 f'WHERE code = ? AND setting_hash = ? AND last_update = '
                 f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update <= ?) '
-                f'ORDER BY volatility_group',
+                f'ORDER BY volatility_level',
                 (code, self.setting_hash, code, self.setting_hash, backtest_date)
             )
             results = cursor.fetchall()
             scores = {}
             for row in results:
                 scores[row[0]] = {
-                    'multiplier_stop': row[1],
-                    'multiplier_take': row[2],
+                    'level_stop': row[1],
+                    'level_take': row[2],
                     'expected_return': row[3],
                     'win_rate': row[4],
                     'total_return': row[5],

@@ -211,8 +211,10 @@ class AnalyzerCandlePattern:
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
-            windowQ.put((UI_NUM['학습로그'], f'{self.pattern_database.db_path} -> {self.pattern_database.table_name}'))
+            windowQ.put((
+                UI_NUM['학습로그'],
+                f'학습 데이터 저장 완료, {self.pattern_database.db_path} -> {self.pattern_database.table_name}'
+            ))
             windowQ.put((UI_NUM['학습로그'], f'캔들분석 학습 완료, 소요시간[{pass_time}]'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다'))
@@ -221,20 +223,7 @@ class AnalyzerCandlePattern:
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_open: int, idx_high: int,
                           idx_low: int, idx_close: int, analysis_period: int, rate_threshold: int,
                           min_samples: int, existing_dates_dict: Dict[str, set], setting_hash: str) -> List[Any]:
-        """
-        종목 청크별 학습 (프로세스 내에서 실행)
-        code_chunk: 종목코드 청크
-        backtest_db: 백테디비 경로
-        idx_open: 분봉시가 인덱스
-        idx_high: 분봉고가 인덱스
-        idx_low: 분봉저가 인덱스
-        idx_close: 현재가 인덱스
-        analysis_period: 분봉 설정
-        rate_threshold: 퍼센트 설정
-        min_samples: 최소 샘플 수 (기본값 10)
-        existing_dates_dict: 종목별 기존 저장 날짜 딕셔너리 {code: set(dates)}
-        return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
-        """
+        """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
 
         all_pattern_scores = []

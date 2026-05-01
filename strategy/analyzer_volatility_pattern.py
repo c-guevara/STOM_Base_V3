@@ -109,13 +109,14 @@ def _calculate_volatility_scores(close_price: np.ndarray, dates: np.ndarray, ind
 class AnalyzerVolatilityPattern:
     """메인 변동성 패턴 분석 통합 클래스"""
     def __init__(self, market_gubun: int, market_info: dict, is_tick: bool,
-                 backtest: bool = False, min_samples: int = 20):
+                 backtest: bool = False, min_samples: int = 100):
         """
         초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
-        min_samples: 최소 샘플 수 (기본값 20)
-        is_tick: 틱 데이터 여부 (기본값 False)
+        is_tick: 틱 데이터 여부
+        backtest: 백테스트 모드 여부
+        min_samples: 최소 샘플 수 (기본값 100)
         """
         self.volatility_database = VolatilityPatternDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold = \
@@ -249,8 +250,10 @@ class AnalyzerVolatilityPattern:
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
-            windowQ.put((UI_NUM['학습로그'], f'{self.volatility_database.db_path} -> {self.volatility_database.table_name}'))
+            windowQ.put((
+                UI_NUM['학습로그'],
+                f'학습 데이터 저장 완료, {self.volatility_database.db_path} -> {self.volatility_database.table_name}'
+            ))
             windowQ.put((UI_NUM['학습로그'], f'변동성분석 학습 완료, 소요시간[{pass_time}]'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
@@ -259,19 +262,7 @@ class AnalyzerVolatilityPattern:
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_high: int, idx_low: int,
                           analysis_period: int, rate_threshold: int, min_samples: int,
                           existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
-        """
-        종목 청크별 학습 (프로세스 내에서 실행)
-        code_chunk: 종목코드 청크
-        backtest_db: 백테디비 경로
-        idx_close: 현재가 인덱스
-        idx_high: 분봉고가 인덱스 (틱 데이터 시 None)
-        idx_low: 분봉저가 인덱스 (틱 데이터 시 None)
-        analysis_period: 분석 기간 분
-        rate_threshold: 등락율 임계값
-        min_samples: 최소 샘플 수
-        existing_dates_dict: 종목별 기존 저장 날짜 딕셔너리 {code: set(dates)}
-        return: 종목별 변동성 점수 딕셔너리 {code: volatility_scores}
-        """
+        """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
 
         all_volatility_scores = []
@@ -314,12 +305,12 @@ class AnalyzerVolatilityPattern:
 
                     groups = {}
                     for idx in range(len(change_rates)):
-                        rounded_multiplier = round(change_rates[idx] * 2) / 2
-                        if rounded_multiplier not in groups:
-                            groups[rounded_multiplier] = []
-                        groups[rounded_multiplier].append(idx)
+                        rounded_level = round(change_rates[idx] * 2) / 2
+                        if rounded_level not in groups:
+                            groups[rounded_level] = []
+                        groups[rounded_level].append(idx)
 
-                    for multiplier, indices in groups.items():
+                    for level, indices in groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
                             scores = _calculate_volatility_scores(close_price, dates, indices_array,
@@ -332,7 +323,7 @@ class AnalyzerVolatilityPattern:
 
                                 level_scores = [
                                     code,
-                                    multiplier,
+                                    level,
                                     round(float(np.mean(scores)), 2),
                                     round(float(np.max(scores)), 2),
                                     round(float(np.min(scores)), 2),

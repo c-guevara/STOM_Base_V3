@@ -93,8 +93,9 @@ class AnalyzerVolumeProfile:
         초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
+        is_tick: 틱 데이터 여부
+        backtest: 백테스트 모드 여부
         top_nodes: 상위 볼륨 노드 개수 (기본값 20)
-        is_tick: 틱 데이터 여부 (기본값 False)
         """
         self.volume_database = VolumeProfileDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold, self.price_range_pct = \
@@ -222,8 +223,10 @@ class AnalyzerVolumeProfile:
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
-            windowQ.put((UI_NUM['학습로그'], f'{self.volume_database.db_path} -> {self.volume_database.table_name}'))
+            windowQ.put((
+                UI_NUM['학습로그'],
+                f'학습 데이터 저장 완료, {self.volume_database.db_path} -> {self.volume_database.table_name}'
+            ))
             windowQ.put((UI_NUM['학습로그'], f'가격대분석 학습 완료, 소요시간[{pass_time}]'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
@@ -232,19 +235,7 @@ class AnalyzerVolumeProfile:
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
                           analysis_period: int, rate_threshold: float, price_range_pct: float, top_nodes: int,
                           existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
-        """
-        종목 청크별 학습 (프로세스 내에서 실행)
-        code_chunk: 종목코드 청크
-        backtest_db: 백테디비 경로
-        idx_close: 현재가 인덱스
-        idx_volume: 거래량 인덱스
-        analysis_period: 분석 기간
-        rate_threshold: 등락율 임계값
-        price_range_pct: 가격대 분할 퍼센트
-        top_nodes: 상위 볼륨 노드 개수
-        existing_dates_dict: 종목별 기존 저장 날짜 딕셔너리 {code: set(dates)}
-        return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
-        """
+        """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
 
         all_volume_scores = []

@@ -84,8 +84,9 @@ class AnalyzerVolumeSpike:
         초기화
         market_gubun: 마켓 구분 번호
         market_info: 마켓 정보 딕셔너리
+        is_tick: 틱 데이터 여부
+        backtest: 백테스트 모드 여부
         min_samples: 최소 샘플 수 (기본값 20)
-        is_tick: 틱 데이터 여부 (기본값 False)
         """
         self.spike_database = VolumeSpikeDatabase(market_info['전략구분'], is_tick)
         self.analysis_period, self.rate_threshold = self.spike_database.load_spike_setting(market_gubun)
@@ -128,9 +129,9 @@ class AnalyzerVolumeSpike:
             current_volume = volume_data[-1]
 
             if current_ma_volume > 0:
-                spike_multiplier   = current_volume / current_ma_volume
-                rounded_multiplier = round(spike_multiplier * 2) / 2
-                score_data = spike_scores.get(rounded_multiplier)
+                spike_level   = current_volume / current_ma_volume
+                rounded_level = round(spike_level * 2) / 2
+                score_data = spike_scores.get(rounded_level)
                 if score_data:
                     volume_spike_score = score_data['avg_score']
                     confidence_score   = score_data['confidence_score']
@@ -200,7 +201,7 @@ class AnalyzerVolumeSpike:
 
         total_processed = 0
         columns = [
-            'code', 'spike_multiplier', 'avg_score', 'max_score', 'min_score', 'std_score',
+            'code', 'spike_level', 'avg_score', 'max_score', 'min_score', 'std_score',
             'sample_count', 'confidence_score', 'setting_hash', 'last_update'
         ]
         for i, result in enumerate(results):
@@ -212,8 +213,10 @@ class AnalyzerVolumeSpike:
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((UI_NUM['학습로그'], '학습 데이터 저장 완료'))
-            windowQ.put((UI_NUM['학습로그'], f'{self.spike_database.db_path} -> {self.spike_database.table_name}'))
+            windowQ.put((
+                UI_NUM['학습로그'],
+                f'학습 데이터 저장 완료, {self.spike_database.db_path} -> {self.spike_database.table_name}'
+            ))
             windowQ.put((UI_NUM['학습로그'], f'거래량분석 학습 완료, 소요시간[{pass_time}]'))
         else:
             windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
@@ -222,18 +225,7 @@ class AnalyzerVolumeSpike:
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
                           analysis_period: int, rate_threshold: int, min_samples: int,
                           existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
-        """
-        종목 청크별 학습 (프로세스 내에서 실행)
-        code_chunk: 종목코드 청크
-        backtest_db: 백테디비 경로
-        idx_close: 현재가 인덱스
-        idx_volume: 거래량 인덱스
-        analysis_period: 분석 기간 분
-        rate_threshold: 등락율 임계값
-        min_samples: 최소 샘플 수
-        existing_dates_dict: 종목별 기존 저장 날짜 딕셔너리 {code: set(dates)}
-        return: 종목별 급증 점수 딕셔너리 {code: spike_scores}
-        """
+        """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
 
         all_spike_scores = []
@@ -271,13 +263,13 @@ class AnalyzerVolumeSpike:
 
                     groups = {}
                     for idx in spike_indices:
-                        multiplier = volume_data[idx] / ma_volume[idx]
-                        rounded_multiplier = round(multiplier * 2) / 2
-                        if rounded_multiplier not in groups:
-                            groups[rounded_multiplier] = []
-                        groups[rounded_multiplier].append(idx)
+                        level = volume_data[idx] / ma_volume[idx]
+                        rounded_level = round(level * 2) / 2
+                        if rounded_level not in groups:
+                            groups[rounded_level] = []
+                        groups[rounded_level].append(idx)
 
-                    for multiplier, indices in groups.items():
+                    for level, indices in groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
                             scores = _calculate_spike_score_array(close_price, dates, indices_array,
@@ -290,7 +282,7 @@ class AnalyzerVolumeSpike:
 
                                 spike_scores = [
                                     code,
-                                    multiplier,
+                                    level,
                                     round(float(np.mean(scores)), 2),
                                     round(float(np.max(scores)), 2),
                                     round(float(np.min(scores)), 2),
@@ -336,7 +328,7 @@ class VolumeSpikeDatabase:
             cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS {self.table_name} (
                     code TEXT NOT NULL,
-                    spike_multiplier REAL NOT NULL,
+                    spike_level REAL NOT NULL,
                     avg_score REAL NOT NULL,
                     max_score REAL NOT NULL,
                     min_score REAL NOT NULL,
@@ -345,7 +337,7 @@ class VolumeSpikeDatabase:
                     confidence_score REAL NOT NULL,
                     setting_hash TEXT NOT NULL,
                     last_update INTEGER NOT NULL,
-                    PRIMARY KEY (code, spike_multiplier, setting_hash, last_update)
+                    PRIMARY KEY (code, spike_level, setting_hash, last_update)
                 )
             ''')
             conn.commit()
@@ -373,7 +365,7 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT spike_multiplier, avg_score, max_score, min_score, std_score, sample_count, confidence_score
+                SELECT spike_level, avg_score, max_score, min_score, std_score, sample_count, confidence_score
                 FROM {self.table_name}
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
@@ -402,7 +394,7 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT spike_multiplier, avg_score, max_score, min_score, std_score, sample_count, confidence_score
+                SELECT spike_level, avg_score, max_score, min_score, std_score, sample_count, confidence_score
                 FROM {self.table_name}
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update < ?)
