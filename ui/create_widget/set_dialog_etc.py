@@ -304,15 +304,15 @@ class SetDialogEtc:
         self.ui.dialog_list.append(self.ui.dialog_pattern)
 
         self.ui.ptn_labellllll_01 = QLabel('  ▣ 캔들분석      |  분석시간(분)                          등락율(%)', self.ui.dialog_pattern)
-        self.ui.ptn_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['30', '60', '120', '180'])
-        self.ui.ptn_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['5', '10', '15', '20', '25', '30'])
+        self.ui.ptn_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '15', '30', '60', '120', '180'])
+        self.ui.ptn_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['3', '5', '10', '15', '20', '25', '30'])
         self.ui.ptn_pushButton_00 = self.wc.setPushbutton('도움말', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_help(self.ui))
         self.ui.ptn_pushButton_01 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_load(self.ui))
         self.ui.ptn_pushButton_02 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_save(self.ui))
         self.ui.ptn_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, color=4, bounced=True, click=lambda: pattern_train(self.ui))
 
         self.ui.vsp_labellllll_01 = QLabel('  ▣ 거래량분석  |  분석시간(초/분)                     등락율(%)', self.ui.dialog_pattern)
-        self.ui.vsp_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '30', '60', '120', '180', '300'])
+        self.ui.vsp_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '15', '30', '60', '120', '180', '300'])
         self.ui.vsp_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['3', '4', '5', '6', '7', '8', '9', '10', '15', '20'])
         self.ui.vsp_pushButton_00 = self.wc.setPushbutton('도움말', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_help(self.ui))
         self.ui.vsp_pushButton_01 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: spike_setting_load(self.ui))
@@ -329,7 +329,7 @@ class SetDialogEtc:
         self.ui.vpf_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, color=4, bounced=True, click=lambda: volume_profile_train(self.ui))
 
         self.ui.vlp_labellllll_01 = QLabel('  ▣ 변동성분석  |  분석시간(초/분)                     등락율(%)', self.ui.dialog_pattern)
-        self.ui.vlp_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '30', '60', '120', '180', '300'])
+        self.ui.vlp_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '15', '30', '60', '120', '180', '300'])
         self.ui.vlp_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['3', '4', '5', '6', '7', '8', '9', '10', '15', '20'])
         self.ui.vlp_pushButton_00 = self.wc.setPushbutton('도움말', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_help(self.ui))
         self.ui.vlp_pushButton_01 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: volatility_setting_load(self.ui))
@@ -337,7 +337,7 @@ class SetDialogEtc:
         self.ui.vlp_pushButton_03 = self.wc.setPushbutton('학습하기', parent=self.ui.dialog_pattern, color=4, bounced=True, click=lambda: volatility_train(self.ui))
 
         self.ui.vst_labellllll_01 = QLabel('  ▣ 변손익분석  |  분석시간(초/분)', self.ui.dialog_pattern)
-        self.ui.vst_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '30', '60', '120', '180', '300'])
+        self.ui.vst_comboBoxxx_01 = self.wc.setCombobox(self.ui.dialog_pattern, hover=False, items=['10', '15', '30', '60', '120', '180', '300'])
         self.ui.vst_pushButton_00 = self.wc.setPushbutton('도움말', parent=self.ui.dialog_pattern, bounced=True, click=lambda: pattern_setting_help(self.ui))
         self.ui.vst_pushButton_01 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: volatility_stop_take_setting_load(self.ui))
         self.ui.vst_pushButton_02 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_pattern, bounced=True, click=lambda: volatility_stop_take_setting_save(self.ui))

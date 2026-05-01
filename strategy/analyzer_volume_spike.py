@@ -437,7 +437,7 @@ class VolumeSpikeDatabase:
             if result:
                 analysis_period, rate_threshold = result
             else:
-                analysis_period, rate_threshold = 30, 3
+                analysis_period, rate_threshold = 10, 3
                 self.save_spike_setting(market, analysis_period, rate_threshold)
 
             self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold)

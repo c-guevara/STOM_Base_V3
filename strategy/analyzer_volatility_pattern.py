@@ -316,7 +316,7 @@ class AnalyzerVolatilityPattern:
                             scores = _calculate_volatility_scores(close_price, dates, indices_array,
                                                                   analysis_period, rate_threshold)
 
-                            if len(scores) >= 100:
+                            if len(scores) >= min_samples:
                                 sample_factor = min(len(scores) / 100.0, 1.0)
                                 std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
@@ -486,7 +486,7 @@ class VolatilityPatternDatabase:
             if result:
                 analysis_period, rate_threshold = result
             else:
-                analysis_period, rate_threshold = 30, 3
+                analysis_period, rate_threshold = 10, 3
                 self.save_volatility_setting(market, analysis_period, rate_threshold)
 
             self.setting_hash = _calculate_setting_hash(analysis_period, rate_threshold)

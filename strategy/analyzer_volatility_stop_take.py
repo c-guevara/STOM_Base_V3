@@ -387,7 +387,7 @@ class AnalyzerVolatilityStopTake:
                                     returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
                                                                   analysis_period, check_step)
 
-                                    if len(returns) >= 100:
+                                    if len(returns) >= min_samples:
                                         total_return = returns.sum()
                                         if total_return > best_return:
                                             best_return = total_return
@@ -552,7 +552,7 @@ class VolatilityStopTakeDatabase:
                 self.setting_hash = _calculate_setting_hash(result[0])
                 return result[0]
             else:
-                analysis_period = 30
+                analysis_period = 10
                 self.save_volatility_stop_take_setting(market, is_tick, analysis_period)
                 self.setting_hash = _calculate_setting_hash(analysis_period)
                 return analysis_period
