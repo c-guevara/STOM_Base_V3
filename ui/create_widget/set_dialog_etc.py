@@ -10,7 +10,7 @@ from ui.create_widget.set_text import pattern_text_list
 from ui.event_change.changed_text import text_changed_05
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.event_keypress.overwrite_return_press import return_press_02
-from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
+from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk, style_pgbar
 from strategy.analyzer_volume_spike import spike_setting_load, spike_setting_save, spike_train
 from ui.event_click.table_cell_clicked import cell_clicked_09, cell_clicked_07, cell_clicked_08
 from strategy.analyzer_candle_pattern import pattern_setting_load, pattern_setting_save, pattern_train
@@ -346,6 +346,9 @@ class SetDialogEtc:
         self.ui.ptn_groupBoxxx_01 = QGroupBox('', self.ui.dialog_pattern)
         self.ui.ptn_labellllll_02 = QLabel(pattern_text_list[0], self.ui.ptn_groupBoxxx_01)
         self.ui.ptn_textEdittt_01 = self.wc.setTextEdit(self.ui.ptn_groupBoxxx_01, vscroll=True)
+        self.ui.ptn_progresBar_01 = self.wc.setProgressBar(self.ui.ptn_groupBoxxx_01, style=style_pgbar)
+        self.ui.ptn_progresBar_01.setFormat('%p%')
+        self.ui.ptn_progresBar_01.setValue(0)
 
         self.ui.dialog_hoga.setFixedSize(572, 355)
         self.ui.hj_tableWidgett_01.setGeometry(5, 5, 562, 42)
@@ -500,7 +503,7 @@ class SetDialogEtc:
             xw = 100 if i < 10 else 675
             getattr(self.ui, f'set_lineEdittt_{i+1:02d}').setGeometry(x, y, xw, 25)
 
-        self.ui.dialog_pattern.setFixedSize(750, 520)
+        self.ui.dialog_pattern.setFixedSize(750, 550)
 
         self.ui.ptn_labellllll_01.setGeometry(5, 7, 420, 25)
         self.ui.ptn_comboBoxxx_01.setGeometry(180, 7, 50, 25)
@@ -542,6 +545,7 @@ class SetDialogEtc:
         self.ui.vst_pushButton_02.setGeometry(615, 127, 60, 25)
         self.ui.vst_pushButton_03.setGeometry(680, 127, 65, 25)
 
-        self.ui.ptn_groupBoxxx_01.setGeometry(5, 157, 740, 358)
+        self.ui.ptn_groupBoxxx_01.setGeometry(5, 157, 740, 388)
         self.ui.ptn_labellllll_02.setGeometry(5, 5, 730, 140)
         self.ui.ptn_textEdittt_01.setGeometry(7, 160, 727, 193)
+        self.ui.ptn_progresBar_01.setGeometry(7, 358, 727, 25)

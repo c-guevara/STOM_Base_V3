@@ -10,20 +10,22 @@ from PyQt5.QtWidgets import QMessageBox
 from typing import Tuple, List, Dict, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
-from utility.static_method.static_datetime import now
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
-from utility.static_method.static_datetime import timedelta_day, dt_ymd, str_ymd
+from utility.static_method.static_datetime import now, dt_ymd, str_ymd, timedelta_sec, timedelta_day
 
 VOLATILITY_STOP_TAKE_DB = f'{DB_PATH}/volatility_stop_take.db'
 
 window_queue = None
+total_queue  = None
 
 
-def init_worker(q):
+def init_worker(wndowQ, totalQ):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
-    window_queue = q
+    global total_queue
+    window_queue = wndowQ
+    total_queue  = totalQ
 
 
 def _calculate_setting_hash(*args) -> str:
@@ -221,9 +223,10 @@ class AnalyzerVolatilityStopTake:
         """
         estimated_return, take_profit_pct, stop_loss_pct = 0.0, 0.0, 0.0
 
-        close_price = code_data[:, self.idx_close]
-        group_data  = self.volatility_data[code]
-        if group_data and len(close_price) >= self.analysis_period * 2 + 1:
+        len_min    = self.analysis_period * 2 + 1
+        group_data = self.volatility_data[code]
+        if group_data and len(code_data) >= len_min:
+            close_price    = code_data[-len_min:, self.idx_close]
             vol_std_change = _calculate_volatility_change_rate_last(close_price, self.analysis_period)
             vol_abs_change = _calculate_absolute_change_rate_change_last(close_price, self.analysis_period)
             vol_rv_change  = _calculate_realized_volatility_change_rate_last(close_price, self.analysis_period)
@@ -252,12 +255,12 @@ class AnalyzerVolatilityStopTake:
         results = np.zeros((n, 3))
 
         for i in range(start_idx, n):
-            window_data = code_data[i - start_idx:i]
+            window_data = code_data[:i]
             results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results
 
-    def train_all_codes(self, windowQ):
+    def train_all_codes(self, ui):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
         start = now()
         with sqlite3.connect(self.backtest_db) as conn:
@@ -279,15 +282,18 @@ class AnalyzerVolatilityStopTake:
                 existing_dates_dict[code] = set([row[0] for row in cursor.fetchall()])
 
         multi = cpu_count()
-        if len(code_list) <= multi:
+        len_code_list = len(code_list)
+        if len_code_list <= multi:
             code_chunks = [[code] for code in code_list]
         else:
             code_chunks = []
             for i in range(multi):
                 code_chunks.append([code for j, code in enumerate(code_list) if j % multi == i])
 
+        self._monitor_totalQ(start, ui.windowQ, ui.totalQ, len_code_list)
+
         actual_processes = min(multi, len(code_chunks))
-        with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(ui.windowQ, ui.totalQ)) as pool:
             args = [
                 (
                     i, chunk, self.backtest_db, self.idx_close, self.analysis_period,
@@ -308,17 +314,30 @@ class AnalyzerVolatilityStopTake:
                 df = pd.DataFrame(result, columns=columns)
                 self.volatility_database.save_volatility_scores(df)
                 total_processed += 1
-                windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
+                ui.windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((
+            ui.windowQ.put((
                 UI_NUM['학습로그'],
                 f'학습 데이터 저장 완료, {self.volatility_database.db_path} -> {self.volatility_database.table_name}'
             ))
-            windowQ.put((UI_NUM['학습로그'], f'변손익분석 학습 완료, 소요시간[{pass_time}]'))
+            ui.windowQ.put((UI_NUM['학습로그'], f'변손익분석 학습 완료, 소요시간[{pass_time}]'))
         else:
-            windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다'))
+            ui.windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다'))
+
+    @thread_decorator
+    def _monitor_totalQ(self, start, windowQ, totalQ, last):
+        count = 0
+        windowQ.put((UI_NUM['학습로그'], (start, start, count, last)))
+        while count < last:
+            _ = totalQ.get()
+            count += 1
+            curr_time = now()
+            left_time = curr_time - start
+            left_secs = left_time.total_seconds()
+            remn_time = timedelta_sec(left_secs / count * (last - count)) - curr_time
+            windowQ.put((UI_NUM['학습로그'], (left_time, remn_time, count, last)))
 
     @staticmethod
     def _train_single_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, analysis_period: int,
@@ -326,6 +345,7 @@ class AnalyzerVolatilityStopTake:
                             setting_hash: str) -> List[Any]:
         """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
+        global total_queue
 
         all_volatility_scores = []
         last = len(code_chunk)
@@ -420,6 +440,9 @@ class AnalyzerVolatilityStopTake:
             except Exception:
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['시스템로그'], format_exc()))
+
+            # noinspection PyUnresolvedReferences
+            total_queue.put('학습완료')
 
         return all_volatility_scores
 
@@ -610,5 +633,5 @@ def _volatility_stop_take_train(ui):
     """스레드로 변동성 손절/익절 학습을 시작한다."""
     ui.learn_running = True
     vst_analyzer = AnalyzerVolatilityStopTake(ui.market_gubun, ui.market_info, ui.dict_set['타임프레임'])
-    vst_analyzer.train_all_codes(ui.windowQ)
+    vst_analyzer.train_all_codes(ui)
     ui.learn_running = False

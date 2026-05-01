@@ -10,19 +10,22 @@ from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
-from utility.static_method.static_datetime import now
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
+from utility.static_method.static_datetime import now, timedelta_sec
 
 VOLATILITY_PATTERN_DB = f'{DB_PATH}/volatility_pattern.db'
 
 window_queue = None
+total_queue  = None
 
 
-def init_worker(q):
+def init_worker(wndowQ, totalQ):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
-    window_queue = q
+    global total_queue
+    window_queue = wndowQ
+    total_queue  = totalQ
 
 
 def _calculate_setting_hash(*args) -> str:
@@ -32,69 +35,135 @@ def _calculate_setting_hash(*args) -> str:
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
-    """로그 수익률 기반 변동성 계산 (numba 최적화)"""
-    n = len(close_price)
-    volatility  = np.zeros(n, dtype=np.float64)
-    log_returns = np.diff(np.log(close_price))
-    for idx in prange(analysis_period, n - 1):
-        volatility[idx] = np.std(log_returns[idx-analysis_period:idx])
-    return volatility
-
-
-@njit(cache=True, fastmath=True, parallel=True)
-def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
-                   analysis_period: int) -> np.ndarray:
-    """ATR 계산 (numba 최적화)"""
-    n = len(close_price)
-    tr1 = high_price[1:] - low_price[1:]
-    tr2 = np.abs(high_price[1:] - close_price[:-1])
-    tr3 = np.abs(low_price[1:] - close_price[:-1])
-    tr  = np.maximum(tr1, tr2, tr3)
-    atr = np.zeros(n, dtype=np.float64)
-    for idx in prange(analysis_period, n):
-        atr[idx] = np.mean(tr[idx-analysis_period:idx])
-    return atr
-
-
-@njit(cache=True, fastmath=True, parallel=True)
-def _calculate_volatility_change_rate(volatility_data: np.ndarray, analysis_period: int) -> np.ndarray:
+def _calculate_volatility_change_rate(prices: np.ndarray, analysis_period: int) -> np.ndarray:
     """변동성 변화율 계산 (이전기간 대비 최근기간 변동성 변화, Numba 최적화)
-    analysis_period: 각 기간의 길이 (이전=period, 최근=period, 총 2*period 필요)
+    period: 각 기간의 길이 (이전=period, 최근=period, 총 2*period 필요)
     """
-    n = len(volatility_data)
+    n = len(prices)
     change_rates = np.zeros(n, dtype=np.float64)
     for i in prange(2 * analysis_period, n):
-        prev_vol   = np.mean(volatility_data[i - 2 * analysis_period:i - analysis_period])
-        recent_vol = np.mean(volatility_data[i - analysis_period:i])
+        prev_window   = prices[i - 2 * analysis_period:i - analysis_period]
+        prev_mean     = np.mean(prev_window)
+        prev_std      = np.std(prev_window)
+        prev_vol      = prev_std / prev_mean * 100 if prev_mean > 0 else 0.0
+        recent_window = prices[i - analysis_period:i]
+        recent_mean   = np.mean(recent_window)
+        recent_std    = np.std(recent_window)
+        recent_vol    = recent_std / recent_mean * 100 if recent_mean > 0 else 0.0
         if prev_vol > 0:
             change_rates[i] = recent_vol / prev_vol
     return change_rates
 
 
 @njit(cache=True, fastmath=True)
-def _calculate_volatility_change_rate_last(volatility_data: np.ndarray, analysis_period: int) -> float:
+def _calculate_volatility_change_rate_last(prices: np.ndarray, analysis_period: int) -> float:
     """변동성 변화율 마지막 값만 계산 (실시간용, Numba 최적화)"""
-    n = len(volatility_data)
-    prev_vol   = np.mean(volatility_data[n - 2 * analysis_period:n - analysis_period])
-    recent_vol = np.mean(volatility_data[n - analysis_period:n])
+    n = len(prices)
+    prev_window   = prices[n - 2 * analysis_period:n - analysis_period]
+    prev_mean     = np.mean(prev_window)
+    prev_std      = np.std(prev_window)
+    prev_vol      = prev_std / prev_mean * 100 if prev_mean > 0 else 0.0
+    recent_window = prices[n - analysis_period:n]
+    recent_mean   = np.mean(recent_window)
+    recent_std    = np.std(recent_window)
+    recent_vol    = recent_std / recent_mean * 100 if recent_mean > 0 else 0.0
     if prev_vol > 0:
         return recent_vol / prev_vol
     return 0.0
 
 
 @njit(cache=True, fastmath=True, parallel=True)
-def _calculate_volatility_scores(close_price: np.ndarray, dates: np.ndarray, indices: np.ndarray,
+def _calculate_realized_volatility_change_rate(prices: np.ndarray, analysis_period: int) -> np.ndarray:
+    """실현 변동성 변화율 계산 (이전기간 대비 최근기간, Numba 최적화)"""
+    n = len(prices)
+    change_rates = np.zeros(n, dtype=np.float64)
+    for i in prange(2 * analysis_period - 1, n):
+        prev_returns  = np.zeros(analysis_period, dtype=np.float64)
+        prev_base_idx = i - 2 * analysis_period - 1
+        for j in range(analysis_period):
+            prev_returns[j] = np.log(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j])
+        prev_vol = np.std(prev_returns) * np.sqrt(analysis_period) * 100
+        recent_returns  = np.zeros(analysis_period, dtype=np.float64)
+        recent_base_idx = i - analysis_period - 1
+        for j in range(analysis_period):
+            recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
+        recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
+        if prev_vol > 0:
+            change_rates[i] = recent_vol / prev_vol
+    return change_rates
+
+
+@njit(cache=True, fastmath=True, parallel=True)
+def _calculate_realized_volatility_change_rate_last(prices: np.ndarray, analysis_period: int) -> float:
+    """실현 변동성 변화율 마지막 값만 계산 (실시간용, Numba 최적화)"""
+    n = len(prices)
+    prev_returns  = np.zeros(analysis_period, dtype=np.float64)
+    prev_base_idx = n - 2 * analysis_period - 1
+    for j in prange(analysis_period):
+        prev_returns[j] = np.log(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j])
+    prev_vol = np.std(prev_returns) * np.sqrt(analysis_period) * 100
+    recent_returns  = np.zeros(analysis_period, dtype=np.float64)
+    recent_base_idx = n - analysis_period - 1
+    for j in prange(analysis_period):
+        recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
+    recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
+    if prev_vol > 0:
+        return recent_vol / prev_vol
+    return 0.0
+
+
+@njit(cache=True, fastmath=True, parallel=True)
+def _calculate_absolute_change_rate_change(prices: np.ndarray, analysis_period: int) -> np.ndarray:
+    """절대 변화율 기반 변동성 변화율 계산 (이전기간 대비 최근기간, Numba 최적화)"""
+    n = len(prices)
+    change_rates = np.zeros(n, dtype=np.float64)
+    for i in prange(2 * analysis_period - 1, n):
+        prev_abs_changes = np.zeros(analysis_period, dtype=np.float64)
+        prev_base_idx    = i - 2 * analysis_period - 1
+        for j in range(analysis_period):
+            prev_abs_changes[j] = abs(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j] - 1) * 100
+        prev_vol = np.mean(prev_abs_changes)
+        recent_abs_changes = np.zeros(analysis_period, dtype=np.float64)
+        recent_base_idx    = i - analysis_period - 1
+        for j in range(analysis_period):
+            recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
+        recent_vol = np.mean(recent_abs_changes)
+        if prev_vol > 0:
+            change_rates[i] = recent_vol / prev_vol
+    return change_rates
+
+
+@njit(cache=True, fastmath=True, parallel=True)
+def _calculate_absolute_change_rate_change_last(prices: np.ndarray, analysis_period: int) -> float:
+    """절대 변화율 기반 변동성 변화율 마지막 값만 계산 (실시간용, Numba 최적화)"""
+    n = len(prices)
+    prev_abs_changes = np.zeros(analysis_period, dtype=np.float64)
+    prev_base_idx    = n - 2 * analysis_period - 1
+    for j in prange(analysis_period):
+        prev_abs_changes[j] = abs(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j] - 1) * 100
+    prev_vol = np.mean(prev_abs_changes)
+    recent_abs_changes = np.zeros(analysis_period, dtype=np.float64)
+    recent_base_idx    = n - analysis_period - 1
+    for j in prange(analysis_period):
+        recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
+    recent_vol = np.mean(recent_abs_changes)
+    if prev_vol > 0:
+        return recent_vol / prev_vol
+    return 0.0
+
+
+@njit(cache=True, fastmath=True, parallel=True)
+def _calculate_volatility_scores(prices: np.ndarray, dates: np.ndarray, indices: np.ndarray,
                                  analysis_period: int, rate_threshold: float) -> np.ndarray:
     """변동성 점수 계산 (numba 최적화)"""
     max_scores = len(indices)
     scores = np.zeros(max_scores, dtype=np.float64)
     for k in prange(max_scores):
         idx = indices[k]
-        if idx + analysis_period < len(close_price) and dates[idx] == dates[idx + analysis_period]:
-            entry_price    = close_price[idx]
-            exit_max_price = close_price[idx:idx + analysis_period].max()
-            exit_min_price = close_price[idx:idx + analysis_period].min()
+        if idx + analysis_period < len(prices) and dates[idx] == dates[idx + analysis_period]:
+            entry_price    = prices[idx]
+            exit_max_price = prices[idx:idx + analysis_period].max()
+            exit_min_price = prices[idx:idx + analysis_period].min()
             if abs(exit_max_price - entry_price) >= abs(exit_min_price - entry_price):
                 exit_price = exit_max_price
             else:
@@ -127,8 +196,6 @@ class AnalyzerVolatilityPattern:
         self.is_tick     = is_tick
         self.min_samples = min_samples
         self.idx_close   = self.factor_list.index('현재가')
-        self.idx_high    = self.factor_list.index('분봉고가') if not is_tick else None
-        self.idx_low     = self.factor_list.index('분봉저가') if not is_tick else None
         self.volatility_scores: dict[str, dict[int, dict[str, float]]] = {}
 
         if not backtest:
@@ -154,19 +221,15 @@ class AnalyzerVolatilityPattern:
         """
         volatility_score, confidence_score = 0.0, 0.0
 
+        len_min = self.analysis_period * 2 + 1
         group_data = self.volatility_scores.get(code)
-        if group_data and len(code_data) >= self.analysis_period * 2:
-            close_price = code_data[:, self.idx_close]
-
-            if self.is_tick:
-                volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
-            else:
-                high_price = code_data[:, self.idx_high]
-                low_price  = code_data[:, self.idx_low]
-                volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
-
-            change_rate  = _calculate_volatility_change_rate_last(volatility_data, self.analysis_period)
-            rounded_rate = round(change_rate * 2) / 2
+        if group_data and len(code_data) >= len_min:
+            close_price    = code_data[-len_min:, self.idx_close]
+            vol_std_change = _calculate_volatility_change_rate_last(close_price, self.analysis_period)
+            vol_abs_change = _calculate_absolute_change_rate_change_last(close_price, self.analysis_period)
+            vol_rv_change  = _calculate_realized_volatility_change_rate_last(close_price, self.analysis_period)
+            vol_cur_change = vol_std_change * 0.4 + vol_rv_change * 0.4 + vol_abs_change * 0.2
+            rounded_rate   = round(vol_cur_change * 2) / 2
 
             score_data = group_data.get(rounded_rate)
             if score_data:
@@ -186,16 +249,16 @@ class AnalyzerVolatilityPattern:
         self.load_volatility_code_scores(code, date)
 
         n = len(code_data)
-        start_idx = self.analysis_period * 2
+        start_idx = self.analysis_period * 2 + 1
         results = np.zeros((n, 2))
 
         for i in range(start_idx, n):
-            window_data = code_data[i - start_idx:i]
+            window_data = code_data[:i]
             results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results
 
-    def train_all_codes(self, windowQ):
+    def train_all_codes(self, ui):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
         start = now()
         with sqlite3.connect(self.backtest_db) as conn:
@@ -216,21 +279,23 @@ class AnalyzerVolatilityPattern:
                 existing_dates_dict[code] = set([row[0] for row in cursor.fetchall()])
 
         multi = cpu_count()
-
-        if len(code_list) <= multi:
+        len_code_list = len(code_list)
+        if len_code_list <= multi:
             code_chunks = [[code] for code in code_list]
         else:
             code_chunks = []
             for i in range(multi):
                 code_chunks.append([code for j, code in enumerate(code_list) if j % multi == i])
 
+        self._monitor_totalQ(start, ui.windowQ, ui.totalQ, len_code_list)
+
         actual_processes = min(multi, len(code_chunks))
-        with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(ui.windowQ, ui.totalQ)) as pool:
             args = [
                 (
-                    i, chunk, self.backtest_db, self.idx_close, self.idx_high, self.idx_low,
-                    self.analysis_period, self.rate_threshold, self.min_samples,
-                    existing_dates_dict, self.is_tick, self.volatility_database.setting_hash
+                    i, chunk, self.backtest_db, self.idx_close, self.analysis_period,
+                    self.rate_threshold, self.min_samples, existing_dates_dict,
+                    self.is_tick, self.volatility_database.setting_hash
                 )
                 for i, chunk in enumerate(code_chunks)
             ]
@@ -246,24 +311,38 @@ class AnalyzerVolatilityPattern:
                 df = pd.DataFrame(result, columns=columns)
                 self.volatility_database.save_volatility_scores(df)
                 total_processed += 1
-                windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
+                ui.windowQ.put((UI_NUM['학습로그'], f'학습 데이터 저장 중 ... [{i+1:02d}/{actual_processes:02d}]'))
 
         if total_processed > 0:
             pass_time = now() - start
-            windowQ.put((
+            ui.windowQ.put((
                 UI_NUM['학습로그'],
                 f'학습 데이터 저장 완료, {self.volatility_database.db_path} -> {self.volatility_database.table_name}'
             ))
-            windowQ.put((UI_NUM['학습로그'], f'변동성분석 학습 완료, 소요시간[{pass_time}]'))
+            ui.windowQ.put((UI_NUM['학습로그'], f'변동성분석 학습 완료, 소요시간[{pass_time}]'))
         else:
-            windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
+            ui.windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
+
+    @thread_decorator
+    def _monitor_totalQ(self, start, windowQ, totalQ, last):
+        count = 0
+        windowQ.put((UI_NUM['학습로그'], (start, start, count, last)))
+        while count < last:
+            _ = totalQ.get()
+            count += 1
+            curr_time = now()
+            left_time = curr_time - start
+            left_secs = left_time.total_seconds()
+            remn_time = timedelta_sec(left_secs / count * (last - count)) - curr_time
+            windowQ.put((UI_NUM['학습로그'], (left_time, remn_time, count, last)))
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_high: int, idx_low: int,
-                          analysis_period: int, rate_threshold: int, min_samples: int,
-                          existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, analysis_period: int,
+                          rate_threshold: int, min_samples: int, existing_dates_dict: Dict[str, set],
+                          is_tick: bool, setting_hash: str) -> List[Any]:
         """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
+        global total_queue
 
         all_volatility_scores = []
         last = len(code_chunk)
@@ -291,17 +370,15 @@ class AnalyzerVolatilityPattern:
                     if len(date_data) < analysis_period * 3:
                         continue
 
-                    dates       = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
-                    close_price = date_data[:, idx_close]
+                    dates          = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
+                    date_prices    = date_data[:, idx_close]
+                    vol_std_change = _calculate_volatility_change_rate(date_prices, analysis_period)
+                    vol_abs_change = _calculate_absolute_change_rate_change(date_prices, analysis_period)
+                    vol_rv_change  = _calculate_realized_volatility_change_rate(date_prices, analysis_period)
 
-                    if is_tick:
-                        volatility_data = _calculate_log_volatility(close_price, analysis_period)
-                    else:
-                        high_price      = date_data[:, idx_high]
-                        low_price       = date_data[:, idx_low]
-                        volatility_data = _calculate_atr(close_price, high_price, low_price, analysis_period)
-
-                    change_rates = _calculate_volatility_change_rate(volatility_data, analysis_period)
+                    change_rates   = vol_std_change * 0.4 + vol_rv_change * 0.4 + vol_abs_change * 0.2
+                    valid_indices  = ~np.isnan(change_rates)
+                    change_rates   = change_rates[valid_indices]
 
                     groups = {}
                     for idx in range(len(change_rates)):
@@ -313,7 +390,7 @@ class AnalyzerVolatilityPattern:
                     for level, indices in groups.items():
                         if len(indices) >= min_samples:
                             indices_array = np.array(indices)
-                            scores = _calculate_volatility_scores(close_price, dates, indices_array,
+                            scores = _calculate_volatility_scores(date_prices, dates, indices_array,
                                                                   analysis_period, rate_threshold)
 
                             if len(scores) >= min_samples:
@@ -336,10 +413,13 @@ class AnalyzerVolatilityPattern:
                                 all_volatility_scores.append(level_scores)
 
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i:02d}][{code}] 변동성분석 학습 중 ... [{k+1:02d}/{last:02d}]"))
+                window_queue.put((UI_NUM['학습로그'], f'[{i:02d}][{code}] 변동성분석 학습 중 ... [{k+1:02d}/{last:02d}]'))
             except Exception:
                 # noinspection PyUnresolvedReferences
                 window_queue.put((UI_NUM['시스템로그'], format_exc()))
+
+            # noinspection PyUnresolvedReferences
+            total_queue.put('학습완료')
 
         return all_volatility_scores
 
@@ -554,5 +634,5 @@ def _volatility_train(ui):
     """스레드로 변동성 패턴 학습을 시작한다."""
     ui.learn_running = True
     vp_analyzer = AnalyzerVolatilityPattern(ui.market_gubun, ui.market_info, ui.dict_set['타임프레임'])
-    vp_analyzer.train_all_codes(ui.windowQ)
+    vp_analyzer.train_all_codes(ui)
     ui.learn_running = False
