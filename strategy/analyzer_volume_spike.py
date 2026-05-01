@@ -147,10 +147,11 @@ class AnalyzerVolumeSpike:
         self.load_spike_code_scores(code, date)
 
         n = len(code_data)
+        start_idx = self.analysis_period
         results = np.zeros((n, 2))
 
-        for i in range(self.analysis_period, n):
-            window_data = code_data[i-self.analysis_period:i]
+        for i in range(start_idx, n):
+            window_data = code_data[i - start_idx:i]
             results[i] = list(self.analyze_current_spike(code, window_data))
 
         return results

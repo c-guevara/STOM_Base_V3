@@ -272,9 +272,11 @@ class AnalyzerVolatilityStopTake:
         self.load_volatility_code_data(code, date)
 
         n = len(code_data)
+        start_idx = self.analysis_period * 2 + 1
         results = np.zeros((n, 3))
-        for i in range(self.analysis_period * 2 + 1, n):
-            window_data = code_data[i - (self.analysis_period * 2 + 1):i]
+
+        for i in range(start_idx, n):
+            window_data = code_data[i - start_idx:i]
             results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results

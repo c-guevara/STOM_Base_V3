@@ -190,7 +190,6 @@ class AnalyzerVolatilityPattern:
         self.idx_high    = self.factor_list.index('분봉고가') if not is_tick else None
         self.idx_low     = self.factor_list.index('분봉저가') if not is_tick else None
         self.volatility_scores: dict[str, dict[int, dict[str, float]]] = {}
-        self.level_boundaries: dict[str, np.ndarray] = {}
 
         if not backtest:
             self._load_volatility_all_scores()
@@ -200,13 +199,11 @@ class AnalyzerVolatilityPattern:
         all_codes = self.volatility_database.get_all_codes()
         if all_codes:
             for code in all_codes:
-                self.volatility_scores[code], self.level_boundaries[code] = \
-                    self.volatility_database.get_volatility_all_scores(code)
+                self.volatility_scores[code] = self.volatility_database.get_volatility_all_scores(code)
 
     def load_volatility_code_scores(self, code: str, date: int):
         """데이터베이스에서 종목코드의 변동성 점수 로드"""
-        self.volatility_scores[code], self.level_boundaries[code] = \
-            self.volatility_database.get_volatility_code_scores(code, date)
+        self.volatility_scores[code] = self.volatility_database.get_volatility_code_scores(code, date)
 
     def analyze_current_volatility(self, code: str, code_data: np.ndarray) -> Tuple[float, float]:
         """
@@ -217,52 +214,24 @@ class AnalyzerVolatilityPattern:
         """
         volatility_score, confidence_score = 0.0, 0.0
 
-        code_scores = self.volatility_scores.get(code)
-        code_percentiles = self.level_boundaries.get(code)
-        if code_scores and code_percentiles is not None and len(code_data) >= self.analysis_period * 2:
+        group_data = self.volatility_scores.get(code)
+        if group_data and len(code_data) >= self.analysis_period * 2:
             close_price = code_data[:, self.idx_close]
 
             if self.is_tick:
                 volatility_data = _calculate_log_volatility(close_price, self.analysis_period)
             else:
                 high_price = code_data[:, self.idx_high]
-                low_price = code_data[:, self.idx_low]
+                low_price  = code_data[:, self.idx_low]
                 volatility_data = _calculate_atr(close_price, high_price, low_price, self.analysis_period)
 
             change_rate = _calculate_volatility_change_rate_last(volatility_data, self.analysis_period)
-            half = self.num_levels // 2
 
-            if change_rate < 0:
-                # 마이너스 변화율 그룹
-                for level in range(half):
-                    if level == 0:
-                        cr_min = -999999.0
-                    else:
-                        cr_min = code_percentiles[level - 1]
-                    cr_max = code_percentiles[level]
-                    if cr_min <= change_rate < cr_max:
-                        score_data = code_scores.get(level)
-                        if score_data:
-                            volatility_score = score_data['avg_score']
-                            confidence_score = score_data['confidence_score']
-                        break
-            else:
-                # 플러스 변화율 그룹
-                for level in range(half, self.num_levels):
-                    if level == half:
-                        cr_min = 0.0
-                    else:
-                        cr_min = code_percentiles[level - 1]
-                    if level == self.num_levels - 1:
-                        cr_max = 999999.0
-                    else:
-                        cr_max = code_percentiles[level]
-                    if cr_min <= change_rate < cr_max:
-                        score_data = code_scores.get(level)
-                        if score_data:
-                            volatility_score = score_data['avg_score']
-                            confidence_score = score_data['confidence_score']
-                        break
+            for _, v in group_data.items():
+                if v['change_rate_min'] <= change_rate < v['change_rate_max']:
+                    volatility_score = v['avg_score']
+                    confidence_score = v['confidence_score']
+                    break
 
         return volatility_score, confidence_score
 
@@ -277,10 +246,11 @@ class AnalyzerVolatilityPattern:
         self.load_volatility_code_scores(code, date)
 
         n = len(code_data)
+        start_idx = self.analysis_period * 2
         results = np.zeros((n, 2))
 
-        for i in range(self.analysis_period * 2, n):
-            window_data = code_data[i - self.analysis_period * 2:i]
+        for i in range(start_idx, n):
+            window_data = code_data[i - start_idx:i]
             results[i] = list(self.analyze_current_volatility(code, window_data))
 
         return results
@@ -327,8 +297,8 @@ class AnalyzerVolatilityPattern:
 
         total_processed = 0
         columns = [
-            'code', 'volatility_level', 'avg_score', 'max_score', 'min_score', 'std_score',
-            'sample_count', 'confidence_score', 'change_rate_percentiles', 'setting_hash', 'last_update'
+            'code', 'volatility_level', 'change_rate_min', 'change_rate_max', 'avg_score', 'max_score',
+            'min_score', 'std_score', 'sample_count', 'confidence_score', 'setting_hash', 'last_update'
         ]
         for i, result in enumerate(results):
             if result:
@@ -411,8 +381,8 @@ class AnalyzerVolatilityPattern:
                         percentiles = _calculate_change_rate_percentiles(valid_change_rates, num_levels)
 
                     levels = _classify_volatility_levels(change_rates, percentiles, num_levels)
-                    percentiles_str = ','.join(map(str, percentiles))
 
+                    half = num_levels // 2
                     for level in range(num_levels):
                         level_indices = np.where(levels == level)[0]
                         if len(level_indices) >= min_samples:
@@ -424,16 +394,34 @@ class AnalyzerVolatilityPattern:
                                 std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
 
+                                if level < half:
+                                    if level == 0:
+                                        cr_min = -999999.0
+                                        cr_max = percentiles[0]
+                                    else:
+                                        cr_min = percentiles[level - 1]
+                                        cr_max = percentiles[level]
+                                else:
+                                    if level == half:
+                                        cr_min = 0.0
+                                    else:
+                                        cr_min = percentiles[level - 1]
+                                    if level == num_levels - 1:
+                                        cr_max = 999999.0
+                                    else:
+                                        cr_max = percentiles[level]
+
                                 level_scores = [
                                     code,
                                     level,
+                                    round(float(cr_min), 4),
+                                    round(float(cr_max), 4),
                                     round(float(np.mean(scores)), 2),
                                     round(float(np.max(scores)), 2),
                                     round(float(np.min(scores)), 2),
                                     round(float(np.std(scores)), 2),
                                     len(scores),
                                     round(confidence, 2),
-                                    percentiles_str,
                                     setting_hash,
                                     target_date
                                 ]
@@ -475,13 +463,14 @@ class VolatilityPatternDatabase:
                 CREATE TABLE IF NOT EXISTS {self.table_name} (
                     code TEXT NOT NULL,
                     volatility_level INTEGER NOT NULL,
+                    change_rate_min REAL NOT NULL,
+                    change_rate_max REAL NOT NULL,
                     avg_score REAL NOT NULL,
                     max_score REAL NOT NULL,
                     min_score REAL NOT NULL,
                     std_score REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
-                    change_rate_percentiles TEXT NOT NULL,
                     setting_hash TEXT NOT NULL,
                     last_update INTEGER NOT NULL,
                     PRIMARY KEY (code, volatility_level, setting_hash, last_update)
@@ -503,71 +492,74 @@ class VolatilityPatternDatabase:
             results = cursor.fetchall()
             return [result[0] for result in results]
 
-    def get_volatility_all_scores(self, code: str) -> Tuple[Dict[int, Dict[str, float]], np.ndarray]:
+    def get_volatility_all_scores(self, code: str) -> Dict[int, Dict[str, float]]:
         """
         종목의 전체 변동성 점수 조회 (최신 날짜 기준)
         code: 종목코드
-        return: (변동성 레벨별 점수 딕셔너리, 변화율 백분위 배열)
+        return: 변동성 레벨별 점수 딕셔너리 (change_rate_min, change_rate_max 포함)
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(f'''
-                SELECT volatility_level, avg_score, max_score, min_score, std_score, sample_count,
-                confidence_score, change_rate_percentiles
-                FROM {self.table_name}
-                WHERE code = ? AND setting_hash = ? AND last_update =
-                (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
-            ''', (code, self.setting_hash, code, self.setting_hash))
+            cursor.execute(
+                f'SELECT volatility_level, change_rate_min, change_rate_max, avg_score, max_score, '
+                f'min_score, std_score, sample_count, confidence_score '
+                f'FROM {self.table_name} '
+                f'WHERE code = ? AND setting_hash = ? AND last_update = '
+                f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?) '
+                f'ORDER BY volatility_level',
+                (code, self.setting_hash, code, self.setting_hash)
+            )
             results = cursor.fetchall()
 
             volatility_scores = {}
-            percentiles = None
             for result in results:
                 volatility_scores[result[0]] = {
-                    'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'change_rate_min': result[1],
+                    'change_rate_max': result[2],
+                    'avg_score': result[3],
+                    'max_score': result[4],
+                    'min_score': result[5],
+                    'std_score': result[6],
+                    'sample_count': result[7],
+                    'confidence_score': result[8]
                 }
-                percentiles = np.array(list(map(float, result[7].split(','))))
 
-            return volatility_scores, percentiles
+            return volatility_scores
 
-    def get_volatility_code_scores(self, code: str, date: int) -> \
-            Tuple[Dict[int, Dict[str, float]], np.ndarray]:
+    def get_volatility_code_scores(self, code: str, date: int) -> Dict[int, Dict[str, float]]:
         """
         백테스트 날짜 기준으로 해당 날짜 이전의 최신 날짜의 전체 변동성 점수 조회
         code: 종목코드
         date: 백테스트 기준 날짜 (YYYYMMDD)
-        return: (변동성 레벨별 점수 딕셔너리, 변화율 백분위 배열)
+        return: 변동성 레벨별 점수 딕셔너리 (change_rate_min, change_rate_max 포함)
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(f'''
-                SELECT volatility_level, avg_score, max_score, min_score, std_score, sample_count,
-                confidence_score, change_rate_percentiles
-                FROM {self.table_name}
-                WHERE code = ? AND setting_hash = ? AND last_update =
-                (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update < ?)
-            ''', (code, self.setting_hash, code, self.setting_hash, date))
+            cursor.execute(
+                f'SELECT volatility_level, change_rate_min, change_rate_max, avg_score, max_score, '
+                f'min_score, std_score, sample_count, confidence_score '
+                f'FROM {self.table_name} '
+                f'WHERE code = ? AND setting_hash = ? AND last_update = '
+                f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update <= ?) '
+                f'ORDER BY volatility_level',
+                (code, self.setting_hash, code, self.setting_hash, date)
+            )
             results = cursor.fetchall()
 
             volatility_scores = {}
-            percentiles = None
             for result in results:
                 volatility_scores[result[0]] = {
-                    'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'change_rate_min': result[1],
+                    'change_rate_max': result[2],
+                    'avg_score': result[3],
+                    'max_score': result[4],
+                    'min_score': result[5],
+                    'std_score': result[6],
+                    'sample_count': result[7],
+                    'confidence_score': result[8]
                 }
-                percentiles = np.array(list(map(float, result[7].split(','))))
 
-            return volatility_scores, percentiles
+            return volatility_scores
 
     def save_volatility_scores(self, df: pd.DataFrame):
         """종목별 변동성 점수 저장"""
