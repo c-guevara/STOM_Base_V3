@@ -12,7 +12,6 @@ from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
-from utility.static_method.static_datetime import timedelta_day, dt_ymd, str_ymd
 
 PATTERN_DB = f'{DB_PATH}/pattern_analysis.db'
 PATTERN_FUNCTIONS = [
@@ -254,8 +253,7 @@ class AnalyzerCandlePattern:
                         if target_date in existing_dates:
                             continue
 
-                        start_date = float(str_ymd(timedelta_day(-30, dt_ymd(str(int(target_date))))))
-                        mask = (start_date <= all_dates) & (all_dates <= target_date)
+                        mask = all_dates <= target_date
                         date_data = historical_data[mask]
 
                         if len(date_data) < analysis_period * 2:
