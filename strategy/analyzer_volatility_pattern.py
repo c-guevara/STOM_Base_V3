@@ -34,10 +34,10 @@ def _calculate_setting_hash(*args) -> str:
 @njit(cache=True, fastmath=True, parallel=True)
 def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> np.ndarray:
     """로그 수익률 기반 변동성 계산 (numba 최적화)"""
-    len_closes  = len(close_price)
-    volatility  = np.zeros(len_closes)
+    n = len(close_price)
+    volatility  = np.zeros(n, dtype=np.float64)
     log_returns = np.diff(np.log(close_price))
-    for idx in prange(analysis_period, len_closes - 1):
+    for idx in prange(analysis_period, n - 1):
         volatility[idx] = np.std(log_returns[idx-analysis_period:idx])
     return volatility
 
@@ -46,12 +46,13 @@ def _calculate_log_volatility(close_price: np.ndarray, analysis_period: int) -> 
 def _calculate_atr(close_price: np.ndarray, high_price: np.ndarray, low_price: np.ndarray,
                    analysis_period: int) -> np.ndarray:
     """ATR 계산 (numba 최적화)"""
+    n = len(close_price)
     tr1 = high_price[1:] - low_price[1:]
     tr2 = np.abs(high_price[1:] - close_price[:-1])
     tr3 = np.abs(low_price[1:] - close_price[:-1])
     tr  = np.maximum(tr1, tr2, tr3)
-    atr = np.zeros(len(close_price))
-    for idx in prange(analysis_period, len(close_price)):
+    atr = np.zeros(n, dtype=np.float64)
+    for idx in prange(analysis_period, n):
         atr[idx] = np.mean(tr[idx-analysis_period:idx])
     return atr
 
@@ -67,7 +68,7 @@ def _calculate_volatility_change_rate(volatility_data: np.ndarray, analysis_peri
         prev_vol   = np.mean(volatility_data[i - 2 * analysis_period:i - analysis_period])
         recent_vol = np.mean(volatility_data[i - analysis_period:i])
         if prev_vol > 0:
-            change_rates[i] = (recent_vol - prev_vol) / prev_vol * 100
+            change_rates[i] = (recent_vol / prev_vol - 1) * 100
     return change_rates
 
 
@@ -78,7 +79,7 @@ def _calculate_volatility_change_rate_last(volatility_data: np.ndarray, analysis
     prev_vol   = np.mean(volatility_data[n - 2 * analysis_period:n - analysis_period])
     recent_vol = np.mean(volatility_data[n - analysis_period:n])
     if prev_vol > 0:
-        return (recent_vol - prev_vol) / prev_vol * 100
+        return (recent_vol / prev_vol - 1) * 100
     return 0.0
 
 
@@ -149,7 +150,7 @@ def _calculate_volatility_scores(close_price: np.ndarray, dates: np.ndarray, lev
                                  analysis_period: int, rate_threshold: float) -> np.ndarray:
     """변동성 점수 계산 (numba 최적화)"""
     max_scores = len(level_indices)
-    scores = np.zeros(max_scores)
+    scores = np.zeros(max_scores, dtype=np.float64)
     for k in prange(max_scores):
         idx = level_indices[k]
         if idx + analysis_period < len(close_price) and dates[idx] == dates[idx + analysis_period]:
