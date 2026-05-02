@@ -187,7 +187,7 @@ class AnalyzerCandlePattern:
                 code_chunks.append([code for j, code in enumerate(code_list) if j % multi == i])
 
         start = now()
-        ui.windowQ.put((UI_NUM['시스템로그'], (start, 0)))
+        ui.windowQ.put((UI_NUM['학습로그'], (start, 0)))
         actual_processes = min(multi, len(code_chunks))
         with Pool(processes=actual_processes, initializer=init_worker, initargs=(ui.windowQ,)) as pool:
             args = [
