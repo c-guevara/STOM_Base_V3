@@ -68,7 +68,6 @@ class ChartHogaQuery:
         self.con4 = sqlite3.connect(DB_CODE_INFO)
 
         self._set_sub_vars()
-        self._set_analyzer()
         self._init_hoga()
         self._main_loop()
 
@@ -109,6 +108,8 @@ class ChartHogaQuery:
         self.analyzer_cnt = self.dict_findex['손절수익률'] - self.dict_findex['당일거래대금각도']
         if not self.is_tick:
             self.indicator_cnt = self.dict_findex['WILLR'] - self.dict_findex['손절수익률']
+
+        self._set_analyzer()
 
     def _set_analyzer(self):
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], self.dict_findex)

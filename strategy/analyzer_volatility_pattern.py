@@ -42,11 +42,11 @@ def _calculate_volatility_change_rate(prices: np.ndarray, analysis_period: int) 
     n = len(prices)
     change_rates = np.zeros(n, dtype=np.float64)
     for i in prange(2 * analysis_period, n):
-        prev_window   = prices[i - 2 * analysis_period:i - analysis_period]
+        prev_window   = prices[i + 1 - 2 * analysis_period:i + 1 - analysis_period]
         prev_mean     = np.mean(prev_window)
         prev_std      = np.std(prev_window)
         prev_vol      = prev_std / prev_mean * 100 if prev_mean > 0 else 0.0
-        recent_window = prices[i - analysis_period:i]
+        recent_window = prices[i + 1 - analysis_period:i + 1]
         recent_mean   = np.mean(recent_window)
         recent_std    = np.std(recent_window)
         recent_vol    = recent_std / recent_mean * 100 if recent_mean > 0 else 0.0
@@ -77,16 +77,16 @@ def _calculate_realized_volatility_change_rate(prices: np.ndarray, analysis_peri
     """실현 변동성 변화율 계산 (이전기간 대비 최근기간, Numba 최적화)"""
     n = len(prices)
     change_rates = np.zeros(n, dtype=np.float64)
-    for i in prange(2 * analysis_period - 1, n):
+    for i in prange(2 * analysis_period, n):
         prev_returns  = np.zeros(analysis_period, dtype=np.float64)
-        prev_base_idx = i - 2 * analysis_period - 1
+        prev_base_idx = i - 2 * analysis_period + 1
         for j in range(analysis_period):
-            prev_returns[j] = np.log(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j])
+            prev_returns[j] = np.log(prices[prev_base_idx + j] / prices[prev_base_idx + j - 1])
         prev_vol = np.std(prev_returns) * np.sqrt(analysis_period) * 100
         recent_returns  = np.zeros(analysis_period, dtype=np.float64)
-        recent_base_idx = i - analysis_period - 1
+        recent_base_idx = i - analysis_period + 1
         for j in range(analysis_period):
-            recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
+            recent_returns[j] = np.log(prices[recent_base_idx + j] / prices[recent_base_idx + j - 1])
         recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
         if prev_vol > 0:
             change_rates[i] = recent_vol / prev_vol
@@ -98,14 +98,14 @@ def _calculate_realized_volatility_change_rate_last(prices: np.ndarray, analysis
     """실현 변동성 변화율 마지막 값만 계산 (실시간용, Numba 최적화)"""
     n = len(prices)
     prev_returns  = np.zeros(analysis_period, dtype=np.float64)
-    prev_base_idx = n - 2 * analysis_period - 1
+    prev_base_idx = n - 1 - 2 * analysis_period
     for j in prange(analysis_period):
-        prev_returns[j] = np.log(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j])
+        prev_returns[j] = np.log(prices[prev_base_idx + j] / prices[prev_base_idx + j - 1])
     prev_vol = np.std(prev_returns) * np.sqrt(analysis_period) * 100
     recent_returns  = np.zeros(analysis_period, dtype=np.float64)
-    recent_base_idx = n - analysis_period - 1
+    recent_base_idx = n - 1 - analysis_period
     for j in prange(analysis_period):
-        recent_returns[j] = np.log(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j])
+        recent_returns[j] = np.log(prices[recent_base_idx + j] / prices[recent_base_idx + j - 1])
     recent_vol = np.std(recent_returns) * np.sqrt(analysis_period) * 100
     if prev_vol > 0:
         return recent_vol / prev_vol
@@ -117,16 +117,16 @@ def _calculate_absolute_change_rate_change(prices: np.ndarray, analysis_period: 
     """절대 변화율 기반 변동성 변화율 계산 (이전기간 대비 최근기간, Numba 최적화)"""
     n = len(prices)
     change_rates = np.zeros(n, dtype=np.float64)
-    for i in prange(2 * analysis_period - 1, n):
+    for i in prange(2 * analysis_period, n):
         prev_abs_changes = np.zeros(analysis_period, dtype=np.float64)
-        prev_base_idx    = i - 2 * analysis_period - 1
+        prev_base_idx    = i - 2 * analysis_period
         for j in range(analysis_period):
-            prev_abs_changes[j] = abs(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j] - 1) * 100
+            prev_abs_changes[j] = abs(prices[prev_base_idx + j] / prices[prev_base_idx + j - 1] - 1) * 100
         prev_vol = np.mean(prev_abs_changes)
         recent_abs_changes = np.zeros(analysis_period, dtype=np.float64)
-        recent_base_idx    = i - analysis_period - 1
+        recent_base_idx    = i - analysis_period
         for j in range(analysis_period):
-            recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
+            recent_abs_changes[j] = abs(prices[recent_base_idx + j] / prices[recent_base_idx + j - 1] - 1) * 100
         recent_vol = np.mean(recent_abs_changes)
         if prev_vol > 0:
             change_rates[i] = recent_vol / prev_vol
@@ -138,14 +138,14 @@ def _calculate_absolute_change_rate_change_last(prices: np.ndarray, analysis_per
     """절대 변화율 기반 변동성 변화율 마지막 값만 계산 (실시간용, Numba 최적화)"""
     n = len(prices)
     prev_abs_changes = np.zeros(analysis_period, dtype=np.float64)
-    prev_base_idx    = n - 2 * analysis_period - 1
+    prev_base_idx    = n - 1 - 2 * analysis_period
     for j in prange(analysis_period):
-        prev_abs_changes[j] = abs(prices[prev_base_idx + j + 1] / prices[prev_base_idx + j] - 1) * 100
+        prev_abs_changes[j] = abs(prices[prev_base_idx + j] / prices[prev_base_idx + j - 1] - 1) * 100
     prev_vol = np.mean(prev_abs_changes)
     recent_abs_changes = np.zeros(analysis_period, dtype=np.float64)
-    recent_base_idx    = n - analysis_period - 1
+    recent_base_idx    = n - 1 - analysis_period
     for j in prange(analysis_period):
-        recent_abs_changes[j] = abs(prices[recent_base_idx + j + 1] / prices[recent_base_idx + j] - 1) * 100
+        recent_abs_changes[j] = abs(prices[recent_base_idx + j] / prices[recent_base_idx + j - 1] - 1) * 100
     recent_vol = np.mean(recent_abs_changes)
     if prev_vol > 0:
         return recent_vol / prev_vol
@@ -375,17 +375,15 @@ class AnalyzerVolatilityPattern:
                     vol_std_change = _calculate_volatility_change_rate(date_prices, analysis_period)
                     vol_abs_change = _calculate_absolute_change_rate_change(date_prices, analysis_period)
                     vol_rv_change  = _calculate_realized_volatility_change_rate(date_prices, analysis_period)
-
                     change_rates   = vol_std_change * 0.4 + vol_rv_change * 0.4 + vol_abs_change * 0.2
-                    valid_indices  = ~np.isnan(change_rates)
-                    change_rates   = change_rates[valid_indices]
 
                     groups = {}
-                    for idx in range(len(change_rates)):
-                        rounded_level = round(change_rates[idx] * 2) / 2
-                        if rounded_level not in groups:
-                            groups[rounded_level] = []
-                        groups[rounded_level].append(idx)
+                    for idx, rate in enumerate(change_rates):
+                        if rate != 0.0:
+                            rounded_level = round(rate * 2) / 2
+                            if rounded_level not in groups:
+                                groups[rounded_level] = []
+                            groups[rounded_level].append(idx)
 
                     for level, indices in groups.items():
                         if len(indices) >= min_samples:
