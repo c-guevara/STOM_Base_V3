@@ -121,7 +121,7 @@ class AnalyzerVolumeSpike:
         code_data: 실시간 1분봉 데이터
         return: 거래량점수, 거래량신뢰도
         """
-        volume_spike_score, confidence_score = 0.0, 0.0
+        volume_spike_score = confidence_score = 0.0
 
         spike_scores = self.spike_scores.get(code)
         if spike_scores and len(code_data) >= self.analysis_period:
@@ -256,19 +256,19 @@ class AnalyzerVolumeSpike:
                     if len(date_data) < analysis_period * 2:
                         continue
 
-                    dates         = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
-                    close_price   = date_data[:, idx_close]
-                    volume_data   = date_data[:, idx_volume]
-                    ma_volume     = _calculate_ma_volume(volume_data, analysis_period)
-                    spike_indices = _calculate_spike_indices(volume_data, ma_volume, analysis_period)
+                    dates          = date_data[:, 0] // 1000000 if is_tick else date_data[:, 0] // 10000
+                    close_price    = date_data[:, idx_close]
+                    volume_data    = date_data[:, idx_volume]
+                    ma_volume_data = _calculate_ma_volume(volume_data, analysis_period)
 
                     groups = {}
-                    for idx in spike_indices:
-                        level = volume_data[idx] / ma_volume[idx]
-                        rounded_level = round(level * 2) / 2
-                        if rounded_level not in groups:
-                            groups[rounded_level] = []
-                        groups[rounded_level].append(idx)
+                    for idx, (volume, ma_volume) in enumerate(zip(volume_data, ma_volume_data)):
+                        if ma_volume > 0.0:
+                            level = volume / ma_volume
+                            rounded_level = round(level * 2) / 2
+                            if rounded_level not in groups:
+                                groups[rounded_level] = []
+                            groups[rounded_level].append(idx)
 
                     for level, indices in groups.items():
                         if len(indices) >= min_samples:
@@ -277,17 +277,18 @@ class AnalyzerVolumeSpike:
                                                                   analysis_period, rate_threshold)
 
                             if len(scores) >= min_samples:
+                                std_scores    = scores.std()
                                 sample_factor = min(len(scores) / 100.0, 1.0)
-                                std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
+                                std_factor    = max(1.0 - std_scores / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
 
                                 spike_scores = [
                                     code,
                                     level,
-                                    round(float(np.mean(scores)), 2),
-                                    round(float(np.max(scores)), 2),
-                                    round(float(np.min(scores)), 2),
-                                    round(float(np.std(scores)), 2),
+                                    round(scores.mean(), 2),
+                                    round(scores.max(), 2),
+                                    round(scores.min(), 2),
+                                    round(std_scores, 2),
                                     len(scores),
                                     round(confidence, 2),
                                     setting_hash,
@@ -353,9 +354,11 @@ class VolumeSpikeDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
-                (self.setting_hash,)
+            cursor.execute(f'''
+                SELECT DISTINCT code 
+                FROM {self.table_name} 
+                WHERE setting_hash = ?
+            ''', (self.setting_hash,)
             )
             results = cursor.fetchall()
             return [result[0] for result in results]
@@ -369,8 +372,8 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT spike_level, avg_score, max_score, min_score, std_score, sample_count, confidence_score
-                FROM {self.table_name}
+                SELECT spike_level, avg_score, confidence_score 
+                FROM {self.table_name} 
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
             ''', (code, self.setting_hash, code, self.setting_hash))
@@ -380,11 +383,7 @@ class VolumeSpikeDatabase:
             for result in results:
                 spike_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
             return spike_scores
 
@@ -398,8 +397,8 @@ class VolumeSpikeDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT spike_level, avg_score, max_score, min_score, std_score, sample_count, confidence_score
-                FROM {self.table_name}
+                SELECT spike_level, avg_score, confidence_score 
+                FROM {self.table_name} 
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update < ?)
             ''', (code, self.setting_hash, code, self.setting_hash, backtest_date))
@@ -409,11 +408,7 @@ class VolumeSpikeDatabase:
             for result in results:
                 spike_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
             return spike_scores
 
@@ -431,11 +426,11 @@ class VolumeSpikeDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'SELECT analysis_period, rate_threshold '
-                'FROM spike_setting '
-                'WHERE market = ? AND is_tick = ?',
-                (market, 1 if self.is_tick else 0)
+            cursor.execute(f'''
+                SELECT analysis_period, rate_threshold 
+                FROM spike_setting 
+                WHERE market = ? AND is_tick = ?
+            ''', (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
             if result:
@@ -457,11 +452,11 @@ class VolumeSpikeDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'INSERT OR REPLACE INTO spike_setting '
-                '(market, is_tick, analysis_period, rate_threshold) '
-                'VALUES (?, ?, ?, ?)',
-                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold)
+            cursor.execute(f'''
+                INSERT OR REPLACE INTO spike_setting 
+                (market, is_tick, analysis_period, rate_threshold) 
+                VALUES (?, ?, ?, ?)
+            ''', (market, 1 if self.is_tick else 0, analysis_period, rate_threshold)
             )
             conn.commit()
 

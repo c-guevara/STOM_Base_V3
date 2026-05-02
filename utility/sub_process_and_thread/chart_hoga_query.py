@@ -105,9 +105,9 @@ class ChartHogaQuery:
                 self.dict_findex['당일거래대금'], self.dict_findex['분당매수수량'], self.dict_findex['분당매도수량'],
                 self.dict_findex['분당거래대금'], self.dict_findex['분봉고가'], self.dict_findex['분봉저가']
             ])
-        self.analyzer_cnt = self.dict_findex['손절수익률'] - self.dict_findex['당일거래대금각도']
+        self.analyzer_cnt = self.dict_findex['변손익신뢰도'] - self.dict_findex['당일거래대금각도']
         if not self.is_tick:
-            self.indicator_cnt = self.dict_findex['WILLR'] - self.dict_findex['손절수익률']
+            self.indicator_cnt = self.dict_findex['WILLR'] - self.dict_findex['변손익신뢰도']
 
         self._set_analyzer()
 
@@ -832,7 +832,7 @@ class ChartHogaQuery:
                 self.vp_analyzer.analyze_batch_data(code, arry)
 
         if self.dict_set['변손익분석']:
-            arry[:, [self.dict_findex['예상수익률'], self.dict_findex['익절수익률'], self.dict_findex['손절수익률']]] = \
+            arry[:, [self.dict_findex['예상수익률'], self.dict_findex['익절수익률'], self.dict_findex['손절수익률'], self.dict_findex['변손익신뢰도']]] = \
                 self.vt_analyzer.analyze_batch_data(code, arry)
 
         if not self.is_tick:

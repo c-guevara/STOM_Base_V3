@@ -130,7 +130,7 @@ class AnalyzerVolumeProfile:
         current_price: 현재가 데이터
         return: 가격대점수, 가격대신뢰도
         """
-        volume_profile_score, confidence_score = 0.0, 0.0
+        volume_profile_score = confidence_score = 0.0
 
         volume_nodes = self.volume_nodes.get(code)
         if volume_nodes:
@@ -364,9 +364,11 @@ class VolumeProfileDatabase:
         """데이터베이스에 저장된 전체 종목코드 조회"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
-                (self.setting_hash,)
+            cursor.execute(f'''
+                SELECT DISTINCT code 
+                FROM {self.table_name} 
+                WHERE setting_hash = ?
+            ''', (self.setting_hash,)
             )
             results = cursor.fetchall()
             return [result[0] for result in results]
@@ -376,7 +378,7 @@ class VolumeProfileDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT price_level, avg_score, upward_strength, downward_strength, sample_count, confidence_score
+                SELECT price_level, avg_score, confidence_score
                 FROM {self.table_name}
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
@@ -436,11 +438,11 @@ class VolumeProfileDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'SELECT analysis_period, rate_threshold, price_range_pct '
-                'FROM volume_setting '
-                'WHERE market = ? AND is_tick = ?',
-                (market, 1 if self.is_tick else 0)
+            cursor.execute(f'''
+                SELECT analysis_period, rate_threshold, price_range_pct 
+                FROM volume_setting 
+                WHERE market = ? AND is_tick = ?
+            ''', (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
             if result:
@@ -463,11 +465,11 @@ class VolumeProfileDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'INSERT OR REPLACE INTO volume_setting '
-                '(market, is_tick, analysis_period, rate_threshold, price_range_pct) '
-                'VALUES (?, ?, ?, ?, ?)',
-                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, price_range_pct)
+            cursor.execute(f'''
+                INSERT OR REPLACE INTO volume_setting 
+                (market, is_tick, analysis_period, rate_threshold, price_range_pct) 
+                VALUES (?, ?, ?, ?, ?)
+            ''', (market, 1 if self.is_tick else 0, analysis_period, rate_threshold, price_range_pct)
             )
             conn.commit()
 

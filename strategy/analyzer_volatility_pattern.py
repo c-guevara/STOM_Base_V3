@@ -217,7 +217,7 @@ class AnalyzerVolatilityPattern:
         code_data: 실시간 데이터 (1분봉 또는 틱)
         return: 변동성점수, 변동성신뢰도
         """
-        volatility_score, confidence_score = 0.0, 0.0
+        volatility_score = confidence_score = 0.0
 
         len_min = self.analysis_period * 2 + 1
         group_data = self.volatility_scores.get(code)
@@ -375,17 +375,18 @@ class AnalyzerVolatilityPattern:
                                                                   analysis_period, rate_threshold)
 
                             if len(scores) >= min_samples:
+                                std_scores    = scores.std()
                                 sample_factor = min(len(scores) / 100.0, 1.0)
-                                std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
+                                std_factor    = max(1.0 - std_scores / 50.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
 
                                 level_scores = [
                                     code,
                                     level,
-                                    round(float(np.mean(scores)), 2),
-                                    round(float(np.max(scores)), 2),
-                                    round(float(np.min(scores)), 2),
-                                    round(float(np.std(scores)), 2),
+                                    round(scores.mean(), 2),
+                                    round(scores.max(), 2),
+                                    round(scores.min(), 2),
+                                    round(std_scores, 2),
                                     len(scores),
                                     round(confidence, 2),
                                     setting_hash,
@@ -451,9 +452,11 @@ class VolatilityPatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
-                (self.setting_hash,)
+            cursor.execute(f'''
+                SELECT DISTINCT code 
+                FROM {self.table_name} 
+                WHERE setting_hash = ?
+            ''', (self.setting_hash,)
             )
             results = cursor.fetchall()
             return [result[0] for result in results]
@@ -466,14 +469,12 @@ class VolatilityPatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT volatility_level, avg_score, max_score, '
-                f'min_score, std_score, sample_count, confidence_score '
-                f'FROM {self.table_name} '
-                f'WHERE code = ? AND setting_hash = ? AND last_update = '
-                f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?) '
-                f'ORDER BY volatility_level',
-                (code, self.setting_hash, code, self.setting_hash)
+            cursor.execute(f'''
+                SELECT volatility_level, avg_score, confidence_score 
+                FROM {self.table_name} 
+                WHERE code = ? AND setting_hash = ? AND last_update = 
+                (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
+            ''', (code, self.setting_hash, code, self.setting_hash)
             )
             results = cursor.fetchall()
 
@@ -481,11 +482,7 @@ class VolatilityPatternDatabase:
             for result in results:
                 volatility_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
 
             return volatility_scores
@@ -499,14 +496,12 @@ class VolatilityPatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT volatility_level, avg_score, max_score, '
-                f'min_score, std_score, sample_count, confidence_score '
-                f'FROM {self.table_name} '
-                f'WHERE code = ? AND setting_hash = ? AND last_update = '
-                f'(SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update <= ?) '
-                f'ORDER BY volatility_level',
-                (code, self.setting_hash, code, self.setting_hash, date)
+            cursor.execute(f'''
+                SELECT volatility_level, avg_score, confidence_score 
+                FROM {self.table_name} 
+                WHERE code = ? AND setting_hash = ? AND last_update = 
+                (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update <= ?)
+            ''', (code, self.setting_hash, code, self.setting_hash, date)
             )
             results = cursor.fetchall()
 
@@ -514,11 +509,7 @@ class VolatilityPatternDatabase:
             for result in results:
                 volatility_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
 
             return volatility_scores
@@ -537,11 +528,11 @@ class VolatilityPatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'SELECT analysis_period, rate_threshold '
-                'FROM volatility_setting '
-                'WHERE market = ? AND is_tick = ?',
-                (market, 1 if self.is_tick else 0)
+            cursor.execute(f'''
+                SELECT analysis_period, rate_threshold 
+                FROM volatility_setting 
+                WHERE market = ? AND is_tick = ?
+            ''', (market, 1 if self.is_tick else 0)
             )
             result = cursor.fetchone()
             if result:
@@ -563,11 +554,11 @@ class VolatilityPatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'INSERT OR REPLACE INTO volatility_setting '
-                '(market, is_tick, analysis_period, rate_threshold) '
-                'VALUES (?, ?, ?, ?)',
-                (market, 1 if self.is_tick else 0, analysis_period, rate_threshold)
+            cursor.execute(f'''
+                INSERT OR REPLACE INTO volatility_setting 
+                (market, is_tick, analysis_period, rate_threshold) 
+                VALUES (?, ?, ?, ?)
+            ''', (market, 1 if self.is_tick else 0, analysis_period, rate_threshold)
             )
             conn.commit()
 

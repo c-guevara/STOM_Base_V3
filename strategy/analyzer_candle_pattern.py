@@ -113,7 +113,7 @@ class AnalyzerCandlePattern:
         code_data: 실시간 1분봉 데이터
         return: 패턴점수, 패턴신뢰도
         """
-        pattern_score, confidence_score = 0.0, 0.0
+        pattern_score = confidence_score = 0.0
 
         pattern_scores = self.pattern_scores.get(code)
         if pattern_scores and len(code_data) >= 5:
@@ -273,17 +273,18 @@ class AnalyzerCandlePattern:
                                                                    analysis_period, rate_threshold)
 
                                 if len(scores) >= min_samples:
+                                    std_scores    = scores.std()
                                     sample_factor = min(len(scores) / 100.0, 1.0)
-                                    std_factor    = max(1.0 - float(np.std(scores)) / 50.0, 0.0)
+                                    std_factor    = max(1.0 - float(std_scores) / 50.0, 0.0)
                                     confidence    = (sample_factor + std_factor) / 2.0
 
                                     pattern_scores = [
                                         code,
                                         pattern_name,
-                                        round(float(np.mean(scores)), 2),
-                                        round(float(np.max(scores)), 2),
-                                        round(float(np.min(scores)), 2),
-                                        round(float(np.std(scores)), 2),
+                                        round(scores.mean(), 2),
+                                        round(scores.max(), 2),
+                                        round(scores.min(), 2),
+                                        round(std_scores, 2),
                                         len(scores),
                                         round(confidence, 2),
                                         setting_hash,
@@ -347,9 +348,11 @@ class CandlePatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                f'SELECT DISTINCT code FROM {self.table_name} WHERE setting_hash = ?',
-                (self.setting_hash,)
+            cursor.execute(f'''
+                SELECT DISTINCT code 
+                FROM {self.table_name} 
+                WHERE setting_hash = ?
+            ''', (self.setting_hash,)
             )
             results = cursor.fetchall()
             return [result[0] for result in results]
@@ -363,7 +366,7 @@ class CandlePatternDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT pattern_name, avg_score, max_score, min_score, std_score, sample_count, confidence_score
+                SELECT pattern_name, avg_score, confidence_score
                 FROM {self.table_name}
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ?)
@@ -374,11 +377,7 @@ class CandlePatternDatabase:
             for result in results:
                 pattern_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
             return pattern_scores
 
@@ -392,7 +391,7 @@ class CandlePatternDatabase:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT pattern_name, avg_score, max_score, min_score, std_score, sample_count, confidence_score
+                SELECT pattern_name, avg_score, confidence_score 
                 FROM {self.table_name}
                 WHERE code = ? AND setting_hash = ? AND last_update = 
                 (SELECT MAX(last_update) FROM {self.table_name} WHERE code = ? AND setting_hash = ? AND last_update < ?)
@@ -403,11 +402,7 @@ class CandlePatternDatabase:
             for result in results:
                 pattern_scores[result[0]] = {
                     'avg_score': result[1],
-                    'max_score': result[2],
-                    'min_score': result[3],
-                    'std_score': result[4],
-                    'sample_count': result[5],
-                    'confidence_score': result[6]
+                    'confidence_score': result[2]
                 }
             return pattern_scores
 
@@ -424,11 +419,11 @@ class CandlePatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'SELECT analysis_period, rate_threshold '
-                'FROM pattern_setting '
-                'WHERE market = ?',
-                (market,)
+            cursor.execute(f'''
+                SELECT analysis_period, rate_threshold 
+                FROM pattern_setting 
+                WHERE market = ?
+            ''', (market,)
             )
             result = cursor.fetchone()
             if result:
@@ -449,10 +444,11 @@ class CandlePatternDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute(
-                'INSERT OR REPLACE INTO pattern_setting '
-                '(market, analysis_period, rate_threshold) VALUES (?, ?, ?)',
+            cursor.execute(f'''
+                INSERT OR REPLACE INTO pattern_setting 
                 (market, analysis_period, rate_threshold)
+                VALUES (?, ?, ?)
+            ''', (market, analysis_period, rate_threshold)
             )
             conn.commit()
 
