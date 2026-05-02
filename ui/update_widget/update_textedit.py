@@ -5,10 +5,10 @@ from ui.etcetera.process_starter import auto_back_schedule
 from utility.static_method.static_etcetera import qtest_qwait
 from utility.static_method.static_decorator import error_decorator
 from ui.event_click.button_clicked_stg_editer import backtest_detail
-from utility.static_method.static_datetime import now, now_cme, str_hms
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_02
 from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
+from utility.static_method.static_datetime import now, now_cme, str_hms, timedelta_sec
 from ui.create_widget.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
 from ui.event_click.button_clicked_database import dbbutton_clicked_08, dbbutton_clicked_09
 
@@ -19,6 +19,7 @@ class UpdateTextedit:
     """
     def __init__(self, ui):
         self.ui        = ui
+        self.learn_cnt = 0
         self.data_save = False
 
     @error_decorator
@@ -40,13 +41,21 @@ class UpdateTextedit:
             self.ui.fm_tcnt = data[3]
 
         elif gubun == UI_NUM['학습로그'] and data[1].__class__ == tuple:
-            left_time, remn_time, count, last = data[1]
-            if count == 0:
+            start, last = data[1]
+            if last == 0:
+                self.learn_cnt = 0
                 self.ui.ptn_progresBar_01.setFormat('%p%')
                 self.ui.ptn_progresBar_01.setValue(0)
             else:
-                self.ui.ptn_progresBar_01.setFormat(f'%p% | 경과 시간 {left_time} | 남은 시간 {remn_time}')
-                self.ui.ptn_progresBar_01.setValue(count)
+                self.learn_cnt += 1
+                curr_time = now()
+                left_time = curr_time - start
+                left_secs = left_time.total_seconds()
+                remn_time = timedelta_sec(left_secs / self.learn_cnt * (last - self.learn_cnt)) - curr_time
+                self.ui.ptn_progresBar_01.setFormat(
+                    f'%p% | 경과 시간 {str(left_time)[:-3]} | 남은 시간 {str(remn_time)[:-3]}'
+                )
+                self.ui.ptn_progresBar_01.setValue(self.learn_cnt)
                 self.ui.ptn_progresBar_01.setRange(0, last)
 
         else:

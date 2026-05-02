@@ -5,27 +5,25 @@ import hashlib
 import numpy as np
 import pandas as pd
 from numba import njit
+from datetime import datetime
 from traceback import format_exc
 from PyQt5.QtWidgets import QMessageBox
 from typing import Dict, List, Tuple, Any
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static_datetime import now
 from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static_decorator import thread_decorator
-from utility.static_method.static_datetime import now, timedelta_sec
 
 VOLUME_PROFILE_DB = f'{DB_PATH}/volume_profile.db'
 
 window_queue = None
-total_queue  = None
 
 
-def init_worker(wndowQ, totalQ):
+def init_worker(wndowQ):
     """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
     global window_queue
-    global total_queue
     window_queue = wndowQ
-    total_queue  = totalQ
 
 
 def _calculate_setting_hash(*args) -> str:
@@ -173,7 +171,6 @@ class AnalyzerVolumeProfile:
 
     def train_all_codes(self, ui):
         """전체 종목 학습 수행 (종목 기반 멀티프로세싱)"""
-        start = now()
         with sqlite3.connect(self.backtest_db) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE TYPE = 'table'")
@@ -200,17 +197,18 @@ class AnalyzerVolumeProfile:
             for i in range(multi):
                 code_chunks.append([code for j, code in enumerate(code_list) if j % multi == i])
 
-        self._monitor_totalQ(start, ui.windowQ, ui.totalQ, len_code_list)
-
+        start = now()
+        ui.windowQ.put((UI_NUM['학습로그'], (start, 0)))
         actual_processes = min(multi, len(code_chunks))
-        with Pool(processes=actual_processes, initializer=init_worker, initargs=(ui.windowQ, ui.totalQ)) as pool:
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(ui.windowQ,)) as pool:
             args = [
                 (
-                    i, chunk, self.backtest_db, self.idx_close, self.idx_volume,
-                    self.analysis_period, self.rate_threshold, self.price_range_pct, self.top_nodes,
-                    existing_dates_dict, self.is_tick, self.volume_database.setting_hash
+                    i, start, len_code_list, code_chunk, self.backtest_db,
+                    self.idx_close, self.idx_volume, self.analysis_period, self.rate_threshold,
+                    self.price_range_pct, self.top_nodes, existing_dates_dict,
+                    self.is_tick, self.volume_database.setting_hash
                 )
-                for i, chunk in enumerate(code_chunks)
+                for i, code_chunk in enumerate(code_chunks)
             ]
             results = pool.starmap(self._train_code_chunk, args)
 
@@ -236,26 +234,13 @@ class AnalyzerVolumeProfile:
         else:
             ui.windowQ.put((UI_NUM['학습로그'], '이미 모든 데이터가 학습되어 있습니다.'))
 
-    @thread_decorator
-    def _monitor_totalQ(self, start, windowQ, totalQ, last):
-        count = 0
-        windowQ.put((UI_NUM['학습로그'], (start, start, count, last)))
-        while count < last:
-            _ = totalQ.get()
-            count += 1
-            curr_time = now()
-            left_time = curr_time - start
-            left_secs = left_time.total_seconds()
-            remn_time = timedelta_sec(left_secs / count * (last - count)) - curr_time
-            windowQ.put((UI_NUM['학습로그'], (left_time, remn_time, count, last)))
-
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db: str, idx_close: int, idx_volume: int,
-                          analysis_period: int, rate_threshold: float, price_range_pct: float, top_nodes: int,
-                          existing_dates_dict: Dict[str, set], is_tick: bool, setting_hash: str) -> List[Any]:
+    def _train_code_chunk(i: int, start: datetime, len_code_list: int, code_chunk: List[str], backtest_db: str,
+                          idx_close: int, idx_volume: int, analysis_period: int, rate_threshold: float,
+                          price_range_pct: float, top_nodes: int, existing_dates_dict: Dict[str, set],
+                          is_tick: bool, setting_hash: str) -> List[Any]:
         """단일 종목 청크 학습 (멀티프로세싱용)"""
         global window_queue
-        global total_queue
 
         all_volume_scores = []
         last = len(code_chunk)
@@ -331,7 +316,7 @@ class AnalyzerVolumeProfile:
                     window_queue.put((UI_NUM['시스템로그'], format_exc()))
 
                 # noinspection PyUnresolvedReferences
-                total_queue.put('학습완료')
+                window_queue.put((UI_NUM['학습로그'], (start, len_code_list)))
 
         return all_volume_scores
 
