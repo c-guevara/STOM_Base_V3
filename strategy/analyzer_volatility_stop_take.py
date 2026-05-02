@@ -251,7 +251,7 @@ class AnalyzerVolatilityStopTake:
 
         n = len(code_data)
         start_idx = self.analysis_period * 2 + 1
-        results = np.zeros((n, 3))
+        results = np.zeros((n, 4))
 
         for i in range(start_idx, n):
             window_data = code_data[:i]
@@ -389,7 +389,7 @@ class AnalyzerVolatilityStopTake:
                                     returns = _simulate_stop_take(date_prices, dates, stop_mult, take_mult,
                                                                   analysis_period, check_step)
 
-                                    if len(returns) >= min_samples:
+                                    if len(returns) > 0:
                                         total_return = returns.sum()
                                         if total_return > best_return:
                                             best_return = total_return
@@ -402,7 +402,7 @@ class AnalyzerVolatilityStopTake:
                                 len_scores    = len(scores)
                                 std_scores    = scores.std()
                                 sample_factor = min(len_scores / 100.0, 1.0)
-                                std_factor    = max(1.0 - std_scores / 50.0, 0.0)
+                                std_factor    = max(1.0 - std_scores / 5.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
                                 # noinspection PyUnresolvedReferences
                                 win_rate = (scores > 0).mean() * 100

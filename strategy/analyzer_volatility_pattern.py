@@ -377,7 +377,7 @@ class AnalyzerVolatilityPattern:
                             if len(scores) >= min_samples:
                                 std_scores    = scores.std()
                                 sample_factor = min(len(scores) / 100.0, 1.0)
-                                std_factor    = max(1.0 - std_scores / 50.0, 0.0)
+                                std_factor    = max(1.0 - std_scores / 100.0, 0.0)
                                 confidence    = (sample_factor + std_factor) / 2.0
 
                                 level_scores = [
