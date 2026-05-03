@@ -222,7 +222,7 @@ class AnalyzerVolatilityStopTake:
         estimated_return = take_profit_pct = stop_loss_pct = confidence_score = 0.0
 
         len_min    = self.analysis_period * 2 + 1
-        group_data = self.volatility_data[code]
+        group_data = self.volatility_data.get(code)
         if group_data and len(code_data) >= len_min:
             close_price    = code_data[-len_min:, self.idx_close]
             vol_std_change = _calculate_volatility_change_rate_last(close_price, self.analysis_period)
